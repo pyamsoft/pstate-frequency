@@ -170,11 +170,11 @@ set_plan(
         int32_t* value_turbo) {
     if (str_starts_with("powersave", optarg)) {
         const int32_t min = pyam_cpu_get_min();
-        *value_max = min + 1;
+        *value_max = min;
         *value_turbo = 0;
     } else if (strncmp("1", optarg, strlen(optarg)) == 0) {
         const int32_t min = pyam_cpu_get_min();
-        *value_max = min + 1;
+        *value_max = min;
         *value_turbo = 0;
     } else if (str_starts_with("performance", optarg)) {
         const int32_t non_turbo_max = pyam_cpu_get_mhz();

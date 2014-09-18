@@ -112,14 +112,17 @@ pyam_cpu_set_max(
     // Get the minimum cpu value
     const int32_t min = pyam_cpu_get_min();
     if (max < min) {
-        real_max = min + 1;
+        real_max = min;
     } else if (max > 100) {
         real_max = 100;
     } else {
         real_max = max;
     }
     pyam_cpu_set_freq(cpu, real_max);
-    pyam_cpu_internal_set(FILE_PSTATE_MAX_PERCENT, real_max);
+
+    /* It appears that this is not needed, the p-state driver will */
+    /* adjust itself when the frequency changes */
+    /* pyam_cpu_internal_set(FILE_PSTATE_MAX_PERCENT, real_max); */
 }
 
 static void
@@ -151,7 +154,7 @@ pyam_cpu_internal_freq(
 
 int32_t
 pyam_cpu_get_min() {
-    return pyam_cpu_internal_get(FILE_PSTATE_MIN_PERCENT);
+    return pyam_cpu_internal_get(FILE_PSTATE_MIN_PERCENT) + 1;
 }
 
 int32_t
