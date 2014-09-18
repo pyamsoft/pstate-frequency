@@ -22,6 +22,7 @@
 #include <src/cpu.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "src/mhz.h"
 
 static void
@@ -54,8 +55,14 @@ pyam_cpu_get_mhz() {
 
 int32_t
 pyam_cpu_get_number() {
-    system("cat /proc/cpuinfo | grep processor | wc -l > /tmp/cpunumber.txt");
-    return pyam_cpu_internal_get("/tmp/cpunumber.txt");
+    const char* file_name = "/tmp/cpunumber.txt";
+    if (access(file_name, F_OK) == -1) {
+        char* command;
+        asprintf(&command, "cat /proc/cpuinfo | grep processor | wc -l > %s", file_name);
+        system(command);
+        free(command);
+    }
+    return pyam_cpu_internal_get(file_name);
 }
 
 struct pyam_cpu_t
