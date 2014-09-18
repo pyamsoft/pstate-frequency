@@ -59,10 +59,16 @@ pyam_cpu_get_number() {
     if (access(file_name, F_OK) == -1) {
         // Create the file
         char* command;
-        asprintf(&command, "cat /proc/cpuinfo | grep processor | wc -l > %s", file_name);
+        if (asprintf(&command, "cat /proc/cpuinfo | grep processor | wc -l > %s", file_name) == -1) {
+            printf("Unable to alloc system command: %s\n", command);
+            exit(6);
+        }
         // Make it world readable
         char* readable;
-        asprintf(&readable, "chmod a+r %s", file_name);
+        if (asprintf(&readable, "chmod a+r %s", file_name) == -1) {
+            printf("Unable to alloc system command: %s\n", readable);
+            exit(6);
+        }
         system(command);
         system(readable);
         free(command);
@@ -76,10 +82,14 @@ pyam_cpu_create(void) {
     struct pyam_cpu_t cpu;
     const int32_t cpu_number = pyam_cpu_get_number();
     cpu.CPU_FREQ_FILES = malloc(sizeof(char*) * cpu_number);
+    if (cpu.CPU_FREQ_FILES == NULL) {
+        printf("Unable to malloc CPU files array\n"); 
+        exit(4);
+    }
     for (int32_t i = 0; i < cpu_number; ++i) {
         if (asprintf(&(cpu.CPU_FREQ_FILES[i]), 
                 "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", i) == -1) {
-            printf("Failed to allocate memory for CPU files array\n");
+            printf("Failed to allocate memory for CPU files array[%d]\n", i);
             exit(4);
         }
     }
