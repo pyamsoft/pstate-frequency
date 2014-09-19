@@ -1,5 +1,5 @@
 # Version
-VERSION=0.4.1
+VERSION=$(shell printf "0.r.$(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)")
 
 # Standard
 STD=-std=c99
