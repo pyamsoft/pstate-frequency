@@ -19,8 +19,9 @@
 
 */
 
-#include <src/cpu.h>
+#define _GNU_SOURCE
 #include <stdio.h>
+#include <src/cpu.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "src/mhz.h"
@@ -157,6 +158,10 @@ pyam_cpu_internal_freq(
     const int32_t cpu_number = pyam_cpu_get_number();
     for (int32_t i = 0; i < cpu_number; ++i) {
         FILE* file = fopen(cpu->CPU_FREQ_FILES[i], "w");
+        if (file == NULL) {
+            printf("Error opening file: %s\n", cpu->CPU_FREQ_FILES[i]);
+            exit(7);
+        }
         fprintf(file, "%s\n", scaling);
         fclose(file);
     }
@@ -197,6 +202,10 @@ pyam_cpu_internal_set(
         exit(6);
     }
     FILE* file = fopen(file_name, "w");    
+    if (file == NULL) {
+        printf("Error opening file: %s\n", file_name);
+        exit(8);
+    }
     fprintf(file, "%s", buffer);
     fclose(file);
     free(buffer);
@@ -206,6 +215,10 @@ static int32_t
 pyam_cpu_internal_get(
         const char* file_name) {
     FILE* file = fopen(file_name, "r");
+    if (file == NULL) {
+        printf("Error opening file: %s\n", file_name);
+        exit(9);
+    }
     char* line = NULL;
     size_t n = 0;
     getline(&line, &n, file);

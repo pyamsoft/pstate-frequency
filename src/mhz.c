@@ -19,11 +19,12 @@
 
 */
 
+#define _GNU_SOURCE
 #include <src/mhz.h>
-#include <stdio.h>
 #include <sys/time.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 
 // copied from the i7z project, 
 // https://github.com/ajaiantilal/i7z/blob/master/helper_functions.c

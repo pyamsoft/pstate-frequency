@@ -22,8 +22,6 @@
 #ifndef C_PYAM_MHZ_H_
 #define C_PYAM_MHZ_H_
 
-#include <stdint.h>
-
 double
 estimate_MHz(void);
 

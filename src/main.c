@@ -19,9 +19,10 @@
 
 */
 
+#define _GNU_SOURCE
+#include <stdio.h>
 #include "src/cpu.h"
 #include "src/color.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>

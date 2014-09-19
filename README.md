@@ -1,7 +1,7 @@
 pstate-frequency
 ================
 
-Program to adjust CPU frequencies using the Intel P-State driver (3.13 onwards)
+Program to adjust CPU frequencies using the Intel P-State driver (3.9 onwards)
 
 pstate-frequency is able to adjust the Intel p-state driver values for the maximum running frequency 
 and the state of turbo boost. It is able to dynamically set a scaling frequency range and
@@ -14,15 +14,11 @@ all the time, perhaps try to powersave plan.
 Requirements
 ============
 
-Intel P-State driver (included in kernel 3.13 and onwards I believe)
-glibc with GNU getopt.h
+Intel P-State driver (included in kernel 3.9 and onwards )
+glibc with GNU Extensions for the following files:
++ sys/time.h 
++ stdio.h
 
-A C compiler of some kind. I use clang, so that is what is set by default in
-config.mk
-
-However, you are welcome to use whatever works for you. I have found success using both
-clang and gcc, and have not tested builds using other compilers. Take note that any build errors 
-that arise from the use of other compilers are most likely not the result of any of the code.
 
 Notes
 =====
