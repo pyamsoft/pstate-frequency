@@ -10,11 +10,11 @@ scaling frequency range and artificially limit the range that your CPU will run 
 ### Requirements
 
 
-Intel P-State driver (included in kernel 3.9 and upwards )  
-A C compiler which has GNU Extensions
-glibc with GNU Extensions for the following files:
-+ sys/time.h 
-+ stdio.h
++ Intel P-State driver (included in kernel 3.9 and upwards).  
+Enable it by adding **intel_pstate=enable** to the boot command line.
++ A C compiler which recognizes **GNU Extensions**
++ glibc with GNU Extensions for the following files:  
+** sys/time.h and stdio.h **
 
 ### Installation
 
