@@ -10,7 +10,7 @@ scaling frequency range and artificially limit the range that your CPU will run 
 ### Requirements
 
 
-Intel P-State driver (included in kernel 3.9 and onwards )  
+Intel P-State driver (included in kernel 3.9 and upwards )  
 A C compiler which has GNU Extensions
 glibc with GNU Extensions for the following files:
 + sys/time.h 
@@ -31,7 +31,7 @@ to performance when plugged into via AC adapter (defaults to No)
 ### Usage
 
 
-The binary be default is name **pstate-frequency**  
+The binary by default is named **pstate-frequency**  
 When called without any options, the program will display something like the following:  
 ![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_run.png)
 
