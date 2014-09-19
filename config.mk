@@ -4,10 +4,6 @@ VERSION=0.4.1
 # Standard
 STD=-std=c99
 
-# Compiler
-CC=clang
-# CC=gcc
-
 # includes and libs
 INCS=-I.
 LIBS=
@@ -18,3 +14,9 @@ BIN_PERMISSION=755
 # Flags
 CFLAGS+= -D_GNU_SOURCE=1 -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Wmissing-prototypes -Wunreachable-code ${INCS}
 LDFLAGS+= -Wl,-O2,--sort-common,--as-needed,-z,relro,-s ${LIBS}
+
+# Options you may change
+CC?=gcc
+PREFIX?=/usr/local
+INCLUDE_BASH_COMPLETION?=0
+INCLUDE_UDEV_RULE?=0

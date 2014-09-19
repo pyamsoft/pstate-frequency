@@ -1,0 +1,2 @@
+SUBSYSTEM=="power_supply", ATTR{online}=="0", RUN+="/usr/local/bin/pstate-frequency -q -s -p 1"
+SUBSYSTEM=="power_supply", ATTR{online}=="1", RUN+="/usr/local/bin/pstate-frequency -q -s -p 2"
