@@ -1,61 +1,66 @@
-pstate-frequency
-================
+# pstate-frequency
 
-Program to adjust CPU frequencies using the Intel P-State driver (3.9 onwards)
 
-pstate-frequency is able to adjust the Intel p-state driver values for the maximum running frequency 
-and the state of turbo boost. It is able to dynamically set a scaling frequency range and
-artificially limit the range that your CPU will run at.
+Easily control Intel p-state driver on Linux (3.9 and upwards) 
 
-If you notice that your CPU seems limited or not able to run at its max frequency, try 
-using ther performance or max-performance plan. If you notice it is running too hot or too fast
-all the time, perhaps try to powersave plan.
+pstate-frequency is able to adjust the Intel p-state driver values for the maximum  
+running frequency and the state of turbo boost. It is able to dynamically set a  
+scaling frequency range and artificially limit the range that your CPU will run at.
 
-Requirements
-============
+### Requirements
 
-Intel P-State driver (included in kernel 3.9 and onwards )
+
+Intel P-State driver (included in kernel 3.9 and onwards )  
+A C compiler which has GNU Extensions
 glibc with GNU Extensions for the following files:
 + sys/time.h 
 + stdio.h
 
-
-Notes
-=====
-
-So this program is really ugly.
-
-I wrote it basically to be used on my computer and so far, it only works on mine.
-If you're reading this and you happen to also have an MSI GE60 0ND-042US, then you're in luck.
-
-Otherwise if you want to use this properly you may need to do some extra configuring.
-
-Update as of 09/17/2014:
-
-After shamelessly copying code from the i7z project, which in turn directly pulled code off from a 
-kernel mailing list, the ability to determine the max CPU frequency at runtime has been added.
-The maximum number of CPU's has also been determined from using information in /proc/cpuinfo.
+### Installation
 
 
-Usage
-=====
+The installation process follows the basic *make, make install* process.  
+While building, there are a couple of options that one may configure or change:  
++ The C compiler used (defaults to gcc)  
++ The directory to install to (defaults to /usr/local)  
++ Whether or not to install bash completion (defaults to No)
++ Whether or not to install a udev rule which monitors the state of the power supply  
+and sets the power plan automatically to powersave when on battery and the power plan  
+to performance when plugged into via AC adapter (defaults to No)
 
-Call the function differently depending on how you wish to use it.
+### Usage
 
-To read CPU values, a normal user can be used.
-To write CPU values, root must be used.
 
-The -g option reads current CPU values.
+The binary be default is name **pstate-frequency**  
+When called without any options, the program will display something like the following:  
+![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_run.png)
 
-The -s option allows you to write the max frequency with -m integer value, 
+When called with the *-g --get* option, the program will display something like the following:
+![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_get.png)
 
-the turbo state with -t 0 for Turbo, 1 for No Turbo
+When called with the *-s --set* option, the program will display something like the following:
+![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_set.png)
 
-or set a predefined power plan with -p 1, 2, 3
+The *-g --get* option can be called by a normal user, and will display the current values  
+for the CPU maximum scaling frequency, the state of Turbo Boost, and the maximum p-state  
+frequency as a percentage.
 
-The powersave plan limits your CPU to its lowest frequency possible.
+The *-s --set* option can only be called by a user with root permissions.  
+The *-s --set* option also takes one or more of these flags as necessary arguments:  
++ **-m --max** Adjust the maximum scaling frequency of the CPU
++ **-t --turbo** Adjust the current state of Turbo Boost
++ **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
 
-The performance plan allows full range of the CPU not including Turbo Boost capabilities.
+There are three power plans:  
+1. **powersave** Sets the maximum scaling frequency to the lowest available frequency  
+and disables Turbo Boost.  
+2. **performance** Sets the maximum scaling frequency to the highest available  
+non-turbo frequency and disables Turbo Boost.  
+3. **max-performance** Sets the maximum scaling frequency to the highest available  
+frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
 
-The max-performance plan allows full range of the CPU including Turbo Boost capabilities.
+# Questions
 
+
+Questions or issues should be either posted in the issue section of this repository,  
+or directed by email to pyam.soft@gmail.com
