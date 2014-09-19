@@ -21,21 +21,41 @@
 
 _pstate-frequency()
 {
-    local cur shopts lopts
+    local cur prev shopts lopts shopts_set lopts_set plans
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
-    shopts="-q -v -h -s -g -m -t -p"
-    lopts="--quiet --version --help --set --get --max --turbo --plan"
-    if [[ ${cur} == --* ]]; then
-        COMPREPLY=( $(compgen -W "${lopts}" -- ${cur}) )
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    shopts="-q -v -h -s -g"
+    lopts="--quiet --version --help --set --get"
+    shopts_set="-m -t -p"
+    lopts_set="--max --turbo --plan"
+    plans="powersave performance max-performance"
+    if [[ ${cur} = --* ]]; then
+        if [[ ${prev} = "--set" ]]; then
+            COMPREPLY=( $(compgen -W "${lopts_set}" -- ${cur}) )
+        else 
+            if [[ ${prev} = "--plan" ]]; then
+                COMPREPLY=( $(compgen -W "${plans}" -- ${cur}) )
+            else
+                COMPREPLY=( $(compgen -W "${lopts}" -- ${cur}) )
+            fi
+        fi
         return 0
     else 
-        if [[ ${cur} == * ]]; then
-            COMPREPLY=( $(compgen -W "${shopts}" -- ${cur}) )
-            return 0
+        if [[ ${cur} = * ]]; then
+            if [[ ${prev} = "-s" ]]; then
+                COMPREPLY=( $(compgen -W "${shopts_set}" -- ${cur}) )
+            else 
+                if [[ ${prev} = "-p" ]]; then
+                    COMPREPLY=( $(compgen -W "${plans}" -- ${cur}) )
+                else
+                    COMPREPLY=( $(compgen -W "${shopts}" -- ${cur}) )
+                fi
+            fi
         fi
+        return 0
     fi
-    unset cur shopts lopts
+    unset cur shopts lopts shopts_set lopts_set plans
 }
 
 complete -F _pstate-frequency pstate-frequency
