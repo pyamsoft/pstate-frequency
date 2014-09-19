@@ -3,13 +3,14 @@
 pkgname=pstate-frequency-git
 _gitname=pstate-frequency
 pkgdesc="Easily control Intel p-state driver on Linux "
-pkgver=0.r8.609a2ad.pyam
+pkgver=0.r13.7503b3d
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
 provides=('pstate-frequency')
 license=('GPLv2')
-source=('git+https://github.com/pyamsoft/pstate-frequency.git')
+url="https://github.com/pyamsoft/pstate-frequency.git"
+source=("git+${url}")
 sha256sums=('SKIP')
 
 pkgver() {
