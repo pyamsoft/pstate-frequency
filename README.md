@@ -14,7 +14,7 @@ scaling frequency range and artificially limit the range that your CPU will run 
 Enable it by adding **intel_pstate=enable** to the boot command line.
 + A C compiler which recognizes **GNU Extensions**
 + glibc with GNU Extensions for the following files:  
-** sys/time.h and stdio.h **
+**sys/time.h and stdio.h**
 
 ### Installation
 
