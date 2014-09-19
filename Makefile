@@ -47,6 +47,7 @@ ifeq ($(INCLUDE_UDEV_RULE), 1)
 		@echo "udev rule will be installed to " $(DESTDIR)/etc/udev/rules.d/$(UDEV)
 		@install -dm 755 $(DESTDIR)/etc/udev/rules.d
 		@install -m 644 assets/udev/$(UDEV) $(DESTDIR)/etc/udev/rules.d/$(UDEV)
+		@sed -i "s#pstate-frequency#$(PREFIX)/bin/pstate-frequency#g" $(DESTDIR)/etc/udev/rules.d/$(UDEV)
 endif
 
 uninstall:
