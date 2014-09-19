@@ -21,7 +21,9 @@ pkgver() {
 
 build() {
     cd "$srcdir/$_gitname"
-    make
+    # CC=gcc
+    make\
+        CC="gcc"
 }
 
 package() {
