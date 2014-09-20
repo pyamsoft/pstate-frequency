@@ -12,7 +12,7 @@ LIBS=
 BIN_PERMISSION=755
 
 # Flags
-CFLAGS+= -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Wmissing-prototypes -Wunreachable-code ${INCS}
+CFLAGS+= -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
 LDFLAGS+= -Wl,-O2,--sort-common,--as-needed,-z,relro,-s ${LIBS}
 
 # Options you may change

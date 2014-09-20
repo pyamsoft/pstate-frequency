@@ -29,45 +29,59 @@
 static void
 pyam_cpu_set_freq(
         struct pyam_cpu_t* const cpu,
+        char** frequency_files,
         const size_t max);
 
-static int32_t
+static double
 pyam_cpu_internal_get(
+        struct pyam_cpu_t* const cpu,
         const char* file_name);
 
 static void
 pyam_cpu_internal_set(
+        struct pyam_cpu_t* const cpu,
         const char* file_name,
         const int32_t value);
 
-static int32_t
-pyam_cpu_get_cpuinfo_freq(void);
+static double
+pyam_cpu_get_cpuinfo_max_freq(
+        struct pyam_cpu_t* const cpu);
+
+static double
+pyam_cpu_get_cpuinfo_min_freq(
+        struct pyam_cpu_t* const cpu);
 
 static void
 pyam_cpu_internal_freq(
-        struct pyam_cpu_t* cpu, const char* scaling);
+        struct pyam_cpu_t* const cpu,
+        char** frequency_files,
+        const char* scaling);
 
 int32_t
-pyam_cpu_get_mhz() {
+pyam_cpu_get_mhz(
+        struct pyam_cpu_t* const cpu) {
     const double mhz = estimate_MHz();
-    const double max_mhz = pyam_cpu_get_cpuinfo_freq() / 1000;
+    const double max_mhz = pyam_cpu_get_cpuinfo_max_freq(cpu) / 1000;
     return (mhz / max_mhz) * 100;
 }
 
 int32_t
-pyam_cpu_get_number() {
+pyam_cpu_get_number(
+        struct pyam_cpu_t* const cpu) {
     const char* file_name = "/tmp/cpunumber.txt";
     if (access(file_name, F_OK) == -1) {
         // Create the file
         char* command;
         if (asprintf(&command, "cat /proc/cpuinfo | grep processor | wc -l > %s", file_name) == -1) {
             printf("Unable to alloc system command: %s\n", command);
+            pyam_cpu_destroy(cpu);
             exit(6);
         }
         // Make it world readable
         char* readable;
         if (asprintf(&readable, "chmod a+r %s", file_name) == -1) {
             printf("Unable to alloc system command: %s\n", readable);
+            pyam_cpu_destroy(cpu);
             exit(6);
         }
         system(command);
@@ -75,22 +89,38 @@ pyam_cpu_get_number() {
         free(command);
         free(readable);
     }
-    return pyam_cpu_internal_get(file_name);
+    return pyam_cpu_internal_get(cpu, file_name);
 }
 
 struct pyam_cpu_t
-pyam_cpu_create(void) {
+pyam_cpu_create() {
     struct pyam_cpu_t cpu;
-    const int32_t cpu_number = pyam_cpu_get_number();
-    cpu.CPU_FREQ_FILES = malloc(sizeof(char*) * cpu_number);
-    if (cpu.CPU_FREQ_FILES == NULL) {
-        printf("Unable to malloc CPU files array\n"); 
+    const int32_t cpu_number = pyam_cpu_get_number(&cpu);
+    cpu.CPU_MAX_FREQ_FILES = malloc(sizeof(char*) * cpu_number);
+    if (cpu.CPU_MAX_FREQ_FILES == NULL) {
+        printf("Unable to malloc CPU_MAX files array\n"); 
+        pyam_cpu_destroy(&cpu);
         exit(4);
     }
     for (int32_t i = 0; i < cpu_number; ++i) {
-        if (asprintf(&(cpu.CPU_FREQ_FILES[i]), 
+        if (asprintf(&(cpu.CPU_MAX_FREQ_FILES[i]), 
                 "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", i) == -1) {
-            printf("Failed to allocate memory for CPU files array[%d]\n", i);
+            printf("Failed to allocate memory for CPU_MAX files array[%d]\n", i);
+            pyam_cpu_destroy(&cpu);
+            exit(4);
+        }
+    }
+    cpu.CPU_MIN_FREQ_FILES = malloc(sizeof(char*) * cpu_number);
+    if (cpu.CPU_MIN_FREQ_FILES == NULL) {
+        printf("Unable to malloc CPU_MIN files array\n"); 
+        pyam_cpu_destroy(&cpu);
+        exit(4);
+    }
+    for (int32_t i = 0; i < cpu_number; ++i) {
+        if (asprintf(&(cpu.CPU_MIN_FREQ_FILES[i]),
+                "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", i) == -1) {
+            printf("Failed to allocate memory for CPU_MIN files array[%d]\n", i);
+            pyam_cpu_destroy(&cpu);
             exit(4);
         }
     }
@@ -100,66 +130,83 @@ pyam_cpu_create(void) {
 void
 pyam_cpu_destroy(
         struct pyam_cpu_t* cpu) {
-    const int32_t cpu_number = pyam_cpu_get_number();
+    const int32_t cpu_number = pyam_cpu_get_number(cpu);
     for (int32_t i = 0; i < cpu_number; ++i) {
-        free(cpu->CPU_FREQ_FILES[i]);
-        cpu->CPU_FREQ_FILES[i] = NULL;
+        if (cpu->CPU_MAX_FREQ_FILES[i] != NULL) {
+            free(cpu->CPU_MAX_FREQ_FILES[i]);
+            cpu->CPU_MAX_FREQ_FILES[i] = NULL;
+        }
+        if (cpu->CPU_MIN_FREQ_FILES[i] != NULL) {
+            free(cpu->CPU_MIN_FREQ_FILES[i]);
+            cpu->CPU_MIN_FREQ_FILES[i] = NULL;
+        }
     }
-    free(cpu->CPU_FREQ_FILES);
-    cpu->CPU_FREQ_FILES = NULL;
+    if (cpu->CPU_MAX_FREQ_FILES != NULL) {
+        free(cpu->CPU_MAX_FREQ_FILES);
+    cpu->CPU_MAX_FREQ_FILES = NULL;
+    }
+    if (cpu->CPU_MIN_FREQ_FILES != NULL) {
+        free(cpu->CPU_MIN_FREQ_FILES);
+        cpu->CPU_MIN_FREQ_FILES = NULL;
+    }
 }
 
 void
 pyam_cpu_set_turbo(
+        struct pyam_cpu_t* const cpu,
         const int32_t turbo) {
-    pyam_cpu_internal_set(FILE_PSTATE_TURBO, turbo);
+    pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
 }
 
 void
 pyam_cpu_set_max(
         struct pyam_cpu_t* const cpu,
         const int32_t max) {
-    size_t real_max = 0;
-    // Get the minimum cpu value
-    const int32_t min = pyam_cpu_get_min();
-    if (max < min) {
-        real_max = min;
-    } else if (max > 100) {
-        real_max = 100;
-    } else {
-        real_max = max;
-    }
-    pyam_cpu_set_freq(cpu, real_max);
+    pyam_cpu_set_freq(cpu, cpu->CPU_MAX_FREQ_FILES, max);
 
     /* It appears that this is not needed, the p-state driver will */
     /* adjust itself when the frequency changes */
-    /* pyam_cpu_internal_set(FILE_PSTATE_MAX_PERCENT, real_max); */
+    /* pyam_cpu_internal_set(FILE_PSTATE_MAX_PERCENT, max); */
+}
+
+void
+pyam_cpu_set_min(
+        struct pyam_cpu_t* const cpu,
+        const int32_t min) {
+    pyam_cpu_set_freq(cpu, cpu->CPU_MIN_FREQ_FILES, min);
+    /* It appears that this is not needed, the p-state driver will */
+    /* adjust itself when the frequency changes */
+    /* pyam_cpu_internal_set(FILE_PSTATE_MIN_PERCENT, min); */
 }
 
 static void
 pyam_cpu_set_freq(
         struct pyam_cpu_t* const cpu,
+        char** frequency_files,
         const size_t max) {
-    const int32_t scaling_value = pyam_cpu_get_cpuinfo_freq();
+    const int32_t scaling_value = pyam_cpu_get_cpuinfo_max_freq(cpu);
     const size_t scaling_max = scaling_value / 100 * max;
     char* buffer;
     if (asprintf(&buffer, "%zu\n", scaling_max) == -1) {
         printf("Failed to allocate memory for set_freq\n");
+        pyam_cpu_destroy(cpu);
         exit(5);
     }
-    pyam_cpu_internal_freq(cpu, buffer);
+    pyam_cpu_internal_freq(cpu, frequency_files, buffer);
     free(buffer);
 }
 
 static void
 pyam_cpu_internal_freq(
-        struct pyam_cpu_t* cpu, 
+        struct pyam_cpu_t* const cpu,
+        char** frequency_files,
         const char* scaling) {
-    const int32_t cpu_number = pyam_cpu_get_number();
+    const int32_t cpu_number = pyam_cpu_get_number(cpu);
     for (int32_t i = 0; i < cpu_number; ++i) {
-        FILE* file = fopen(cpu->CPU_FREQ_FILES[i], "w");
+        FILE* file = fopen(frequency_files[i], "w");
         if (file == NULL) {
-            printf("Error opening file: %s\n", cpu->CPU_FREQ_FILES[i]);
+            printf("Error: internal_freq opening file: %s\n", frequency_files[i]);
+            pyam_cpu_destroy(cpu);
             exit(7);
         }
         fprintf(file, "%s\n", scaling);
@@ -168,42 +215,76 @@ pyam_cpu_internal_freq(
 }
 
 int32_t
-pyam_cpu_get_min() {
-    return pyam_cpu_internal_get(FILE_PSTATE_MIN_PERCENT) + 1;
+pyam_cpu_get_min(
+        struct pyam_cpu_t* const cpu) {
+    const double min = (pyam_cpu_get_min_freq(cpu) / pyam_cpu_get_cpuinfo_max_freq(cpu));
+    return (min * 100);
 }
 
 int32_t
-pyam_cpu_get_turbo() {
-    return pyam_cpu_internal_get(FILE_PSTATE_TURBO);
+pyam_cpu_get_turbo(
+        struct pyam_cpu_t* const cpu) {
+    return pyam_cpu_internal_get(cpu, FILE_PSTATE_TURBO);
 }
 
 int32_t
-pyam_cpu_get_max() {
-    return pyam_cpu_internal_get(FILE_PSTATE_MAX_PERCENT);
+pyam_cpu_get_max(
+        struct pyam_cpu_t* const cpu) {
+    const double max = (pyam_cpu_get_max_freq(cpu) / pyam_cpu_get_cpuinfo_max_freq(cpu));
+    return (max * 100);
 }
 
-int32_t
-pyam_cpu_get_freq() {
-    return pyam_cpu_internal_get(FILE_CPU_FREQ);
+double
+pyam_cpu_get_max_freq(
+        struct pyam_cpu_t* const cpu) {
+    return pyam_cpu_internal_get(cpu, FILE_CPU_MAX_FREQ);
 }
 
-static int32_t
-pyam_cpu_get_cpuinfo_freq() {
-    return pyam_cpu_internal_get(FILE_CPU_MAX);
+double
+pyam_cpu_get_min_freq(
+        struct pyam_cpu_t* const cpu) {
+    return pyam_cpu_internal_get(cpu, FILE_CPU_MIN_FREQ);
+}
+
+static double
+pyam_cpu_get_cpuinfo_max_freq(
+        struct pyam_cpu_t* const cpu) {
+    return pyam_cpu_internal_get(cpu, FILE_CPUINFO_MAX_FREQ);
+}
+
+double
+pyam_cpu_get_cpuinfo_max() {
+    return 100;
+}
+
+double
+pyam_cpu_get_cpuinfo_min(
+        struct pyam_cpu_t* const cpu) {
+    const double min = pyam_cpu_get_cpuinfo_min_freq(cpu) / pyam_cpu_get_cpuinfo_max_freq(cpu);
+    return min * 100;
+}
+
+static double
+pyam_cpu_get_cpuinfo_min_freq(
+        struct pyam_cpu_t* const cpu) {
+    return pyam_cpu_internal_get(cpu, FILE_CPUINFO_MIN_FREQ);
 }
 
 static void
 pyam_cpu_internal_set(
+        struct pyam_cpu_t* const cpu,
         const char* file_name,
         const int32_t value) {
     char* buffer;
     if (asprintf(&buffer, "%d", value) == -1) {
         printf("Failed to write bytes into buffer\n");
+        pyam_cpu_destroy(cpu);
         exit(6);
     }
     FILE* file = fopen(file_name, "w");    
     if (file == NULL) {
-        printf("Error opening file: %s\n", file_name);
+        printf("Error: internal_set opening file: %s\n", file_name);
+        pyam_cpu_destroy(cpu);
         exit(8);
     }
     fprintf(file, "%s", buffer);
@@ -211,18 +292,20 @@ pyam_cpu_internal_set(
     free(buffer);
 }
 
-static int32_t
+static double
 pyam_cpu_internal_get(
+        struct pyam_cpu_t* const cpu,
         const char* file_name) {
     FILE* file = fopen(file_name, "r");
     if (file == NULL) {
-        printf("Error opening file: %s\n", file_name);
+        printf("Error: internal_get opening file: %s\n", file_name);
+        pyam_cpu_destroy(cpu);
         exit(9);
     }
     char* line = NULL;
     size_t n = 0;
     getline(&line, &n, file);
-    const int32_t value = strtol(line, NULL, 10);
+    const double value = strtol(line, NULL, 10);
     fclose(file);
     free(line);
     return value;

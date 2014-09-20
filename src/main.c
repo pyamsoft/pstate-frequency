@@ -29,42 +29,53 @@
 #include <ctype.h>
 #include <getopt.h>
 
-int32_t
+static int32_t
 handle_result(
+        struct pyam_cpu_t* const cpu,
         const int32_t result,
         int32_t* flag_silent,
         int32_t* flag_action,
+        int32_t* value_min,
         int32_t* value_max,
         int32_t* value_turbo);
 
-void 
+static void 
 print_version(void);
 
-int32_t 
+static int32_t 
 str_starts_with(
         const char* restrict string,
         const char* restrict prefix);
 
-int32_t
+static int32_t
 access_cpu(
-        struct pyam_cpu_t* cpu,
+        struct pyam_cpu_t* const cpu,
         int32_t* flag_silent,
         int32_t* flag_action,
+        int32_t* value_min,
         int32_t* value_max,
         int32_t* value_turbo);
 
-void
+static void
+fix_value_range(
+        int32_t * value,
+        const int32_t min);
+
+static void
 print_help(void);
 
-void
-print_output(void);
+static void
+print_output(
+        struct pyam_cpu_t* const cpu);
 
-int32_t
+static int32_t
 is_all_digits(
         const char* string);
 
-int32_t
+static int32_t
 set_plan(
+        struct pyam_cpu_t* const cpu,
+        int32_t* value_min,
         int32_t* value_max,
         int32_t* value_turbo);
 
@@ -76,6 +87,7 @@ main(
     struct pyam_cpu_t cpu = pyam_cpu_create();
     static int32_t flag_silent = 0;
     static int32_t flag_action = 0;
+    static int32_t value_min = -1;
     static int32_t value_max = -1;
     static int32_t value_turbo = -1;
 
@@ -90,33 +102,36 @@ main(
         {"set",     no_argument,        &flag_action,   2},
         {"plan",    required_argument,  NULL,           'p'},
         {"max",     required_argument,  NULL,           'm'},
+        {"min",     required_argument,  NULL,           'n'},
         {"turbo",   required_argument,  NULL,           't'},
         {0,         0,                  0,              0}
     };
     while (1) {
         int32_t option_index = 0;
-        result = getopt_long(argc, argv, "hqvsgp:m:t:", long_options, &option_index);
+        result = getopt_long(argc, argv, "hqvsgp:m:n:t:", long_options, &option_index);
         if (result == -1) {
             break;
         } else {
-            final_result = handle_result(result, &flag_silent,
-                    &flag_action, &value_max, &value_turbo);
+            final_result = handle_result(&cpu, result, &flag_silent,
+                    &flag_action, &value_min, &value_max, &value_turbo);
             if (final_result == -1) {
                 pyam_cpu_destroy(&cpu);
                 return 1;
             }
         }
     }
-    int32_t i = access_cpu(&cpu, &flag_silent, &flag_action, &value_max, &value_turbo);
+    int32_t i = access_cpu(&cpu, &flag_silent, &flag_action, &value_min, &value_max, &value_turbo);
     pyam_cpu_destroy(&cpu);
     return i;
 }
 
-int32_t
+static int32_t
 handle_result(
+        struct pyam_cpu_t* const cpu,
         const int32_t result,
         int32_t* flag_silent,
         int32_t* flag_action,
+        int32_t* value_min,
         int32_t* value_max,
         int32_t* value_turbo) {
     switch(result) {
@@ -138,15 +153,27 @@ handle_result(
             *flag_action = 1;
             return 0;
         case 'p':
-            return set_plan(value_max, value_turbo);
+            return set_plan(cpu, value_min ,value_max, value_turbo);
         case 'm':
             if (is_all_digits(optarg)) {
                 if (*value_max < 0) {
                     *value_max = strtol(optarg, NULL, 10);
+                    fix_value_range(value_max, pyam_cpu_get_cpuinfo_min(cpu) + 1);
                 }
                 return 0;
             }
             printf("%sMax Frequency must be positive, non-zero integer value%s\n",
+                    PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
+            return -1;
+        case 'n':
+            if (is_all_digits(optarg)) {
+                if (*value_min < 0) {
+                    *value_min = strtol(optarg, NULL, 10);
+                    fix_value_range(value_min, pyam_cpu_get_cpuinfo_min(cpu));
+                }
+                return 0;
+            }
+            printf("%sMin Frequency must be positive, non-zero integer value%s\n",
                     PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
             return -1;
         case 't':
@@ -156,7 +183,7 @@ handle_result(
                 }
                 return 0;
             }
-            printf("%sMax Frequency must be either 0 or 1%s\n",
+            printf("%sTurbo Boost must be either 0 or 1%s\n",
                     PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
             return -1;
         case '?':
@@ -165,30 +192,52 @@ handle_result(
     return -1;
 }
 
-int32_t
+static void
+fix_value_range(
+        int32_t * value,
+        const int32_t min) {
+    const int32_t max = pyam_cpu_get_cpuinfo_max();
+    if (*value < min) {
+        *value = min;
+    } else if (*value > max) {
+        *value = max;
+    }
+}
+
+static int32_t
 set_plan(
+        struct pyam_cpu_t* const cpu,
+        int32_t* value_min,
         int32_t* value_max,
         int32_t* value_turbo) {
     if (str_starts_with("powersave", optarg)) {
-        const int32_t min = pyam_cpu_get_min();
-        *value_max = min;
+        const int32_t min = pyam_cpu_get_cpuinfo_min(cpu);
+        *value_min = min;
+        *value_max = min + 1;
         *value_turbo = 0;
     } else if (strncmp("1", optarg, strlen(optarg)) == 0) {
-        const int32_t min = pyam_cpu_get_min();
-        *value_max = min;
+        const int32_t min = pyam_cpu_get_cpuinfo_min(cpu);
+        *value_min = min;
+        *value_max = min + 1;
         *value_turbo = 0;
     } else if (str_starts_with("performance", optarg)) {
-        const int32_t non_turbo_max = pyam_cpu_get_mhz();
+        const int32_t non_turbo_max = pyam_cpu_get_mhz(cpu);
+        const int32_t min = pyam_cpu_get_min(cpu);
+        *value_min = min;
         *value_max = non_turbo_max;
         *value_turbo = 0;
     } else if (strncmp("2", optarg, strlen(optarg)) == 0) {
-        const int32_t non_turbo_max = pyam_cpu_get_mhz();
+        const int32_t non_turbo_max = pyam_cpu_get_mhz(cpu);
+        const int32_t min = pyam_cpu_get_min(cpu);
+        *value_min = min;
         *value_max = non_turbo_max;
         *value_turbo = 0;
     } else if (str_starts_with("max-performance", optarg)) {
+        *value_min = 99;
         *value_max = 100;
         *value_turbo = 1;
     } else if (strncmp("3", optarg, strlen(optarg)) == 0) {
+        *value_min = 99;
         *value_max = 100;
         *value_turbo = 1;
     } else {
@@ -209,7 +258,7 @@ set_plan(
     return 0;
 }
 
-int32_t
+static int32_t
 is_all_digits(
         const char* string) {
     const int32_t length = strlen(string);
@@ -221,11 +270,12 @@ is_all_digits(
     return 1;
 }
 
-int32_t
+static int32_t
 access_cpu(
-        struct pyam_cpu_t* cpu,
+        struct pyam_cpu_t* const cpu,
         int32_t* flag_silent,
         int32_t* flag_action,
+        int32_t* value_min,
         int32_t* value_max,
         int32_t* value_turbo) {
     if (*flag_action == 2) {
@@ -233,14 +283,37 @@ access_cpu(
         if (geteuid() == 0) {
             // is effective root
             int32_t requested = 0;
-            if (*value_max >= 0) {
+            if (*value_max >= 0 
+                    && *value_min >= 0) {
+                /*
+                   If both the min and max are requested to change,
+                   you must change in proper order. Max can not be <= min,
+                   and min can not be >= max. You must change max first
+                   if it is greater than current min, and min first if
+                   it is greater than current max otherwise no changes will take effect
+                */
                 requested = 1;
-                pyam_cpu_set_max(cpu, *value_max);
+                if (*value_max > pyam_cpu_get_min(cpu)) {
+                    pyam_cpu_set_max(cpu, *value_max);
+                    pyam_cpu_set_min(cpu, *value_min);
+                } else { // (*value_min >= pyam_cpu_get_max()) {
+                    pyam_cpu_set_min(cpu, *value_min);
+                    pyam_cpu_set_max(cpu, *value_max);
+                }
+            } else {
+                if (*value_max >= 0) {
+                    requested = 1;
+                    pyam_cpu_set_max(cpu, *value_max);
+                }
+                if (*value_min >= 0) {
+                    requested = 1;
+                    pyam_cpu_set_min(cpu, *value_min);
+                }
             }
             if (*value_turbo == 0
                     || *value_turbo == 1) {
                 requested = 1;
-                pyam_cpu_set_turbo(*value_turbo);
+                pyam_cpu_set_turbo(cpu, *value_turbo);
             }
             if (requested == 0) {
                 printf("%sSet called with no target or invalid values%s\n",
@@ -249,7 +322,7 @@ access_cpu(
             }
             // print out
             if (*flag_silent == 0) {
-                print_output();
+                print_output(cpu);
             }
         } else {
             printf("%sRoot privilages required%s\n",
@@ -259,7 +332,7 @@ access_cpu(
     } else if (*flag_action == 1) {
         // get
         // ignore silent flag
-        print_output();
+        print_output(cpu);
     } else {
         // display help
         print_help();
@@ -267,13 +340,15 @@ access_cpu(
     return 0;
 }
 
-void
-print_output() {
-    int32_t turbo = pyam_cpu_get_turbo();
+static void
+print_output(
+        struct pyam_cpu_t* const cpu) {
+    const int32_t turbo = pyam_cpu_get_turbo(cpu);
     const char* turbo_string = turbo == 1 ? "ON" : "OFF";
-    int32_t cpu_max = pyam_cpu_get_max();
-    int32_t cpu_freq = pyam_cpu_get_freq();
-    int32_t max_mhz = cpu_freq / 1000;
+    const int32_t cpu_max = pyam_cpu_get_max(cpu);
+    const int32_t cpu_min = pyam_cpu_get_min(cpu);
+    const int32_t max_mhz = pyam_cpu_get_max_freq(cpu);
+    const int32_t min_mhz = pyam_cpu_get_min_freq(cpu);
 #ifdef VERSION
     printf("%spstate-frequency %s%s%s\n", 
             PYAM_COLOR_BOLD_BLUE, PYAM_COLOR_BOLD_MAGENTA,
@@ -287,18 +362,18 @@ print_output() {
             PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
             turbo, turbo_string,
             PYAM_COLOR_OFF);
-    printf("%s    pstate::%sCPU_MAX   -> %s%d%% : %dMhz%s\n", 
+    printf("%s    pstate::%sCPU_MIN   -> %s%d%% : %dKhz%s\n", 
+            PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
+            cpu_min, min_mhz,
+            PYAM_COLOR_OFF);
+    printf("%s    pstate::%sCPU_MAX   -> %s%d%% : %dKhz%s\n", 
             PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
             cpu_max, max_mhz,
-            PYAM_COLOR_OFF);
-    printf("%s    pstate::%sFREQUENCY -> %s%dKHz%s\n",
-            PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
-            cpu_freq,
             PYAM_COLOR_OFF);
     printf("\n");
 }
 
-void
+static void
 print_version() {
 #ifdef VERSION
     printf("pstate-frequency version %s\n", VERSION);
@@ -308,7 +383,7 @@ print_version() {
     printf("under certain conditions;\n");
 }
 
-void
+static void
 print_help() {
     print_version();
     printf("\n");
@@ -322,11 +397,12 @@ print_help() {
     printf("        -g | --get      Access current CPU values\n");
     printf("        -p | --plan     Set a predefined power plan (root)\n");
     printf("        -m | --max      Modify current CPU max frequency (root)\n");
+    printf("        -n | --min      Modify current CPU min frequency (root)\n");
     printf("        -t | --turbo    Modify curent CPU turbo boost state (root)\n");
     printf("\n");
 }
 
-int32_t 
+static int32_t 
 str_starts_with(
         const char* restrict string,
         const char* restrict prefix) {
