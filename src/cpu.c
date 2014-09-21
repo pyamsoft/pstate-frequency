@@ -164,9 +164,10 @@ pyam_cpu_set_turbo(
         const int32_t turbo) {
     if (pyam_cpu_has_pstate_driver()) {
         pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
-    } else {
-        printf("Error: Not able to set turbo, p-state driver not found\n");
     }
+#if DEBUG >= 1
+    printf("Error: Not able to set turbo, p-state driver not found\n");
+#endif
 }
 
 void
@@ -237,10 +238,11 @@ pyam_cpu_get_turbo(
         struct pyam_cpu_t* const cpu) {
     if (pyam_cpu_has_pstate_driver()) {
         return pyam_cpu_internal_get(cpu, FILE_PSTATE_TURBO);
-    } else {
-        printf("Error: Not able to get turbo, p-state driver not found\n");
-        return -1;
     }
+#if DEBUG >= 1
+    printf("Error: Not able to get turbo, p-state driver not found\n");
+#endif
+    return -1;
 }
 
 int32_t

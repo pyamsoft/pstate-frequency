@@ -22,9 +22,12 @@ pkgver() {
 
 build() {
     cd "$srcdir/$_gitname"
+    # Variables with their defaults below
     # CC=gcc
+    # DEBUG=0
     make\
-        CC="gcc"
+        CC="gcc" \
+        DEBUG=0
 }
 
 package() {

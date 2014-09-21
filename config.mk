@@ -8,11 +8,16 @@ STD=-std=c99
 INCS=-I.
 LIBS=
 
+# Debug messages enabled or not
+# 0 : OFF
+# 1 : ON
+DEBUG=0
+
 # Permissions
 BIN_PERMISSION=755
 
 # Flags
-CFLAGS+= -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
+CFLAGS+= -DDEBUG="${DEBUG}" -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
 LDFLAGS+= -Wl,-O2,--sort-common,--as-needed,-z,relro,-s ${LIBS}
 
 # Options you may change
