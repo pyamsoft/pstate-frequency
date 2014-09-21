@@ -57,6 +57,12 @@ pyam_cpu_internal_freq(
         char** const frequency_files,
         const char* const scaling);
 
+static int32_t
+pyam_cpu_has_pstate_driver() {
+    const char* pstate_dir = "/sys/devices/system/cpu/intel_pstate";
+    return access(pstate_dir, F_OK) == 0;
+}
+
 int32_t
 pyam_cpu_get_mhz(
         struct pyam_cpu_t* const cpu) {
@@ -156,7 +162,11 @@ void
 pyam_cpu_set_turbo(
         struct pyam_cpu_t* const cpu,
         const int32_t turbo) {
-    pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
+    if (pyam_cpu_has_pstate_driver()) {
+        pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
+    } else {
+        printf("Error: Not able to set turbo, p-state driver not found\n");
+    }
 }
 
 void
@@ -225,7 +235,12 @@ pyam_cpu_get_min(
 int32_t
 pyam_cpu_get_turbo(
         struct pyam_cpu_t* const cpu) {
-    return pyam_cpu_internal_get(cpu, FILE_PSTATE_TURBO);
+    if (pyam_cpu_has_pstate_driver()) {
+        return pyam_cpu_internal_get(cpu, FILE_PSTATE_TURBO);
+    } else {
+        printf("Error: Not able to get turbo, p-state driver not found\n");
+        return -1;
+    }
 }
 
 int32_t

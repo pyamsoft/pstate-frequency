@@ -378,7 +378,7 @@ static void
 print_output(
         struct pyam_cpu_t* const cpu) {
     const int32_t turbo = pyam_cpu_get_turbo(cpu);
-    const char* turbo_string = turbo == 1 ? "ON" : "OFF";
+    const char* turbo_string = turbo == 1 ? "ON" : (turbo == 0 ? "OFF" : "INVALID");
     const int32_t cpu_max = pyam_cpu_get_max(cpu);
     const int32_t cpu_min = pyam_cpu_get_min(cpu);
     const int32_t max_mhz = pyam_cpu_get_max_freq(cpu);
