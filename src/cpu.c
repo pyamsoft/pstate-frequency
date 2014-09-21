@@ -29,18 +29,18 @@
 static void
 pyam_cpu_set_freq(
         struct pyam_cpu_t* const cpu,
-        char** frequency_files,
+        char** const frequency_files,
         const size_t max);
 
 static double
 pyam_cpu_internal_get(
         struct pyam_cpu_t* const cpu,
-        const char* file_name);
+        const char* const file_name);
 
 static void
 pyam_cpu_internal_set(
         struct pyam_cpu_t* const cpu,
-        const char* file_name,
+        const char* const file_name,
         const int32_t value);
 
 static double
@@ -54,8 +54,8 @@ pyam_cpu_get_cpuinfo_min_freq(
 static void
 pyam_cpu_internal_freq(
         struct pyam_cpu_t* const cpu,
-        char** frequency_files,
-        const char* scaling);
+        char** const frequency_files,
+        const char* const scaling);
 
 int32_t
 pyam_cpu_get_mhz(
@@ -149,6 +149,7 @@ pyam_cpu_destroy(
         free(cpu->CPU_MIN_FREQ_FILES);
         cpu->CPU_MIN_FREQ_FILES = NULL;
     }
+    cpu = NULL;
 }
 
 void
@@ -182,7 +183,7 @@ pyam_cpu_set_min(
 static void
 pyam_cpu_set_freq(
         struct pyam_cpu_t* const cpu,
-        char** frequency_files,
+        char** const frequency_files,
         const size_t max) {
     const int32_t scaling_value = pyam_cpu_get_cpuinfo_max_freq(cpu);
     const size_t scaling_max = scaling_value / 100 * max;
@@ -199,7 +200,7 @@ pyam_cpu_set_freq(
 static void
 pyam_cpu_internal_freq(
         struct pyam_cpu_t* const cpu,
-        char** frequency_files,
+        char** const frequency_files,
         const char* scaling) {
     const int32_t cpu_number = pyam_cpu_get_number(cpu);
     for (int32_t i = 0; i < cpu_number; ++i) {
@@ -273,7 +274,7 @@ pyam_cpu_get_cpuinfo_min_freq(
 static void
 pyam_cpu_internal_set(
         struct pyam_cpu_t* const cpu,
-        const char* file_name,
+        const char* const file_name,
         const int32_t value) {
     char* buffer;
     if (asprintf(&buffer, "%d", value) == -1) {
@@ -295,7 +296,7 @@ pyam_cpu_internal_set(
 static double
 pyam_cpu_internal_get(
         struct pyam_cpu_t* const cpu,
-        const char* file_name) {
+        const char* const file_name) {
     FILE* file = fopen(file_name, "r");
     if (file == NULL) {
         printf("Error: internal_get opening file: %s\n", file_name);
