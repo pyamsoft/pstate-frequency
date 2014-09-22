@@ -3,9 +3,8 @@
 
 Easily control Intel p-state driver on Linux (3.9 and upwards) 
 
-pstate-frequency is able to adjust the Intel p-state driver values for the maximum  
-running frequency and the state of turbo boost. It is able to dynamically set a  
-scaling frequency range and artificially limit the range that your CPU will run at.
+pstate-frequency is able to adjust the Intel p-state driver values for the minimum  
+and maximum scaling frequencies and the state of turbo boost. 
 
 ### Requirements
 
@@ -23,6 +22,7 @@ The installation process follows the basic *make, make install* process.
 While building, there are a couple of options that one may configure or change:  
 + The C compiler used (defaults to gcc)  
 + The directory to install to (defaults to /usr/local)  
++ Whether or not to print out debug error messages ( defaults to No)  
 + Whether or not to install bash completion (defaults to No)
 + Whether or not to install a udev rule which monitors the state of the power supply  
 and sets the power plan automatically to powersave when on battery and the power plan  
@@ -42,25 +42,25 @@ When called with the *-s --set* option, the program will display something like 
 ![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_set.png)
 
 The *-g --get* option can be called by a normal user, and will display the current values  
-for the CPU maximum scaling frequency, the state of Turbo Boost, and the maximum p-state  
-frequency as a percentage.
+for the CPU  minimum scaling frequency, the CPU maximum scaling frequency, the state of Turbo Boost.
 
 The *-s --set* option can only be called by a user with root permissions.  
 The *-s --set* option also takes one or more of these flags as necessary arguments:  
 + **-m --max** Adjust the maximum scaling frequency of the CPU
++ **-n --min** Adjust the minimum scaling frequency of the CPU
 + **-t --turbo** Adjust the current state of Turbo Boost
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
 
 There are three power plans:  
-1. **powersave** Sets the maximum scaling frequency to the lowest available frequency  
+1. **powersave** Sets the minimum and maximum scaling frequencies to the lowest available  
 and disables Turbo Boost.  
-2. **performance** Sets the maximum scaling frequency to the highest available  
-non-turbo frequency and disables Turbo Boost.  
-3. **max-performance** Sets the maximum scaling frequency to the highest available  
+2. **performance** Sets the minimum scaling frequency to the lowest available,  
+the maximum scaling frequency to the highest available non-turbo frequency and disables Turbo Boost.  
+3. **max-performance** Sets the minimum and maximum scaling frequencies to the highest available  
 frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
 
 # Questions
 
 
 Questions or issues should be either posted in the issue section of this repository,  
-or directed by email to pyam.soft@gmail.com
+or directed by email to Peter Yamanaka @ pyam.soft@gmail.com
