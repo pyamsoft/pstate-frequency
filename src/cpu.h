@@ -25,6 +25,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define FILE_CPU_NUMBER         "/tmp/cpunumber.txt"
+#define DIR_PSTATE              "/sys/devices/system/cpu/intel_pstate"
+#define FILE_CPU_SCALING_DRIVER "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
 #define FILE_CPUINFO_MAX_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 #define FILE_CPUINFO_MIN_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
 #define FILE_PSTATE_TURBO       "/sys/devices/system/cpu/intel_pstate/no_turbo"
@@ -56,6 +59,10 @@ void
 pyam_cpu_set_max(
         struct pyam_cpu_t* const cpu,
         const int32_t max);
+
+char* 
+pyam_cpu_get_driver(
+        struct pyam_cpu_t* const cpu);
 
 void
 pyam_cpu_set_min(
