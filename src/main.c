@@ -383,6 +383,7 @@ print_output(
     const int32_t cpu_min = pyam_cpu_get_min(cpu);
     const int32_t max_mhz = pyam_cpu_get_max_freq(cpu);
     const int32_t min_mhz = pyam_cpu_get_min_freq(cpu);
+    char* cpu_driver = pyam_cpu_get_driver(cpu);
 #ifdef VERSION
     printf("%spstate-frequency %s%s%s\n",
             PYAM_COLOR_BOLD_BLUE, PYAM_COLOR_BOLD_MAGENTA,
@@ -392,19 +393,24 @@ print_output(
     printf("%spstate-frequency%s\n",
             PYAM_COLOR_BOLD_BLUE, PYAM_COLOR_OFF);
 #endif
-    printf("%s    pstate::%sTURBO     -> %s%d : %s%s\n",
+    printf("%s    pstate::%sCPU_DRIVER  -> %s%s%s",
+            PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
+            cpu_driver,
+            PYAM_COLOR_OFF);
+    printf("%s    pstate::%sCPU_TURBO   -> %s%d : %s%s\n",
             PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
             turbo, turbo_string,
             PYAM_COLOR_OFF);
-    printf("%s    pstate::%sCPU_MIN   -> %s%d%% : %dKhz%s\n",
+    printf("%s    pstate::%sCPU_MIN     -> %s%d%% : %dKhz%s\n",
             PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
             cpu_min, min_mhz,
             PYAM_COLOR_OFF);
-    printf("%s    pstate::%sCPU_MAX   -> %s%d%% : %dKhz%s\n",
+    printf("%s    pstate::%sCPU_MAX     -> %s%d%% : %dKhz%s\n",
             PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
             cpu_max, max_mhz,
             PYAM_COLOR_OFF);
     printf("\n");
+    free(cpu_driver);
 }
 
 static void

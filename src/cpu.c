@@ -59,8 +59,7 @@ pyam_cpu_internal_freq(
 
 static int32_t
 pyam_cpu_has_pstate_driver() {
-    const char* pstate_dir = "/sys/devices/system/cpu/intel_pstate";
-    return access(pstate_dir, F_OK) == 0;
+    return access(DIR_PSTATE, F_OK) == 0;
 }
 
 int32_t
@@ -71,21 +70,36 @@ pyam_cpu_get_mhz(
     return (mhz / max_mhz) * 100;
 }
 
+char* 
+pyam_cpu_get_driver(
+        struct pyam_cpu_t* const cpu) {
+    FILE* file = fopen(FILE_CPU_SCALING_DRIVER, "r");
+    if (file == NULL) {
+        printf("Error: internal_get opening file: %s\n", FILE_CPU_SCALING_DRIVER);
+        pyam_cpu_destroy(cpu);
+        exit(10);
+    }
+    char* line = NULL;
+    size_t n = 0;
+    getline(&line, &n, file);
+    fclose(file);
+    return line;
+}
+
 int32_t
 pyam_cpu_get_number(
         struct pyam_cpu_t* const cpu) {
-    const char* file_name = "/tmp/cpunumber.txt";
-    if (access(file_name, F_OK) == -1) {
+    if (access(FILE_CPU_NUMBER, F_OK) == -1) {
         // Create the file
         char* command;
-        if (asprintf(&command, "cat /proc/cpuinfo | grep processor | wc -l > %s", file_name) == -1) {
+        if (asprintf(&command, "cat /proc/cpuinfo | grep processor | wc -l > %s", FILE_CPU_NUMBER) == -1) {
             printf("Unable to alloc system command: %s\n", command);
             pyam_cpu_destroy(cpu);
             exit(6);
         }
         // Make it world readable
         char* readable;
-        if (asprintf(&readable, "chmod a+r %s", file_name) == -1) {
+        if (asprintf(&readable, "chmod a+r %s", FILE_CPU_NUMBER) == -1) {
             printf("Unable to alloc system command: %s\n", readable);
             pyam_cpu_destroy(cpu);
             exit(6);
@@ -95,7 +109,7 @@ pyam_cpu_get_number(
         free(command);
         free(readable);
     }
-    return pyam_cpu_internal_get(cpu, file_name);
+    return pyam_cpu_internal_get(cpu, FILE_CPU_NUMBER);
 }
 
 struct pyam_cpu_t
