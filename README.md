@@ -58,8 +58,8 @@ There are three power plans:
 and disables Turbo Boost.  
 2. **performance** Sets the minimum scaling frequency to the lowest available,  
 the maximum scaling frequency to the highest available non-turbo frequency and disables Turbo Boost.  
-3. **max-performance** Sets the minimum and maximum scaling frequencies to the highest available  
-frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
+3. **max-performance** Sets the minimum and maximum scaling frequencies to the  
+highest available frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
 
 # Questions
 
