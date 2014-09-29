@@ -12,7 +12,7 @@ and maximum scaling frequencies and the state of turbo boost.
 + Intel P-State driver (included in kernel 3.9 and upwards).  
 Enable it by adding **intel_pstate=enable** to the boot command line.  
 If the p-state driver is not present in your system, the application will still  
-work on a basic level using the default cpufreq driver.
+work on a basic level using the default **cpufreq** driver.
 + A C compiler which recognizes **GNU Extensions**
 + glibc with GNU Extensions for the following files:  
 **sys/time.h and stdio.h**
