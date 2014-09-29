@@ -241,7 +241,7 @@ set_plan(
         set_max_performance(value_min, value_max, value_turbo);
     } else {
         printf("%sPlan: Unrecognized plan: %s%s%s\n",
-                PYAM_COLOR_NORMAL_RED, PYAM_COLOR_BOLD_RED,
+                PYAM_COLOR_BOLD_RED, PYAM_COLOR_BOLD_RED,
                 optarg,
                 PYAM_COLOR_OFF);
         printf("%sValid plans are:%s\n",
