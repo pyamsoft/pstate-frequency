@@ -106,10 +106,6 @@ pyam_cpu_set_governor(
         struct pyam_cpu_t* const cpu,
         const int32_t governor);
 
-char**
-pyam_cpu_get_available_governors(
-        struct pyam_cpu_t* const cpu);
-
 void
 pyam_cpu_destroy(
         struct pyam_cpu_t* cpu);
