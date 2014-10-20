@@ -350,12 +350,6 @@ pyam_cpu_set_governor(
         pyam_cpu_internal_set(cpu, FILE_CPU_GOVERNOR, governor);
 }
 
-char**
-pyam_cpu_get_available_governors(
-        struct pyam_cpu_t* const cpu) {
-    return NULL;
-}
-
 static double
 pyam_cpu_internal_get(
         struct pyam_cpu_t* const cpu,
