@@ -32,16 +32,14 @@
 //copied blantantly from http://www.cs.helsinki.fi/linux/linux-kernel/2001-37/0256.html
 
 __inline__ unsigned long long int
-rdtsc()
-{
+rdtsc() {
     unsigned long long int x;
     __asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
     return x;
 }
 
 double
-estimate_MHz()
-{
+estimate_MHz() {
     //copied blantantly from http://www.cs.helsinki.fi/linux/linux-kernel/2001-37/0256.html
     /*
     * $Id: MHz.c,v 1.4 2001/05/21 18:58:01 davej Exp $
@@ -56,40 +54,27 @@ estimate_MHz()
     */
     struct timezone tz;
     struct timeval tvstart, tvstop;
-    unsigned long long int cycles[2];       /* must be 64 bit */
+    unsigned long long int first_cycle, second_cycle;       /* must be 64 bit */
     unsigned long long int microseconds;    /* total time taken */
 
     memset(&tz, 0, sizeof (tz));
 
-    /* get this function in cached memory */
     gettimeofday(&tvstart, &tz);
-    cycles[0] = rdtsc();
+    first_cycle = rdtsc();
     gettimeofday(&tvstart, &tz);
-
     /* we don't trust that this is any specific length of time */
     /*1 sec will cause rdtsc to overlap multiple times perhaps. 100msecs is a good spot */
     usleep(10000);
-
-    cycles[1] = rdtsc ();
+    second_cycle = rdtsc ();
     gettimeofday(&tvstop, &tz);
     microseconds = ((tvstop.tv_sec - tvstart.tv_sec) * 1000000) +
                    (tvstop.tv_usec - tvstart.tv_usec);
-
-    unsigned long long int elapsed = 0;
-    if (cycles[1] < cycles[0])
-    {
-        //printf("c0 = %llu   c1 = %llu",cycles[0],cycles[1]);
-        elapsed = UINT32_MAX - cycles[0];
-        elapsed = elapsed + cycles[1];
-        //printf("c0 = %llu  c1 = %llu max = %llu elapsed=%llu\n",cycles[0], cycles[1], UINT32_MAX,elapsed);
+    unsigned long long int elapsed;
+    if (second_cycle < first_cycle) {
+        elapsed = UINT32_MAX - first_cycle;
+        elapsed += second_cycle;
+    } else {
+        elapsed = second_cycle - first_cycle;
     }
-    else
-    {
-        elapsed = cycles[1] - cycles[0];
-        //printf("\nc0 = %llu  c1 = %llu elapsed=%llu\n",cycles[0], cycles[1],elapsed);
-    }
-
-    //printf("%llg MHz processor (estimate).  diff cycles=%llu  microseconds=%llu \n", mhz, elapsed, microseconds);
-    //printf("%g  elapsed %llu  microseconds %llu\n",mhz, elapsed, microseconds);
     return elapsed / microseconds;
 }

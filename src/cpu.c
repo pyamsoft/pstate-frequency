@@ -26,6 +26,11 @@
 #include <unistd.h>
 #include "src/mhz.h"
 
+static char*
+pyam_cpu_get_file_contents_str(
+        struct pyam_cpu_t* const cpu,
+        const char* file_name);
+
 static void
 pyam_cpu_set_freq(
         struct pyam_cpu_t* const cpu,
@@ -73,7 +78,14 @@ pyam_cpu_get_mhz(
 char* 
 pyam_cpu_get_driver(
         struct pyam_cpu_t* const cpu) {
-    FILE* file = fopen(FILE_CPU_SCALING_DRIVER, "r");
+    return pyam_cpu_get_file_contents_str(cpu, FILE_CPU_SCALING_DRIVER);
+}
+
+static char*
+pyam_cpu_get_file_contents_str(
+        struct pyam_cpu_t* const cpu,
+        const char* file_name) {
+    FILE* file = fopen(file_name, "r");
     if (file == NULL) {
         printf("Error: internal_get opening file: %s\n", FILE_CPU_SCALING_DRIVER);
         pyam_cpu_destroy(cpu);
@@ -322,6 +334,20 @@ pyam_cpu_internal_set(
     fprintf(file, "%s", buffer);
     fclose(file);
     free(buffer);
+}
+
+char*
+pyam_cpu_get_governor(
+        struct pyam_cpu_t* const cpu) {
+    return pyam_cpu_get_file_contents_str(cpu, FILE_CPU_GOVERNOR);
+}
+
+void
+pyam_cpu_set_governor(
+        struct pyam_cpu_t* const cpu,
+        const int32_t governor) {
+    // if is valid governor
+        pyam_cpu_internal_set(cpu, FILE_CPU_GOVERNOR, governor);
 }
 
 static double

@@ -50,7 +50,7 @@ The *-s --set* option can only be called by a user with root permissions.
 The *-s --set* option also takes one or more of these flags as necessary arguments:  
 + **-m --max** Adjust the maximum scaling frequency of the CPU
 + **-n --min** Adjust the minimum scaling frequency of the CPU
-+ **-t --turbo** Adjust the current state of Turbo Boost
++ **-t --turbo** Adjust the current state of Turbo Boost (0 is ON, 1 is OFF)
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
 
 There are three power plans:  
