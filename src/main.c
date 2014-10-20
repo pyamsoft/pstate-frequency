@@ -117,9 +117,9 @@ main(
     static struct option long_options[] = {
         {"help",    no_argument,        NULL,           'h'},
         {"version", no_argument,        NULL,           'v'},
-        {"quiet",   no_argument,        &flag_silent,   1},
-        {"get",     no_argument,        &flag_action,   1},
-        {"set",     no_argument,        &flag_action,   2},
+        {"quiet",   no_argument,        NULL,           'q'},
+        {"get",     no_argument,        NULL,           'g'},
+        {"set",     no_argument,        NULL,           's'},
         {"plan",    required_argument,  NULL,           'p'},
         {"max",     required_argument,  NULL,           'm'},
         {"min",     required_argument,  NULL,           'n'},
@@ -156,6 +156,7 @@ handle_result(
         int32_t* const value_turbo) {
     switch(result) {
         case 0:
+            // End of option parsing
             return 0;
         case 'h':
             print_help();
@@ -266,7 +267,7 @@ set_powersave(
     const int32_t min = pyam_cpu_get_cpuinfo_min(cpu);
     *value_min = min;
     *value_max = min + 1;
-    *value_turbo = 0;
+    *value_turbo = 1;
 }
 
 static void
@@ -279,7 +280,7 @@ set_performance(
     const int32_t min = pyam_cpu_get_cpuinfo_min(cpu);
     *value_min = min;
     *value_max = non_turbo_max;
-    *value_turbo = 0;
+    *value_turbo = 1;
 }
 
 static void
@@ -289,7 +290,7 @@ set_max_performance(
         int32_t* const value_turbo) {
     *value_min = 99;
     *value_max = 100;
-    *value_turbo = 1;
+    *value_turbo = 0;
 }
 
 static int32_t
@@ -378,7 +379,7 @@ static void
 print_output(
         struct pyam_cpu_t* const cpu) {
     const int32_t turbo = pyam_cpu_get_turbo(cpu);
-    const char* turbo_string = turbo == 1 ? "ON" : (turbo == 0 ? "OFF" : "INVALID");
+    const char* turbo_string = turbo == 0 ? "ON" : (turbo == 1 ? "OFF" : "INVALID");
     const int32_t cpu_max = pyam_cpu_get_max(cpu);
     const int32_t cpu_min = pyam_cpu_get_min(cpu);
     const int32_t max_mhz = pyam_cpu_get_max_freq(cpu);
