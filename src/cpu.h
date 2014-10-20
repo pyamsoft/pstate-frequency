@@ -28,6 +28,7 @@
 #define FILE_CPU_NUMBER         "/tmp/cpunumber.txt"
 #define DIR_PSTATE              "/sys/devices/system/cpu/intel_pstate"
 #define FILE_CPU_SCALING_DRIVER "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
+#define FILE_CPU_GOVERNOR       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
 #define FILE_CPUINFO_MAX_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 #define FILE_CPUINFO_MIN_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
 #define FILE_PSTATE_TURBO       "/sys/devices/system/cpu/intel_pstate/no_turbo"
@@ -94,6 +95,19 @@ pyam_cpu_get_cpuinfo_max(void);
 
 double
 pyam_cpu_get_cpuinfo_min(
+        struct pyam_cpu_t* const cpu);
+
+char*
+pyam_cpu_get_governor(
+        struct pyam_cpu_t* const cpu);
+
+void
+pyam_cpu_set_governor(
+        struct pyam_cpu_t* const cpu,
+        const int32_t governor);
+
+char**
+pyam_cpu_get_available_governors(
         struct pyam_cpu_t* const cpu);
 
 void
