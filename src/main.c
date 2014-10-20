@@ -117,9 +117,9 @@ main(
     static struct option long_options[] = {
         {"help",    no_argument,        NULL,           'h'},
         {"version", no_argument,        NULL,           'v'},
-        {"quiet",   no_argument,        &flag_silent,   1},
-        {"get",     no_argument,        &flag_action,   1},
-        {"set",     no_argument,        &flag_action,   2},
+        {"quiet",   no_argument,        NULL,           'q'},
+        {"get",     no_argument,        NULL,           'g'},
+        {"set",     no_argument,        NULL,           's'},
         {"plan",    required_argument,  NULL,           'p'},
         {"max",     required_argument,  NULL,           'm'},
         {"min",     required_argument,  NULL,           'n'},
@@ -156,6 +156,7 @@ handle_result(
         int32_t* const value_turbo) {
     switch(result) {
         case 0:
+            // End of option parsing
             return 0;
         case 'h':
             print_help();
@@ -266,7 +267,7 @@ set_powersave(
     const int32_t min = pyam_cpu_get_cpuinfo_min(cpu);
     *value_min = min;
     *value_max = min + 1;
-    *value_turbo = 0;
+    *value_turbo = 1;
 }
 
 static void
@@ -279,7 +280,7 @@ set_performance(
     const int32_t min = pyam_cpu_get_cpuinfo_min(cpu);
     *value_min = min;
     *value_max = non_turbo_max;
-    *value_turbo = 0;
+    *value_turbo = 1;
 }
 
 static void
@@ -289,7 +290,7 @@ set_max_performance(
         int32_t* const value_turbo) {
     *value_min = 99;
     *value_max = 100;
-    *value_turbo = 1;
+    *value_turbo = 0;
 }
 
 static int32_t
