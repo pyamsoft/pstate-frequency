@@ -110,4 +110,8 @@ void
 pyam_cpu_destroy(
         struct pyam_cpu_t* cpu);
 
+int32_t
+pyam_cpu_read_msr(
+        struct pyam_cpu_t* cpu);
+
 #endif  // C_PYAM_CPU_H_
