@@ -23,8 +23,19 @@
 #include <stdio.h>
 #include <src/cpu.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include "src/mhz.h"
+
+static char*
+pyam_cpu_is_file_on_path(
+        struct pyam_cpu_t* cpu,
+        const char* const file_name);
+
+static void
+pyam_cpu_write_msr(
+        struct pyam_cpu_t* cpu,
+        const int32_t value);
 
 static char*
 pyam_cpu_get_file_contents_str(
@@ -101,27 +112,81 @@ pyam_cpu_get_file_contents_str(
 int32_t
 pyam_cpu_get_number(
         struct pyam_cpu_t* const cpu) {
-    if (access(FILE_CPU_NUMBER, F_OK) == -1) {
-        // Create the file
-        char* command;
-        if (asprintf(&command, "cat /proc/cpuinfo | grep processor | wc -l > %s", FILE_CPU_NUMBER) == -1) {
-            printf("Unable to alloc system command: %s\n", command);
-            pyam_cpu_destroy(cpu);
-            exit(6);
-        }
-        // Make it world readable
-        char* readable;
-        if (asprintf(&readable, "chmod a+r %s", FILE_CPU_NUMBER) == -1) {
-            printf("Unable to alloc system command: %s\n", readable);
-            pyam_cpu_destroy(cpu);
-            exit(6);
-        }
-        system(command);
-        system(readable);
-        free(command);
-        free(readable);
+    char* cat = pyam_cpu_is_file_on_path(cpu, "cat");
+    if (cat == NULL) {
+        printf("cat is null\n");
+        exit(1);
     }
-    return pyam_cpu_internal_get(cpu, FILE_CPU_NUMBER);
+    char* grep = pyam_cpu_is_file_on_path(cpu, "grep");
+    if (grep == NULL) {
+        printf("grep is null\n");
+        exit(1);
+    }
+    char* wc = pyam_cpu_is_file_on_path(cpu, "wc");
+    if (wc == NULL) {
+        printf("wc is null\n");
+        exit(1);
+    }
+
+    
+    char* cmd;
+    if (asprintf(&cmd, "%s /proc/cpuinfo | %s processor | %s -l", cat, grep, wc) == -1) {
+        printf("Can't alloc for get_number command\n");
+        free(cat);
+        free(grep);
+        free(wc);
+        exit(2);
+    }
+    FILE* pf = popen(cmd, "r");
+    if (pf == NULL) {
+        printf("Unable to popen cpu_number\n");
+        pyam_cpu_destroy(cpu);
+        exit(10);
+    }
+    char* line = NULL;
+    size_t n = 0;
+    getline(&line, &n, pf);
+    const int32_t value = strtol(line, NULL, 10);
+    pclose(pf);
+    free(cmd);
+    free(line);
+    free(cat);
+    free(grep);
+    free(wc);
+    return value;
+    /* if (access(FILE_CPU_NUMBER, F_OK) == -1) { */
+    /*     // Create the file */
+    /*     char* command; */
+    /*     if (asprintf(&command, "cat /proc/cpuinfo | grep processor | wc -l > %s", FILE_CPU_NUMBER) == -1) { */
+    /*         printf("Unable to alloc system command: %s\n", command); */
+    /*         pyam_cpu_destroy(cpu); */
+    /*         exit(6); */
+    /*     } */
+    /*     // Make it world readable */
+    /*     char* readable; */
+    /*     if (asprintf(&readable, "chmod a+r %s", FILE_CPU_NUMBER) == -1) { */
+    /*         printf("Unable to alloc system command: %s\n", readable); */
+    /*         pyam_cpu_destroy(cpu); */
+    /*         exit(6); */
+    /*     } */
+    /*     if (system(command) == -1) { */
+    /*         printf("Unable to cat cpuinfo system command: %s\n", readable); */
+    /*         pyam_cpu_destroy(cpu); */
+    /*         free(command); */
+    /*         free(readable); */
+    /*         exit(6); */
+    /*     } */
+    /*     if (system(readable) == -1) { */
+    /*         printf("Unable to chmod cpunumber.txt system command: %s\n", readable); */
+    /*         pyam_cpu_destroy(cpu); */
+    /*         free(command); */
+    /*         free(readable); */
+    /*         exit(6); */
+    /*     } */
+    /*     free(command); */
+    /*     free(readable); */
+    /* } */
+    /* return pyam_cpu_internal_get(cpu, FILE_CPU_NUMBER); */
 }
 
 struct pyam_cpu_t
@@ -188,12 +253,14 @@ void
 pyam_cpu_set_turbo(
         struct pyam_cpu_t* const cpu,
         const int32_t turbo) {
+    pyam_cpu_write_msr(cpu, turbo);
     if (pyam_cpu_has_pstate_driver()) {
         pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
-    }
+    } else {
 #if DEBUG >= 1
-    printf("Error: Not able to set turbo, p-state driver not found\n");
+        printf("Error: Not able to set turbo, p-state driver not found\n");
 #endif
+    }
 }
 
 void
@@ -367,4 +434,114 @@ pyam_cpu_internal_get(
     fclose(file);
     free(line);
     return value;
+}
+
+static char*
+pyam_cpu_is_file_on_path(
+        struct pyam_cpu_t* cpu,
+        const char* const file_name) {
+    char* const REAL_PATH = getenv("PATH");
+    char* PATH;
+    if (asprintf(&PATH, "%s", REAL_PATH) == -1) {
+        printf("Unable to copy REAL_PATH to PATH\n");
+        exit(1);
+    }
+    const char* const delimiter = ":"; 
+    char* token;
+#if DEBUG >= 1
+    printf("FOR = %s\n", file_name);
+    printf("PATH = %s\n", PATH);
+#endif
+    token = strtok(PATH, delimiter);
+    while (token != NULL) {
+        char* cmd;
+#if DEBUG >= 1
+        printf("TOKEN = %s\n", token);
+#endif
+        if (asprintf(&cmd, "%s/%s", token, file_name) == -1) {
+            printf("Error allocating for %s/%s", token, file_name);
+            pyam_cpu_destroy(cpu);
+            exit(5);
+        }
+        if (access(cmd, F_OK) != -1) {
+#if DEBUG >= 1
+            printf("File %s exists\n", cmd);
+#endif
+            free(PATH);
+            return cmd;
+        }
+#if DEBUG >= 1
+        printf("File %s doesn't exist\n", cmd);
+#endif
+        token = strtok(NULL, delimiter);
+        free(cmd);
+    }
+    free(PATH);
+    return NULL;
+}
+
+static void
+pyam_cpu_write_msr(
+        struct pyam_cpu_t* cpu,
+        const int32_t value) {
+    char* cmd = pyam_cpu_is_file_on_path(cpu, "wrmsr");
+    if (cmd == NULL) {
+        return;
+    }
+    const int32_t cpu_number = pyam_cpu_get_number(cpu);
+    char* instruction = value == 1 ? "0x4000850089" : "0x850089";
+    for (int32_t i = 0; i < cpu_number; ++i) {
+        char* buffer;
+        if (asprintf(&buffer, "%s -p%d 0x1a0 %s", cmd, i, instruction) == -1) {
+            printf("Failed to allocate memory for writing msr of CPU %d\n", i);
+            pyam_cpu_destroy(cpu);
+            exit(4);
+        }
+        if (system(buffer) == -1) {
+            printf("Failed using %s to write to CPU %d\n", cmd, i);
+            pyam_cpu_destroy(cpu);
+            free(cmd);
+            free(buffer);
+            exit(4);
+        }
+        free(buffer);
+    }
+    free(cmd);
+}
+
+int32_t
+pyam_cpu_read_msr(
+        struct pyam_cpu_t* cpu) {
+    char* cmd = pyam_cpu_is_file_on_path(cpu, "rdmsr");
+    if (cmd == NULL) {
+        return -1;
+    }
+    int32_t sum = 0;
+    const int32_t cpu_number = pyam_cpu_get_number(cpu);
+    for (int32_t i = 0; i < cpu_number; ++i) {
+        char* rdcmd;
+        if (asprintf(&rdcmd, "%s -p%d 0x1a0 -f 38:38", cmd, i) == -1) {
+            printf("Couldn't allocate for rdmsr command\n");
+            free(cmd);
+            exit(3);
+        }
+        FILE* pf = popen(rdcmd, "r");
+        if (pf == NULL) {
+            printf("Unable to popen cpu_number\n");
+            pyam_cpu_destroy(cpu);
+            free(rdcmd);
+            free(cmd);
+            exit(10);
+        }
+        char* line = NULL;
+        size_t n = 0;
+        getline(&line, &n, pf);
+        const int32_t value = strtol(line, NULL, 10);
+        sum += value;
+        pclose(pf);
+        free(line);
+        free(rdcmd);
+    }
+    free(cmd);
+    return sum / cpu_number;
 }
