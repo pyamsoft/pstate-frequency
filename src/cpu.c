@@ -133,7 +133,7 @@ pyam_cpu_get_number(
     pyam_cpu_malloc_error(cpu, 
             asprintf(&cmd, "%s /proc/cpuinfo | %s processor | %s -l", cat, grep, wc),
             "Can't alloc for get_number command",
-            cat, grep, wc);
+            cat, grep, wc, NULL);
     FILE* pf = popen(cmd, "r");
     const int32_t value = pyam_cpu_to_num(pyam_cpu_internal_get(cpu, pf, cmd));
     pclose(pf);
@@ -158,6 +158,7 @@ pyam_cpu_malloc_error(
         FILE* file = va_arg(list, FILE*);
         while (file != NULL) {
             free(file);
+            file = va_arg(list, FILE*);
         }
         va_end(list);
         exit(4);
@@ -178,7 +179,8 @@ pyam_cpu_create() {
         pyam_cpu_malloc_error(&cpu, 
             asprintf(&(cpu.CPU_MAX_FREQ_FILES[i]), 
                     "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", i),
-            "Failed to allocate memory for MAX_FREQ_FILES");
+            "Failed to allocate memory for MAX_FREQ_FILES",
+            NULL);
     }
     cpu.CPU_MIN_FREQ_FILES = malloc(sizeof(char*) * cpu_number);
     if (cpu.CPU_MIN_FREQ_FILES == NULL) {
@@ -190,7 +192,8 @@ pyam_cpu_create() {
         pyam_cpu_malloc_error(&cpu,
             asprintf(&(cpu.CPU_MIN_FREQ_FILES[i]),
                 "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", i),
-            "Failed to allocate memory for MIN_FREQ_FILES");
+            "Failed to allocate memory for MIN_FREQ_FILES",
+            NULL);
     }
     return cpu;
 }
@@ -265,7 +268,8 @@ pyam_cpu_set_freq(
     char* buffer;
     pyam_cpu_malloc_error(cpu,
             asprintf(&buffer, "%zu\n", scaling_max),
-            "Failed to allocate memory for set_freq");
+            "Failed to allocate memory for set_freq",
+            NULL);
     pyam_cpu_internal_freq(cpu, frequency_files, buffer);
     free(buffer);
 }
@@ -384,7 +388,8 @@ pyam_cpu_internal_set(
         const int32_t value) {
     char* buffer;
     pyam_cpu_malloc_error(cpu, asprintf(&buffer, "%d", value),
-            "Failed to write bytes into buffer");
+            "Failed to write bytes into buffer",
+            NULL);
     FILE* file = fopen(file_name, "w");    
     pyam_cpu_file_error(cpu, file, file_name);
     fprintf(file, "%s", buffer);
@@ -441,7 +446,7 @@ pyam_cpu_is_file_on_path(
     char* PATH;
     char* DEFAULT_PATH = "/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/bin:/sbin";
     char* USING_PATH = REAL_PATH == NULL ? DEFAULT_PATH : REAL_PATH;
-    pyam_cpu_malloc_error(cpu, asprintf(&PATH, "%s", USING_PATH), "Unable to copy PATH");
+    pyam_cpu_malloc_error(cpu, asprintf(&PATH, "%s", USING_PATH), "Unable to copy PATH", NULL);
     const char* const delimiter = ":"; 
     char* token;
     token = strtok(PATH, delimiter);
@@ -450,7 +455,7 @@ pyam_cpu_is_file_on_path(
         pyam_cpu_malloc_error(cpu, 
                 asprintf(&cmd, "%s/%s", token, file_name), 
                 "Error allocating memory for path",
-                PATH);
+                PATH, NULL);
         if (access(cmd, F_OK) != -1) {
             free(PATH);
             return cmd;
@@ -476,8 +481,8 @@ pyam_cpu_write_msr(
         char* buffer;
         pyam_cpu_malloc_error(cpu, asprintf(&buffer, "%s -p%d 0x1a0 %s", cmd, i, instruction),
             "Failed to allocate memory for writing msr of CPU",
-            cmd);
-        pyam_cpu_malloc_error(cpu, system(buffer), "Failed using wrmsr to write to CPU", cmd);
+            cmd, NULL);
+        pyam_cpu_malloc_error(cpu, system(buffer), "Failed using wrmsr to write to CPU", cmd, NULL);
         free(buffer);
     }
     free(cmd);
