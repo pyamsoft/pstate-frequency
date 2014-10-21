@@ -17,6 +17,10 @@ work on a basic level using the default **cpufreq** driver.
 + glibc with GNU Extensions for the following files:  
 **sys/time.h and stdio.h**
 
+## Optional
+
++ **msr-tools** package to provide the **wrmsr** binary
+
 ### Installation
 
 
@@ -60,6 +64,15 @@ and disables Turbo Boost.
 the maximum scaling frequency to the highest available non-turbo frequency and disables Turbo Boost.  
 3. **max-performance** Sets the minimum and maximum scaling frequencies to the  
 highest available frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
+
+### Additional Notes
+
+For some machines, the new Intel P-State driver fails to listen to the requested frequency levels.  
+This is a result of incorrect CPU frequency reporting to the OS. As a result, the OS believes  
+that the non-turbo boosted frequency has a max level which sits in the turbo boost range. To fix  
+this issue, one potential step can be taken which is to install the **msr-tools** package.  
+This will allow **pstate-frequency** to toggle the actual turbo state bit on most Sandy Bridge CPU  
+chips, and force the disabling of turbo boost.
 
 # Questions
 
