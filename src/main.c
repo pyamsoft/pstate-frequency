@@ -384,7 +384,6 @@ print_output(
     const int32_t cpu_min = pyam_cpu_get_min(cpu);
     const int32_t max_mhz = pyam_cpu_get_max_freq(cpu);
     const int32_t min_mhz = pyam_cpu_get_min_freq(cpu);
-    const int32_t rdmsr = pyam_cpu_read_msr(cpu);
     char* cpu_driver = pyam_cpu_get_driver(cpu);
 #ifdef VERSION
     printf("%spstate-frequency %s%s%s\n",
@@ -398,10 +397,6 @@ print_output(
     printf("%s    pstate::%sCPU_DRIVER  -> %s%s%s",
             PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
             cpu_driver,
-            PYAM_COLOR_OFF);
-    printf("%s    pstate::%sMSR_BIT     -> %s%d : %s%s\n",
-            PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
-            rdmsr, rdmsr == 1 ? "OFF" :  rdmsr == 0 ? "ON" : "INVALID",
             PYAM_COLOR_OFF);
     printf("%s    pstate::%sNO_TURBO    -> %s%d : %s%s\n",
             PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
