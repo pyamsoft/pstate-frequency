@@ -3,10 +3,14 @@
 pkgname=pstate-frequency-git
 _gitname=pstate-frequency
 pkgdesc="Easily control Intel p-state driver on Linux "
-pkgver=0.r38.0be490f
+pkgver=0.r46.eb0ad58
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
+optdepends=(
+    'msr-tools: Allow explicit setting of Turbo Boost bit on Sandy Bride+ CPUs'
+    'clang:     Enable additional compiler functions'
+)
 provides=('pstate-frequency')
 license=('GPLv2')
 url="https://github.com/pyamsoft/pstate-frequency.git"
