@@ -442,9 +442,16 @@ pyam_cpu_is_file_on_path(
         const char* const file_name) {
     char* const REAL_PATH = getenv("PATH");
     char* PATH;
-    if (asprintf(&PATH, "%s", REAL_PATH) == -1) {
-        printf("Unable to copy REAL_PATH to PATH\n");
-        exit(1);
+    if (REAL_PATH == NULL) {
+        if (asprintf(&PATH, "%s", "/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/bin:/sbin") == -1) {
+            printf("Unable to copy REAL_PATH to PATH\n");
+            exit(1);
+        }
+    } else {
+        if (asprintf(&PATH, "%s", REAL_PATH) == -1) {
+            printf("Unable to copy REAL_PATH to PATH\n");
+            exit(1);
+        }
     }
     const char* const delimiter = ":"; 
     char* token;
