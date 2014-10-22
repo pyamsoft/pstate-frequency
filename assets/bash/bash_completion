@@ -27,8 +27,8 @@ _pstate-frequency()
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     shopts="-q -v -h -s -g"
     lopts="--quiet --version --help --set --get"
-    shopts_set="-m -t -p"
-    lopts_set="--max --turbo --plan"
+    shopts_set="-m -n -t -p"
+    lopts_set="--max --min --turbo --plan"
     plans="powersave performance max-performance"
     if [[ ${cur} = --* ]]; then
         if [[ ${prev} = "--set" ]]; then
