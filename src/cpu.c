@@ -475,15 +475,29 @@ pyam_cpu_write_msr(
     if (cmd == NULL) {
         return;
     }
+    char* modprobe = pyam_cpu_is_file_on_path(cpu, "modprobe");
+    if (modprobe == NULL) {
+        free(cmd);
+        return;
+    }
+    char* modprobe_cmd;
+    pyam_cpu_malloc_error(cpu, asprintf(&modprobe_cmd, "%s msr", modprobe),
+            "Failed to allocate memory for modprobe msr",
+            cmd, modprobe, NULL);
+    pyam_cpu_malloc_error(cpu, system(modprobe_cmd), "Failed modprobing msr module", 
+            cmd, modprobe, modprobe_cmd, NULL);
     const int32_t cpu_number = pyam_cpu_get_number(cpu);
     char* instruction = value == 1 ? "0x4000850089" : "0x850089";
     for (int32_t i = 0; i < cpu_number; ++i) {
         char* buffer;
         pyam_cpu_malloc_error(cpu, asprintf(&buffer, "%s -p%d 0x1a0 %s", cmd, i, instruction),
             "Failed to allocate memory for writing msr of CPU",
-            cmd, NULL);
-        pyam_cpu_malloc_error(cpu, system(buffer), "Failed using wrmsr to write to CPU", cmd, NULL);
+            cmd, modprobe, modprobe_cmd, NULL);
+        pyam_cpu_malloc_error(cpu, system(buffer), "Failed using wrmsr to write to CPU", 
+                cmd, modprobe, modprobe_cmd, NULL);
         free(buffer);
     }
+    free(modprobe);
+    free(modprobe_cmd);
     free(cmd);
 }
