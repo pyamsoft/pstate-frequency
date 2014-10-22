@@ -58,6 +58,7 @@ access_cpu(
 
 static void
 fix_value_range(
+        struct pyam_cpu_t* const cpu,
         int32_t* const value,
         const int32_t min);
 
@@ -182,7 +183,7 @@ handle_result(
             if (is_all_digits(optarg)) {
                 if (*value_max < 0) {
                     *value_max = strtol(optarg, NULL, 10);
-                    fix_value_range(value_max, pyam_cpu_get_cpuinfo_min(cpu) + 1);
+                    fix_value_range(cpu, value_max, pyam_cpu_get_cpuinfo_min(cpu) + 1);
                 }
                 return 0;
             }
@@ -193,7 +194,7 @@ handle_result(
             if (is_all_digits(optarg)) {
                 if (*value_min < 0) {
                     *value_min = strtol(optarg, NULL, 10);
-                    fix_value_range(value_min, pyam_cpu_get_cpuinfo_min(cpu));
+                    fix_value_range(cpu, value_min, pyam_cpu_get_cpuinfo_min(cpu));
                 }
                 return 0;
             }
@@ -218,9 +219,10 @@ handle_result(
 
 static void
 fix_value_range(
+        struct pyam_cpu_t* const cpu,
         int32_t* const value,
         const int32_t min) {
-    const int32_t max = pyam_cpu_get_cpuinfo_max();
+    const int32_t max = pyam_cpu_get_cpuinfo_max(cpu);
     if (*value < min) {
         *value = min;
     } else if (*value > max) {

@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define FILE_CPU_NUMBER         "/tmp/cpunumber.txt"
+/* #define FILE_CPU_NUMBER         "/tmp/cpunumber.txt" */
 #define DIR_PSTATE              "/sys/devices/system/cpu/intel_pstate"
 #define FILE_CPU_SCALING_DRIVER "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
 #define FILE_CPU_GOVERNOR       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
@@ -38,6 +38,13 @@
 struct pyam_cpu_t {
     char** CPU_MAX_FREQ_FILES;
     char** CPU_MIN_FREQ_FILES;
+    double CPUINFO_MAX_FREQ;
+    double CPUINFO_MIN_FREQ;
+    int32_t CPUINFO_MAX_VALUE;
+    int32_t CPUINFO_MIN_VALUE;
+    int32_t CPU_MHZ;
+    int32_t CPU_NUMBER;
+    int32_t HAS_PSTATE;
 };
 
 struct pyam_cpu_t
@@ -48,9 +55,9 @@ pyam_cpu_set_turbo(
         struct pyam_cpu_t* const cpu,
         const int32_t turbo);
 
-int32_t
-pyam_cpu_get_number(
-        struct pyam_cpu_t* const cpu);
+/* int32_t */
+/* pyam_cpu_get_number( */
+/*         struct pyam_cpu_t* const cpu); */
 
 int32_t
 pyam_cpu_get_mhz(
@@ -91,7 +98,8 @@ pyam_cpu_get_max(
         struct pyam_cpu_t* const cpu);
 
 double
-pyam_cpu_get_cpuinfo_max(void);
+pyam_cpu_get_cpuinfo_max(
+        struct pyam_cpu_t* const cpu);
 
 double
 pyam_cpu_get_cpuinfo_min(
