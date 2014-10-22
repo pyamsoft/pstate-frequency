@@ -30,9 +30,10 @@ work on a basic level using the default **cpufreq** driver.
 
 The installation process follows the basic *make, make install* process.  
 While building, there are a couple of options that one may configure or change:  
-+ The C compiler used (defaults to gcc)  
++ The C compiler used (defaults to cc)  
 + The directory to install to (defaults to /usr/local)  
 + Whether or not to print out debug error messages ( defaults to No)  
++ Whether or not to enable the use of the msr kernel module (defaults to No)  
 + Whether or not to install bash completion (defaults to No)
 + Whether or not to install a udev rule which monitors the state of the power supply  
 and sets the power plan automatically to powersave when on battery and the power plan  
@@ -70,6 +71,7 @@ the maximum scaling frequency to the highest available non-turbo frequency and d
 highest available frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
 
 ### Additional Notes
+
 
 For some machines, the new Intel P-State driver fails to listen to the requested frequency levels.  
 This is a result of incorrect CPU frequency reporting to the OS. As a result, the OS believes  
