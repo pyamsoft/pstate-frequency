@@ -28,6 +28,13 @@
 #include <unistd.h>
 #include "src/mhz.h"
 
+#if WRITE_MSR >=1
+static void
+pyam_cpu_write_msr(
+        struct pyam_cpu_t* cpu,
+        const int32_t value);
+#endif
+
 static void
 pyam_cpu_malloc_error(
         struct pyam_cpu_t* cpu,
@@ -50,13 +57,6 @@ pyam_cpu_is_file_on_path(
         struct pyam_cpu_t* cpu,
         const char* const file_name);
 
-#if WRITE_MSR >=1
-static void
-pyam_cpu_write_msr(
-        struct pyam_cpu_t* cpu,
-        const int32_t value);
-#endif
-
 static void
 pyam_cpu_set_freq(
         struct pyam_cpu_t* const cpu,
@@ -74,6 +74,13 @@ pyam_cpu_internal_set(
     struct pyam_cpu_t* const cpu,
     const char* const file_name,
     const int32_t value);
+
+static int32_t
+pyam_cpu_calculate_cpuinfo_min(
+        struct pyam_cpu_t* const cpu);
+
+static int32_t
+pyam_cpu_calculate_cpuinfo_max(void);
 
 static double
 pyam_cpu_get_cpuinfo_max_freq(
@@ -94,12 +101,22 @@ pyam_cpu_has_pstate_driver() {
     return access(DIR_PSTATE, F_OK) == 0;
 }
 
+static int32_t
+pyam_cpu_calculate_mhz(
+    struct pyam_cpu_t* const cpu);
+
+static int32_t
+pyam_cpu_calculate_mhz(
+    struct pyam_cpu_t* const cpu) {
+    const double mhz = estimate_MHz();
+    const double max_mhz = cpu->CPUINFO_MAX_FREQ / 1000;
+    return (mhz / max_mhz) * 100;
+}
+
 int32_t
 pyam_cpu_get_mhz(
     struct pyam_cpu_t* const cpu) {
-    const double mhz = estimate_MHz();
-    const double max_mhz = pyam_cpu_get_cpuinfo_max_freq(cpu) / 1000;
-    return (mhz / max_mhz) * 100;
+    return cpu->CPU_MHZ;
 }
 
 char* 
@@ -111,8 +128,8 @@ pyam_cpu_get_driver(
     return result;
 }
 
-int32_t
-pyam_cpu_get_number(
+static int32_t
+pyam_cpu_calculate_number(
         struct pyam_cpu_t* const cpu) {
     char* cat = pyam_cpu_is_file_on_path(cpu, "cat");
     if (cat == NULL) {
@@ -146,6 +163,12 @@ pyam_cpu_get_number(
     return value;
 }
 
+/* int32_t */
+/* pyam_cpu_get_number( */
+/*         struct pyam_cpu_t* const cpu) { */
+/*     return cpu->CPU_NUMBER; */
+/* } */
+
 static void
 pyam_cpu_malloc_error(
         struct pyam_cpu_t* cpu,
@@ -170,41 +193,46 @@ pyam_cpu_malloc_error(
 struct pyam_cpu_t
 pyam_cpu_create() {
     struct pyam_cpu_t cpu;
-    const int32_t cpu_number = pyam_cpu_get_number(&cpu);
-    cpu.CPU_MAX_FREQ_FILES = malloc(sizeof(char*) * cpu_number);
+    cpu.CPU_NUMBER = pyam_cpu_calculate_number(&cpu);
+    cpu.CPU_MAX_FREQ_FILES = malloc(sizeof(char*) * cpu.CPU_NUMBER);
     if (cpu.CPU_MAX_FREQ_FILES == NULL) {
         printf("Unable to malloc CPU_MAX files array\n"); 
         pyam_cpu_destroy(&cpu);
         exit(1);
     }
-    for (int32_t i = 0; i < cpu_number; ++i) {
+    for (int32_t i = 0; i < cpu.CPU_NUMBER; ++i) {
         pyam_cpu_malloc_error(&cpu, 
             asprintf(&(cpu.CPU_MAX_FREQ_FILES[i]), 
                     "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", i),
             "Failed to allocate memory for MAX_FREQ_FILES",
             NULL);
     }
-    cpu.CPU_MIN_FREQ_FILES = malloc(sizeof(char*) * cpu_number);
+    cpu.CPU_MIN_FREQ_FILES = malloc(sizeof(char*) * cpu.CPU_NUMBER);
     if (cpu.CPU_MIN_FREQ_FILES == NULL) {
         printf("Unable to malloc CPU_MIN files array\n"); 
         pyam_cpu_destroy(&cpu);
         exit(2);
     }
-    for (int32_t i = 0; i < cpu_number; ++i) {
+    for (int32_t i = 0; i < cpu.CPU_NUMBER; ++i) {
         pyam_cpu_malloc_error(&cpu,
             asprintf(&(cpu.CPU_MIN_FREQ_FILES[i]),
                 "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", i),
             "Failed to allocate memory for MIN_FREQ_FILES",
             NULL);
     }
+    cpu.CPUINFO_MAX_FREQ = pyam_cpu_get_cpuinfo_max_freq(&cpu);
+    cpu.CPUINFO_MIN_FREQ = pyam_cpu_get_cpuinfo_min_freq(&cpu);
+    cpu.CPUINFO_MIN_VALUE = pyam_cpu_calculate_cpuinfo_min(&cpu);
+    cpu.CPUINFO_MAX_VALUE = pyam_cpu_calculate_cpuinfo_max();
+    cpu.CPU_MHZ = pyam_cpu_calculate_mhz(&cpu);
+    cpu.HAS_PSTATE = pyam_cpu_has_pstate_driver();
     return cpu;
 }
 
 void
 pyam_cpu_destroy(
         struct pyam_cpu_t* cpu) {
-    const int32_t cpu_number = pyam_cpu_get_number(cpu);
-    for (int32_t i = 0; i < cpu_number; ++i) {
+    for (int32_t i = 0; i < cpu->CPU_NUMBER; ++i) {
         if (cpu->CPU_MAX_FREQ_FILES[i] != NULL) {
             free(cpu->CPU_MAX_FREQ_FILES[i]);
             cpu->CPU_MAX_FREQ_FILES[i] = NULL;
@@ -232,7 +260,7 @@ pyam_cpu_set_turbo(
 #if WRITE_MSR >=1
     pyam_cpu_write_msr(cpu, turbo);
 #endif
-    if (pyam_cpu_has_pstate_driver()) {
+    if (cpu->HAS_PSTATE) {
         pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
     } else {
 #if DEBUG >= 1
@@ -267,7 +295,7 @@ pyam_cpu_set_freq(
         struct pyam_cpu_t* const cpu,
         char** const frequency_files,
         const size_t max) {
-    const int32_t scaling_value = pyam_cpu_get_cpuinfo_max_freq(cpu);
+    const int32_t scaling_value = cpu->CPUINFO_MAX_FREQ;
     const size_t scaling_max = scaling_value / 100 * max;
     char* buffer;
     pyam_cpu_malloc_error(cpu,
@@ -283,8 +311,7 @@ pyam_cpu_internal_freq(
         struct pyam_cpu_t* const cpu,
         char** const frequency_files,
         const char* scaling) {
-    const int32_t cpu_number = pyam_cpu_get_number(cpu);
-    for (int32_t i = 0; i < cpu_number; ++i) {
+    for (int32_t i = 0; i < cpu->CPU_NUMBER; ++i) {
         FILE* file = fopen(frequency_files[i], "w");
         if (file == NULL) {
             printf("Error: internal_freq opening file: %s\n", frequency_files[i]);
@@ -299,14 +326,14 @@ pyam_cpu_internal_freq(
 int32_t
 pyam_cpu_get_min(
         struct pyam_cpu_t* const cpu) {
-    const double min = (pyam_cpu_get_min_freq(cpu) / pyam_cpu_get_cpuinfo_max_freq(cpu));
+    const double min = (pyam_cpu_get_min_freq(cpu) / cpu->CPUINFO_MAX_FREQ);
     return (min * 100);
 }
 
 int32_t
 pyam_cpu_get_turbo(
         struct pyam_cpu_t* const cpu) {
-    if (pyam_cpu_has_pstate_driver()) {
+    if (cpu->HAS_PSTATE) {
         FILE* file = fopen(FILE_PSTATE_TURBO, "r");
         const int32_t result = pyam_cpu_to_num(pyam_cpu_internal_get(cpu, file, FILE_PSTATE_TURBO));
         fclose(file);
@@ -333,7 +360,7 @@ pyam_cpu_file_error(
 int32_t
 pyam_cpu_get_max(
         struct pyam_cpu_t* const cpu) {
-    const double max = (pyam_cpu_get_max_freq(cpu) / pyam_cpu_get_cpuinfo_max_freq(cpu));
+    const double max = (pyam_cpu_get_max_freq(cpu) / cpu->CPUINFO_MAX_FREQ);
     return (max * 100);
 }
 
@@ -365,15 +392,27 @@ pyam_cpu_get_cpuinfo_max_freq(
 }
 
 double
-pyam_cpu_get_cpuinfo_max() {
-    return 100;
+pyam_cpu_get_cpuinfo_max(
+        struct pyam_cpu_t* const cpu) {
+    return cpu->CPUINFO_MAX_VALUE;
 }
 
 double
 pyam_cpu_get_cpuinfo_min(
         struct pyam_cpu_t* const cpu) {
-    const double min = pyam_cpu_get_cpuinfo_min_freq(cpu) / pyam_cpu_get_cpuinfo_max_freq(cpu);
+    return cpu->CPUINFO_MIN_VALUE;
+}
+
+static int32_t
+pyam_cpu_calculate_cpuinfo_min(
+        struct pyam_cpu_t* const cpu) {
+    const double min = cpu->CPUINFO_MIN_FREQ / cpu->CPUINFO_MAX_FREQ;
     return min * 100;
+}
+
+static int32_t
+pyam_cpu_calculate_cpuinfo_max() {
+    return 100;
 }
 
 static double
@@ -491,9 +530,8 @@ pyam_cpu_write_msr(
             cmd, modprobe, NULL);
     pyam_cpu_malloc_error(cpu, system(modprobe_cmd), "Failed modprobing msr module", 
             cmd, modprobe, modprobe_cmd, NULL);
-    const int32_t cpu_number = pyam_cpu_get_number(cpu);
     char* instruction = value == 1 ? "0x4000850089" : "0x850089";
-    for (int32_t i = 0; i < cpu_number; ++i) {
+    for (int32_t i = 0; i < cpu->CPU_NUMBER; ++i) {
         char* buffer;
         pyam_cpu_malloc_error(cpu, asprintf(&buffer, "%s -p%d 0x1a0 %s", cmd, i, instruction),
             "Failed to allocate memory for writing msr of CPU",
