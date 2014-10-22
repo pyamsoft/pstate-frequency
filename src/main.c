@@ -99,6 +99,9 @@ set_max_performance(
         int32_t* const value_max,
         int32_t* const value_turbo);
 
+static void
+print_possible_set(void);
+
 int
 main(
         int32_t argc,
@@ -353,6 +356,7 @@ access_cpu(
             if (requested == 0) {
                 printf("%sSet called with no target or invalid values%s\n",
                         PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
+                print_possible_set();
                 return 2;
             }
             // print out
@@ -373,6 +377,15 @@ access_cpu(
         print_help();
     }
     return 0;
+}
+
+static void
+print_possible_set() {
+    printf("Possible set values are: \n");
+    printf("    -m | --max   Set the max scaling frequency to a number between 0 and 100 inclusive\n");
+    printf("    -n | --min   Set the min scaling frequency to a number between 0 and 100 inclusive\n");
+    printf("    -t | --turbo Set the state of turbo boost to either 1 (OFF) or 0 (ON)\n");
+    printf("    -p | --plan  Set a predefined power plan\n");
 }
 
 static void
