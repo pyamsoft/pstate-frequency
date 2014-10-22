@@ -11,17 +11,47 @@ LIBS=
 # Debug messages enabled or not
 # 0 : OFF
 # 1 : ON
-DEBUG=0
+DEBUG?=0
+
+# Allow use of the msr module and wrmsr binary
+# to write sepcific bits on the CPU register
+# This is needed on some machines to disble Turbo Boost
+#
+# PLEASE NOTE that setting this option to 1 does not require
+# you to have the msr module or wrmsr installed.
+# pstate-frequency will check to see if you have these
+# and silently skip over if you do not
+# 0 OFF
+# 1 ON
+WRITE_MSR?=1
+
+# Include a bash completion file
+# 0 NO
+# 1 YES
+INCLUDE_BASH_COMPLETION?=0
+
+# Include a udev rule which will set the pstate to powersave
+# on battery and performance on AC power
+# (Generally useful for laptops and mobile machines)
+INCLUDE_UDEV_RULE?=0
+
+# Options you may change
+# C Compiler to use
+CC?=cc
+
+# Prefix of install
+PREFIX?=/usr/local
+
+# Configuration director
+ETCDIR?=/etc
 
 # Permissions
+# Owner executable
+# Group read/write
+# Other read/write
 BIN_PERMISSION=755
 
 # Flags
-CFLAGS+= -DDEBUG="${DEBUG}" -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
+CFLAGS+= -DDEBUG="${DEBUG}" -DWRITE_MSR="${WRITE_MSR}" -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
 LDFLAGS+= -Wl,-O2,--sort-common,--as-needed,-z,relro,-s ${LIBS}
 
-# Options you may change
-CC?=gcc
-PREFIX?=/usr/local
-INCLUDE_BASH_COMPLETION?=0
-INCLUDE_UDEV_RULE?=0

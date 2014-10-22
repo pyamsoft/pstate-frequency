@@ -50,10 +50,12 @@ pyam_cpu_is_file_on_path(
         struct pyam_cpu_t* cpu,
         const char* const file_name);
 
+#if WRITE_MSR >=1
 static void
 pyam_cpu_write_msr(
         struct pyam_cpu_t* cpu,
         const int32_t value);
+#endif
 
 static void
 pyam_cpu_set_freq(
@@ -227,7 +229,9 @@ void
 pyam_cpu_set_turbo(
         struct pyam_cpu_t* const cpu,
         const int32_t turbo) {
+#if WRITE_MSR >=1
     pyam_cpu_write_msr(cpu, turbo);
+#endif
     if (pyam_cpu_has_pstate_driver()) {
         pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
     } else {
@@ -467,6 +471,7 @@ pyam_cpu_is_file_on_path(
     return NULL;
 }
 
+#if WRITE_MSR >= 1
 static void
 pyam_cpu_write_msr(
         struct pyam_cpu_t* cpu,
@@ -501,3 +506,4 @@ pyam_cpu_write_msr(
     free(modprobe_cmd);
     free(cmd);
 }
+#endif

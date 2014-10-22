@@ -9,7 +9,6 @@ arch=('i686' 'x86_64')
 makedepends=('git')
 optdepends=(
     'msr-tools: Allow explicit setting of Turbo Boost bit on Sandy Bride+ CPUs'
-    'clang:     Enable additional compiler functions'
 )
 provides=('pstate-frequency')
 license=('GPLv2')
@@ -27,23 +26,27 @@ pkgver() {
 build() {
     cd "$srcdir/$_gitname"
     # Variables with their defaults below
-    # CC=gcc
+    # CC=cc
     # DEBUG=0
+    # WRITE_MSR=1
     make\
-        CC="gcc" \
-        DEBUG=0
+        CC="cc" \
+        DEBUG=0 \
+        WRITE_MSR=1
 }
 
 package() {
     cd "$srcdir/$_gitname"
     # Variables with their defaults below
-    # CC="gcc"
-    # PREFIX="/usr/local/"
+    # CC=cc
+    # PREFIX=/usr/local
+    # ETCDIR=/etc
     # INCLUDE_BASH_COMPLETION=0
     # INCLUDE_UDEV_RULE=0
     make DESTDIR="$pkgdir" \
-        CC="gcc" \
-        PREFIX="/usr/" \
+        CC="cc" \
+        PREFIX="/usr" \
+        ETCDIR="/etc" \
         INCLUDE_BASH_COMPLETION=0 \
         INCLUDE_UDEV_RULE=0 \
         install
