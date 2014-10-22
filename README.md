@@ -20,6 +20,10 @@ work on a basic level using the default **cpufreq** driver.
 ## Optional
 
 + **msr-tools** package to provide the **wrmsr** binary
++ The **msr** kernel module which should also be provided by the **msr-tools** package.
++ *Please note that*
+**msr-tools** 
+*may be named diffrently on your distribution of choice.*
 
 ### Installation
 
@@ -58,11 +62,11 @@ The *-s --set* option also takes one or more of these flags as necessary argumen
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
 
 There are three power plans:  
-1. **powersave** Sets the minimum and maximum scaling frequencies to the lowest available  
+1. **powersave (1)**  Sets the minimum and maximum scaling frequencies to the lowest available  
 and disables Turbo Boost.  
-2. **performance** Sets the minimum scaling frequency to the lowest available,  
+2. **performance (2)** Sets the minimum scaling frequency to the lowest available,  
 the maximum scaling frequency to the highest available non-turbo frequency and disables Turbo Boost.  
-3. **max-performance** Sets the minimum and maximum scaling frequencies to the  
+3. **max-performance (3)** Sets the minimum and maximum scaling frequencies to the  
 highest available frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
 
 ### Additional Notes
