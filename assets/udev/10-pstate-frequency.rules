@@ -1,2 +1,2 @@
-SUBSYSTEM=="power_supply", ATTR{online}=="0", RUN+="pstate-frequency -q -s -p 1"
-SUBSYSTEM=="power_supply", ATTR{online}=="1", RUN+="pstate-frequency -q -s -p 2"
+SUBSYSTEM=="power_supply", ATTR{online}=="0", RUN+="pstate-frequency -s -p 1"
+SUBSYSTEM=="power_supply", ATTR{online}=="1", RUN+="pstate-frequency -s -p 2"
