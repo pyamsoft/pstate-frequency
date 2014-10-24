@@ -323,37 +323,72 @@ access_cpu(
         if (geteuid() == 0) {
             // is effective root
             int32_t requested = 0;
+            const int32_t current_max = pyam_cpu_get_max(cpu);
+            const int32_t current_min = pyam_cpu_get_min(cpu);
+            const int32_t current_turbo = pyam_cpu_get_turbo(cpu);
+#if DEBUG >= 1
+            printf("current max = %d, current min = %d, current turbo = %d\n", current_max, current_min, current_turbo);
+#endif
+            // Reset values to sane defaults
+            pyam_cpu_set_max(cpu, 100);
+            pyam_cpu_set_min(cpu, 0);
+            pyam_cpu_set_turbo(cpu, 0);
             if (*value_max >= 0
                     && *value_min >= 0) {
-                /*
-                   If both the min and max are requested to change,
-                   you must change in proper order. Max can not be <= min,
-                   and min can not be >= max. You must change max first
-                   if it is greater than current min, and min first if
-                   it is greater than current max otherwise no changes will take effect
-                */
                 requested = 1;
-                if (*value_max > pyam_cpu_get_min(cpu)) {
-                    pyam_cpu_set_max(cpu, *value_max);
-                    pyam_cpu_set_min(cpu, *value_min);
-                } else { // (*value_min >= pyam_cpu_get_max()) {
-                    pyam_cpu_set_min(cpu, *value_min);
-                    pyam_cpu_set_max(cpu, *value_max);
-                }
+                /* if (*value_max > pyam_cpu_get_min(cpu)) { */
+                /*     pyam_cpu_set_max(cpu, *value_max); */
+                /*     pyam_cpu_set_min(cpu, *value_min); */
+                /* } else { // (*value_min >= pyam_cpu_get_max()) { */
+                /*     pyam_cpu_set_min(cpu, *value_min); */
+                /*     pyam_cpu_set_max(cpu, *value_max); */
+                /* } */
+                
+                // Set the cpu values
+                pyam_cpu_set_max(cpu, *value_max);
+                pyam_cpu_set_min(cpu, *value_min);
+#if DEBUG >= 1
+                printf("Set new max = %d\n", *value_max);
+                printf("Set new min = %d\n", *value_min);
+#endif
             } else {
                 if (*value_max >= 0) {
                     requested = 1;
                     pyam_cpu_set_max(cpu, *value_max);
+#if DEBUG >= 1
+                    printf("Set new max = %d\n", *value_max);
+#endif
+                } else {
+                    pyam_cpu_set_max(cpu, current_max);
+#if DEBUG >= 1
+                    printf("Set current max = %d\n", current_max);
+#endif
                 }
                 if (*value_min >= 0) {
                     requested = 1;
                     pyam_cpu_set_min(cpu, *value_min);
+#if DEBUG >= 1
+                    printf("Set new min = %d\n", *value_min);
+#endif
+                } else {
+                    pyam_cpu_set_min(cpu, current_min);
+#if DEBUG >= 1
+                    printf("Set current min = %d\n", current_min);
+#endif
                 }
             }
             if (*value_turbo == 0
                     || *value_turbo == 1) {
                 requested = 1;
                 pyam_cpu_set_turbo(cpu, *value_turbo);
+#if DEBUG >= 1
+                printf("Set new turbo = %d\n", *value_turbo);
+#endif
+            } else {
+                pyam_cpu_set_turbo(cpu, current_turbo);
+#if DEBUG >= 1
+                printf("Set current turbo = %d\n", current_turbo);
+#endif
             }
             if (requested == 0) {
                 printf("%sSet called with no target or invalid values%s\n",
