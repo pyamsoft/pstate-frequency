@@ -274,10 +274,9 @@ pyam_cpu_set_max(
         struct pyam_cpu_t* const cpu,
         const int32_t max) {
     pyam_cpu_set_freq(cpu, cpu->CPU_MAX_FREQ_FILES, max);
-
-    /* It appears that this is not needed, the p-state driver will */
-    /* adjust itself when the frequency changes */
-    /* pyam_cpu_internal_set(FILE_PSTATE_MAX_PERCENT, max); */
+    if (pyam_cpu_has_pstate_driver()) {
+        pyam_cpu_internal_set(cpu, FILE_PSTATE_MAX, max);
+    }
 }
 
 void
@@ -285,9 +284,9 @@ pyam_cpu_set_min(
         struct pyam_cpu_t* const cpu,
         const int32_t min) {
     pyam_cpu_set_freq(cpu, cpu->CPU_MIN_FREQ_FILES, min);
-    /* It appears that this is not needed, the p-state driver will */
-    /* adjust itself when the frequency changes */
-    /* pyam_cpu_internal_set(FILE_PSTATE_MIN_PERCENT, min); */
+    if (pyam_cpu_has_pstate_driver()) {
+        pyam_cpu_internal_set(cpu, FILE_PSTATE_MIN, min);
+    }
 }
 
 static void
