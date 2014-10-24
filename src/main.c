@@ -179,7 +179,7 @@ handle_result(
                 }
                 return 0;
             }
-            printf("%sMax Frequency must be positive, non-zero integer value%s\n",
+            fprintf(stderr, "%sMax Frequency must be positive, non-zero integer value%s\n",
                     PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
             return -1;
         case 'n':
@@ -190,7 +190,7 @@ handle_result(
                 }
                 return 0;
             }
-            printf("%sMin Frequency must be positive, non-zero integer value%s\n",
+            fprintf(stderr, "%sMin Frequency must be positive, non-zero integer value%s\n",
                     PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
             return -1;
         case 't':
@@ -200,7 +200,7 @@ handle_result(
                 }
                 return 0;
             }
-            printf("%sTurbo Boost must be either 0 or 1%s\n",
+            fprintf(stderr, "%sTurbo Boost must be either 0 or 1%s\n",
                     PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
             return -1;
         case '?':
@@ -238,7 +238,7 @@ set_plan(
             || strncmp("3", optarg, strlen(optarg)) == 0) {
         set_max_performance(value_min, value_max, value_turbo);
     } else {
-        printf("%sPlan: Unrecognized plan: %s%s%s\n",
+        fprintf(stderr, "%sPlan: Unrecognized plan: %s%s%s\n",
                 PYAM_COLOR_BOLD_RED, PYAM_COLOR_BOLD_RED,
                 optarg,
                 PYAM_COLOR_OFF);
@@ -382,7 +382,7 @@ access_cpu(
 #endif
             }
             if (requested == 0) {
-                printf("%sSet called with no target or invalid values%s\n",
+                fprintf(stderr, "%sSet called with no target or invalid values%s\n",
                         PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
                 print_possible_set();
                 return 2;
@@ -390,7 +390,7 @@ access_cpu(
             // print out
             print_output(cpu);
         } else {
-            printf("%sRoot privilages required%s\n",
+            fprintf(stderr, "%sRoot privilages required%s\n",
                     PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
             return 2;
         }

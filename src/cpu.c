@@ -22,6 +22,7 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <src/cpu.h>
+#include <src/color.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
@@ -133,17 +134,20 @@ pyam_cpu_calculate_number(
         struct pyam_cpu_t* const cpu) {
     char* cat = pyam_cpu_is_file_on_path(cpu, "cat");
     if (cat == NULL) {
-        printf("cat is null\n");
+        fprintf(stderr, "%sCan't find cat binary on $PATH%s\n",
+                PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
         exit(6);
     }
     char* grep = pyam_cpu_is_file_on_path(cpu, "grep");
     if (grep == NULL) {
-        printf("grep is null\n");
+        fprintf(stderr, "%sCan't find grep binary on $PATH%s\n",
+                PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
         exit(7);
     }
     char* wc = pyam_cpu_is_file_on_path(cpu, "wc");
     if (wc == NULL) {
-        printf("wc is null\n");
+        fprintf(stderr, "%sCan't find wc binary on $PATH%s\n",
+                PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
         exit(8);
     }
 
@@ -176,7 +180,8 @@ pyam_cpu_malloc_error(
         const char* const error_message,
         ...) {
     if (result == -1) {
-        printf("%s\n", error_message);
+        fprintf(stderr, "%s%s%s\n", 
+                PYAM_COLOR_BOLD_RED, error_message, PYAM_COLOR_OFF);
         pyam_cpu_destroy(cpu);
         va_list list;
         va_start(list, error_message);
@@ -196,7 +201,8 @@ pyam_cpu_create() {
     cpu.CPU_NUMBER = pyam_cpu_calculate_number(&cpu);
     cpu.CPU_MAX_FREQ_FILES = malloc(sizeof(char*) * cpu.CPU_NUMBER);
     if (cpu.CPU_MAX_FREQ_FILES == NULL) {
-        printf("Unable to malloc CPU_MAX files array\n"); 
+        fprintf(stderr, "%sUnable to malloc CPU_MAX files array%s\n",
+                PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF); 
         pyam_cpu_destroy(&cpu);
         exit(1);
     }
@@ -209,7 +215,8 @@ pyam_cpu_create() {
     }
     cpu.CPU_MIN_FREQ_FILES = malloc(sizeof(char*) * cpu.CPU_NUMBER);
     if (cpu.CPU_MIN_FREQ_FILES == NULL) {
-        printf("Unable to malloc CPU_MIN files array\n"); 
+        fprintf(stderr, "%sUnable to malloc CPU_MIN files array%s\n",
+                PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF); 
         pyam_cpu_destroy(&cpu);
         exit(2);
     }
@@ -264,7 +271,8 @@ pyam_cpu_set_turbo(
         pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
     } else {
 #if DEBUG >= 1
-        printf("Error: Not able to set turbo, p-state driver not found\n");
+        fprintf(stderr, "%sError: Not able to set turbo, p-state driver not found%s\n",
+                PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_OFF);
 #endif
     }
 }
@@ -313,7 +321,8 @@ pyam_cpu_internal_freq(
     for (int32_t i = 0; i < cpu->CPU_NUMBER; ++i) {
         FILE* file = fopen(frequency_files[i], "w");
         if (file == NULL) {
-            printf("Error: internal_freq opening file: %s\n", frequency_files[i]);
+            fprintf(stderr, "%sError: internal_freq opening file: %s%s\n", 
+                    PYAM_COLOR_BOLD_RED, frequency_files[i], PYAM_COLOR_OFF);
             pyam_cpu_destroy(cpu);
             exit(3);
         }
@@ -339,7 +348,8 @@ pyam_cpu_get_turbo(
         return result;
     }
 #if DEBUG >= 1
-    printf("Error: Not able to get turbo, p-state driver not found\n");
+    fprintf(stderr, "%sError: Not able to get turbo, p-state driver not found%s\n",
+            PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_OFF);
 #endif
     return -1;
 }
@@ -350,7 +360,8 @@ pyam_cpu_file_error(
         FILE* const file,
         const char* const file_name) {
     if (file == NULL) {
-        printf("Error opening %s\n. Exiting.", file_name);
+        fprintf(stderr, "%sError opening '%s' Exiting.%s\n", 
+                PYAM_COLOR_BOLD_RED, file_name, PYAM_COLOR_OFF);
         pyam_cpu_destroy(cpu);
         exit(15);
     }
@@ -465,7 +476,8 @@ pyam_cpu_internal_get(
     char* line = NULL;
     size_t n = 0;
     if (getline(&line, &n, file) == -1) {
-        printf("Could not malloc for getline in internal_get\n");
+        fprintf(stderr, "%sCould not malloc for getline in internal_get%s\n",
+                PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
         pyam_cpu_destroy(cpu);
         exit(5);
     }
