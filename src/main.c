@@ -33,7 +33,6 @@ static int32_t
 handle_result(
         struct pyam_cpu_t* const cpu,
         const int32_t result,
-        int32_t* const flag_silent,
         int32_t* const flag_action,
         int32_t* const value_min,
         int32_t* const value_max,
@@ -50,7 +49,6 @@ str_starts_with(
 static int32_t
 access_cpu(
         struct pyam_cpu_t* const cpu,
-        int32_t* const flag_silent,
         int32_t* const flag_action,
         int32_t* const value_min,
         int32_t* const value_max,
@@ -109,7 +107,6 @@ main(
         char** argv) {
 
     struct pyam_cpu_t cpu = pyam_cpu_create();
-    static int32_t flag_silent = 0;
     static int32_t flag_action = 0;
     static int32_t value_min = -1;
     static int32_t value_max = -1;
@@ -121,7 +118,6 @@ main(
     static struct option long_options[] = {
         {"help",    no_argument,        NULL,           'h'},
         {"version", no_argument,        NULL,           'v'},
-        {"quiet",   no_argument,        NULL,           'q'},
         {"get",     no_argument,        NULL,           'g'},
         {"set",     no_argument,        NULL,           's'},
         {"plan",    required_argument,  NULL,           'p'},
@@ -132,19 +128,19 @@ main(
     };
     while (1) {
         int32_t option_index = 0;
-        result = getopt_long(argc, argv, "hqvsgp:m:n:t:", long_options, &option_index);
+        result = getopt_long(argc, argv, "hvsgp:m:n:t:", long_options, &option_index);
         if (result == -1) {
             break;
         } else {
-            final_result = handle_result(&cpu, result, &flag_silent,
-                    &flag_action, &value_min, &value_max, &value_turbo);
+            final_result = handle_result(&cpu, result, &flag_action, 
+                    &value_min, &value_max, &value_turbo);
             if (final_result == -1) {
                 pyam_cpu_destroy(&cpu);
                 return 1;
             }
         }
     }
-    int32_t i = access_cpu(&cpu, &flag_silent, &flag_action, &value_min, &value_max, &value_turbo);
+    int32_t i = access_cpu(&cpu, &flag_action, &value_min, &value_max, &value_turbo);
     pyam_cpu_destroy(&cpu);
     return i;
 }
@@ -153,7 +149,6 @@ static int32_t
 handle_result(
         struct pyam_cpu_t* const cpu,
         const int32_t result,
-        int32_t* const flag_silent,
         int32_t* const flag_action,
         int32_t* const value_min,
         int32_t* const value_max,
@@ -168,9 +163,6 @@ handle_result(
         case 'v':
             print_version();
             return -1;
-        case 'q':
-            *flag_silent = 1;
-            return 0;
         case 's':
             *flag_action = 2;
             return 0;
@@ -313,7 +305,6 @@ is_all_digits(
 static int32_t
 access_cpu(
         struct pyam_cpu_t* const cpu,
-        int32_t* const flag_silent,
         int32_t* const flag_action,
         int32_t* const value_min,
         int32_t* const value_max,
@@ -397,9 +388,7 @@ access_cpu(
                 return 2;
             }
             // print out
-            if (*flag_silent == 0) {
-                print_output(cpu);
-            }
+            print_output(cpu);
         } else {
             printf("%sRoot privilages required%s\n",
                     PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
@@ -483,7 +472,6 @@ print_help() {
     printf("    Options:\n");
     printf("        -h | --help     Display this help and exit\n");
     printf("        -v | --version  Display application version and exit\n");
-    printf("        -q | --quiet    Suppress normal application output\n");
     printf("        -s | --set      Modify current CPU values (root)\n");
     printf("        -g | --get      Access current CPU values\n");
     printf("        -p | --plan     Set a predefined power plan (root)\n");
