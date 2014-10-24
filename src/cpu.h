@@ -25,15 +25,16 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* #define FILE_CPU_NUMBER         "/tmp/cpunumber.txt" */
 #define DIR_PSTATE              "/sys/devices/system/cpu/intel_pstate"
 #define FILE_CPU_SCALING_DRIVER "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
 #define FILE_CPU_GOVERNOR       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
 #define FILE_CPUINFO_MAX_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 #define FILE_CPUINFO_MIN_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
-#define FILE_PSTATE_TURBO       "/sys/devices/system/cpu/intel_pstate/no_turbo"
 #define FILE_CPU_MAX_FREQ       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
 #define FILE_CPU_MIN_FREQ       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"
+#define FILE_PSTATE_TURBO       "/sys/devices/system/cpu/intel_pstate/no_turbo"
+#define FILE_PSTATE_MAX         "/sys/devices/system/cpu/intel_pstate/max_perf_pct"
+#define FILE_PSTATE_MIN         "/sys/devices/system/cpu/intel_pstate/min_perf_pct"
 
 struct pyam_cpu_t {
     char** CPU_MAX_FREQ_FILES;
