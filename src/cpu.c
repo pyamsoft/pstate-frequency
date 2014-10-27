@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include "src/mhz.h"
 
-#if WRITE_MSR >=1
+#if WRITE_MSR >= 1
 static void
 pyam_cpu_write_msr(
         struct pyam_cpu_t* cpu,
@@ -270,7 +270,7 @@ pyam_cpu_set_turbo(
         /* The p-state driver appears to override the value set in bit 38 anyway, therefore
            this code is only needed when the pstate driver is not running
         */
-#if WRITE_MSR >=1
+#if WRITE_MSR >= 1
     pyam_cpu_write_msr(cpu, turbo);
 #endif
 #if DEBUG >= 1
