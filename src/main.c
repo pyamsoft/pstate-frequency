@@ -140,7 +140,7 @@ main(
             }
         }
     }
-    int32_t i = access_cpu(&cpu, &flag_action, &value_min, &value_max, &value_turbo);
+    const int32_t i = access_cpu(&cpu, &flag_action, &value_min, &value_max, &value_turbo);
     pyam_cpu_destroy(&cpu);
     return i;
 }
@@ -309,98 +309,48 @@ access_cpu(
         int32_t* const value_min,
         int32_t* const value_max,
         int32_t* const value_turbo) {
-    if (*flag_action == 2) {
-        //set
-        if (geteuid() == 0) {
-            // is effective root
-            int32_t requested = 0;
-            const int32_t current_max = pyam_cpu_get_max(cpu);
-            const int32_t current_min = pyam_cpu_get_min(cpu);
-            const int32_t current_turbo = pyam_cpu_get_turbo(cpu);
-#if DEBUG >= 1
-            printf("current max = %d, current min = %d, current turbo = %d\n", current_max, current_min, current_turbo);
-#endif
-            // Reset values to sane defaults
-            pyam_cpu_set_max(cpu, 100);
-            pyam_cpu_set_min(cpu, 0);
-            pyam_cpu_set_turbo(cpu, 0);
-            if (*value_max >= 0
-                    && *value_min >= 0) {
-                requested = 1;
-                /* if (*value_max > pyam_cpu_get_min(cpu)) { */
-                /*     pyam_cpu_set_max(cpu, *value_max); */
-                /*     pyam_cpu_set_min(cpu, *value_min); */
-                /* } else { // (*value_min >= pyam_cpu_get_max()) { */
-                /*     pyam_cpu_set_min(cpu, *value_min); */
-                /*     pyam_cpu_set_max(cpu, *value_max); */
-                /* } */
-                
-                // Set the cpu values
-                pyam_cpu_set_max(cpu, *value_max);
-                pyam_cpu_set_min(cpu, *value_min);
-#if DEBUG >= 1
-                printf("Set new max = %d\n", *value_max);
-                printf("Set new min = %d\n", *value_min);
-#endif
-            } else {
-                if (*value_max >= 0) {
-                    requested = 1;
-                    pyam_cpu_set_max(cpu, *value_max);
-#if DEBUG >= 1
-                    printf("Set new max = %d\n", *value_max);
-#endif
-                } else {
-                    pyam_cpu_set_max(cpu, current_max);
-#if DEBUG >= 1
-                    printf("Set current max = %d\n", current_max);
-#endif
+    switch(*flag_action) {
+        case 2:
+            //set
+            if (geteuid() == 0) {
+                if (!(*value_max >= 0 || *value_min >= 0 || *value_turbo == 0 || *value_turbo == 1)) {
+                    fprintf(stderr, "%sSet called with no target or invalid values%s\n",
+                            PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
+                    print_possible_set();
+                    return 1;
                 }
-                if (*value_min >= 0) {
-                    requested = 1;
-                    pyam_cpu_set_min(cpu, *value_min);
+                // is effective root
+                const int32_t set_max = *value_max >= 0 ? *value_max : pyam_cpu_get_max(cpu);
+                const int32_t set_min = *value_min >= 0 ? *value_min : pyam_cpu_get_min(cpu);
+                const int32_t set_turbo = (*value_turbo == 0 || *value_turbo == 1) ? *value_turbo : pyam_cpu_get_turbo(cpu);
+                // Reset values to sane defaults
+                pyam_cpu_set_max(cpu, 100);
+                pyam_cpu_set_min(cpu, 0);
+                pyam_cpu_set_turbo(cpu, 0);
+
+                // Now set new values based on above
+                pyam_cpu_set_max(cpu, set_max);
+                pyam_cpu_set_min(cpu, set_min);
+                pyam_cpu_set_turbo(cpu, set_turbo);
 #if DEBUG >= 1
-                    printf("Set new min = %d\n", *value_min);
+                printf("Set max = %d\n", set_max);
+                printf("Set min = %d\n", set_min);
+                printf("Set turbo = %d\n", set_turbo);
 #endif
-                } else {
-                    pyam_cpu_set_min(cpu, current_min);
-#if DEBUG >= 1
-                    printf("Set current min = %d\n", current_min);
-#endif
-                }
-            }
-            if (*value_turbo == 0
-                    || *value_turbo == 1) {
-                requested = 1;
-                pyam_cpu_set_turbo(cpu, *value_turbo);
-#if DEBUG >= 1
-                printf("Set new turbo = %d\n", *value_turbo);
-#endif
+                // print out
+                print_output(cpu);
             } else {
-                pyam_cpu_set_turbo(cpu, current_turbo);
-#if DEBUG >= 1
-                printf("Set current turbo = %d\n", current_turbo);
-#endif
-            }
-            if (requested == 0) {
-                fprintf(stderr, "%sSet called with no target or invalid values%s\n",
+                fprintf(stderr, "%sRoot privilages required%s\n",
                         PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
-                print_possible_set();
-                return 2;
+                return 1;
             }
-            // print out
+            break;
+        case 1:
             print_output(cpu);
-        } else {
-            fprintf(stderr, "%sRoot privilages required%s\n",
-                    PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
-            return 2;
-        }
-    } else if (*flag_action == 1) {
-        // get
-        // ignore silent flag
-        print_output(cpu);
-    } else {
-        // display help
-        print_help();
+            break;
+        default:
+            print_help();
+            break;
     }
     return 0;
 }

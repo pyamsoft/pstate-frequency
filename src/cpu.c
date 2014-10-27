@@ -264,12 +264,15 @@ void
 pyam_cpu_set_turbo(
         struct pyam_cpu_t* const cpu,
         const int32_t turbo) {
-#if WRITE_MSR >=1
-    pyam_cpu_write_msr(cpu, turbo);
-#endif
     if (cpu->HAS_PSTATE) {
         pyam_cpu_internal_set(cpu, FILE_PSTATE_TURBO, turbo);
     } else {
+        /* The p-state driver appears to override the value set in bit 38 anyway, therefore
+           this code is only needed when the pstate driver is not running
+        */
+#if WRITE_MSR >=1
+    pyam_cpu_write_msr(cpu, turbo);
+#endif
 #if DEBUG >= 1
         fprintf(stderr, "%sError: Not able to set turbo, p-state driver not found%s\n",
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_OFF);
@@ -291,9 +294,11 @@ void
 pyam_cpu_set_min(
         struct pyam_cpu_t* const cpu,
         const int32_t min) {
-    pyam_cpu_set_freq(cpu, cpu->CPU_MIN_FREQ_FILES, min);
-    if (pyam_cpu_has_pstate_driver()) {
-        pyam_cpu_internal_set(cpu, FILE_PSTATE_MIN, min);
+    if (min >= pyam_cpu_get_max(cpu)) {
+        pyam_cpu_set_freq(cpu, cpu->CPU_MIN_FREQ_FILES, min);
+        if (pyam_cpu_has_pstate_driver()) {
+            pyam_cpu_internal_set(cpu, FILE_PSTATE_MIN, min);
+        }
     }
 }
 
