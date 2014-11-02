@@ -23,16 +23,23 @@ pkgver() {
         "$(git rev-parse --short HEAD)"
 }
 
+##################################################
+
+    # Please read config.mk for an explanation
+    # of the variable options in this file
+
+##################################################
+
 build() {
     cd "$srcdir/$_gitname"
     # Variables with their defaults below
     # CC=cc
     # DEBUG=0
-    # WRITE_MSR=1
+    # WRITE_MSR=0
     make\
         CC="cc" \
         DEBUG=0 \
-        WRITE_MSR=1
+        WRITE_MSR=0
 }
 
 package() {
@@ -41,13 +48,13 @@ package() {
     # CC=cc
     # PREFIX=/usr/local
     # ETCDIR=/etc
-    # INCLUDE_BASH_COMPLETION=0
+    # INCLUDE_BASH_COMPLETION=1
     # INCLUDE_UDEV_RULE=0
     make DESTDIR="$pkgdir" \
         CC="cc" \
         PREFIX="/usr" \
         ETCDIR="/etc" \
-        INCLUDE_BASH_COMPLETION=0 \
+        INCLUDE_BASH_COMPLETION=1 \
         INCLUDE_UDEV_RULE=0 \
         install
 }

@@ -41,6 +41,9 @@ handle_result(
 static void 
 print_version(void);
 
+static void 
+print_flags(void);
+
 static int32_t 
 str_starts_with(
         const char* restrict string,
@@ -120,6 +123,7 @@ main(
         {"version", no_argument,        NULL,           'v'},
         {"get",     no_argument,        NULL,           'g'},
         {"set",     no_argument,        NULL,           's'},
+        {"flags",   no_argument,        NULL,           'f'},
         {"plan",    required_argument,  NULL,           'p'},
         {"max",     required_argument,  NULL,           'm'},
         {"min",     required_argument,  NULL,           'n'},
@@ -128,7 +132,7 @@ main(
     };
     while (1) {
         int32_t option_index = 0;
-        result = getopt_long(argc, argv, "hvsgp:m:n:t:", long_options, &option_index);
+        result = getopt_long(argc, argv, "hvsfgp:m:n:t:", long_options, &option_index);
         if (result == -1) {
             break;
         } else {
@@ -137,6 +141,9 @@ main(
             if (final_result == -1) {
                 pyam_cpu_destroy(&cpu);
                 return 1;
+            } else if (final_result == 1) {
+                pyam_cpu_destroy(&cpu);
+                return 0;
             }
         }
     }
@@ -159,10 +166,13 @@ handle_result(
             return 0;
         case 'h':
             print_help();
-            return -1;
+            return 1;
         case 'v':
             print_version();
-            return -1;
+            return 1;
+        case 'f':
+            print_flags();
+            return 1;
         case 's':
             *flag_action = 2;
             return 0;
@@ -320,7 +330,8 @@ access_cpu(
                     return 1;
                 }
                 // is effective root
-                const int32_t set_max = *value_max >= 0 ? *value_max : pyam_cpu_get_max(cpu);
+                const int32_t max = *value_max >= 0 ? *value_max : pyam_cpu_get_max(cpu);
+                const int32_t set_max = (max > *value_min) ? max : *value_min + 1;
                 const int32_t set_min = *value_min >= 0 ? *value_min : pyam_cpu_get_min(cpu);
                 const int32_t set_turbo = (*value_turbo == 0 || *value_turbo == 1) ? *value_turbo : pyam_cpu_get_turbo(cpu);
                 // Reset values to sane defaults
@@ -422,13 +433,30 @@ print_help() {
     printf("    Options:\n");
     printf("        -h | --help     Display this help and exit\n");
     printf("        -v | --version  Display application version and exit\n");
-    printf("        -s | --set      Modify current CPU values (root)\n");
+    printf("        -f | --flags    Display the flags the program compiled with\n");
     printf("        -g | --get      Access current CPU values\n");
+    printf("        -s | --set      Modify current CPU values (root)\n");
     printf("        -p | --plan     Set a predefined power plan (root)\n");
     printf("        -m | --max      Modify current CPU max frequency (root)\n");
     printf("        -n | --min      Modify current CPU min frequency (root)\n");
     printf("        -t | --turbo    Modify curent CPU turbo boost state (root)\n");
     printf("\n");
+}
+
+static void 
+print_flags() {
+#ifdef CFLAGS
+    printf("%sCFLAGS    %s%s%s\n", 
+            PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_WHITE,
+            CFLAGS,
+            PYAM_COLOR_OFF);
+#endif
+#ifdef LDFLAGS
+    printf("%sLDFLAGS    %s%s%s\n", 
+            PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_WHITE,
+            LDFLAGS,
+            PYAM_COLOR_OFF);
+#endif
 }
 
 static int32_t

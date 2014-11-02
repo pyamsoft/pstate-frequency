@@ -294,11 +294,9 @@ void
 pyam_cpu_set_min(
         struct pyam_cpu_t* const cpu,
         const int32_t min) {
-    if (min >= pyam_cpu_get_max(cpu)) {
-        pyam_cpu_set_freq(cpu, cpu->CPU_MIN_FREQ_FILES, min);
-        if (pyam_cpu_has_pstate_driver()) {
-            pyam_cpu_internal_set(cpu, FILE_PSTATE_MIN, min);
-        }
+    pyam_cpu_set_freq(cpu, cpu->CPU_MIN_FREQ_FILES, min);
+    if (pyam_cpu_has_pstate_driver()) {
+        pyam_cpu_internal_set(cpu, FILE_PSTATE_MIN, min);
     }
 }
 
