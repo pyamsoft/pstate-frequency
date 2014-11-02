@@ -23,12 +23,12 @@ DEBUG?=0
 # and silently skip over if you do not
 # 0 OFF
 # 1 ON
-WRITE_MSR?=1
+WRITE_MSR?=0
 
 # Include a bash completion file
 # 0 NO
 # 1 YES
-INCLUDE_BASH_COMPLETION?=0
+INCLUDE_BASH_COMPLETION?=1
 
 # Include a udev rule which will set the pstate to powersave
 # on battery and performance on AC power
