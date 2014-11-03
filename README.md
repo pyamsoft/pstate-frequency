@@ -32,9 +32,9 @@ The installation process follows the basic *make, make install* process.
 While building, there are a couple of options that one may configure or change:  
 + The C compiler used (defaults to cc)  
 + The directory to install to (defaults to /usr/local)  
-+ Whether or not to print out debug error messages ( defaults to No)  
++ Whether or not to print out debug error messages (defaults to No)  
 + Whether or not to enable the use of the msr kernel module (defaults to No)  
-+ Whether or not to install bash completion (defaults to No)
++ Whether or not to install bash completion (defaults to Yes)
 + Whether or not to install a udev rule which monitors the state of the power supply  
 and sets the power plan automatically to powersave when on battery and the power plan  
 to performance when plugged into via AC adapter (defaults to No)
@@ -69,16 +69,6 @@ and disables Turbo Boost.
 the maximum scaling frequency to the highest available non-turbo frequency and disables Turbo Boost.  
 3. **max-performance (3)** Sets the minimum and maximum scaling frequencies to the  
 highest available frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
-
-### Additional Notes
-
-
-For some machines, the new Intel P-State driver fails to listen to the requested frequency levels.  
-This is a result of incorrect CPU frequency reporting to the OS. As a result, the OS believes  
-that the non-turbo boosted frequency has a max level which sits in the turbo boost range. To fix  
-this issue, one potential step can be taken which is to install the **msr-tools** package.  
-This will allow **pstate-frequency** to toggle the actual turbo state bit on most Sandy Bridge CPU  
-chips, and force the disabling of turbo boost.
 
 # Questions
 
