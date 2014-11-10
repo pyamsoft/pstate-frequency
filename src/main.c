@@ -41,9 +41,6 @@ handle_result(
 static void 
 print_version(void);
 
-static void 
-print_flags(void);
-
 static int32_t 
 str_starts_with(
         const char* restrict string,
@@ -123,7 +120,6 @@ main(
         {"version", no_argument,        NULL,           'v'},
         {"get",     no_argument,        NULL,           'g'},
         {"set",     no_argument,        NULL,           's'},
-        {"flags",   no_argument,        NULL,           'f'},
         {"plan",    required_argument,  NULL,           'p'},
         {"max",     required_argument,  NULL,           'm'},
         {"min",     required_argument,  NULL,           'n'},
@@ -132,7 +128,7 @@ main(
     };
     while (1) {
         int32_t option_index = 0;
-        result = getopt_long(argc, argv, "hvsfgp:m:n:t:", long_options, &option_index);
+        result = getopt_long(argc, argv, "hvsgp:m:n:t:", long_options, &option_index);
         if (result == -1) {
             break;
         } else {
@@ -169,9 +165,6 @@ handle_result(
             return 1;
         case 'v':
             print_version();
-            return 1;
-        case 'f':
-            print_flags();
             return 1;
         case 's':
             *flag_action = 2;
@@ -433,7 +426,6 @@ print_help() {
     printf("    Options:\n");
     printf("        -h | --help     Display this help and exit\n");
     printf("        -v | --version  Display application version and exit\n");
-    printf("        -f | --flags    Display the flags the program compiled with\n");
     printf("        -g | --get      Access current CPU values\n");
     printf("        -s | --set      Modify current CPU values (root)\n");
     printf("        -p | --plan     Set a predefined power plan (root)\n");
@@ -441,22 +433,6 @@ print_help() {
     printf("        -n | --min      Modify current CPU min frequency (root)\n");
     printf("        -t | --turbo    Modify curent CPU turbo boost state (root)\n");
     printf("\n");
-}
-
-static void 
-print_flags() {
-#ifdef CFLAGS
-    printf("%sCFLAGS    %s%s%s\n", 
-            PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_WHITE,
-            CFLAGS,
-            PYAM_COLOR_OFF);
-#endif
-#ifdef LDFLAGS
-    printf("%sLDFLAGS    %s%s%s\n", 
-            PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_WHITE,
-            LDFLAGS,
-            PYAM_COLOR_OFF);
-#endif
 }
 
 static int32_t

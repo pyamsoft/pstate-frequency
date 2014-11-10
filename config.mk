@@ -1,12 +1,12 @@
 # Version
-VERSION=$(shell printf "0.r.$(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)")
+VERSION:=$(shell printf "0.r.$(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)")
 
 # Standard
-STD=-std=c99
+STD:=-std=c99
 
 # includes and libs
-INCS=-I.
-LIBS=
+INCS:=-I.
+LIBS:=
 
 # Debug messages enabled or not
 # 0 : OFF
@@ -52,6 +52,5 @@ ETCDIR?=/etc
 BIN_PERMISSION=755
 
 # Flags
-CFLAGS+= -DDEBUG="${DEBUG}" -DWRITE_MSR="${WRITE_MSR}" -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
 LDFLAGS+= -Wl,-O2,--sort-common,--as-needed,-z,relro,-s ${LIBS}
-
+CFLAGS+= -DDEBUG=${DEBUG} -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
