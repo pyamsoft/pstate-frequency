@@ -51,6 +51,8 @@ ETCDIR?=/etc
 # Other read/write
 BIN_PERMISSION=755
 
-# Flags
+# Linker Flags
 LDFLAGS+= -Wl,-O2,--sort-common,--as-needed,-z,relro,-s ${LIBS}
+
+# Compiler flags
 CFLAGS+= -DDEBUG=${DEBUG} -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
