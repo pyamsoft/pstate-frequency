@@ -23,100 +23,40 @@
 #define C_PYAM_CPU_H_
 
 #include <stdint.h>
-#include <stddef.h>
 
 #define DIR_PSTATE              "/sys/devices/system/cpu/intel_pstate"
-#define FILE_CPU_SCALING_DRIVER "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
-#define FILE_CPU_GOVERNOR       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
-#define FILE_CPUINFO_MAX_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
-#define FILE_CPUINFO_MIN_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
-#define FILE_CPU_MAX_FREQ       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
-#define FILE_CPU_MIN_FREQ       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"
+#define FILE_SCALING_DRIVER "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
+#define FILE_INFO_MAX_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
+#define FILE_INFO_MIN_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
+#define FILE_SCALING_MAX_FREQ       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
+#define FILE_SCALING_MIN_FREQ       "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"
 #define FILE_PSTATE_TURBO       "/sys/devices/system/cpu/intel_pstate/no_turbo"
 #define FILE_PSTATE_MAX         "/sys/devices/system/cpu/intel_pstate/max_perf_pct"
 #define FILE_PSTATE_MIN         "/sys/devices/system/cpu/intel_pstate/min_perf_pct"
+#define FILE_SCALING_MIN_NAME   "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq"
+#define FILE_SCALING_MAX_NAME   "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq"
 
-struct pyam_cpu_t {
+struct cpu_t {
     char** CPU_MAX_FREQ_FILES;
     char** CPU_MIN_FREQ_FILES;
-    double CPUINFO_MAX_FREQ;
-    double CPUINFO_MIN_FREQ;
-    int32_t CPUINFO_MAX_VALUE;
-    int32_t CPUINFO_MIN_VALUE;
-    int32_t CPU_MHZ;
     int32_t CPU_NUMBER;
-    int32_t HAS_PSTATE;
 };
 
-struct pyam_cpu_t
-pyam_cpu_create(void);
+/**
+    Creates a new cpu_t object and initializes memory for the following:
+    CPU_MIN_FREQ_FILES array 
+    CPU_MAX_FREQ_FILES array
+    CPU_NUMBER int
+    HAS_PSTATE bool
+    CPU_DRIVER char*
+*/
+struct cpu_t cpu_create(void);
 
-void
-pyam_cpu_set_turbo(
-        struct pyam_cpu_t* const cpu,
-        const int32_t turbo);
-
-/* int32_t */
-/* pyam_cpu_get_number( */
-/*         struct pyam_cpu_t* const cpu); */
-
-int32_t
-pyam_cpu_get_mhz(
-        struct pyam_cpu_t* const cpu);
-
-void
-pyam_cpu_set_max(
-        struct pyam_cpu_t* const cpu,
-        const int32_t max);
-
-char* 
-pyam_cpu_get_driver(
-        struct pyam_cpu_t* const cpu);
-
-void
-pyam_cpu_set_min(
-        struct pyam_cpu_t* const cpu,
-        const int32_t min);
-
-int32_t
-pyam_cpu_get_min(
-        struct pyam_cpu_t* const cpu);
-
-int32_t
-pyam_cpu_get_turbo(
-        struct pyam_cpu_t* const cpu);
-
-double
-pyam_cpu_get_max_freq(
-        struct pyam_cpu_t* const cpu);
-
-double
-pyam_cpu_get_min_freq(
-        struct pyam_cpu_t* const cpu);
-
-int32_t
-pyam_cpu_get_max(
-        struct pyam_cpu_t* const cpu);
-
-double
-pyam_cpu_get_cpuinfo_max(
-        struct pyam_cpu_t* const cpu);
-
-double
-pyam_cpu_get_cpuinfo_min(
-        struct pyam_cpu_t* const cpu);
-
-char*
-pyam_cpu_get_governor(
-        struct pyam_cpu_t* const cpu);
-
-void
-pyam_cpu_set_governor(
-        struct pyam_cpu_t* const cpu,
-        const int32_t governor);
-
-void
-pyam_cpu_destroy(
-        struct pyam_cpu_t* cpu);
+/**
+  Frees memory held by the arrays
+  CPU_MIN_FREQ_FILES
+  CPU_MAX_FREQ_FILES
+*/
+void cpu_destroy(struct cpu_t *cpu);
 
 #endif  // C_PYAM_CPU_H_
