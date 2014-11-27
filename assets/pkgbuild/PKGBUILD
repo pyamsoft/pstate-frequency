@@ -3,7 +3,7 @@
 pkgname=pstate-frequency-git
 _gitname=pstate-frequency
 pkgdesc="Easily control Intel p-state driver on Linux "
-pkgver=0.r58.a561672
+pkgver=1.r75.57ee707
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
@@ -18,7 +18,7 @@ sha256sums=('SKIP')
 
 pkgver() {
     cd "$srcdir/$_gitname"
-    printf "0.r%s.%s" \
+    printf "1.r%s.%s" \
         "$(git rev-list --count HEAD)" \
         "$(git rev-parse --short HEAD)"
 }
@@ -34,11 +34,9 @@ build() {
     cd "$srcdir/$_gitname"
     # Variables with their defaults below
     # CC=cc
-    # DEBUG=0
     # WRITE_MSR=0
     make\
         CC="cc" \
-        DEBUG=0 \
         WRITE_MSR=0
 }
 
