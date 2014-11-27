@@ -1,5 +1,5 @@
 # Version
-VERSION:=$(shell printf "0.r.$(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)")
+VERSION:=$(shell printf "1.r.$(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)")
 
 # Standard
 STD:=-std=c99
@@ -7,11 +7,6 @@ STD:=-std=c99
 # includes and libs
 INCS:=-I.
 LIBS:=
-
-# Debug messages enabled or not
-# 0 : OFF
-# 1 : ON
-DEBUG?=0
 
 # Allow use of the msr module and wrmsr binary
 # to write sepcific bits on the CPU register
@@ -52,7 +47,7 @@ ETCDIR?=/etc
 BIN_PERMISSION=755
 
 # Linker Flags
-LDFLAGS+= -Wl,-O2,--sort-common,--as-needed,-z,relro,-s ${LIBS}
+LDFLAGS+= -Wl,-O3,--sort-common,--as-needed,-z,relro,-s ${LIBS}
 
 # Compiler flags
-CFLAGS+= -DDEBUG=${DEBUG} -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O2 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
+CFLAGS+= -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O3 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
