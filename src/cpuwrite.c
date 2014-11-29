@@ -1,23 +1,22 @@
 /*
-*   pstate_frequency Easier control of the Intel p-state driver
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License as published by
-*   the Free Software Foundation; either version 2 of the License, or
-*   (at your option) any later version.
-*
-*   This program is distributed in the hope that it will be useful,
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*   GNU General Public License for more details.
-*
-*   You should have received a copy of the GNU General Public License along
-*   with this program; if not, write to the Free Software Foundation, Inc.,
-*   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*
-*   For questions please contact P.Yam Software at pyam.soft@gmail.com
-*
-*/
+ * pstate_frequency Easier control of the Intel p-state driver
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * For questions please contact P.Yam Software at pyam.soft@gmail.com
+ */
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -37,6 +36,12 @@ static void internal_set_freq(struct cpu_t *const cpu, char **const frequency_fi
 #if WRITE_MSR >= 1
 static void write_msr(struct cpu_t *const cpu, const int32_t value);
 
+/*
+ * Checks for the existence of the wrmsr program from the msr-utils package
+ * If it can be found on the path then attempt to load the module msr using
+ * modprobe and set the turbo boost bit in the CPU to either ON or OFF based
+ * on the value passed in as a parameter.
+ */
 static void write_msr(struct cpu_t *const cpu, const int32_t value)
 {
         log_debug("Resolving path for wrmsr and modprobe\n");
@@ -71,6 +76,11 @@ static void write_msr(struct cpu_t *const cpu, const int32_t value)
 }
 #endif
 
+/*
+ * Write a given integer value into a temporary string buffer.
+ * Write the temporary buffer into the file specified by file_name and
+ * close the file, freeing the buffer.
+ */
 static void internal_set(struct cpu_t *const cpu, const char *const file_name,
         const int32_t value)
 {
@@ -88,6 +98,10 @@ static void internal_set(struct cpu_t *const cpu, const char *const file_name,
         log_debug("internal_set: wrote file %s, closed file and buffer\n", file_name);
 }
 
+/*
+ * Write a frquency value in kilohertz into the files specified by the 
+ * frequency_files array
+ */
 static void internal_set_freq(struct cpu_t *const cpu, char **const frequency_files,
         const size_t value)
 {
@@ -101,6 +115,10 @@ static void internal_set_freq(struct cpu_t *const cpu, char **const frequency_fi
         }
 }
 
+/*
+ * Set the current state of Turbo Boost on the CPU. A turbo value
+ * of 1 means OFF and 0 means ON
+ */
 void set_turbo(struct cpu_t *const cpu, const int32_t turbo)
 {
         if (has_pstate(cpu)) {
@@ -116,6 +134,10 @@ void set_turbo(struct cpu_t *const cpu, const int32_t turbo)
         }
 }
 
+/*
+ * Set the current max_perf_pct of the CPU, from a value range of
+ * the minimum capable cpu frequency to 100
+ */
 void set_scaling_max(struct cpu_t *const cpu, const int32_t max)
 {
         log_debug("set_scaling_max running with max: %d\n", max);
@@ -126,9 +148,13 @@ void set_scaling_max(struct cpu_t *const cpu, const int32_t max)
         }
 }
 
+/*
+ * Set the current min_perf_pct of the CPU, from a value range of
+ * the minimum capable cpu frequency to 99, 1 less than the capable
+ * max_perf_pct
+ */
 void set_scaling_min(struct cpu_t *const cpu, const int32_t min)
 {
-
         log_debug("set_scaling_min running with min: %d\n", min);
         internal_set_freq(cpu, cpu->CPU_MIN_FREQ_FILES, min);
         if (has_pstate(cpu)) {
@@ -136,4 +162,3 @@ void set_scaling_min(struct cpu_t *const cpu, const int32_t min)
                 internal_set(cpu, FILE_PSTATE_MIN, min);
         }
 }
-

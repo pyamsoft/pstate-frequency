@@ -1,23 +1,22 @@
 /*
-*   pstate_frequency Easier control of the Intel p-state driver
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License as published by
-*   the Free Software Foundation; either version 2 of the License, or
-*   (at your option) any later version.
-*
-*   This program is distributed in the hope that it will be useful,
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*   GNU General Public License for more details.
-*
-*   You should have received a copy of the GNU General Public License along
-*   with this program; if not, write to the Free Software Foundation, Inc.,
-*   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*
-*   For questions please contact P.Yam Software at pyam.soft@gmail.com
-*
-*/
+ * pstate_frequency Easier control of the Intel p-state driver
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * For questions please contact P.Yam Software at pyam.soft@gmail.com
+ */
 
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -28,6 +27,12 @@
 #include "src/cpuutil.h"
 #include "src/util.h"
 
+/*
+ * Creates a new cpu_t object and initializes memory for the following:
+ * CPU_MIN_FREQ_FILES array 
+ * CPU_MAX_FREQ_FILES array
+ * CPU_NUMBER int
+ */
 struct cpu_t cpu_create()
 {
         struct cpu_t cpu;
@@ -61,6 +66,11 @@ struct cpu_t cpu_create()
         return cpu;
 }
 
+/*
+ * Frees memory held by the arrays
+ * CPU_MIN_FREQ_FILES
+ * CPU_MAX_FREQ_FILES
+ */
 void cpu_destroy(struct cpu_t *cpu)
 {
         log_debug("Freeing allocated CPU resources\n");
@@ -83,7 +93,6 @@ void cpu_destroy(struct cpu_t *cpu)
                                 free(cpu->CPU_MAX_FREQ_FILES[i]);
                                 cpu->CPU_MAX_FREQ_FILES[i] = NULL;
                         }
-                        
                 }
                 free(cpu->CPU_MAX_FREQ_FILES);
                 log_debug("Freeing CPU_MAX_FREQ_FILES\n");

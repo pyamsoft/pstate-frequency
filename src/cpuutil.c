@@ -1,23 +1,22 @@
 /*
-*   pstate_frequency Easier control of the Intel p-state driver
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License as published by
-*   the Free Software Foundation; either version 2 of the License, or
-*   (at your option) any later version.
-*
-*   This program is distributed in the hope that it will be useful,
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*   GNU General Public License for more details.
-*
-*   You should have received a copy of the GNU General Public License along
-*   with this program; if not, write to the Free Software Foundation, Inc.,
-*   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*
-*   For questions please contact P.Yam Software at pyam.soft@gmail.com
-*
-*/
+ * pstate_frequency Easier control of the Intel p-state driver
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * For questions please contact P.Yam Software at pyam.soft@gmail.com
+ */
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -29,6 +28,12 @@
 #include "src/util.h"
 #include "src/color.h"
 
+/*
+ * Given a file_name, resolve whether the file exists on the given environment path.
+ * Because of the expected usage of this function, any file which cannot be found results
+ * in a critical error in the program and it will be unable to recover. Exit the program if the
+ * specified file cannot be resolved.
+ */
 char* resolve_path_to_file(struct cpu_t *const cpu, const char *const file_name)
 {
         log_debug("getting the path and copying it\n");
@@ -59,6 +64,12 @@ char* resolve_path_to_file(struct cpu_t *const cpu, const char *const file_name)
         exit(1);
 }
 
+/*
+ * A wrapper which checks the success of any function which follows the
+ * returns structure of a malloc call. If the malloc call returns a -1 meaning
+ * failure, exit the program and clean up any of the currently malloced values held in the
+ * varargs array
+ */
 void safe_malloc(struct cpu_t *const cpu, const int32_t result,
         const char *const error_message, ...)
 {
@@ -81,6 +92,11 @@ void safe_malloc(struct cpu_t *const cpu, const int32_t result,
         }
 }
 
+/*
+ * Check that a file was successfully opened. If the file state is
+ * -1 meaning failure, exit from the program because it is mission critical
+ * that a given file be available
+ */
 void check_file(struct cpu_t *const cpu, FILE *const file,
         const char *const file_name)
 {

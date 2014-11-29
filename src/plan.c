@@ -1,23 +1,22 @@
 /*
-*   pstate_frequency Easier control of the Intel p-state driver
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License as published by
-*   the Free Software Foundation; either version 2 of the License, or
-*   (at your option) any later version.
-*
-*   This program is distributed in the hope that it will be useful,
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*   GNU General Public License for more details.
-*
-*   You should have received a copy of the GNU General Public License along
-*   with this program; if not, write to the Free Software Foundation, Inc.,
-*   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*
-*   For questions please contact P.Yam Software at pyam.soft@gmail.com
-*
-*/
+ * pstate_frequency Easier control of the Intel p-state driver
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * For questions please contact P.Yam Software at pyam.soft@gmail.com
+ */
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -37,10 +36,15 @@ static void set_performance(int32_t *const value_min, int32_t *const value_max,
 static void set_max_performance(int32_t *const value_min, int32_t *const value_max,
                 int32_t *const value_turbo);
 
+/*
+ * Sets the running power plan to one of three presets, powersave, performance,
+ * and max-performance. Uses string comparison and pattern matching to decipher
+ * the input given in the optarg variable
+ */
 int32_t set_plan(int32_t *const value_min, int32_t *const value_max,
                 int32_t *const value_turbo)
 {
-        if (str_starts_with("powersave", optarg) 
+        if (str_starts_with("powersave", optarg)
             || strncmp("1", optarg, strlen(optarg)) == 0) {
                 set_powersave(value_min, value_max, value_turbo);
         } else if (str_starts_with("performance", optarg)
@@ -66,6 +70,9 @@ int32_t set_plan(int32_t *const value_min, int32_t *const value_max,
         return 0;
 }
 
+/*
+ * Sets the powersave plan
+ */
 static void set_powersave(int32_t *const value_min,
         int32_t *const value_max, int32_t *const value_turbo)
 {
@@ -74,6 +81,9 @@ static void set_powersave(int32_t *const value_min,
     *value_turbo = 1;
 }
 
+/*
+ * Sets the performance plan
+ */
 static void set_performance(int32_t *const value_min,
         int32_t *const value_max, int32_t *const value_turbo)
 {
@@ -82,6 +92,9 @@ static void set_performance(int32_t *const value_min,
     *value_turbo = 1;
 }
 
+/*
+ * Sets the max-performance plan
+ */
 static void set_max_performance(int32_t *const value_min,
         int32_t *const value_max, int32_t *const value_turbo)
 {

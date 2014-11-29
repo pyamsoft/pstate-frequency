@@ -34,6 +34,10 @@ static char *internal_get(struct cpu_t *const cpu,
 static double internal_get_cpu_value(struct cpu_t *const cpu,
         const char *const file_name);
 
+/*
+ * Returns the name of the current cpufreq driver as
+ * a null-terminated string with two newlines included
+ */
 char *get_driver(struct cpu_t *const cpu)
 {
         log_debug("Open file %s for driver\n", FILE_SCALING_DRIVER);
@@ -45,7 +49,10 @@ char *get_driver(struct cpu_t *const cpu)
         return result;
 }
 
-
+/*
+ * Retrieve a single line from the specified file and return the line as a character string.
+ * The line is implicitly malloced, so it must be freed after it is used.
+ */
 static char *internal_get(struct cpu_t *const cpu,
         FILE *const file, const char *const file_name)
 {
@@ -63,6 +70,10 @@ static char *internal_get(struct cpu_t *const cpu,
         return line;
 }
 
+/*
+ * Returns whether or not the pstate driver is loaded into the active kernel
+ * Returns 1 on success, 0 on failure
+ */
 int32_t has_pstate(struct cpu_t *const cpu)
 {
         char *driver = get_driver(cpu);
@@ -71,29 +82,35 @@ int32_t has_pstate(struct cpu_t *const cpu)
         return (result == 0);
 }
 
+/*
+ * Retrieve the number of CPU cores on the CPU chip by grepping for the string
+ * 'processor' and counting the number of lines returned
+ */
 int32_t get_cpu_number(struct cpu_t *const cpu)
 {
-        log_debug("Finding cat, grep, and wc on path\n");
-        char *cat = resolve_path_to_file(cpu, "cat");
+        log_debug("Finding grep, and wc on path\n");
         char *grep = resolve_path_to_file(cpu, "grep");
         char *wc = resolve_path_to_file(cpu, "wc");
         char *cmd;
-        safe_malloc(cpu, asprintf(&cmd, "%s /proc/cpuinfo | %s processor | %s -l", cat, grep, wc),
+        safe_malloc(cpu, asprintf(&cmd, "%s processor /proc/cpuinfo | %s -l", grep, wc),
                 "Can't alloc for get_number command",
-                cat, grep, wc, NULL);
+                grep, wc, NULL);
         log_debug("Opening a pipe for cmd: %s\n", cmd);
         FILE *pf = popen(cmd, "r");
         const int32_t value = str_to_num(internal_get(cpu, pf, cmd));
         log_debug("Freeing pipe resources\n");
         pclose(pf);
         free(cmd);
-        free(cat);
         free(grep);
         free(wc);
         log_debug("Cpu_number: %d\n", value);
         return value;
 }
 
+/*
+ * Helper function which simplifies the retrieval of a single number value
+ * from a given file with specified file_name
+ */
 static double internal_get_cpu_value(struct cpu_t *const cpu,
         const char *const file_name)
 {
@@ -105,26 +122,42 @@ static double internal_get_cpu_value(struct cpu_t *const cpu,
         return value;
 }
 
+/*
+ * Get the current scaling max frequency in KHz
+ */
 double get_scaling_max_freq(struct cpu_t *const cpu)
 {
         return internal_get_cpu_value(cpu, FILE_SCALING_MAX_FREQ);
 }
 
+/*
+ * Get the current scaling min frequency in KHz
+ */
 double get_scaling_min_freq(struct cpu_t *const cpu)
 {
         return internal_get_cpu_value(cpu, FILE_SCALING_MIN_FREQ);
 }
 
+/*
+ * Get the maximum possible frequency in KHz
+ */
 double get_info_max_freq(struct cpu_t *const cpu)
 {
         return internal_get_cpu_value(cpu, FILE_INFO_MAX_FREQ);
 }
 
+/*
+ * Get the minimum possible frequency in KHz
+ */
 double get_info_min_freq(struct cpu_t *const cpu)
 {
         return internal_get_cpu_value(cpu, FILE_INFO_MIN_FREQ);
 }
 
+/*
+ * Get the current value of turbo on the CPU.
+ * 1 is OFF and 0 is ON
+ */
 int32_t get_turbo(struct cpu_t *const cpu)
 {
         if (has_pstate(cpu)) {
@@ -140,6 +173,9 @@ int32_t get_turbo(struct cpu_t *const cpu)
         return -1;
 }
 
+/*
+ * Get the minimum possible CPU value as a percent value
+ */
 double get_info_min(struct cpu_t *const cpu)
 {
         const double max_freq = get_info_max_freq(cpu);
@@ -149,6 +185,9 @@ double get_info_min(struct cpu_t *const cpu)
         return result;
 }
 
+/*
+ * Get the maximum possible CPU value as a percent value
+ */
 double get_scaling_max(struct cpu_t *const cpu)
 {
         const double max_freq = get_info_max_freq(cpu);
@@ -158,6 +197,9 @@ double get_scaling_max(struct cpu_t *const cpu)
         return result;
 }
 
+/*
+ * Get the current minimum CPU value as a percent value
+ */
 double get_scaling_min(struct cpu_t *const cpu)
 {
         const double max_freq = get_info_max_freq(cpu);

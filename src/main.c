@@ -1,23 +1,22 @@
 /*
-*   pstate_frequency Easier control of the Intel p-state driver
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License as published by
-*   the Free Software Foundation; either version 2 of the License, or
-*   (at your option) any later version.
-*
-*   This program is distributed in the hope that it will be useful,
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*   GNU General Public License for more details.
-*
-*   You should have received a copy of the GNU General Public License along
-*   with this program; if not, write to the Free Software Foundation, Inc.,
-*   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*
-*   For questions please contact P.Yam Software at pyam.soft@gmail.com
-*
-*/
+ * pstate_frequency Easier control of the Intel p-state driver
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * For questions please contact P.Yam Software at pyam.soft@gmail.com
+ */
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -86,6 +85,9 @@ int main(int32_t argc, char **argv)
         return access_cpu(&cpu, &flag_action, &value_min, &value_max, &value_turbo);
 }
 
+/*
+ * Parses the result of the getopt_long function
+ */
 static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
         int32_t *const flag_action, int32_t *const value_min,
         int32_t *const value_max, int32_t *const value_turbo)
@@ -151,7 +153,9 @@ static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
         return -1;
 }
 
-
+/*
+ * Modify the CPU attributes with the new requested values
+ */
 static int32_t access_cpu(struct cpu_t *const cpu, int32_t *const flag_action,
         int32_t *const value_min, int32_t *const value_max,
         int32_t *const value_turbo)
@@ -176,7 +180,7 @@ static int32_t access_cpu(struct cpu_t *const cpu, int32_t *const flag_action,
                 const int32_t real_turbo = (*value_turbo == 0 || *value_turbo == 1)
                         ? *value_turbo : get_turbo(cpu);
 
-                // Reset values to sane defaults
+                /* Reset values to sane defaults */
                 set_turbo(cpu, 0);
                 set_scaling_max(cpu, 100);
                 set_scaling_min(cpu, 0);
@@ -206,6 +210,9 @@ static int32_t access_cpu(struct cpu_t *const cpu, int32_t *const flag_action,
         return 0;
 }
 
+/*
+ * Print possible commands when running with --set
+ */
 static void print_possible_set()
 {
         printf("Possible set values are: \n");
@@ -215,6 +222,9 @@ static void print_possible_set()
         printf("    -p | --plan  Set a predefined power plan\n");
 }
 
+/*
+ * Print program results to the stdout
+ */
 static void print_output(struct cpu_t *const cpu)
 {
         const int32_t turbo = get_turbo(cpu);
@@ -248,6 +258,9 @@ static void print_output(struct cpu_t *const cpu)
         free(cpu_driver);
 }
 
+/*
+ * Print program version
+ */
 static void print_version()
 {
 #ifdef VERSION
@@ -258,6 +271,9 @@ static void print_version()
         printf("under certain conditions;\n");
 }
 
+/*
+ * Print program help message
+ */
 static void print_help()
 {
         print_version();
