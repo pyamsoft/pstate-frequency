@@ -63,6 +63,10 @@ struct cpu_t cpu_create()
                 "Failed to allocate memory for MIN_FREQ_FILES",
                 NULL);
         }
+	cpu.CPU_INFO_MAX_FREQ = get_info_max_freq(&cpu);
+	cpu.CPU_INFO_MIN_FREQ = get_info_min_freq(&cpu);
+	cpu.CPU_INFO_MIN = get_info_min(&cpu);
+	cpu.CPU_DRIVER = get_driver(&cpu);
         return cpu;
 }
 
@@ -98,6 +102,11 @@ void cpu_destroy(struct cpu_t *cpu)
                 log_debug("Freeing CPU_MAX_FREQ_FILES\n");
                 cpu->CPU_MAX_FREQ_FILES = NULL;
         }
+	if (cpu->CPU_DRIVER != NULL) {
+		log_debug("Freeing CPU Driver\n");
+		free(cpu->CPU_DRIVER);
+		cpu->CPU_DRIVER = NULL;
+	}
         log_debug("Freeing cpu\n");
         cpu = NULL;
 }

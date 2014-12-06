@@ -76,9 +76,8 @@ static char *internal_get(struct cpu_t *const cpu,
  */
 int32_t has_pstate(struct cpu_t *const cpu)
 {
-        char *driver = get_driver(cpu);
+        char *driver = cpu->CPU_DRIVER;
         const int32_t result = strncmp(driver, "intel_pstate\n", strlen(driver));
-        free(driver);
         return (result == 0);
 }
 
@@ -178,9 +177,9 @@ int32_t get_turbo(struct cpu_t *const cpu)
  */
 double get_info_min(struct cpu_t *const cpu)
 {
-        const double max_freq = get_info_max_freq(cpu);
+        const double max_freq = cpu->CPU_INFO_MAX_FREQ;
         log_debug("max_freq: %f\n", max_freq);
-        const double result = (get_info_min_freq(cpu) / max_freq) * 100;
+        const double result = (cpu->CPU_INFO_MIN_FREQ / max_freq) * 100;
         log_debug("info_min result: %f\n", result);
         return result;
 }
@@ -190,7 +189,7 @@ double get_info_min(struct cpu_t *const cpu)
  */
 double get_scaling_max(struct cpu_t *const cpu)
 {
-        const double max_freq = get_info_max_freq(cpu);
+        const double max_freq = cpu->CPU_INFO_MAX_FREQ;
         log_debug("max_freq: %f\n", max_freq);
         const double result = (get_scaling_max_freq(cpu) / max_freq) * 100;
         log_debug("scaling_max result: %f\n", result);
@@ -202,7 +201,7 @@ double get_scaling_max(struct cpu_t *const cpu)
  */
 double get_scaling_min(struct cpu_t *const cpu)
 {
-        const double max_freq = get_info_max_freq(cpu);
+        const double max_freq = cpu->CPU_INFO_MAX_FREQ;
         log_debug("max_freq: %f\n", max_freq);
         const double result = (get_scaling_min_freq(cpu) / max_freq) * 100;
         log_debug("scaling_min result: %f\n", result);

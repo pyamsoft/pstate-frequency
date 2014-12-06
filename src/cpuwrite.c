@@ -106,7 +106,7 @@ static void internal_set_freq(struct cpu_t *const cpu, char **const frequency_fi
         const size_t value)
 {
         log_debug("internal_set_freq: value = %zu\n", value);
-        const int32_t scaling_value = get_info_max_freq(cpu);
+        const int32_t scaling_value = cpu->CPU_INFO_MAX_FREQ;
         log_debug("internal_set_freq: scaling_value = %d\n", scaling_value);
         const size_t scaling = scaling_value / 100 * value;
         log_debug("internal_set_freq: scaling = %zu\n", scaling);

@@ -113,14 +113,14 @@ static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
                 return 0;
         case 'p':
                 plan_result = set_plan(value_min, value_max, value_turbo);
-                *value_max = fix_value_range(*value_max, get_info_min(cpu) + 1, 100);
-                *value_min = fix_value_range(*value_min, get_info_min(cpu), 99);
+                *value_max = fix_value_range(*value_max, cpu->CPU_INFO_MIN + 1, 100);
+                *value_min = fix_value_range(*value_min, cpu->CPU_INFO_MIN, 99);
                 return plan_result;
         case 'm':
                 if (string_is_digits(optarg)) {
                         if (*value_max < 0) {
                                 *value_max = strtol(optarg, NULL, 10);
-                                *value_max = fix_value_range(*value_max, get_info_min(cpu) + 1, 100);
+                                *value_max = fix_value_range(*value_max, cpu->CPU_INFO_MIN + 1, 100);
                         }
                 return 0;
                 }
@@ -131,7 +131,7 @@ static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
                 if (string_is_digits(optarg)) {
                         if (*value_min < 0) {
                                 *value_min = strtol(optarg, NULL, 10);
-                                *value_min = fix_value_range(*value_min, get_info_min(cpu), 99);
+                                *value_min = fix_value_range(*value_min, cpu->CPU_INFO_MIN, 99);
                         }
                 return 0;
                 }
@@ -233,7 +233,6 @@ static void print_output(struct cpu_t *const cpu)
         const int32_t cpu_min = get_scaling_min(cpu);
         const int32_t max_mhz = get_scaling_max_freq(cpu);
         const int32_t min_mhz = get_scaling_min_freq(cpu);
-        char* cpu_driver = get_driver(cpu);
 #ifdef VERSION
         printf("%spstate-frequency %s%s%s\n",
                 PYAM_COLOR_BOLD_BLUE, PYAM_COLOR_BOLD_MAGENTA,
@@ -244,7 +243,7 @@ static void print_output(struct cpu_t *const cpu)
 #endif
         printf("%s    pstate::%sCPU_DRIVER  -> %s%s%s",
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
-                cpu_driver, PYAM_COLOR_OFF);
+                cpu->CPU_DRIVER, PYAM_COLOR_OFF);
         printf("%s    pstate::%sNO_TURBO    -> %s%d : %s%s\n",
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
                 turbo, turbo_string, PYAM_COLOR_OFF);
@@ -255,7 +254,6 @@ static void print_output(struct cpu_t *const cpu)
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
                 cpu_max, max_mhz, PYAM_COLOR_OFF);
         printf("\n");
-        free(cpu_driver);
 }
 
 /*

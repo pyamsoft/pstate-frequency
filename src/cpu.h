@@ -39,6 +39,10 @@ struct cpu_t {
         char** CPU_MAX_FREQ_FILES;
         char** CPU_MIN_FREQ_FILES;
         int32_t CPU_NUMBER;
+	char* CPU_DRIVER;
+	double CPU_INFO_MIN;
+	double CPU_INFO_MIN_FREQ;
+	double CPU_INFO_MAX_FREQ;
 };
 
 struct cpu_t cpu_create(void);
