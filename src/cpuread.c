@@ -50,6 +50,40 @@ char *get_driver(struct cpu_t *const cpu)
 }
 
 /*
+ * Returns all of the io schedulers available on the block device, with
+ * the active scheduler bracketed.
+ * a null-terminated string with two newlines included
+ *
+ * KLUDGE: Add ability to take as input a block device name so that
+ * /sys/block/sda is no hardcoded in the event that sda does not exist.
+ */
+char *get_scheduler(struct cpu_t *const cpu)
+{
+        log_debug("Open file %s for scheduler\n", FILE_IO_SCHEDULER);
+        FILE *file = fopen(FILE_IO_SCHEDULER, "r");
+        check_file(cpu, file, FILE_IO_SCHEDULER);
+        char *result = internal_get(cpu, file, FILE_IO_SCHEDULER);
+        log_debug("scheduler is: %s", result);
+        fclose(file);
+        return result;
+}
+
+/*
+ * Returns the name of the current cpufreq governor as
+ * a null-terminated string with two newlines included
+ */
+char *get_governor(struct cpu_t *const cpu)
+{
+        log_debug("Open file %s for governor\n", FILE_SCALING_GOVERNOR);
+        FILE *file = fopen(FILE_SCALING_GOVERNOR, "r");
+        check_file(cpu, file, FILE_IO_SCHEDULER);
+        char *result = internal_get(cpu, file, FILE_SCALING_GOVERNOR);
+        log_debug("governor is: %s", result);
+        fclose(file);
+        return result;
+}
+
+/*
  * Retrieve a single line from the specified file and return the line as a character string.
  * The line is implicitly malloced, so it must be freed after it is used.
  */

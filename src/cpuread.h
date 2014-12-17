@@ -29,6 +29,8 @@ int32_t get_turbo(struct cpu_t *const cpu);
 double get_scaling_max_freq(struct cpu_t *const cpu);
 double get_scaling_min_freq(struct cpu_t *const cpu);
 char *get_driver(struct cpu_t *const cpu);
+char *get_scheduler(struct cpu_t *const cpu);
+char *get_governor(struct cpu_t *const cpu);
 double get_info_min(struct cpu_t *const cpu);
 double get_info_max_freq(struct cpu_t *const cpu);
 double get_info_min_freq(struct cpu_t *const cpu);

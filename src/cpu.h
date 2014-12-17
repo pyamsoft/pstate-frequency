@@ -34,12 +34,16 @@
 #define FILE_PSTATE_MIN         "/sys/devices/system/cpu/intel_pstate/min_perf_pct"
 #define FILE_SCALING_MIN_NAME   "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq"
 #define FILE_SCALING_MAX_NAME   "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq"
+#define FILE_SCALING_GOVERNOR	"/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+#define FILE_IO_SCHEDULER	"/sys/block/sda/queue/scheduler"
 
 struct cpu_t {
         char** CPU_MAX_FREQ_FILES;
         char** CPU_MIN_FREQ_FILES;
         int32_t CPU_NUMBER;
 	char* CPU_DRIVER;
+	char* IO_SCHED;
+	char* CPU_GOVERNOR;
 	double CPU_INFO_MIN;
 	double CPU_INFO_MIN_FREQ;
 	double CPU_INFO_MAX_FREQ;

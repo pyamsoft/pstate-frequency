@@ -27,11 +27,15 @@
 #include "src/cpuutil.h"
 #include "src/util.h"
 
+static void internal_cpu_destroy(struct cpu_t *const cpu);
+
 /*
  * Creates a new cpu_t object and initializes memory for the following:
  * CPU_MIN_FREQ_FILES array 
  * CPU_MAX_FREQ_FILES array
  * CPU_NUMBER int
+ * and char strings allocated for
+ * CPU_DRIVER, CPU_GOVERNOR, and IO_SCHED
  */
 struct cpu_t cpu_create()
 {
@@ -67,6 +71,8 @@ struct cpu_t cpu_create()
 	cpu.CPU_INFO_MIN_FREQ = get_info_min_freq(&cpu);
 	cpu.CPU_INFO_MIN = get_info_min(&cpu);
 	cpu.CPU_DRIVER = get_driver(&cpu);
+	cpu.CPU_GOVERNOR = get_governor(&cpu);
+	cpu.IO_SCHED = get_scheduler(&cpu);
         return cpu;
 }
 
@@ -74,6 +80,7 @@ struct cpu_t cpu_create()
  * Frees memory held by the arrays
  * CPU_MIN_FREQ_FILES
  * CPU_MAX_FREQ_FILES
+ * and memory held by char strings
  */
 void cpu_destroy(struct cpu_t *cpu)
 {
@@ -102,11 +109,30 @@ void cpu_destroy(struct cpu_t *cpu)
                 log_debug("Freeing CPU_MAX_FREQ_FILES\n");
                 cpu->CPU_MAX_FREQ_FILES = NULL;
         }
+	internal_cpu_destroy(cpu);
+        log_debug("Freeing cpu\n");
+        cpu = NULL;
+}
+
+/*
+ * Free the allocated character strings
+ */
+static void internal_cpu_destroy(struct cpu_t *const cpu)
+{
 	if (cpu->CPU_DRIVER != NULL) {
 		log_debug("Freeing CPU Driver\n");
 		free(cpu->CPU_DRIVER);
 		cpu->CPU_DRIVER = NULL;
 	}
-        log_debug("Freeing cpu\n");
-        cpu = NULL;
+	if (cpu->CPU_GOVERNOR != NULL) {
+		log_debug("Freeing CPU_GOVERNOR\n");
+		free(cpu->CPU_GOVERNOR);
+		cpu->CPU_GOVERNOR = NULL;
+
+	}
+	if (cpu->IO_SCHED != NULL) {
+		log_debug("Freeing IO_SCHED\n");
+		free(cpu->IO_SCHED);
+		cpu->IO_SCHED = NULL;
+	}
 }

@@ -54,20 +54,24 @@ int main(int32_t argc, char **argv)
         int32_t final_result = 0;
         int32_t result = -1;
         static struct option long_options[] = {
-                {"help",    no_argument,        NULL,           'h'},
-                {"version", no_argument,        NULL,           'v'},
-                {"get",     no_argument,        NULL,           'g'},
-                {"set",     no_argument,        NULL,           's'},
-                {"debug",   no_argument,        NULL,           'd'},
-                {"plan",    required_argument,  NULL,           'p'},
-                {"max",     required_argument,  NULL,           'm'},
-                {"min",     required_argument,  NULL,           'n'},
-                {"turbo",   required_argument,  NULL,           't'},
-                {0,         0,                  0,              0}
+                {"help",          no_argument,        NULL,           'h'},
+                {"version",       no_argument,        NULL,           'v'},
+                {"get",           no_argument,        NULL,           'g'},
+                {"set",           no_argument,        NULL,           's'},
+                {"debug",         no_argument,        NULL,           'd'},
+                {"plan",          required_argument,  NULL,           'p'},
+                {"io",            required_argument,  NULL,           'i'},
+                {"io-scheduler",  required_argument,  NULL,           'i'},
+                {"gov",           required_argument,  NULL,           'o'},
+                {"governor",	  required_argument,  NULL,           'o'},
+		{"max",		  required_argument,  NULL,           'm'},
+		{"min",		  required_argument,  NULL,           'n'},
+		{"turbo",	  required_argument,  NULL,           't'},
+		{0,		  0,                  0,              0}
                 };
         while (1) {
                 int32_t option_index = 0;
-                result = getopt_long(argc, argv, "hvsdgp:m:n:t:", long_options, &option_index);
+                result = getopt_long(argc, argv, "hvsdgp:m:n:t:i:o:", long_options, &option_index);
                 if (result == -1) {
                         break;
                 } else {
@@ -127,6 +131,12 @@ static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
                 fprintf(stderr, "%sMax Frequency must be positive, non-zero integer value%s\n",
                         PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
                 return -1;
+	case 'i':
+		printf("TODO Option: IO_SCHEDULER\n");
+		return 0;
+	case 'o':
+		printf("TODO Option: GOVERNOR\n");
+		return 0;
         case 'n':
                 if (string_is_digits(optarg)) {
                         if (*value_min < 0) {
@@ -241,6 +251,12 @@ static void print_output(struct cpu_t *const cpu)
         printf("%spstate-frequency%s\n",
                 PYAM_COLOR_BOLD_BLUE, PYAM_COLOR_OFF);
 #endif
+        /* printf("%s    pstate::%sIO_SCHED  -> %s%s%s", */
+        /*         PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN, */
+        /*         cpu->IO_SCHED, PYAM_COLOR_OFF); */
+        printf("%s    pstate::%sCPU_GOVERNOR  -> %s%s%s",
+                PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
+                cpu->CPU_GOVERNOR, PYAM_COLOR_OFF);
         printf("%s    pstate::%sCPU_DRIVER  -> %s%s%s",
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
                 cpu->CPU_DRIVER, PYAM_COLOR_OFF);
@@ -277,16 +293,28 @@ static void print_help()
         print_version();
         printf("\n");
         printf("usage:\n");
+	printf("pstate-frequency [action] [option]\n");
         printf("\n");
-        printf("    Options:\n");
-        printf("        -h | --help     Display this help and exit\n");
-        printf("        -v | --version  Display application version and exit\n");
-        printf("        -d | --debug    Print debugging messages to stdout\n");
-        printf("        -g | --get      Access current CPU values\n");
-        printf("        -s | --set      Modify current CPU values (root)\n");
-        printf("        -p | --plan     Set a predefined power plan (root)\n");
-        printf("        -m | --max      Modify current CPU max frequency (root)\n");
-        printf("        -n | --min      Modify current CPU min frequency (root)\n");
-        printf("        -t | --turbo    Modify curent CPU turbo boost state (root)\n");
+        printf("    actions:\n");
+	printf("        unprivilaged:\n");
+        printf("            -h | --help                 Display this help and exit\n");
+        printf("            -v | --version              Display application version and exit\n");
+        printf("            -d | --debug                Print debugging messages to stdout\n");
+        printf("            -g | --get                  Access current CPU values\n");
+	printf("\n");
+	printf("        privilaged:\n");
+        printf("            -s | --set                  Modify current CPU values\n");
+	printf("\n");
+        printf("    options:\n");
+	printf("        unprivilaged:\n");
+	printf("            -i | --io | --io-scheduler  Get the IO Scheduler for the given device\n");
+	printf("\n");
+	printf("        privilaged:\n");
+        printf("            -p | --plan		        Set a predefined power plan\n");
+        printf("            -m | --max		        Modify current CPU max frequency\n");
+	printf("            -i | --io | --io-scheduler  Set the IO Scheduler for the given device\n");
+	printf("            -o | --gov | --governor     Set the cpufreq governor\n");
+        printf("            -n | --min                  Modify current CPU min frequency\n");
+        printf("            -t | --turbo                Modify curent CPU turbo boost state\n");
         printf("\n");
 }
