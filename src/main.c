@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * For questions please contact P.Yam Software at pyam.soft@gmail.com
+ * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
 #define _GNU_SOURCE
@@ -32,24 +32,25 @@
 #include "src/plan.h"
 #include "src/util.h"
 
-static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
-        int32_t *const flag_action, int32_t *const value_min,
-        int32_t *const value_max, int32_t *const value_turbo);
+static int32_t handle_result(struct cpu_t *const cpu, struct flag_t *const flags, const int32_t result);
 static void print_version(void);
-static int32_t access_cpu(struct cpu_t *const cpu, int32_t *const flag_action,
-        int32_t *const value_min, int32_t *const value_max,
-        int32_t *const value_turbo);
+static int32_t access_cpu(struct cpu_t *const cpu, struct flag_t *const flags);
 static void print_help(void);
 static void print_output(struct cpu_t *const cpu);
 static void print_possible_set(void);
+static void print_io_scheduler(struct cpu_t *const cpu);
+static void quit(struct cpu_t *cpu, struct flag_t *flags);
 
+static void quit(struct cpu_t *cpu, struct flag_t *flags)
+{
+	cpu_destroy(cpu);
+	flags_destroy(flags);
+	
+}
 int main(int32_t argc, char **argv)
 {
+	struct flag_t flags = flags_create();
         struct cpu_t cpu = cpu_create();
-        static int32_t flag_action = 0;
-        static int32_t value_min = -1;
-        static int32_t value_max = -1;
-        static int32_t value_turbo = -1;
 
         int32_t final_result = 0;
         int32_t result = -1;
@@ -75,28 +76,24 @@ int main(int32_t argc, char **argv)
                 if (result == -1) {
                         break;
                 } else {
-                        final_result = handle_result(&cpu, result, &flag_action,
-                                &value_min, &value_max, &value_turbo);
+                        final_result = handle_result(&cpu, &flags, result);
                         if (final_result == -1) {
-                                cpu_destroy(&cpu);
+				quit(&cpu, &flags);
                                 return 1;
                         } else if (final_result == 1) {
-                                cpu_destroy(&cpu);
+				quit(&cpu, &flags);
                                 return 0;
                         }
                 }
         }
-        return access_cpu(&cpu, &flag_action, &value_min, &value_max, &value_turbo);
+        return access_cpu(&cpu, &flags);
 }
 
 /*
  * Parses the result of the getopt_long function
  */
-static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
-        int32_t *const flag_action, int32_t *const value_min,
-        int32_t *const value_max, int32_t *const value_turbo)
+static int32_t handle_result(struct cpu_t *const cpu, struct flag_t *const flags, const int32_t result)
 {
-        int32_t plan_result;
         switch(result) {
         case 0:
                 return 0;
@@ -107,24 +104,21 @@ static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
                 print_version();
                 return 1;
         case 's':
-                *flag_action = 2;
+                flags->action = ACTION_SET;
                 return 0;
         case 'd':
                 debug = 1;
                 return 0;
         case 'g':
-                *flag_action = 1;
+                flags->action = ACTION_GET;
                 return 0;
         case 'p':
-                plan_result = set_plan(value_min, value_max, value_turbo);
-                *value_max = fix_value_range(*value_max, cpu->CPU_INFO_MIN + 1, 100);
-                *value_min = fix_value_range(*value_min, cpu->CPU_INFO_MIN, 99);
-                return plan_result;
+                return set_plan(cpu, flags);
         case 'm':
                 if (string_is_digits(optarg)) {
-                        if (*value_max < 0) {
-                                *value_max = strtol(optarg, NULL, 10);
-                                *value_max = fix_value_range(*value_max, cpu->CPU_INFO_MIN + 1, 100);
+                        if (flags->max == FLAG_UNINITIALIZED) {
+                                flags->max = strtol(optarg, NULL, 10);
+                                flags->max = fix_value_range(flags->max, cpu->CPU_INFO_MIN + 1, 100);
                         }
                 return 0;
                 }
@@ -139,9 +133,9 @@ static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
 		return 0;
         case 'n':
                 if (string_is_digits(optarg)) {
-                        if (*value_min < 0) {
-                                *value_min = strtol(optarg, NULL, 10);
-                                *value_min = fix_value_range(*value_min, cpu->CPU_INFO_MIN, 99);
+                        if (flags->min == FLAG_UNINITIALIZED) {
+                                flags->min = strtol(optarg, NULL, 10);
+                                flags->min = fix_value_range(flags->min, cpu->CPU_INFO_MIN, 99);
                         }
                 return 0;
                 }
@@ -150,8 +144,8 @@ static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
                 return -1;
         case 't':
                 if (string_is_digits(optarg)) {
-                        if (*value_turbo < 0)
-                                *value_turbo = strtol(optarg, NULL, 10);
+                        if (flags->turbo == FLAG_UNINITIALIZED)
+                                flags->turbo = strtol(optarg, NULL, 10);
                         return 0;
                 }
                 fprintf(stderr, "%sTurbo Boost must be either 0 or 1%s\n",
@@ -166,57 +160,60 @@ static int32_t handle_result(struct cpu_t *const cpu, const int32_t result,
 /*
  * Modify the CPU attributes with the new requested values
  */
-static int32_t access_cpu(struct cpu_t *const cpu, int32_t *const flag_action,
-        int32_t *const value_min, int32_t *const value_max,
-        int32_t *const value_turbo)
+static int32_t access_cpu(struct cpu_t *const cpu, struct flag_t *const flags)
 {
-        switch(*flag_action) {
-        case 2:
+        switch(flags->action) {
+        case ACTION_SET:
                 if (geteuid() == 0) {
-                        if (!(*value_max >= 0 || *value_min >= 0
-                            || *value_turbo == 0 || *value_turbo == 1)) {
+			const int32_t flag_min = flags->min;
+			const int32_t flag_max = flags->max;
+			const int32_t flag_turbo = flags->turbo;
+                        if (!(flag_max != FLAG_UNINITIALIZED
+					|| flag_min != FLAG_UNINITIALIZED 
+					|| flag_turbo == 1 || flag_turbo == 0)) {
                                 fprintf(stderr, "%sSet called with no target or invalid values%s\n",
                                         PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
                                 print_possible_set();
-                                cpu_destroy(cpu);
+				quit(cpu, flags);
                                 return 1;
                         }
-                log_debug("MAX is %d %d\n", (*value_max >= 0), *value_max);
-                log_debug("MIN is %d %d\n", (*value_min >= 0), *value_min);
-                log_debug("TURBO is %d %d\n", (*value_turbo >= 0), *value_turbo);
-                const int32_t max = *value_max >= 0 ? *value_max : get_scaling_max(cpu);
-                const int32_t real_max = (max > *value_min) ? max : *value_min + 1;
-                const int32_t real_min = *value_min >= 0 ? *value_min : get_scaling_min(cpu);
-                const int32_t real_turbo = (*value_turbo == 0 || *value_turbo == 1)
-                        ? *value_turbo : get_turbo(cpu);
-
-                /* Reset values to sane defaults */
-                set_turbo(cpu, 0);
-                set_scaling_max(cpu, 100);
-                set_scaling_min(cpu, 0);
-
-                log_debug("Set turbo = %d\n", real_turbo);
-                log_debug("Set max = %d\n", real_max);
-                log_debug("Set min = %d\n", real_min);
-                set_turbo(cpu, real_turbo);
-                set_scaling_max(cpu, real_max);
-                set_scaling_min(cpu, real_min);
-                print_output(cpu);
+			log_debug("MAX is %d %d\n", (flag_max >= 0), flag_max);
+			log_debug("MIN is %d %d\n", (flag_min >= 0), flag_min);
+			log_debug("TURBO is %d %d\n", (flag_turbo >= 0), flag_turbo);
+			const int32_t max = flag_max >= 0 ? flag_max : get_scaling_max(cpu);
+			const int32_t real_max = (max > flag_min) ? max : flag_min + 1;
+			const int32_t real_min = flag_min >= 0 ? flag_min : get_scaling_min(cpu);
+			const int32_t real_turbo = (flag_turbo == 0 || flag_turbo == 1)
+				? flag_turbo : get_turbo(cpu);
+			log_debug("Resetting CPU to sane defaults\n");
+			set_turbo(cpu, 0);
+			set_scaling_max(cpu, 100);
+			set_scaling_min(cpu, 0);
+			log_debug("Set turbo = %d\n", real_turbo);
+			log_debug("Set max = %d\n", real_max);
+			log_debug("Set min = %d\n", real_min);
+			set_turbo(cpu, real_turbo);
+			set_scaling_max(cpu, real_max);
+			set_scaling_min(cpu, real_min);
+			print_output(cpu);
                 } else {
                         fprintf(stderr, "%sRoot privilages required%s\n",
                                 PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);
-                        cpu_destroy(cpu);
+			quit(cpu, flags);
                         return 1;
                 }
                 break;
-        case 1:
-                print_output(cpu);
+        case ACTION_GET:
+		if (flags->iosched != NULL)
+			print_io_scheduler(cpu);
+		else
+			print_output(cpu);
                 break;
         default:
                 print_help();
                 break;
         }
-        cpu_destroy(cpu);
+	quit(cpu, flags);
         return 0;
 }
 
@@ -230,6 +227,16 @@ static void print_possible_set()
         printf("    -n | --min   Set the min scaling frequency to a number between 0 and 100 inclusive\n");
         printf("    -t | --turbo Set the state of turbo boost to either 1 (OFF) or 0 (ON)\n");
         printf("    -p | --plan  Set a predefined power plan\n");
+}
+
+/*
+ * Print the currently active IO SCHEDULER
+ */
+static void print_io_scheduler(struct cpu_t *const cpu)
+{
+        printf("%s    pstate::%sIO_SCHED  -> %s%s%s",
+                PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
+                cpu->IO_SCHED, PYAM_COLOR_OFF);
 }
 
 /*
@@ -251,22 +258,19 @@ static void print_output(struct cpu_t *const cpu)
         printf("%spstate-frequency%s\n",
                 PYAM_COLOR_BOLD_BLUE, PYAM_COLOR_OFF);
 #endif
-        /* printf("%s    pstate::%sIO_SCHED  -> %s%s%s", */
-        /*         PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN, */
-        /*         cpu->IO_SCHED, PYAM_COLOR_OFF); */
+        printf("%s    pstate::%sCPU_DRIVER    -> %s%s%s",
+                PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
+                cpu->CPU_DRIVER, PYAM_COLOR_OFF);
         printf("%s    pstate::%sCPU_GOVERNOR  -> %s%s%s",
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
                 cpu->CPU_GOVERNOR, PYAM_COLOR_OFF);
-        printf("%s    pstate::%sCPU_DRIVER  -> %s%s%s",
-                PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
-                cpu->CPU_DRIVER, PYAM_COLOR_OFF);
-        printf("%s    pstate::%sNO_TURBO    -> %s%d : %s%s\n",
+        printf("%s    pstate::%sNO_TURBO      -> %s%d : %s%s\n",
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
                 turbo, turbo_string, PYAM_COLOR_OFF);
-        printf("%s    pstate::%sCPU_MIN     -> %s%d%% : %dKhz%s\n",
+        printf("%s    pstate::%sCPU_MIN       -> %s%d%% : %dKhz%s\n",
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
                 cpu_min, min_mhz, PYAM_COLOR_OFF);
-        printf("%s    pstate::%sCPU_MAX     -> %s%d%% : %dKhz%s\n",
+        printf("%s    pstate::%sCPU_MAX       -> %s%d%% : %dKhz%s\n",
                 PYAM_COLOR_BOLD_WHITE, PYAM_COLOR_BOLD_GREEN, PYAM_COLOR_BOLD_CYAN,
                 cpu_max, max_mhz, PYAM_COLOR_OFF);
         printf("\n");

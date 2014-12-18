@@ -23,7 +23,25 @@
 
 #include <stdint.h>
 
-int32_t set_plan(int32_t *const value_min, int32_t *const value_max,
-                int32_t *const value_turbo);
+#include "src/cpu.h"
+
+#define ACTION_SET 2
+#define ACTION_GET 1
+#define ACTION_UNDEFINED 0
+#define FLAG_UNINITIALIZED -1
+
+struct flag_t {
+	int32_t action;
+	int32_t min;
+	int32_t max;
+	int32_t turbo;
+	char* iosched;
+	char* governor;
+};
+
+struct flag_t flags_create(void);
+void flags_destroy(struct flag_t* flags);
+int32_t set_plan(struct cpu_t *const cpu, struct flag_t *const flags);
+                
 
 #endif
