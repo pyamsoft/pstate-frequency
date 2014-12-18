@@ -23,7 +23,7 @@ WRITE_MSR?=0
 # Include a bash completion file
 # 0 NO
 # 1 YES
-INCLUDE_BASH_COMPLETION?=0
+INCLUDE_BASH_COMPLETION?=1
 
 # Include a zsh completion file
 # 0 NO
