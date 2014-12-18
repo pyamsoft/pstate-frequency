@@ -316,7 +316,7 @@ static void print_help()
 	printf("        privilaged:\n");
         printf("            -p | --plan		        Set a predefined power plan\n");
         printf("            -m | --max		        Modify current CPU max frequency\n");
-	printf("            -i | --io | --io-scheduler  Set the IO Scheduler for the given device\n");
+	printf("            -i | --io  | --io-scheduler Set the IO Scheduler for the given device\n");
 	printf("            -o | --gov | --governor     Set the cpufreq governor\n");
         printf("            -n | --min                  Modify current CPU min frequency\n");
         printf("            -t | --turbo                Modify curent CPU turbo boost state\n");

@@ -3,9 +3,9 @@
 _pstate-frequency()
 {
 	typeset -A opt_args
-	local context state line curcontext="$curcontext"
 	_arguments \
-		"1: :_actions"
+		"1: :_actions" \
+		"2: :_options"
 }
 
 _actions()
@@ -15,7 +15,44 @@ _actions()
 		"privilaged-actions:privilaged actions:_privilaged_actions"
 }
 
-_unprivilaged_actions() {
+_options()
+{
+	if [ "$words[2]" = "-s" ] || [ "$words[2]" = "--set" ]; then
+		_alternative \
+			"privilaged-options:privilaged options:_privilaged_options"
+	elif [ "$words[2]" = "-g" ] || [ "$words[2]" = "--get" ]; then
+		_alternative \
+			"unprivilaged-options:unprivilaged options:_unprivilaged_options"
+	fi
+
+}
+
+_unprivilaged_options()
+{
+	local options;
+	options=(
+		"-i:Get the io scheduler"
+	)
+	_describe -t unprivilaged-options "unprivilaged options" options "$@"
+}
+
+_privilaged_options()
+{
+	local options;
+	options=(
+		"-p:Set a pre-defined plan"
+		"-m:Set the CPU max"
+		"-n:Set the CPU min"
+		"-t:Set the CPU turbo"
+		"-i:Set the io scheduler"
+		"-o:Set the CPU governor"
+	)
+	_describe -t privilaged-options "privilaged options" options "$@"
+}
+
+
+_unprivilaged_actions()
+{
 	local actions;
 	actions=(
 		"-h:Print the help output"
@@ -26,7 +63,8 @@ _unprivilaged_actions() {
 	_describe -t unprivilaged-actions "unprivilaged actions" actions "$@"
 }
 
-_privilaged_actions() {
+_privilaged_actions()
+{
 	local actions;
 	actions=(
 		"-s:Modify the current CPU values"
