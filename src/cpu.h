@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * For questions please contact P.Yam Software at pyam.soft@gmail.com
+ * For questions please contact pyamsoft at pyam.soft@gmail.com
  *
  */
 
@@ -24,18 +24,19 @@
 
 #include <stdint.h>
 
-#define FILE_SCALING_DRIVER     "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
-#define FILE_INFO_MAX_FREQ      "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
-#define FILE_INFO_MIN_FREQ      "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
-#define FILE_SCALING_MAX_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
-#define FILE_SCALING_MIN_FREQ   "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"
-#define FILE_PSTATE_TURBO       "/sys/devices/system/cpu/intel_pstate/no_turbo"
-#define FILE_PSTATE_MAX         "/sys/devices/system/cpu/intel_pstate/max_perf_pct"
-#define FILE_PSTATE_MIN         "/sys/devices/system/cpu/intel_pstate/min_perf_pct"
-#define FILE_SCALING_MIN_NAME   "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq"
-#define FILE_SCALING_MAX_NAME   "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq"
-#define FILE_SCALING_GOVERNOR	"/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
-#define FILE_IO_SCHEDULER	"/sys/block/sda/queue/scheduler"
+#define FILE_SCALING_DRIVER             "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
+#define FILE_INFO_MAX_FREQ              "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
+#define FILE_INFO_MIN_FREQ              "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
+#define FILE_SCALING_MAX_FREQ           "/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
+#define FILE_SCALING_MIN_FREQ           "/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"
+#define FILE_PSTATE_TURBO               "/sys/devices/system/cpu/intel_pstate/no_turbo"
+#define FILE_PSTATE_MAX                 "/sys/devices/system/cpu/intel_pstate/max_perf_pct"
+#define FILE_PSTATE_MIN                 "/sys/devices/system/cpu/intel_pstate/min_perf_pct"
+#define FILE_SCALING_MIN_NAME           "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq"
+#define FILE_SCALING_MAX_NAME           "/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq"
+#define FILE_AVAILABLE_GOVERNORS	"/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors"
+#define FILE_SCALING_GOVERNOR	        "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+#define FILE_IO_SCHEDULER	        "/sys/block/sda/queue/scheduler"
 
 struct cpu_t {
         char** CPU_MAX_FREQ_FILES;

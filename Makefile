@@ -36,28 +36,37 @@ clean:
 
 install: all
 	@echo "pstate-frequency will be installed to " $(DESTDIR)/$(PREFIX)/$(TARGET)
-	@install -dm 755 $(DESTDIR)/$(PREFIX)/bin
+	@install -d $(DESTDIR)/$(PREFIX)/bin
 	@install -m $(BIN_PERMISSION) $(TARGET) $(DESTDIR)/$(PREFIX)/bin
 ifeq ($(INCLUDE_BASH_COMPLETION), 1)
 	@echo "bash completion will be installed to " $(DESTDIR)/$(ETCDIR)/bash_completion/$(EXEC_NAME)
-	@install -dm 755 $(DESTDIR)/$(ETCDIR)/bash_completion.d
-	@install -m 644 assets/bash/bash_completion $(DESTDIR)/$(ETCDIR)/bash_completion.d/$(EXEC_NAME)
+	@install -d $(DESTDIR)/$(ETCDIR)/bash_completion.d
+	@install -m 644 assets/shell/bash/bash_completion $(DESTDIR)/$(ETCDIR)/bash_completion.d/$(EXEC_NAME)
+endif
+ifeq ($(INCLUDE_ZSH_COMPLETION), 1)
+	@echo "zsh completion will be installed to " $(DESTDIR)/$(PREFIX)/share/zsh/site-functions/_$(EXEC_NAME)
+	@install -d $(DESTDIR)/$(PREFIX)/share/zsh/site-functions
+	@install -m 644 assets/shell/zsh/zsh_completion $(DESTDIR)/$(PREFIX)/share/zsh/site-functions/_$(EXEC_NAME)
 endif
 ifeq ($(INCLUDE_UDEV_RULE), 1)
 	@echo "udev rule will be installed to " $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)
-	@install -dm 755 $(DESTDIR)/$(ETCDIR)/udev/rules.d
+	@install -d $(DESTDIR)/$(ETCDIR)/udev/rules.d
 	@install -m 644 assets/udev/$(UDEV) $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)
 	@sed -i "s#pstate-frequency#$(PREFIX)/bin/pstate-frequency#g" $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)
 endif
 
 uninstall:
 ifeq ($(INCLUDE_BASH_COMPLETION), 1)
-	@echo "Removing udev rule file."
-	@rm -f $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)
-endif
-ifeq ($(INCLUDE_UDEV_RULE), 1)
 	@echo "Removing bash completion file."
 	@rm -f $(DESTDIR)/$(ETCDIR)/bash_completion.d/$(EXEC_NAME)
+endif
+ifeq ($(INCLUDE_ZSH_COMPLETION), 1)
+	@echo "Removing zsh completion file."
+	@rm -f $(DESTDIR)/$(PREFIX)/share/zsh/site-functions/_$(EXEC_NAME)
+endif
+ifeq ($(INCLUDE_UDEV_RULE), 1)
+	@echo "Removing udev rule file."
+	@rm -f $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)
 endif
 	@echo "Removing binary."
 	@rm -f $(DESTDIR)/$(PREFIX)/bin/$(EXEC_NAME)

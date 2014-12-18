@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * For questions please contact P.Yam Software at pyam.soft@gmail.com
+ * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
 #define _GNU_SOURCE

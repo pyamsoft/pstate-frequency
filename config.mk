@@ -23,7 +23,12 @@ WRITE_MSR?=0
 # Include a bash completion file
 # 0 NO
 # 1 YES
-INCLUDE_BASH_COMPLETION?=1
+INCLUDE_BASH_COMPLETION?=0
+
+# Include a zsh completion file
+# 0 NO
+# 1 YES
+INCLUDE_ZSH_COMPLETION?=1
 
 # Include a udev rule which will set the pstate to powersave
 # on battery and performance on AC power
