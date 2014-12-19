@@ -1,9 +1,12 @@
 # Maintainer: pyamsoft <pyam.soft@gmail.com>
 
-pkgname=pstate-frequency-git
+# Varialbes which hold the name of the git repository
+# and the branch to clone
 _gitname=pstate-frequency
+_gitbranch=master
+pkgname=pstate-frequency-git
 pkgdesc="Easily control Intel p-state driver on Linux "
-pkgver=1.r83.e1a482c
+pkgver=1.r85.0347ca3
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
@@ -13,7 +16,7 @@ optdepends=(
 provides=('pstate-frequency')
 license=('GPLv2')
 url="https://github.com/pyamsoft/pstate-frequency.git"
-source=("git+${url}")
+source=("${_gitname}::git+${url}#branch=${_gitbranch}")
 sha256sums=('SKIP')
 
 pkgver() {
