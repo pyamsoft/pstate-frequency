@@ -5,7 +5,7 @@ _pstate-frequency()
 	typeset -A opt_args
 	_arguments \
 		"1: :_actions" \
-		"2: :_options"
+		"*: :_options"
 }
 
 _actions()
@@ -17,18 +17,43 @@ _actions()
 
 _options()
 {
-	if [ "$words[2]" = "-s" ] || [ "$words[2]" = "--set" ]; then
+	# Array size ${#words}
+	local index
+	let "index=${#words} - 1"
+	if [ "$words[$index]" = "-s" ] || [ "$words[$index]" = "--set" ]; then
 		_alternative \
 			"privilaged-options:privilaged options:_privilaged_options"
-	elif [ "$words[2]" = "-g" ] || [ "$words[2]" = "--get" ]; then
+	elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--get" ]; then
 		_alternative \
 			"unprivilaged-options:unprivilaged options:_unprivilaged_options"
+	elif [ "$words[$index]" = "-i" ] || [ "$words[$index]" = "--io" ] || [ "$words[$index]" = "--io-scheduler" ]; then
+		_alternative \
+			":disk device name:"
+	elif [ "$words[$index]" = "-o" ] || [ "$words[$index]" = "--gov" ] || [ "$words[$index]" = "--governor" ]; then
+		_alternative \
+			":cpu governor name:"
+	elif [ "$words[$index]" = "-m" ] || [ "$words[$index]" = "--max" ]; then
+		_alternative \
+			":max freq between 0 and 100:"
+	elif [ "$words[$index]" = "-n" ] || [ "$words[$index]" = "--min" ]; then
+		_alternative \
+			":min freq between 0 and 100:"
+	elif [ "$words[$index]" = "-t" ] || [ "$words[$index]" = "--turbo" ]; then
+		_alternative \
+			":turbo boost either 0 or 1:"
+	elif [ "$words[$index]" = "-p" ] || [ "$words[$index]" = "--plan" ]; then
+		_alternative \
+			":power plan name or number:"
+
+	else
+		_actions
 	fi
 
 }
 
 _unprivilaged_options()
 {
+	# Add long option support
 	local options;
 	options=(
 		"-i:Get the io scheduler"
@@ -38,6 +63,7 @@ _unprivilaged_options()
 
 _privilaged_options()
 {
+	# Add long option support
 	local options;
 	options=(
 		"-p:Set a pre-defined plan"
@@ -53,6 +79,7 @@ _privilaged_options()
 
 _unprivilaged_actions()
 {
+	# Add long option support
 	local actions;
 	actions=(
 		"-h:Print the help output"
@@ -65,6 +92,7 @@ _unprivilaged_actions()
 
 _privilaged_actions()
 {
+	# Add long option support
 	local actions;
 	actions=(
 		"-s:Modify the current CPU values"
