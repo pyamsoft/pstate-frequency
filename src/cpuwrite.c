@@ -99,7 +99,7 @@ static void internal_set(struct cpu_t *const cpu, const char *const file_name,
 }
 
 /*
- * Write a frquency value in kilohertz into the files specified by the 
+ * Write a frquency value in kilohertz into the files specified by the
  * frequency_files array
  */
 static void internal_set_freq(struct cpu_t *const cpu, char **const frequency_files,

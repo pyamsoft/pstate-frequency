@@ -42,6 +42,5 @@ struct flag_t {
 struct flag_t flags_create(void);
 void flags_destroy(struct flag_t* flags);
 int32_t set_plan(struct cpu_t *const cpu, struct flag_t *const flags);
-                
 
 #endif

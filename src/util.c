@@ -32,7 +32,7 @@
 int32_t debug = 0;
 
 /*
- * Check if a given string starts with a given prefix, return 1 for success and 
+ * Check if a given string starts with a given prefix, return 1 for success and
  * 0 for failure
  */
 int32_t str_starts_with(const char *restrict string, const char *restrict prefix)

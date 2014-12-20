@@ -31,7 +31,7 @@ static void internal_cpu_destroy(struct cpu_t *const cpu);
 
 /*
  * Creates a new cpu_t object and initializes memory for the following:
- * CPU_MIN_FREQ_FILES array 
+ * CPU_MIN_FREQ_FILES array
  * CPU_MAX_FREQ_FILES array
  * CPU_NUMBER int
  * and char strings allocated for

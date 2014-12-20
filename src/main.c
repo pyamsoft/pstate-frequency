@@ -32,7 +32,8 @@
 #include "src/plan.h"
 #include "src/util.h"
 
-static int32_t handle_result(struct cpu_t *const cpu, struct flag_t *const flags, const int32_t result);
+static int32_t handle_result(struct cpu_t *const cpu,
+		struct flag_t *const flags, const int32_t result);
 static void print_version(void);
 static int32_t access_cpu(struct cpu_t *const cpu, struct flag_t *const flags);
 static void print_help(void);
@@ -45,8 +46,8 @@ static void quit(struct cpu_t *cpu, struct flag_t *flags)
 {
 	cpu_destroy(cpu);
 	flags_destroy(flags);
-	
 }
+
 int main(int32_t argc, char **argv)
 {
 	struct flag_t flags = flags_create();
@@ -169,7 +170,7 @@ static int32_t access_cpu(struct cpu_t *const cpu, struct flag_t *const flags)
 			const int32_t flag_max = flags->max;
 			const int32_t flag_turbo = flags->turbo;
                         if (!(flag_max != FLAG_UNINITIALIZED
-					|| flag_min != FLAG_UNINITIALIZED 
+					|| flag_min != FLAG_UNINITIALIZED
 					|| flag_turbo == 1 || flag_turbo == 0)) {
                                 fprintf(stderr, "%sSet called with no target or invalid values%s\n",
                                         PYAM_COLOR_BOLD_RED, PYAM_COLOR_OFF);

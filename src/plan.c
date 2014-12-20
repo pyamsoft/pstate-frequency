@@ -49,7 +49,7 @@ struct flag_t flags_create(void)
 }
 
 /*
- * Free an allocated flag_t resources 
+ * Free an allocated flag_t resources
  */
 void flags_destroy(struct flag_t* flags)
 {
