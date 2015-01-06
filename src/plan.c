@@ -39,6 +39,8 @@ static void set_auto(struct cpu_t *const cpu, struct flag_t *const flags, const 
 static int32_t hide_dir(char *const dir_name);
 static int32_t is_main_power_type(char *const dir_name);
 static int32_t get_path_length(const char *const dir_name, char *const d_name);
+static int32_t set_plan_by_status(struct cpu_t* cpu, struct flag_t *const flags,
+		const char *const dir_name, struct dirent *const entry);
 
 #endif
 
@@ -101,34 +103,8 @@ static void set_auto(struct cpu_t *const cpu, struct flag_t *const flags, const 
 	while(entry) {
 		if (!hide_dir(entry->d_name)) {
 			if (get_path_length(dir_name, entry->d_name) < PATH_MAX) {
-				char *dir_entry;
-				safe_malloc(cpu, asprintf(&dir_entry, "%s/%s/type", dir_name, entry->d_name),
-						"Could not malloc for subdir\n", NULL);
-				if (access(dir_entry, F_OK) != -1) {
-					char *power_type = get_power_type(cpu, dir_entry);
-					if (is_main_power_type(power_type)) {
-						char *status;
-						safe_malloc(cpu, asprintf(&status, "%s/%s/online",
-							dir_name, entry->d_name),
-							"Could not malloc for online\n", power_type, dir_entry, NULL);
-						int32_t online = get_online_status(cpu, status);
-						if (online) {
-							log_debug("auto set performance\n");
-							set_performance(flags);
-						} else {
-							log_debug("auto set powersave\n");
-							set_powersave(flags);
-						}
-						free(status);
-						if (online) {
-							free(power_type);
-							free(dir_entry);
-							break;
-						}
-					}
-					free(power_type);
-				}
-				free(dir_entry);
+				if (set_plan_by_status(cpu, flags, dir_name, entry))
+					break;
 			} else {
 				log_error("Path name is too long\n");
 				exit(1);
@@ -140,6 +116,38 @@ static void set_auto(struct cpu_t *const cpu, struct flag_t *const flags, const 
 		log_error("Could not close directory: %s\n", dir_name);
 		exit(1);
 	}
+}
+
+static int32_t set_plan_by_status(struct cpu_t* cpu, struct flag_t *const flags,
+		const char *const dir_name, struct dirent *const entry)
+{
+	char *dir_entry;
+	safe_malloc(cpu, asprintf(&dir_entry, "%s/%s/type", dir_name, entry->d_name),
+			"Could not malloc for subdir\n", NULL);
+	if (access(dir_entry, F_OK) != -1) {
+		char *power_type = get_power_type(cpu, dir_entry);
+		if (is_main_power_type(power_type)) {
+			char *status;
+			safe_malloc(cpu, asprintf(&status, "%s/%s/online",
+				dir_name, entry->d_name),
+				"Could not malloc for online\n", power_type, dir_entry, NULL);
+			int32_t online = get_online_status(cpu, status);
+			if (online) {
+				log_debug("auto set performance\n");
+				set_performance(flags);
+			} else {
+				log_debug("auto set powersave\n");
+				set_powersave(flags);
+			}
+			free(status);
+			free(power_type);
+			free(dir_entry);
+			return 1;
+		}
+		free(power_type);
+	}
+	free(dir_entry);
+	return 0;
 }
 
 /*
