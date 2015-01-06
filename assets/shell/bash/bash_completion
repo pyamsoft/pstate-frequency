@@ -25,8 +25,8 @@ _pstate-frequency()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
-    short_actions="-v -h -s -g -d"
-    long_actions="--quiet --version --help --set --get"
+    short_actions="-v -h -s -g -d -q"
+    long_actions="--quiet --version --help --set --get --quiet"
     shorts_options="-m -n -t -p"
     long_options="--max --min --turbo --plan"
     plans="powersave performance max-performance"
