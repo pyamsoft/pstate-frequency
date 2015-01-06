@@ -31,33 +31,42 @@ pkgver() {
 	# Please read config.mk for an explanation
 	# of the variable options in this file
 
+# DEFAULTS 
+
+# _CC="cc"
+# _PREFIX="/usr/local"
+# _ETCDIR="/etc"
+# _WRITE_MSR=0
+# _INCLUDE_BASH_COMPLETION=1
+# _INCLUDE_ZSH_COMPLETION=1
+# _INCLUDE_UDEV_RULE=0
+
+_CC="cc"
+_PREFIX="/usr"
+_ETCDIR="/etc"
+_WRITE_MSR=0
+_INCLUDE_BASH_COMPLETION=1
+_INCLUDE_ZSH_COMPLETION=1
+_INCLUDE_UDEV_RULE=1
+
 ##################################################
 
 build() {
 	cd "$srcdir/$_gitname"
-	# Variables with their defaults below
-	# CC=cc
-	# WRITE_MSR=0
 	make\
-		CC="cc" \
-		WRITE_MSR=0
+		CC="${_CC}" \
+		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
+		WRITE_MSR=${_WRITE_MSR}
 }
 
 package() {
 	cd "$srcdir/$_gitname"
-	# Variables with their defaults below
-	# CC=cc
-	# PREFIX=/usr/local
-	# ETCDIR=/etc
-	# INCLUDE_BASH_COMPLETION=1
-	# INCLUDE_ZSH_COMPLETION=1
-	# INCLUDE_UDEV_RULE=0
 	make DESTDIR="$pkgdir" \
-		CC="cc" \
-		PREFIX="/usr" \
-		ETCDIR="/etc" \
-		INCLUDE_BASH_COMPLETION=1 \
-		INCLUDE_ZSH_COMPLETION=1 \
-		INCLUDE_UDEV_RULE=0 \
+		CC="${_CC}" \
+		PREFIX="${_PREFIX}" \
+		ETCDIR="${_ETCDIR}" \
+		INCLUDE_BASH_COMPLETION=$_INCLUDE_BASH_COMPLETION \
+		INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
+		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
 		install
 }
