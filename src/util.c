@@ -27,7 +27,7 @@
 #include "src/util.h"
 
 /*
- * The requested state of debugging. Initialized to 0 for OFF, 1 for ON
+ * The requested state of debugging. Initialized to 0 for OFF, 1 for ON, -1 for QUIET
  */
 int32_t debug = 0;
 
@@ -88,7 +88,7 @@ int32_t string_is_digits(const char *const string)
  */
 void log_debug(const char *const format, ...)
 {
-        if (debug) {
+        if (debug == 1) {
                 va_list arg;
                 va_start(arg, format);
                 vfprintf(stdout, format, arg);
@@ -102,7 +102,7 @@ void log_debug(const char *const format, ...)
  */
 void log_error(const char *const format, ...)
 {
-        if (debug) {
+        if (debug == 1) {
                 va_list arg;
                 va_start(arg, format);
                 vfprintf(stderr, format, arg);

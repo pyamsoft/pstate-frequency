@@ -55,4 +55,4 @@ BIN_PERMISSION=755
 LDFLAGS+= -Wl,-O3,--sort-common,--as-needed,-z,relro,-s ${LIBS}
 
 # Compiler flags
-CFLAGS+= -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CC}]\" ${STD} -O3 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}
+CFLAGS+= -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CC}]\" -DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE} ${STD} -O3 -Wall -Wextra -Werror -Wmissing-prototypes -Wunreachable-code ${INCS}

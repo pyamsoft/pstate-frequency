@@ -23,6 +23,13 @@
 
 #include "src/cpu.h"
 
+#if INCLUDE_UDEV_RULE >= 1
+
+char *get_power_type(struct cpu_t *const cpu, char *const file_name);
+int32_t get_online_status(struct cpu_t *const cpu, char *const file_name);
+
+#endif
+
 double get_scaling_max(struct cpu_t *const cpu);
 double get_scaling_min(struct cpu_t *const cpu);
 int32_t get_turbo(struct cpu_t *const cpu);

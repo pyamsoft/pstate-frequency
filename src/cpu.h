@@ -24,6 +24,12 @@
 
 #include <stdint.h>
 
+#if INCLUDE_UDEV_RULE >= 1
+
+#define DIR_POWER_SUPPLY		"/sys/class/power_supply"
+
+#endif
+
 #define FILE_SCALING_DRIVER             "/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
 #define FILE_INFO_MAX_FREQ              "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq"
 #define FILE_INFO_MIN_FREQ              "/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq"
