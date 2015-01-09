@@ -76,6 +76,15 @@ There is also a power plan meant to be used with the udev rule:
 If the main powersource is offline, then the *powersave* plan is set.  
 
 
+# Understanding pstate-frequency
+
+pstate-frequency is just a convenient frontend for pre-existing software. It interacts with  
+and modifies variables that are then read by other drivers or modules to effect system  
+performance. Any problems with the system which may have indirectly resulted from the  
+usage of pstate-frequency, but are not related to the output or input handling in  
+pstate-frequency itself, should be presented to the respective authors.
+
+
 # Questions
 
 

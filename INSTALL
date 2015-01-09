@@ -1,9 +1,9 @@
 # Setup
 
-Please look at the config.mk file.  
-Included in this file are various configuration options  
+Please look at the config.mk file.
+Included in this file are various configuration options
 which pertain to the use of pstate-frequency.
-Enable or disable by choice the use of  
+Enable or disable by choice the use of
 
 + debugging messages in program output
 + the use of the msr kernel module to explicitly set
@@ -11,7 +11,7 @@ a Turbo Boost bit to ON or OFF
 + a udev rule for dynamic plan setting on power change
 + basic bash completion of options
 
-Other options that may be of interest to the user are  
+Other options that may be of interest to the user are
 + The C compiler to use
 + The location of install
 
@@ -19,7 +19,11 @@ Other options that may be of interest to the user are
 Once the config.mk file has been setup to user liking,
 run the commands
 
-make - to build the pstate-frequency binary
-make install - to install the pstate-frequency binary to $PREFIX    
-               and the udev and bash completion rules should they  
+make	     - to build the pstate-frequency binary
+make clean   - clean the build directory and remove any
+               compiled object files
+make options - display the compiler, linker, and make options
+               as well as the compiler used.
+make install - to install the pstate-frequency binary to $PREFIX
+               and the udev and bash completion rules should they
                be enabled

@@ -1,45 +1,46 @@
-# Maintainer: pyamsoft <pyam.soft@gmail.com>
+## Maintainer: pyamsoft <pyam.soft@gmail.com>
 
-# Varialbes which hold the name of the git repository
-# and the branch to clone
-_gitname=pstate-frequency
-_gitbranch=master
 pkgname=pstate-frequency-git
-pkgdesc="Easily control Intel p-state driver on Linux "
+pkgdesc="Easily control Intel p-state driver"
 pkgver=1.r93.d868941
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
 optdepends=(
-	'msr-tools: Allow explicit setting of Turbo Boost bit on Sandy Bride+ CPUs'
+	'msr-tools: Allow acpi-cpufreq setting of Turbo Boost bit on Sandy Bride+ CPUs'
 )
 provides=('pstate-frequency')
 license=('GPLv2')
 url="https://github.com/pyamsoft/pstate-frequency.git"
+sha256sums=('SKIP') ## The SHA256 is constantly changing since this is
+                    ## pulled from git so skip the verification check
+
+## The name of the git project
+_gitname=pstate-frequency
+
+## The 'dev' branch is not guaranteed to be stable, and
+## may enter periods where it fails to run, or possibly
+## even fail to compile. While newer features will enter
+## 'dev' before 'master' it is not recommended to use
+## the dev branch on production machines.
+_gitbranch=master
+# _gitbranch=dev
+
 source=("${_gitname}::git+${url}#branch=${_gitbranch}")
-sha256sums=('SKIP')
 
-pkgver() {
-	cd "$srcdir/$_gitname"
-	printf "1.r%s.%s" \
-		"$(git rev-list --count HEAD)" \
-		"$(git rev-parse --short HEAD)"
-}
+###############################################################################
 
-##################################################
+## Please read config.mk for an explanation
+## of the variable options in this file
 
-	# Please read config.mk for an explanation
-	# of the variable options in this file
-
-# DEFAULTS 
-
-# _CC="cc"
-# _PREFIX="/usr/local"
-# _ETCDIR="/etc"
-# _WRITE_MSR=0
-# _INCLUDE_BASH_COMPLETION=1
-# _INCLUDE_ZSH_COMPLETION=1
-# _INCLUDE_UDEV_RULE=0
+## DEFAULTS
+## _CC="cc"
+## _PREFIX="/usr/local"
+## _ETCDIR="/etc"
+## _WRITE_MSR=0
+## _INCLUDE_BASH_COMPLETION=1
+## _INCLUDE_ZSH_COMPLETION=1
+## _INCLUDE_UDEV_RULE=1
 
 _CC="cc"
 _PREFIX="/usr"
@@ -49,11 +50,16 @@ _INCLUDE_BASH_COMPLETION=1
 _INCLUDE_ZSH_COMPLETION=1
 _INCLUDE_UDEV_RULE=1
 
-##################################################
+pkgver() {
+	cd "$srcdir/$_gitname"
+	printf "1.r%s.%s" \
+		"$(git rev-list --count HEAD)" \
+		"$(git rev-parse --short HEAD)"
+}
 
 build() {
 	cd "$srcdir/$_gitname"
-	make\
+	make \
 		CC="${_CC}" \
 		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
 		WRITE_MSR=${_WRITE_MSR}
@@ -61,11 +67,12 @@ build() {
 
 package() {
 	cd "$srcdir/$_gitname"
-	make DESTDIR="$pkgdir" \
+	make \
+		DESTDIR="$pkgdir" \
 		CC="${_CC}" \
 		PREFIX="${_PREFIX}" \
 		ETCDIR="${_ETCDIR}" \
-		INCLUDE_BASH_COMPLETION=$_INCLUDE_BASH_COMPLETION \
+		INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
 		INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
 		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
 		install
