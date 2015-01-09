@@ -33,7 +33,7 @@ INCLUDE_ZSH_COMPLETION?=1
 # Include a udev rule which will set the pstate to powersave
 # on battery and performance on AC power
 # (Generally useful for laptops and mobile machines)
-INCLUDE_UDEV_RULE?=0
+INCLUDE_UDEV_RULE?=1
 
 # Options you may change
 # C Compiler to use

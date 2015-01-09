@@ -7,12 +7,13 @@ UDEV=10-pstate-frequency.rules
 TARGET=bin/$(EXEC_NAME)
 
 # The Target Build
-all: options $(TARGET)
+all: $(TARGET)
 
 options:
-	@echo "CFLAGS  = " $(CFLAGS)
-	@echo "LDFLAGS = " $(LDFLAGS)
-	@echo "CC      = " $(CC)
+	@echo "CFLAGS    = " $(CFLAGS)
+	@echo "LDFLAGS   = " $(LDFLAGS)
+	@echo "MAKEFLAGS = " $(MAKEFLAGS)
+	@echo "CC        = " $(CC)
 
 $(OBJECTS): | obj
 
