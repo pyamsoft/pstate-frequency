@@ -35,9 +35,10 @@ While building, there are a couple of options that one may configure or change:
 + Whether or not to print out debug error messages (defaults to No)  
 + Whether or not to enable the use of the msr kernel module (defaults to No)  
 + Whether or not to install bash completion (defaults to Yes)
++ Whether or not to install zsh completion (defaults to Yes)
 + Whether or not to install a udev rule which monitors the state of the power supply  
 and sets the power plan automatically to powersave when on battery and the power plan  
-to performance when plugged into via AC adapter (defaults to No)
+to performance when plugged into via AC adapter (defaults to Yes)
 
 ### Usage
 
@@ -62,16 +63,21 @@ The *-s --set* option also takes one or more of these flags as necessary argumen
 + **-t --turbo** Adjust the current state of Turbo Boost (0 is ON, 1 is OFF)
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
 
-There are three power plans:  
-1. **powersave (1)**  Sets the minimum and maximum scaling frequencies to the lowest available  
+There are three user power plans:  
+1. **powersave (1)** Sets the minimum and maximum scaling frequencies to the lowest available  
 and disables Turbo Boost.  
 2. **performance (2)** Sets the minimum scaling frequency to the lowest available,  
 the maximum scaling frequency to the highest available non-turbo frequency and disables Turbo Boost.  
 3. **max-performance (3)** Sets the minimum and maximum scaling frequencies to the  
 highest available frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
 
+There is also a power plan meant to be used with the udev rule:
+1. **auto (0)** If the computer's main powersource is online, then the *performance* plan is set.  
+If the main powersource is offline, then the *powersave* plan is set.  
+
+
 # Questions
 
 
 Questions or issues should be either posted in the issue section of this repository,  
-or directed by email to Peter Yamanaka @ pyam.soft@gmail.com
+or directed by email to pyamsoft @ \<pyam.soft@gmail.com\>
