@@ -64,9 +64,7 @@ int main(int32_t argc, char **argv)
                 {"debug",         no_argument,        NULL,           'd'},
                 {"plan",          required_argument,  NULL,           'p'},
                 {"io",            required_argument,  NULL,           'i'},
-                {"io-scheduler",  required_argument,  NULL,           'i'},
                 {"gov",           required_argument,  NULL,           'o'},
-                {"governor",	  required_argument,  NULL,           'o'},
 		{"max",		  required_argument,  NULL,           'm'},
 		{"min",		  required_argument,  NULL,           'n'},
 		{"turbo",	  required_argument,  NULL,           't'},
@@ -311,25 +309,25 @@ static void print_help()
         printf("\n");
         printf("    actions:\n");
 	printf("        unprivilaged:\n");
-        printf("            -h | --help                 Display this help and exit\n");
-        printf("            -v | --version              Display application version and exit\n");
-        printf("            -d | --debug                Print debugging messages to stdout\n");
-        printf("            -q | --quiet                Supress all output\n");
-        printf("            -g | --get                  Access current CPU values\n");
+        printf("            -h | --help     Display this help and exit\n");
+        printf("            -v | --version  Display application version and exit\n");
+        printf("            -d | --debug    Print debugging messages to stdout\n");
+        printf("            -q | --quiet    Supress all output\n");
+        printf("            -g | --get      Access current CPU values\n");
 	printf("\n");
 	printf("        privilaged:\n");
-        printf("            -s | --set                  Modify current CPU values\n");
+        printf("            -s | --set      Modify current CPU values\n");
 	printf("\n");
         printf("    options:\n");
 	printf("        unprivilaged:\n");
-	printf("            -i | --io | --io-scheduler  Get the IO Scheduler for the given device\n");
+	printf("            -i | --io       Get the IO Scheduler for the given device\n");
 	printf("\n");
 	printf("        privilaged:\n");
-        printf("            -p | --plan		        Set a predefined power plan\n");
-        printf("            -m | --max		        Modify current CPU max frequency\n");
-	printf("            -i | --io  | --io-scheduler Set the IO Scheduler for the given device\n");
-	printf("            -o | --gov | --governor     Set the cpufreq governor\n");
-        printf("            -n | --min                  Modify current CPU min frequency\n");
-        printf("            -t | --turbo                Modify curent CPU turbo boost state\n");
+        printf("            -p | --plan	    Set a predefined power plan\n");
+        printf("            -m | --max	    Modify current CPU max frequency\n");
+	printf("            -i | --io       Set the IO Scheduler for the given device\n");
+	printf("            -o | --gov      Set the cpufreq governor\n");
+        printf("            -n | --min      Modify current CPU min frequency\n");
+        printf("            -t | --turbo    Modify curent CPU turbo boost state\n");
         printf("\n");
 }
