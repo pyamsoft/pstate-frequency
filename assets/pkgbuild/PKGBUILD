@@ -52,7 +52,7 @@ build() {
 	cd "$srcdir/$_gitname"
 	make \
 		CC="${_CC}" \
-		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
+		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE}
 }
 
 package() {
