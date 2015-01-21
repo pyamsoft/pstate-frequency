@@ -1,5 +1,5 @@
 /*
- * pstate_frequency Easier control of the Intel p-state driver
+ * pstate-frequency Easier control of the Intel p-state driver
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,36 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#ifndef C_PYAM_CPUWRITE_H_
-#define C_PYAM_CPUWRITE_H_
+#include <iostream>
+#include <sstream>
 
-#include "src/cpu.h"
+#include "include/psfreq_util.h"
 
-void set_turbo(struct cpu_t *const cpu, const int32_t turbo);
-void set_scaling_max(struct cpu_t *const cpu, const int32_t max);
-void set_scaling_min(struct cpu_t *const cpu, const int32_t min);
+namespace psfreq {
 
-#endif
+double stringToNumber(const std::string &line)
+{
+        std::istringstream iss(line);
+	int result;
+	iss >> result;
+	return result;
+}
+
+int boundValue(const int value, const int minBound,
+		const int maxBound)
+{
+	if (value < minBound) {
+		return minBound;
+	} else if (value > maxBound) {
+		return maxBound;
+	} else {
+		return value;
+	}
+}
+
+bool stringStartsWith(const std::string &control, const std::string &value)
+{
+	return control.compare(0, value.length(), value) == 0;
+}
+
+}

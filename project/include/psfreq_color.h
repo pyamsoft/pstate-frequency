@@ -1,5 +1,5 @@
 /*
- * pstate_frequency Easier control of the Intel p-state driver
+ * pstate-frequency Easier control of the Intel p-state driver
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,29 +18,19 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#ifndef C_PYAM_PLAN_H_
-#define C_PYAM_PLAN_H_
+#ifndef C_PSFREQ_COLORS_H_
+#define C_PSFREQ_COLORS_H_
 
-#include <stdint.h>
+namespace psfreq {
 
-#include "src/cpu.h"
+const char *const PSFREQ_COLOR_OFF = "\033[0m";
+const char *const PSFREQ_COLOR_BOLD_RED = "\033[1;31m";
+const char *const PSFREQ_COLOR_BOLD_GREEN = "\033[1;32m";
+const char *const PSFREQ_COLOR_BOLD_BLUE = "\033[1;34m";
+const char *const PSFREQ_COLOR_BOLD_MAGENTA = "\033[1;35m";
+const char *const PSFREQ_COLOR_BOLD_CYAN = "\033[1;36m";
+const char *const PSFREQ_COLOR_BOLD_WHITE = "\033[1;37m";
 
-#define ACTION_SET 2
-#define ACTION_GET 1
-#define ACTION_UNDEFINED 0
-#define FLAG_UNINITIALIZED -1
-
-struct flag_t {
-	int32_t action;
-	int32_t min;
-	int32_t max;
-	int32_t turbo;
-	char* iosched;
-	char* governor;
-};
-
-struct flag_t flags_create(void);
-void flags_destroy(struct flag_t* flags);
-int32_t set_plan(struct cpu_t *const cpu, struct flag_t *const flags);
+}
 
 #endif

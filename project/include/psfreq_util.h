@@ -1,5 +1,5 @@
 /*
- * pstate_frequency Easier control of the Intel p-state driver
+ * pstate-frequency Easier control of the Intel p-state driver
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,17 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#ifndef C_PYAM_COLORS_H_
-#define C_PYAM_COLORS_H_
+#ifndef CPP_PSFREQ_UTIL_H
+#define CPP_PSFREQ_UTIL_H
 
-#define PYAM_COLOR_OFF           "\033[0m"
-#define PYAM_COLOR_BOLD_RED      "\033[1;31m"
-#define PYAM_COLOR_BOLD_GREEN    "\033[1;32m"
-#define PYAM_COLOR_BOLD_BLUE     "\033[1;34m"
-#define PYAM_COLOR_BOLD_MAGENTA  "\033[1;35m"
-#define PYAM_COLOR_BOLD_CYAN     "\033[1;36m"
-#define PYAM_COLOR_BOLD_WHITE    "\033[1;37m"
+#include <string>
+
+namespace psfreq {
+
+	double stringToNumber(const std::string &line);
+	int boundValue(const int value, const int minBound,
+			const int maxBound);
+	bool stringStartsWith(const std::string &control, const std::string &value);
+}
 
 #endif

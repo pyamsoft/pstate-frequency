@@ -2,12 +2,12 @@
 
 pkgname=pstate-frequency-git
 pkgdesc="Easily control Intel p-state driver"
-pkgver=1.r93.d868941
+pkgver=1.0.0.git
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
 optdepends=(
-	'msr-tools: Allow acpi-cpufreq setting of Turbo Boost bit on Sandy Bride+ CPUs'
+	# 'msr-tools: Allow acpi-cpufreq setting of Turbo Boost bit on Sandy Bride+ CPUs'
 )
 provides=('pstate-frequency')
 license=('GPLv2')
@@ -34,35 +34,25 @@ source=("${_gitname}::git+${url}#branch=${_gitbranch}")
 ## of the variable options in this file
 
 ## DEFAULTS
-## _CC="cc"
+## _CXX="c++"
 ## _PREFIX="/usr/local"
 ## _ETCDIR="/etc"
-## _WRITE_MSR=0
 ## _INCLUDE_BASH_COMPLETION=1
 ## _INCLUDE_ZSH_COMPLETION=1
 ## _INCLUDE_UDEV_RULE=1
 
-_CC="cc"
+_CXX="c++"
 _PREFIX="/usr"
 _ETCDIR="/etc"
-_WRITE_MSR=0
 _INCLUDE_BASH_COMPLETION=1
 _INCLUDE_ZSH_COMPLETION=1
 _INCLUDE_UDEV_RULE=1
-
-pkgver() {
-	cd "$srcdir/$_gitname"
-	printf "1.r%s.%s" \
-		"$(git rev-list --count HEAD)" \
-		"$(git rev-parse --short HEAD)"
-}
 
 build() {
 	cd "$srcdir/$_gitname"
 	make \
 		CC="${_CC}" \
 		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
-		WRITE_MSR=${_WRITE_MSR}
 }
 
 package() {

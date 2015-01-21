@@ -1,39 +1,40 @@
 include config.mk
 
+PROJECT_ROOT=project
 EXEC_NAME=pstate-frequency
-SOURCES=$(wildcard src/**/*.c src/*.c)
-OBJECTS=$(patsubst src/%.c,obj/%.o,$(SOURCES))
-UDEV=10-pstate-frequency.rules
-TARGET=bin/$(EXEC_NAME)
+SOURCES=$(wildcard $(PROJECT_ROOT)/src/*.cpp)
+OBJECTS=$(patsubst $(PROJECT_ROOT)/src/%.cpp,$(PROJECT_ROOT)/obj/%.o,$(SOURCES))
+UDEV=10-$(EXEC_NAME).rules
+TARGET=$(PROJECT_ROOT)/bin/$(EXEC_NAME)
 
 # The Target Build
 all: $(TARGET)
 
 options:
-	@echo "CFLAGS    = " $(CFLAGS)
+	@echo "CXXFLAGS  = " $(CXXFLAGS)
 	@echo "LDFLAGS   = " $(LDFLAGS)
 	@echo "MAKEFLAGS = " $(MAKEFLAGS)
-	@echo "CC        = " $(CC)
+	@echo "CXX       = " $(CXX)
 
-$(OBJECTS): | obj
+$(OBJECTS): | $(PROJECT_ROOT)/obj
 
-obj:
+$(PROJECT_ROOT)/obj:
 	@mkdir -p $@
 
-obj/%.o : src/%.c
-	@echo "  CC  $@"
-	@$(CC) -c $< -o $@ $(CFLAGS)
+$(PROJECT_ROOT)/obj/%.o : $(PROJECT_ROOT)/src/%.cpp
+	@echo "  CXX  $@"
+	@$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 $(TARGET): dirs $(OBJECTS)
-	@echo "  LD  $@"
-	@$(CC) -o $@ $(OBJECTS) $(LDFLAGS) 
+	@echo "  LD   $@"
+	@$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
 
 dirs:
-	@mkdir -p obj
-	@mkdir -p bin
+	@mkdir -p $(PROJECT_ROOT)/obj
+	@mkdir -p $(PROJECT_ROOT)/bin
 
 clean:
-	rm -rf $(TARGET) $(OBJECTS) bin obj
+	rm -rf $(TARGET) $(OBJECTS) $(PROJECT_ROOT)/bin $(PROJECT_ROOT)/obj
 
 install: all
 	@echo "  INSTALL  $(DESTDIR)/$(PREFIX)/$(TARGET)"
@@ -53,7 +54,7 @@ ifeq ($(INCLUDE_UDEV_RULE), 1)
 	@echo "  INSTALL  $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)"
 	@install -d $(DESTDIR)/$(ETCDIR)/udev/rules.d
 	@install -m 644 assets/udev/$(UDEV) $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)
-	@sed -i "s#pstate-frequency#$(PREFIX)/bin/pstate-frequency#g" $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)
+	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" $(DESTDIR)/$(ETCDIR)/udev/rules.d/$(UDEV)
 endif
 
 uninstall:
