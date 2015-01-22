@@ -17,8 +17,8 @@ pstate-frequency is distribution independent, and should run on all standard ver
 based operating systems which include a recent kernel (3.9+) and come with the set of expected  
 core utilities, including *ls*, *grep*, *wc*, and *modprobe*. The system must also support the use of  
 the **proc** and **sys** mounts, as found on a typical modern system. These attributes are assumed  
-on any system attempting to use the pstate-frequency frontend, and support towards any system which  
-does not conform to these normally expected features cannot be given at this time.
+on any system attempting to use the pstate-frequency frontend, and support towards any system  
+which does not conform to these normally expected features cannot be given at this time.
 
 
 #### Optional
