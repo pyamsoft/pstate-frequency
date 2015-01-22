@@ -1,10 +1,10 @@
 # pstate-frequency
 
 
-Easily control Intel p-state driver on Linux (3.9 and upwards) 
+Easily control Intel p-state driver on Linux (3.9 and upwards)
 
 pstate-frequency is able to adjust the Intel p-state driver values for the minimum  
-and maximum scaling frequencies and the state of turbo boost. 
+and maximum scaling frequencies and the state of turbo boost.
 
 ### Requirements
 
@@ -22,7 +22,7 @@ work on a basic level using the default **cpufreq** driver.
 + **msr-tools** package to provide the **wrmsr** binary
 + The **msr** kernel module which should also be provided by the **msr-tools** package.
 + *Please note that*
-**msr-tools** 
+**msr-tools**
 *may be named diffrently on your distribution of choice.*
 
 ### Installation
@@ -30,10 +30,8 @@ work on a basic level using the default **cpufreq** driver.
 
 The installation process follows the basic *make, make install* process.  
 While building, there are a couple of options that one may configure or change:  
-+ The C compiler used (defaults to cc)  
++ The C++ compiler used (defaults to c++, though clang++ is recommended)  
 + The directory to install to (defaults to /usr/local)  
-+ Whether or not to print out debug error messages (defaults to No)  
-+ Whether or not to enable the use of the msr kernel module (defaults to No)  
 + Whether or not to install bash completion (defaults to Yes)
 + Whether or not to install zsh completion (defaults to Yes)
 + Whether or not to install a udev rule which monitors the state of the power supply  
