@@ -38,12 +38,15 @@ int planFromOptArg(char *const arg);
 
 void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues)
 {
-	const int max = psfreq::boundValue(cpuValues.getMax(), cpu.getInfoMinValue() + 1, cpu.getInfoMaxValue());
-	const int min = psfreq::boundValue(cpuValues.getMin(), cpu.getInfoMinValue(), cpu.getInfoMaxValue() - 1);
-	const int turbo = psfreq::boundValue(cpuValues.getTurbo(), 0, 1);
-	const int newTurbo = (turbo != -1 ? turbo : cpu.getTurboBoost());
-	const int newMin = (min >= 0 ? min : cpu.getMinPState());
+	const int max = cpuValues.getMax();
+	const int min = cpuValues.getMin();
+	const int turbo = cpuValues.getTurbo();
+	int newTurbo = (turbo != -1 ? turbo : cpu.getTurboBoost());
+	newTurbo = psfreq::boundValue(newTurbo, 0, 1);
+	int newMin = (min >= 0 ? min : cpu.getMinPState());
+	newMin = psfreq::boundValue(newMin, cpu.getInfoMinValue(), cpu.getInfoMaxValue() - 1);
 	int newMax = (max >= 0 ? max : cpu.getMaxPState());
+	newMax = psfreq::boundValue(newMax, cpu.getInfoMinValue() + 1, cpu.getInfoMaxValue());
 	newMax = (newMax > newMin ? newMax : newMin + 1);
 
 	cpu.setSaneDefaults();
@@ -242,8 +245,15 @@ int main(int argc, char** argv)
 		printCpuValues(cpu);
 	} else {
 		if (geteuid() == 0) {
-			setCpuValues(cpu, cpuValues);
-			printCpuValues(cpu);
+			if (cpuValues.isInitialized()) {
+				setCpuValues(cpu, cpuValues);
+				printCpuValues(cpu);
+			} else {
+				std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED
+					<< "Set called with no target"
+					<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+				return EXIT_FAILURE;
+			}
 		} else {
 			std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Root privilages required"
 				<< psfreq::PSFREQ_COLOR_OFF << std::endl;

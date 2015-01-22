@@ -61,6 +61,7 @@ public:
 	bool isActionNull() const;
 	bool isActionGet() const;
 	bool isActionSet() const;
+	bool isInitialized() const;
 };
 
 }

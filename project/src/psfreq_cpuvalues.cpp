@@ -42,6 +42,11 @@ cpuValues::~cpuValues()
 {
 }
 
+bool cpuValues::isInitialized() const
+{
+	return hasAction() && (max != -1 || min != -1 || turbo != -1);
+}
+
 bool cpuValues::hasAction() const
 {
 	return action != -1;
