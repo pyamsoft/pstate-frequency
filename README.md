@@ -89,7 +89,7 @@ the maximum scaling frequency to the highest available non-turbo frequency and d
 3. **max-performance (3)** Sets the minimum and maximum scaling frequencies to the  
 highest available frequency taking into account Turbo Boost frequencies, and enables Turbo Boost.  
 
-There is also a power plan meant to be used with the udev rule:
+There is also a power plan meant to be used with the udev rule:  
 1. **auto (0)** If the computer's main powersource is online, then the *performance* plan is set.  
 If the main powersource is offline, then the *powersave* plan is set.  
 
