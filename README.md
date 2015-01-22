@@ -1,31 +1,38 @@
 # pstate-frequency
 
-
 Easily control Intel p-state driver on Linux (3.9 and upwards)
 
 pstate-frequency is able to adjust the Intel p-state driver values for the minimum  
 and maximum scaling frequencies and the state of turbo boost.
 
-### Requirements
 
+### Requirements
 
 + Intel P-State driver (included in kernel 3.9 and upwards).  
 Enable it by adding **intel_pstate=enable** to the boot command line.  
 If the p-state driver is not present in your system, the application will still  
 work on a basic level using the default **cpufreq** driver.
 
-## Optional
+pstate-frequency is distribution independent, and should run on all standard versions of Linux  
+based operating systems which include a recent kernel (3.9+) and come with the set of expected  
+core utilities, including *ls*, *grep*, *wc*, and *modprobe*. The system must also support the use of  
+the **proc** and **sys** mounts, as found on a typical modern system. These attributes are assumed  
+on any system attempting to use the pstate-frequency frontend, and support towards any system which  
+does not conform to these normally expected features cannot be given at this time.
+
+
+#### Optional
 
 + **msr-tools** package to provide the **wrmsr** binary
-+ The **msr** kernel module which should also be provided by the **msr-tools** package.
 + *Please note that*
 **msr-tools**
 *may be named diffrently on your distribution of choice.*
 
+
 ### Installation
 
-
 The installation process follows the basic *make, make install* process.  
+
 While building, there are a couple of options that one may configure or change:  
 + The C++ compiler used (defaults to c++, though clang++ is recommended)  
 + The directory to install to (defaults to /usr/local)  
@@ -35,8 +42,24 @@ While building, there are a couple of options that one may configure or change:
 and sets the power plan automatically to powersave when on battery and the power plan  
 to performance when plugged into via AC adapter (defaults to Yes)
 
-### Usage
 
+#### Distribution Specific Installations
+
+At this time, only ArchLinux is officially supported via the Arch User Repository (AUR).
+
+pstate-frequency comes with a PKGBUILD provided in the assets directory.  
+The PKGBUILD will pull the latest version from the master repository on GitHub  
+and compile it for any recent version of ArchLinux.  
+
+Debian based distributions are currently unofficially supported through the **checkinstall** program  
+and this is currently the recommended way to install the package until an actual deb package can  
+be constructed.
+
+RedHat based distributions should also look to using **checkinstall** or a similar kind of program  
+to produce an RPM for use on such systems.
+
+
+### Usage
 
 The binary by default is named **pstate-frequency**  
 When called without any options, the program will display something like the following:  
@@ -71,17 +94,25 @@ There is also a power plan meant to be used with the udev rule:
 If the main powersource is offline, then the *powersave* plan is set.  
 
 
-# Understanding pstate-frequency
+### Understanding pstate-frequency
 
 pstate-frequency is just a convenient frontend for pre-existing software. It interacts with  
-and modifies variables that are then read by other drivers or modules to effect system  
+and modifies variables that are then read by other drivers or modules to affect system  
 performance. Any problems with the system which may have indirectly resulted from the  
 usage of pstate-frequency, but are not related to the output or input handling in  
 pstate-frequency itself, should be presented to the respective authors.
 
+Intel's thermald is also capable of adjusting the pstate driver periodically via the  
+monitoring of system temperatures. pstate-frequency should in theory be able to work  
+around this as it limits the actual CPU frequencies, not just the values of the  
+pstate driver itself. This being said, any issues that may arise as a result of using  
+the thermald program with pstate-frequency will not be supported. This does not mean  
+users are unable to use thermald and pstate-frequency, just understand that  
+pstate-frequency may override the automatic values set by thermald, and thermald may  
+attempt to override the manually set values of pstate-frequency.
 
-# Questions
 
+## Questions
 
 Questions or issues should be either posted in the issue section of this repository,  
 or directed by email to pyamsoft @ \<pyam.soft@gmail.com\>
