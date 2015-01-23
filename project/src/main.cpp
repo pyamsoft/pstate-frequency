@@ -136,10 +136,11 @@ void printCpuValues(const psfreq::cpu& cpu)
 	std::cout << psfreq::PSFREQ_COLOR_BOLD_WHITE
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_GOVERNOR   -> "
 		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getGovernor() << std::endl;
+	const int turbo = cpu.getTurboBoost();
 	std::cout << psfreq::PSFREQ_COLOR_BOLD_WHITE
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "NO_TURBO       -> "
-		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getTurboBoost() << " : "
-		<< (cpu.getTurboBoost() == 1 ? "OFF" : "ON") << std::endl;
+		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << turbo << " : "
+		<< (turbo == 1 ? "OFF" : (turbo == -1 ? "INVALID" : "ON")) << std::endl;
 	std::cout << psfreq::PSFREQ_COLOR_BOLD_WHITE
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MIN        -> "
 		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMinPState() << "% : "
