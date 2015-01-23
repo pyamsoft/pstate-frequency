@@ -55,7 +55,7 @@ bool hasPstate()
 {
 	sysfs cpuSysfs;
 	const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
-	return (driver.compare("intel_pstate\n"));
+	return (driver.compare("intel_pstate") == 0);
 }
 
 }
