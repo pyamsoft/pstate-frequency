@@ -26,6 +26,7 @@
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
 #include "include/psfreq_cpuvalues.h"
+#include "include/psfreq_logger.h"
 #include "include/psfreq_util.h"
 
 void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues);
@@ -33,14 +34,16 @@ void printCpuValues(const psfreq::cpu& cpu);
 void printGPL();
 void printVersion();
 void printHelp();
-int handleOptionResult(psfreq::cpuValues &cpuValues, const int result);
+int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int result);
 int planFromOptArg(char *const arg);
+const std::string governorFromOptArg(char *const arg, std::vector<std::string> availableGovernors);
 
 void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues)
 {
 	const int max = cpuValues.getMax();
 	const int min = cpuValues.getMin();
 	const int turbo = cpuValues.getTurbo();
+	const std::string governor = cpuValues.getGovernor();
 	int newTurbo = (turbo != -1 ? turbo : cpu.getTurboBoost());
 	newTurbo = psfreq::boundValue(newTurbo, 0, 1);
 	int newMin = (min >= 0 ? min : cpu.getMinPState());
@@ -48,11 +51,13 @@ void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues)
 	int newMax = (max >= 0 ? max : cpu.getMaxPState());
 	newMax = psfreq::boundValue(newMax, cpu.getInfoMinValue() + 1, cpu.getInfoMaxValue());
 	newMax = (newMax > newMin ? newMax : newMin + 1);
+	const std::string newGovernor = (governor != "" ? governor : cpu.getGovernor());
 
 	cpu.setSaneDefaults();
 	cpu.setScalingMax(newMax);
 	cpu.setScalingMin(newMin);
 	cpu.setTurboBoost(newTurbo);
+	cpu.setGovernor(newGovernor);
 }
 
 int planFromOptArg(char *const arg)
@@ -72,10 +77,34 @@ int planFromOptArg(char *const arg)
 #endif
 #endif
 	} else {
-		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid plan: " << convertedArg << psfreq::PSFREQ_COLOR_OFF << std::endl;
+		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid plan: "
+			<< convertedArg << psfreq::PSFREQ_COLOR_OFF << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	return plan;
+}
+
+const std::string governorFromOptArg(char *const arg, std::vector<std::string> availableGovernors)
+{
+	const std::string convertedArg = arg;
+	std::string governor = "";
+	for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
+		if (psfreq::stringStartsWith(availableGovernors[i], convertedArg)) {
+			governor = availableGovernors[i];
+			break;
+		}
+	}
+	if (governor == "") {
+		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid governor: "
+			<< psfreq::PSFREQ_COLOR_BOLD_WHITE << convertedArg << std::endl;
+		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Valid governors are: [ " << psfreq::PSFREQ_COLOR_BOLD_WHITE;
+		for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
+			std::cerr << availableGovernors[i] << " ";
+		}
+		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "]" << psfreq::PSFREQ_COLOR_OFF << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	return governor;
 }
 
 void printGPL()
@@ -151,7 +180,7 @@ void printHelp()
 		<< "            -t | --turbo    Modify curent CPU turbo boost state" << std::endl;
 }
 
-int handleOptionResult(psfreq::cpuValues &cpuValues, const int result)
+int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int result)
 {
 	switch(result) {
 	case 0:
@@ -185,6 +214,7 @@ int handleOptionResult(psfreq::cpuValues &cpuValues, const int result)
 	case 'i':
 		return 0;
 	case 'o':
+		cpuValues.setGovernor(governorFromOptArg(optarg, cpu.getAvailableGovernors()));
 		return 0;
         case 'n':
 		cpuValues.setMin(psfreq::stringToNumber(optarg));
@@ -226,7 +256,7 @@ int main(int argc, char** argv)
                 if (optionResult == -1) {
                         break;
                 } else {
-			finalOptionResult = handleOptionResult(cpuValues, optionResult);
+			finalOptionResult = handleOptionResult(cpu, cpuValues, optionResult);
                         if (finalOptionResult == -1) {
                                 return 0;
                         } else if (finalOptionResult == EXIT_FAILURE) {

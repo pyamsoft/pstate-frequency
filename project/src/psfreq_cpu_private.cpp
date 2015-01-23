@@ -47,11 +47,11 @@ unsigned int cpu::findNumber() const
 	return result;
 }
 
-void cpu::initializeVector(std::vector<std::string> &vector, std::string minOrMax) const
+void cpu::initializeVector(std::vector<std::string> &vector, std::string what) const
 {
 	for (unsigned int i = 0; i < number; ++i) {
 		std::ostringstream oss;
-		oss << "cpu" << i << "/cpufreq/scaling_" << minOrMax;
+		oss << "cpu" << i << "/cpufreq/scaling_" << what;
 		vector.push_back(oss.str());
 	}
 }

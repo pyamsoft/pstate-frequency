@@ -91,4 +91,35 @@ namespace psfreq {
 	{
 		return read(basePath, file);
 	}
+
+	const std::vector<std::string> sysfs::readAll(const std::string &file) const
+	{
+		return readAll(basePath, file);
+	}
+
+	const std::vector<std::string> sysfs::readAll(const std::string &path, const std::string &file) const
+	{
+		std::ostringstream oss;
+		oss << path << file;
+		const std::string absolutePath = oss.str();
+		std::ifstream inputFile;
+		inputFile.open(absolutePath.c_str());
+		if (!inputFile.is_open()) {
+			std::cerr << PSFREQ_COLOR_BOLD_RED << "Input file: " << absolutePath
+				<< " could not be opened." << PSFREQ_COLOR_OFF << std::endl;
+			exit(EXIT_FAILURE);
+		}
+		std::vector<std::string> contents = std::vector<std::string>();
+		while (true) {
+			std::string content;
+			inputFile >> content;
+			if (inputFile.eof()) {
+				break;
+			}
+			contents.push_back(content);
+		}
+		inputFile.close();
+		return contents;
+	
+	}
 }

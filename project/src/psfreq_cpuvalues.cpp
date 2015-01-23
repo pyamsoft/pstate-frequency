@@ -36,6 +36,7 @@ cpuValues::cpuValues()
 	max = -1;
 	min = -1;
 	turbo = -1;
+	governor = "";
 }
 
 cpuValues::~cpuValues()
@@ -44,7 +45,7 @@ cpuValues::~cpuValues()
 
 bool cpuValues::isInitialized() const
 {
-	return hasAction() && (max != -1 || min != -1 || turbo != -1);
+	return hasAction() && (max != -1 || min != -1 || turbo != -1 || governor != "");
 }
 
 bool cpuValues::hasAction() const
@@ -67,6 +68,12 @@ bool cpuValues::isActionSet() const
 	return action == 1;
 }
 
+void cpuValues::setGovernor(const std::string& newGovernor)
+{
+	governor = newGovernor;
+}
+
+
 void cpuValues::setAction(const int newAction)
 {
 	action = newAction;
@@ -85,6 +92,11 @@ void cpuValues::setMin(const int newMin)
 void cpuValues::setTurbo(const int newTurbo)
 {
 	turbo = newTurbo;
+}
+
+const std::string cpuValues::getGovernor() const
+{
+	return governor;
 }
 
 int cpuValues::getAction() const
@@ -129,6 +141,7 @@ void cpuValues::setPlanPowersave()
 	max = 0;
 	min = 0;
 	turbo = 1;
+	governor = "powersave";
 }
 
 void cpuValues::setPlanPerformance()
@@ -136,13 +149,15 @@ void cpuValues::setPlanPerformance()
 	max = 100;
 	min = 0;
 	turbo = 1;
+	governor = hasPstate() ? "powersave" : "ondemand";
 }
 
 void cpuValues::setPlanMaxPerformance()
 {
 	max = 100;
-	min = 99;
+	min = 100;
 	turbo = 1;
+	governor = "performance";
 }
 
 void cpuValues::setPlanAuto()

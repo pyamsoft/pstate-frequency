@@ -22,6 +22,7 @@
 #define CPP_PSFREQ_SYSFS_H
 
 #include <string>
+#include <vector>
 
 namespace psfreq {
 
@@ -37,6 +38,8 @@ public:
 	void write(const std::string &file, const int number) const;
 	const std::string read(const std::string &file) const;
 	const std::string read(const std::string &path, const std::string &file) const;
+	const std::vector<std::string> readAll(const std::string &file) const;
+	const std::vector<std::string> readAll(const std::string &path, const std::string &file) const;
 };
 
 }

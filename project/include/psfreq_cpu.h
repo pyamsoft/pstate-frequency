@@ -36,8 +36,9 @@ private:
 	double maxInfoFrequency;
 	std::vector<std::string> maxFrequencyFileVector;
 	std::vector<std::string> minFrequencyFileVector;
+	std::vector<std::string> governorFileVector;
 
-	void initializeVector(std::vector<std::string> &vector, std::string minOrMax) const;
+	void initializeVector(std::vector<std::string> &vector, std::string what) const;
 	unsigned int findNumber() const;
 	double findInfoMinFrequency() const;
 	double findInfoMaxFrequency() const;
@@ -49,6 +50,7 @@ public:
 	void setScalingMax(const int max) const;
 	void setScalingMin(const int min) const;
 	void setTurboBoost(const int turbo) const;
+	void setGovernor(const std::string &governor) const;
 	int getTurboBoost() const;
 	int getNumber() const;
 	int getInfoMinValue() const;
@@ -60,6 +62,7 @@ public:
 	double getInfoMinFrequency() const;
 	double getInfoMaxFrequency() const;
 	const std::string getGovernor() const;
+	const std::vector<std::string> getAvailableGovernors() const;
 	const std::string getDriver() const;
 	const std::string getIOScheduler() const;
 };

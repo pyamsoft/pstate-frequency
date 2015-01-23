@@ -18,53 +18,65 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#ifndef CPP_PSFREQ_CPUVALUES_H
-#define CPP_PSFREQ_CPUVALUES_H
+#ifndef CPP_PSFREQ_LOGGER_H
+#define CPP_PSFREQ_LOGGER_H
 
+#include <iostream>
+#include <sstream>
 #include <string>
 
 namespace psfreq {
 
-class cpuValues {
-
+class logger {
 private:
-	int action;
-	int max;
-	int min;
-	int turbo;
-	std::string governor;
 
-	void setPlanPowersave();
-	void setPlanPerformance();
-	void setPlanMaxPerformance();
-	void setPlanAuto();
-
-	bool hideDirectory(const std::string &entryName);
-	bool discoverPowerSupply(const std::string &fullPath);
+	static std::ostringstream oss;
+	static int verbose;
 
 public:
+	logger()
+	{
+		verbose = 0;
+	}
 
-	cpuValues();
-	~cpuValues();
+	~logger()
+	{
+		oss.clear();
+	}
 
-	void setAction(const int newAction);
-	void setMax(const int newMax);
-	void setMin(const int newMin);
-	void setTurbo(const int newTurbo);
-	void setPlan(const int plan);
-	void setGovernor(const std::string& newGovernor);
+	static void log(std::string& str)
+	{
+		oss << str;
+	}
 
-	int getAction() const;
-	int getMax() const;
-	int getMin() const;
-	int getTurbo() const;
-	const std::string getGovernor() const;
+	static void d()
+	{
+		const std::string str = flush();
+		std::cout << str;
+	}
 
-	bool hasAction() const;
-	bool isActionNull() const;
-	bool isActionGet() const;
-	bool isActionSet() const;
-	bool isInitialized() const;
+	static void e()
+	{
+		const std::string str = flush();
+		std::cerr << str;
+	}
+
+	static const std::string flush()
+	{
+		const std::string str = oss.str();
+		oss.clear();
+		return str;
+	}
+
+	static void setQuiet()
+	{
+		verbose = -1;
+	}
+
+	static void setDebug()
+	{
+		verbose = 1;
+	}
 };
 
 }

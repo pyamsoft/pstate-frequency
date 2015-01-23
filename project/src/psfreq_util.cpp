@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include "include/psfreq_util.h"
+#include "include/psfreq_sysfs.h"
 
 namespace psfreq {
 
@@ -48,6 +49,13 @@ int boundValue(const int value, const int minBound,
 bool stringStartsWith(const std::string &control, const std::string &value)
 {
 	return control.compare(0, value.length(), value) == 0;
+}
+
+bool hasPstate()
+{
+	sysfs cpuSysfs;
+	const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
+	return (driver.compare("intel_pstate\n"));
 }
 
 }

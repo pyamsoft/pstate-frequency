@@ -31,13 +31,16 @@ cpu::cpu()
 	maxInfoFrequency = findInfoMaxFrequency();
 	minFrequencyFileVector = std::vector<std::string>();
 	maxFrequencyFileVector = std::vector<std::string>();
+	governorFileVector = std::vector<std::string>();
 	initializeVector(minFrequencyFileVector, "min_freq");
 	initializeVector(maxFrequencyFileVector, "max_freq");
+	initializeVector(governorFileVector, "governor");
 }
 
 cpu::~cpu()
 {
 }
+
 
 double cpu::getScalingMinFrequency() const
 {
@@ -83,25 +86,32 @@ const std::string cpu::getDriver() const
 	return cpuSysfs.read("cpu0/cpufreq/scaling_driver");
 }
 
+const std::vector<std::string> cpu::getAvailableGovernors() const
+{
+	std::vector<std::string> availableGovernors = std::vector<std::string>();
+	availableGovernors = cpuSysfs.readAll("cpu0/cpufreq/scaling_available_governors");
+	return availableGovernors;
+}
+
 int cpu::getMaxPState() const
 {
-	const std::string line = cpuSysfs.read("intel_pstate/max_perf_pct");
-	const int result = stringToNumber(line);
-	return result;
+	return static_cast<int>(getScalingMaxFrequency() / getInfoMaxFrequency() * 100);
 }
 
 int cpu::getMinPState() const
 {
-	const std::string line = cpuSysfs.read("intel_pstate/min_perf_pct");
-	const int result = stringToNumber(line);
-	return result;
+	return static_cast<int>(getScalingMinFrequency() / getInfoMaxFrequency() * 100);
 }
 
 int cpu::getTurboBoost() const
 {
-	const std::string line = cpuSysfs.read("intel_pstate/no_turbo");
-	const int result = stringToNumber(line);
-	return result;
+	if (hasPstate()) {
+		const std::string line = cpuSysfs.read("intel_pstate/no_turbo");
+		const int result = stringToNumber(line);
+		return result;
+	} else {
+		return -1;
+	}
 }
 
 int cpu::getInfoMinValue() const
@@ -118,6 +128,7 @@ void cpu::setSaneDefaults() const
 	setScalingMax(100);
 	setScalingMin(0);
 	setTurboBoost(1);
+	setGovernor("powersave");
 }
 
 void cpu::setScalingMax(const int max) const
@@ -127,7 +138,9 @@ void cpu::setScalingMax(const int max) const
 		for (unsigned int i = 0; i < number; ++i) {
 			cpuSysfs.write(maxFrequencyFileVector[i], scalingMax);
 		}
-		cpuSysfs.write("intel_pstate/max_perf_pct", max);
+		if (hasPstate()) {
+			cpuSysfs.write("intel_pstate/max_perf_pct", max);
+		}
 	}
 }
 
@@ -138,13 +151,26 @@ void cpu::setScalingMin(const int min) const
 		for (unsigned int i = 0; i < number; ++i) {
 			cpuSysfs.write(minFrequencyFileVector[i], scalingMin);
 		}
-		cpuSysfs.write("intel_pstate/min_perf_pct", min);
+		if (hasPstate()) {
+			cpuSysfs.write("intel_pstate/min_perf_pct", min);
+		}
 	}
 }
 
 void cpu::setTurboBoost(const int turbo) const
 {
-	cpuSysfs.write("intel_pstate/no_turbo", turbo);
+	if (hasPstate()) {
+		cpuSysfs.write("intel_pstate/no_turbo", turbo);
+	}
+}
+
+void cpu::setGovernor(const std::string &governor) const
+{
+	if (number == governorFileVector.size()) {
+		for (unsigned int i = 0; i < number; ++i) {
+			cpuSysfs.write(governorFileVector[i], governor);
+		}
+	}
 }
 
 
