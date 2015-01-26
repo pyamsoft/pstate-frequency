@@ -51,21 +51,29 @@ public:
 
 	static void d()
 	{
-		const std::string str = flush();
-		std::cout << str;
+		if (verbose == 1) {
+			const std::string str = flush();
+			std::cout << str;
+		}
 	}
 
 	static void e()
 	{
-		const std::string str = flush();
-		std::cerr << str;
+		if (verbose == 1) {
+			const std::string str = flush();
+			std::cerr << str;
+		}
 	}
 
 	static const std::string flush()
 	{
-		const std::string str = oss.str();
-		oss.clear();
-		return str;
+		if (verbose == 1) {
+			const std::string str = oss.str();
+			oss.clear();
+			return str;
+		} else {
+			return "";
+		}
 	}
 
 	static void setQuiet()

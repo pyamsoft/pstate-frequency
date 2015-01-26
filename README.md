@@ -112,7 +112,18 @@ pstate-frequency may override the automatic values set by thermald, and thermald
 attempt to override the manually set values of pstate-frequency.
 
 
+### Additional Notes
+
+If you are attempting to use the udev rule but pstate-frequency fails to change the  
+frequencies when the power state has changed, please open an issue on GitHub. I believe  
+this is an issue that is due to the way udev lays out the structures of certain systems  
+requiring a different or additional udev rule to function properly. This new rule can  
+only be instated after a large amount of testing, and any help that you could provide  
+by stating your system as well as any output you get when running **udevadm monitor**  
+would be of great help.
+
+
 ## Questions
 
 Questions or issues should be either posted in the issue section of this repository,  
-or directed by email to pyamsoft @ \<pyam.soft@gmail.com\>
+or directed by email to pyamsoft @ pyam.soft@gmail.com

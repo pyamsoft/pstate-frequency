@@ -169,13 +169,9 @@ void printHelp()
 		<< "            -s | --set      Modify current CPU values" << std::endl
 		<< std::endl
 		<< "    options:" << std::endl
-		<< "        unprivilaged:" << std::endl
-		<< "            -i | --io       Get the IO Scheduler for the given device" << std::endl
-		<< std::endl
 		<< "        privilaged: "<< std::endl
 		<< "            -p | --plan     Set a predefined power plan" << std::endl
 		<< "            -m | --max      Modify current CPU max frequency" << std::endl
-		<< "            -i | --io       Set the IO Scheduler for the given device" << std::endl
 		<< "            -o | --gov      Set the cpufreq governor" << std::endl
 		<< "            -n | --min      Modify current CPU min frequency" << std::endl
 		<< "            -t | --turbo    Modify curent CPU turbo boost state" << std::endl;
@@ -212,8 +208,6 @@ int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int
         case 'm':
 		cpuValues.setMax(psfreq::stringToNumber(optarg));
                 return 0;
-	case 'i':
-		return 0;
 	case 'o':
 		cpuValues.setGovernor(governorFromOptArg(optarg, cpu.getAvailableGovernors()));
 		return 0;
@@ -234,7 +228,7 @@ int main(int argc, char** argv)
 
 	int finalOptionResult = 0;
 	int optionResult = 0;
-	const char *const shortOptions = "hvsdgqp:m:n:t:i:o:";
+	const char *const shortOptions = "hvsdgqp:m:n:t:o:";
 	struct option longOptions[] = {
                 {"help",          no_argument,        NULL,           'h'},
                 {"version",       no_argument,        NULL,           'v'},
@@ -243,7 +237,6 @@ int main(int argc, char** argv)
                 {"quiet",         no_argument,        NULL,           'q'},
                 {"debug",         no_argument,        NULL,           'd'},
                 {"plan",          required_argument,  NULL,           'p'},
-                {"io",            required_argument,  NULL,           'i'},
                 {"gov",           required_argument,  NULL,           'o'},
 		{"max",		  required_argument,  NULL,           'm'},
 		{"min",		  required_argument,  NULL,           'n'},
@@ -265,7 +258,6 @@ int main(int argc, char** argv)
                         }
                 }
         }
-
 
 	if (cpuValues.isActionNull()) {
 		printGPL();
