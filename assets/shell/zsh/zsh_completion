@@ -23,12 +23,9 @@ _options()
 	if [ "$words[$index]" = "-s" ] || [ "$words[$index]" = "--set" ]; then
 		_alternative \
 			"privilaged-options:privilaged options:_privilaged_options"
-	elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--get" ]; then
-		_alternative \
-			"unprivilaged-options:unprivilaged options:_unprivilaged_options"
-	elif [ "$words[$index]" = "-i" ] || [ "$words[$index]" = "--io" ] || [ "$words[$index]" = "--io-scheduler" ]; then
-		_alternative \
-			":disk device name:"
+	# elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--get" ]; then
+	# 	_alternative \
+	# 		"unprivilaged-options:unprivilaged options:_unprivilaged_options"
 	elif [ "$words[$index]" = "-o" ] || [ "$words[$index]" = "--gov" ] || [ "$words[$index]" = "--governor" ]; then
 		_alternative \
 			":cpu governor name:"
@@ -51,15 +48,15 @@ _options()
 
 }
 
-_unprivilaged_options()
-{
-	# Add long option support
-	local options;
-	options=(
-		"-i:Get the io scheduler"
-	)
-	_describe -t unprivilaged-options "unprivilaged options" options "$@"
-}
+# _unprivilaged_options()
+# {
+# 	# Add long option support
+# 	local options;
+# 	options=(
+# 		"-i:Get the io scheduler"
+# 	)
+# 	_describe -t unprivilaged-options "unprivilaged options" options "$@"
+# }
 
 _privilaged_options()
 {
@@ -70,7 +67,6 @@ _privilaged_options()
 		"-m:Set the CPU max"
 		"-n:Set the CPU min"
 		"-t:Set the CPU turbo"
-		"-i:Set the io scheduler"
 		"-o:Set the CPU governor"
 	)
 	_describe -t privilaged-options "privilaged options" options "$@"

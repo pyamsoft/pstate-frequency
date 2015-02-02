@@ -4,7 +4,7 @@ PROJECT_ROOT=project
 EXEC_NAME=pstate-frequency
 SOURCES=$(wildcard $(PROJECT_ROOT)/src/*.cpp)
 OBJECTS=$(patsubst $(PROJECT_ROOT)/src/%.cpp,$(PROJECT_ROOT)/obj/%.o,$(SOURCES))
-UDEV=10-$(EXEC_NAME).rules
+UDEV=99-$(EXEC_NAME).rules
 TARGET=$(PROJECT_ROOT)/bin/$(EXEC_NAME)
 
 # The Target Build
@@ -34,7 +34,8 @@ dirs:
 	@mkdir -p $(PROJECT_ROOT)/bin
 
 clean:
-	rm -rf $(TARGET) $(OBJECTS) $(PROJECT_ROOT)/bin $(PROJECT_ROOT)/obj
+	@rm -rf $(TARGET) $(OBJECTS) $(PROJECT_ROOT)/obj $(PROJECT_ROOT)/bin
+	@echo "  CLEAN PROJECT"
 
 install: all
 	@echo "  INSTALL  $(DESTDIR)/$(PREFIX)/$(TARGET)"
