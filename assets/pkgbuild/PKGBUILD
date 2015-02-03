@@ -10,6 +10,7 @@ optdepends=(
 	# 'msr-tools: Allow acpi-cpufreq setting of Turbo Boost bit on Sandy Bride+ CPUs'
 )
 provides=('pstate-frequency')
+conflicts=('pstate-frequency')
 license=('GPLv2')
 url="https://github.com/pyamsoft/pstate-frequency.git"
 sha256sums=('SKIP') ## The SHA256 is constantly changing since this is
