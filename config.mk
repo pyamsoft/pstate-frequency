@@ -1,5 +1,5 @@
 # Version Number
-VERSION:=1.0.5
+VERSION:=1.0.6
 
 # Standard
 # The standard has been decided as C++11 for a couple of reasons. The kernel
@@ -7,6 +7,10 @@ VERSION:=1.0.5
 # out before kernel 3.9, meaning that if you are able to run kernel 3.9, you
 # should hopefully be on a distribution which sports a C++ compiler that
 # supports the new C++11 standard.
+#
+# This being said, the project has been updated to the point that you should be
+# able to compile successfully without needing to declare a C++ standard version
+# at all.
 STD:=-std=c++11
 
 # Include the current directory so that paths for headers are properly
@@ -35,9 +39,9 @@ INCLUDE_ZSH_COMPLETION:=1
 INCLUDE_UDEV_RULE:=1
 
 # C++ Compiler to use
-# This will default to the environment defined binary if it is specified.
+# This will default to the GNU C++ compiler, g++
 # clang is recommended, but not required.
-CXX?=c++
+CXX?=g++
 
 # Prefix of install
 PREFIX?=/usr/local
@@ -53,7 +57,7 @@ LDFLAGS:= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all
 
 # Compiler flags
 CXXFLAGS:= -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CXX}]\" \
-	-DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE} ${STD} -O3 -Wall \
+	-DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE} ${STD} ${INCS} -O3 \
 	-march=native -mtune=generic -pipe -fstack-protector-strong \
 	--param=ssp-buffer-size=4 \
-	-Wextra -Werror -Wpedantic -Wmissing-declarations -Wunreachable-code ${INCS}
+	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations -Wunreachable-code

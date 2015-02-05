@@ -35,14 +35,14 @@ source=("${_gitname}::git+${url}#branch=${_gitbranch}")
 ## of the variable options in this file
 
 ## DEFAULTS
-## _CXX="c++"
+## _CXX="g++"
 ## _PREFIX="/usr/local"
 ## _ETCDIR="/etc"
 ## _INCLUDE_BASH_COMPLETION=1
 ## _INCLUDE_ZSH_COMPLETION=1
 ## _INCLUDE_UDEV_RULE=1
 
-_CXX="c++"
+_CXX="g++"
 _PREFIX="/usr"
 _ETCDIR="/etc"
 _INCLUDE_BASH_COMPLETION=1
@@ -54,10 +54,16 @@ pkgver() {
 	echo "$(head -n 2 config.mk | tail -n 1 | cut -c10-).git"
 }
 
+prepare() {
+	cd "$srcdir/$_gitname"
+	make options \
+		CXX="${_CXX}"
+}
+
 build() {
 	cd "$srcdir/$_gitname"
 	make \
-		CC="${_CC}" \
+		CXX="${_CXX}" \
 		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE}
 }
 
@@ -65,7 +71,7 @@ package() {
 	cd "$srcdir/$_gitname"
 	make \
 		DESTDIR="$pkgdir" \
-		CC="${_CC}" \
+		CXX="${_CXX}" \
 		PREFIX="${_PREFIX}" \
 		ETCDIR="${_ETCDIR}" \
 		INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \

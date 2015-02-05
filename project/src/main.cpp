@@ -19,6 +19,7 @@
  */
 
 #include <iostream>
+#include <cstdlib>
 
 #include <getopt.h>
 #include <unistd.h>

@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <cstdlib>
 
 #include <dirent.h>
 #include <unistd.h>

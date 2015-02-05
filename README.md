@@ -13,12 +13,19 @@ Enable it by adding **intel_pstate=enable** to the boot command line.
 If the p-state driver is not present in your system, the application will still  
 work on a basic level using the default **cpufreq** driver.
 
-pstate-frequency is distribution independent, and should run on all standard versions of Linux  
-based operating systems which include a recent kernel (3.9+) and come with the set of expected  
-core utilities, including *ls*, *grep*, *wc*, and *modprobe*. The system must also support the use of  
-the **proc** and **sys** mounts, as found on a typical modern system. These attributes are assumed  
-on any system attempting to use the pstate-frequency frontend, and support towards any system  
-which does not conform to these normally expected features cannot be given at this time.
+pstate-frequency is distribution independent, and should run on all standard  
+versions of Linux based operating systems which include a recent kernel (3.9+)  
+and come with the set of expected core utilities, including *ls*, *grep*,  
+*wc*, and *modprobe*. The system must also support the use of the **proc** and  
+**sys** mounts, as found on a typical modern system. These attributes are  
+assumed on any system attempting to use the pstate-frequency frontend, and 
+support towards any system which does not conform to these normally expected  
+features cannot be given at this time.
+
+You are also expected to read and understand the settings in the configuration  
+file: config.mk. Undertaking modification of this file is up to the user, and  
+support for any kind of customization that deviates from the shipped  
+configuration file will not be supported.
 
 
 #### Optional
@@ -34,7 +41,7 @@ which does not conform to these normally expected features cannot be given at th
 The installation process follows the basic *make, make install* process.  
 
 While building, there are a couple of options that one may configure or change:  
-+ The C++ compiler used (defaults to c++, though clang++ is recommended)  
++ The C++ compiler used (defaults to g++, though clang++ is recommended)  
 + The directory to install to (defaults to /usr/local)  
 + Whether or not to install bash completion (defaults to Yes)
 + Whether or not to install zsh completion (defaults to Yes)

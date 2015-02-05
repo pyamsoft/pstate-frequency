@@ -21,6 +21,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_sysfs.h"
