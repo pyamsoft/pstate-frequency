@@ -78,8 +78,10 @@ int planFromOptArg(char *const arg)
 #endif
 #endif
 	} else {
-		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid plan: "
+		std::ostringstream oss;
+		oss << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid plan: "
 			<< convertedArg << psfreq::PSFREQ_COLOR_OFF << std::endl;
+		psfreq::logger::e(oss.str());
 		psfreq::logger::close();
 		exit(EXIT_FAILURE);
 	}
@@ -171,22 +173,23 @@ void printHelp()
 		<< std::endl
 		<< "    actions:" << std::endl
 		<< "        unprivilaged:" << std::endl
-		<< "            -h | --help     Display this help and exit" << std::endl
-		<< "            -v | --version  Display application version and exit" << std::endl
-		<< "            -d | --debug    Print debugging messages to stdout" << std::endl
-		<< "            -q | --quiet    Supress all output" << std::endl
-		<< "            -g | --get      Access current CPU values" << std::endl
+		<< "            -h | --help      Display this help and exit" << std::endl
+		<< "            -v | --version   Display application version and exit" << std::endl
+		<< "            -d | --debug     Print debugging messages to stdout" << std::endl
+		<< "            -q | --quiet     Supress all non-error output" << std::endl
+		<< "            -a | --all-quiet Supress all output" << std::endl
+		<< "            -g | --get       Access current CPU values" << std::endl
 		<< std::endl
 		<< "        privilaged:" << std::endl
-		<< "            -s | --set      Modify current CPU values" << std::endl
+		<< "            -s | --set       Modify current CPU values" << std::endl
 		<< std::endl
 		<< "    options:" << std::endl
 		<< "        privilaged: "<< std::endl
-		<< "            -p | --plan     Set a predefined power plan" << std::endl
-		<< "            -m | --max      Modify current CPU max frequency" << std::endl
-		<< "            -o | --gov      Set the cpufreq governor" << std::endl
-		<< "            -n | --min      Modify current CPU min frequency" << std::endl
-		<< "            -t | --turbo    Modify curent CPU turbo boost state" << std::endl;
+		<< "            -p | --plan      Set a predefined power plan" << std::endl
+		<< "            -m | --max       Modify current CPU max frequency" << std::endl
+		<< "            -o | --gov       Set the cpufreq governor" << std::endl
+		<< "            -n | --min       Modify current CPU min frequency" << std::endl
+		<< "            -t | --turbo     Modify curent CPU turbo boost state" << std::endl;
 	psfreq::logger::n(oss.str());
 }
 
@@ -215,6 +218,9 @@ int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int
         case 'd':
 		psfreq::logger::setDebug();
                 return 0;
+	case 'a':
+		psfreq::logger::setAllQuiet();
+		return 0;
 	case 'q':
 		psfreq::logger::setQuiet();
 		return 0;
@@ -247,13 +253,14 @@ int main(int argc, char** argv)
 
 	int finalOptionResult = 0;
 	int optionResult = 0;
-	const char *const shortOptions = "hvsdgqp:m:n:t:o:";
+	const char *const shortOptions = "hvsdagqp:m:n:t:o:";
 	struct option longOptions[] = {
                 {"help",          no_argument,        NULL,           'h'},
                 {"version",       no_argument,        NULL,           'v'},
                 {"get",           no_argument,        NULL,           'g'},
                 {"set",           no_argument,        NULL,           's'},
                 {"quiet",         no_argument,        NULL,           'q'},
+                {"all-quiet",     no_argument,        NULL,           'a'},
                 {"debug",         no_argument,        NULL,           'd'},
                 {"plan",          required_argument,  NULL,           'p'},
                 {"gov",           required_argument,  NULL,           'o'},
@@ -296,15 +303,19 @@ int main(int argc, char** argv)
 				setCpuValues(cpu, cpuValues);
 				printCpuValues(cpu);
 			} else {
-				std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED
+				std::ostringstream oss;
+				oss << psfreq::PSFREQ_COLOR_BOLD_RED
 					<< "Set called with no target"
 					<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+				psfreq::logger::e(oss.str());
 				psfreq::logger::close();
 				return EXIT_FAILURE;
 			}
 		} else {
-			std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Root privilages required"
+			std::ostringstream oss;
+			oss << psfreq::PSFREQ_COLOR_BOLD_RED << "Root privilages required"
 				<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::e(oss.str());
 			psfreq::logger::close();
 			return EXIT_FAILURE;
 		}

@@ -46,8 +46,10 @@ namespace psfreq {
 		std::ofstream outputFile;
 		outputFile.open(absolutePath.c_str());
 		if (!outputFile.is_open()) {
-			std::cerr << PSFREQ_COLOR_BOLD_RED << "Output file: " << absolutePath
+			std::ostringstream oss;
+			oss << PSFREQ_COLOR_BOLD_RED << "Output file: " << absolutePath
 				<< " could not be opened." << PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::e(oss.str());
 			psfreq::logger::close();
 			exit(EXIT_FAILURE);
 		}
@@ -81,8 +83,10 @@ namespace psfreq {
 		std::ifstream inputFile;
 		inputFile.open(absolutePath.c_str());
 		if (!inputFile.is_open()) {
-			std::cerr << PSFREQ_COLOR_BOLD_RED << "Input file: " << absolutePath
+			std::ostringstream oss;
+			oss << PSFREQ_COLOR_BOLD_RED << "Input file: " << absolutePath
 				<< " could not be opened." << PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::e(oss.str());
 			psfreq::logger::close();
 			exit(EXIT_FAILURE);
 		}
@@ -109,8 +113,10 @@ namespace psfreq {
 		std::ifstream inputFile;
 		inputFile.open(absolutePath.c_str());
 		if (!inputFile.is_open()) {
-			std::cerr << PSFREQ_COLOR_BOLD_RED << "Input file: " << absolutePath
+			std::ostringstream oss;
+			oss << PSFREQ_COLOR_BOLD_RED << "Input file: " << absolutePath
 				<< " could not be opened." << PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::e(oss.str());
 			psfreq::logger::close();
 			exit(EXIT_FAILURE);
 		}

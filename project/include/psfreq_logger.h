@@ -51,7 +51,7 @@ public:
 
 	static void n(const std::string& log)
 	{
-		if (verbose != -1) {
+		if (verbose >= 0) {
 			oss << log;
 			const std::string str = flush();
 			std::cout << str;
@@ -69,15 +69,27 @@ public:
 
 	static void e(const std::string& log)
 	{
-		oss << log;
-		const std::string str = flush();
-		std::cerr << str;
+		if (verbose != -2) {
+			oss << log;
+			const std::string str = flush();
+			std::cerr << str;
+		}
 	}
 
 	static void close()
 	{
 		oss.clear();
 		verbose = 0;
+	}
+
+	static bool isAllQuiet()
+	{
+		return verbose == -2;
+	}
+
+	static bool isQuiet()
+	{
+		return verbose == -1;
 	}
 
 	static bool isNormal()
@@ -90,9 +102,9 @@ public:
 		return verbose == 1;
 	}
 
-	static bool isQuiet()
+	static void setAllQuiet()
 	{
-		return verbose == -1;
+		verbose = -2;
 	}
 
 	static void setQuiet()

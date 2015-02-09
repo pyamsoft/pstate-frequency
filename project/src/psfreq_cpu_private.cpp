@@ -38,8 +38,10 @@ unsigned int cpu::findNumber() const
 	char *line = NULL;
         size_t n = 0;
         if (getline(&line, &n, pipe) == -1) {
-		std::cerr << PSFREQ_COLOR_BOLD_RED << "Could not get a line from file."
+		std::ostringstream oss;
+		oss << PSFREQ_COLOR_BOLD_RED << "Could not get a line from file."
 			<< PSFREQ_COLOR_OFF << std::endl;
+		psfreq::logger::e(oss.str());
 		psfreq::logger::close();
                 exit(EXIT_FAILURE);
         }
