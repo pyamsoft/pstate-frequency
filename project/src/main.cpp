@@ -82,7 +82,12 @@ void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues)
 	log << "\tnewGovernor: "<< newGovernor << std::endl;
 	psfreq::logger::d(log);
 
+	log << "\tSetting sane defaults" << std::endl;
+	psfreq::logger::d(log);
 	cpu.setSaneDefaults();
+
+	log << "\tSetting new values" << std::endl;
+	psfreq::logger::d(log);
 	cpu.setScalingMax(newMax);
 	cpu.setScalingMin(newMin);
 	cpu.setTurboBoost(newTurbo);
