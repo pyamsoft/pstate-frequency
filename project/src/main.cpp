@@ -169,21 +169,23 @@ void printHelp()
 {
 	std::ostringstream oss;
         oss << "usage:"
-		<< "pstate-frequency [action] [option]"
+		<< "pstate-frequency [action] [option(s)]"
 		<< std::endl
 		<< "    actions:" << std::endl
 		<< "        unprivilaged:" << std::endl
 		<< "            -h | --help      Display this help and exit" << std::endl
 		<< "            -v | --version   Display application version and exit" << std::endl
-		<< "            -d | --debug     Print debugging messages to stdout" << std::endl
-		<< "            -q | --quiet     Supress all non-error output" << std::endl
-		<< "            -a | --all-quiet Supress all output" << std::endl
 		<< "            -g | --get       Access current CPU values" << std::endl
 		<< std::endl
 		<< "        privilaged:" << std::endl
 		<< "            -s | --set       Modify current CPU values" << std::endl
 		<< std::endl
 		<< "    options:" << std::endl
+		<< "        unprivilaged:" << std::endl
+		<< "            -d | --debug     Print debugging messages to stdout" << std::endl
+		<< "            -q | --quiet     Supress all non-error output" << std::endl
+		<< "            -a | --all-quiet Supress all output" << std::endl
+		<< std::endl
 		<< "        privilaged: "<< std::endl
 		<< "            -p | --plan      Set a predefined power plan" << std::endl
 		<< "            -m | --max       Modify current CPU max frequency" << std::endl
