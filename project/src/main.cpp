@@ -41,18 +41,46 @@ const std::string governorFromOptArg(char *const arg, std::vector<std::string> a
 
 void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues)
 {
+	std::ostringstream log;
+	log << "pstate-frequency [main.cpp]: setCpuValues" << std::endl;
+	psfreq::logger::d(log);
+
 	const int max = cpuValues.getMax();
+	log << "\tMax: " << max << std::endl;
+	psfreq::logger::d(log);
+
 	const int min = cpuValues.getMin();
+	log << "\tMin: "<< min << std::endl;
+	psfreq::logger::d(log);
+
 	const int turbo = cpuValues.getTurbo();
+	log << "\tTurbo: "<< turbo << std::endl;
+	psfreq::logger::d(log);
+
 	const std::string governor = cpuValues.getGovernor();
+	log << "\tGovernor: "<< governor << std::endl;
+	log << "\tProcessing new CPU values..." << std::endl;
+	psfreq::logger::d(log);
+
 	int newTurbo = (turbo != -1 ? turbo : cpu.getTurboBoost());
 	newTurbo = psfreq::boundValue(newTurbo, 0, 1);
+	log << "\tnewTurbo: "<< newTurbo << std::endl;
+	psfreq::logger::d(log);
+
 	int newMin = (min >= 0 ? min : cpu.getMinPState());
 	newMin = psfreq::boundValue(newMin, cpu.getInfoMinValue(), cpu.getInfoMaxValue() - 1);
+	log << "\tnewMin: "<< newMin << std::endl;
+	psfreq::logger::d(log);
+
 	int newMax = (max >= 0 ? max : cpu.getMaxPState());
 	newMax = psfreq::boundValue(newMax, cpu.getInfoMinValue() + 1, cpu.getInfoMaxValue());
 	newMax = (newMax > newMin ? newMax : newMin + 1);
+	log << "\tnewMax: " << newMax << std::endl;
+	psfreq::logger::d(log);
+
 	const std::string newGovernor = (governor != "" ? governor : cpu.getGovernor());
+	log << "\tnewGovernor: "<< newGovernor << std::endl;
+	psfreq::logger::d(log);
 
 	cpu.setSaneDefaults();
 	cpu.setScalingMax(newMax);
@@ -63,36 +91,52 @@ void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues)
 
 int planFromOptArg(char *const arg)
 {
-	const std::string convertedArg = arg;
+	const std::string convertedArg(arg);
 	int plan;
+	std::ostringstream log;
+	log << "pstate-frequency [main.cpp]: planFromOptArg" << std::endl;
+	psfreq::logger::d(log);
 	if (convertedArg.compare("1") == 0 || psfreq::stringStartsWith("powersave", convertedArg)) {
 		plan = 1;
+		log << "\tPlan: powersave 1" << std::endl;
 	} else if (convertedArg.compare("2") == 0 || psfreq::stringStartsWith("performance", convertedArg)) {
 		plan = 2;
+		log << "\tPlan: performance 2" << std::endl;
 	} else if (convertedArg.compare("3") == 0 || psfreq::stringStartsWith("max-performance", convertedArg)) {
 		plan = 3;
+		log << "\tPlan: max-performance 3" << std::endl;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	} else if (convertedArg.compare("0") == 0 || psfreq::stringStartsWith("auto", convertedArg)) {
 		plan = 0;
+		log << "\tPlan: auto 0" << std::endl;
 #endif
 #endif
 	} else {
-		std::ostringstream oss;
-		oss << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid plan: "
+		std::ostringstream err;
+		err << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid plan: "
 			<< convertedArg << psfreq::PSFREQ_COLOR_OFF << std::endl;
-		psfreq::logger::e(oss.str());
+		psfreq::logger::e(err.str());
 		psfreq::logger::close();
 		exit(EXIT_FAILURE);
 	}
+	psfreq::logger::d(log);
 	return plan;
 }
 
 const std::string governorFromOptArg(char *const arg, std::vector<std::string> availableGovernors)
 {
-	const std::string convertedArg = arg;
+	const std::string convertedArg(arg);
+	std::ostringstream gov;
 	std::string governor = "";
+	std::ostringstream log;
+	log << "pstate-frequency [main.cpp]: governorFromOptArg" << std::endl;
+	psfreq::logger::d(log);
+
 	for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
+		log << "\tComparing argument: " << convertedArg << " to governor: "
+			<< availableGovernors[i] << std::endl;
+		psfreq::logger::d(log);
 		if (psfreq::stringStartsWith(availableGovernors[i], convertedArg)) {
 			governor = availableGovernors[i];
 			break;
@@ -111,6 +155,8 @@ const std::string governorFromOptArg(char *const arg, std::vector<std::string> a
 		psfreq::logger::close();
 		exit(EXIT_FAILURE);
 	}
+	log << "\tGovernor: " << governor << std::endl;
+	psfreq::logger::d(log);
 	return governor;
 }
 
@@ -169,23 +215,23 @@ void printHelp()
 {
 	std::ostringstream oss;
         oss << "usage:"
-		<< "pstate-frequency [action] [option(s)]"
+		<< "pstate-frequency [verbose] [action] [option(s)]"
+		<< std::endl
+		<< "    verbose:" << std::endl
+		<< "        unprivilaged:" << std::endl
+		<< "            -d | --debug     Print debugging messages to stdout" << std::endl
+		<< "            -q | --quiet     Supress all non-error output" << std::endl
+		<< "            -a | --all-quiet Supress all output" << std::endl
 		<< std::endl
 		<< "    actions:" << std::endl
 		<< "        unprivilaged:" << std::endl
 		<< "            -h | --help      Display this help and exit" << std::endl
 		<< "            -v | --version   Display application version and exit" << std::endl
 		<< "            -g | --get       Access current CPU values" << std::endl
-		<< std::endl
 		<< "        privilaged:" << std::endl
 		<< "            -s | --set       Modify current CPU values" << std::endl
 		<< std::endl
 		<< "    options:" << std::endl
-		<< "        unprivilaged:" << std::endl
-		<< "            -d | --debug     Print debugging messages to stdout" << std::endl
-		<< "            -q | --quiet     Supress all non-error output" << std::endl
-		<< "            -a | --all-quiet Supress all output" << std::endl
-		<< std::endl
 		<< "        privilaged: "<< std::endl
 		<< "            -p | --plan      Set a predefined power plan" << std::endl
 		<< "            -m | --max       Modify current CPU max frequency" << std::endl

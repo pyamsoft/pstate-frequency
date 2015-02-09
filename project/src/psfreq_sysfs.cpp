@@ -40,9 +40,17 @@ namespace psfreq {
 
 	void sysfs::write(const std::string &path, const std::string &file, const std::string &buffer) const
 	{
+		std::ostringstream log;
+		log << "pstate-frequency [psfreq_sysfs.cpp]: sysfs::write" << std::endl;
+		psfreq::logger::d(log);
+
 		std::ostringstream oss;
 		oss << path << file;
 		const std::string absolutePath = oss.str();
+		log << "\tPath: " << absolutePath << std::endl;
+		log << "\tOpening outputFile..." << std::endl;
+		psfreq::logger::d(log);
+
 		std::ofstream outputFile;
 		outputFile.open(absolutePath.c_str());
 		if (!outputFile.is_open()) {
@@ -53,7 +61,13 @@ namespace psfreq {
 			psfreq::logger::close();
 			exit(EXIT_FAILURE);
 		}
+		log << "\tWritting buffer: " << buffer << " to outputFile: "
+			<< absolutePath << std::endl;
+		psfreq::logger::d(log);
 		outputFile << buffer << std::endl;
+
+		log << "\tClosing outputFile..." << std::endl;
+		psfreq::logger::d(log);
 		outputFile.close();
 	}
 
@@ -76,9 +90,17 @@ namespace psfreq {
 
 	const std::string sysfs::read(const std::string &path, const std::string &file) const
 	{
+		std::ostringstream log;
+		log << "pstate-frequency [psfreq_sysfs.cpp]: sysfs::read" << std::endl;
+		psfreq::logger::d(log);
+
 		std::ostringstream oss;
 		oss << path << file;
 		const std::string absolutePath = oss.str();
+		log << "\tPath: " << absolutePath << std::endl;
+		log << "\tOpening inputFile..." << std::endl;
+		psfreq::logger::d(log);
+
 		std::string content;
 		std::ifstream inputFile;
 		inputFile.open(absolutePath.c_str());
@@ -90,7 +112,13 @@ namespace psfreq {
 			psfreq::logger::close();
 			exit(EXIT_FAILURE);
 		}
+		log << "\tGetting a line from inputFile..." << std::endl;
+		psfreq::logger::d(log);
 		std::getline(inputFile, content);
+
+		log << "\tClosing inputFile..." << std::endl;
+		psfreq::logger::d(log);
+
 		inputFile.close();
 		return content;
 	}
@@ -107,9 +135,17 @@ namespace psfreq {
 
 	const std::vector<std::string> sysfs::readAll(const std::string &path, const std::string &file) const
 	{
+		std::ostringstream log;
+		log << "pstate-frequency [psfreq_sysfs.cpp]: sysfs::readAll" << std::endl;
+		psfreq::logger::d(log);
+
 		std::ostringstream oss;
 		oss << path << file;
 		const std::string absolutePath = oss.str();
+		log << "\tPath: " << absolutePath << std::endl;
+		log << "\tOpening inputFile..." << std::endl;
+		psfreq::logger::d(log);
+
 		std::ifstream inputFile;
 		inputFile.open(absolutePath.c_str());
 		if (!inputFile.is_open()) {
@@ -122,15 +158,21 @@ namespace psfreq {
 		}
 		std::vector<std::string> contents = std::vector<std::string>();
 		while (true) {
+			log << "\tReading single input from inputFile..." << std::endl;
+			psfreq::logger::d(log);
 			std::string content;
 			inputFile >> content;
 			if (inputFile.eof()) {
+				log << "\tEOF reached." << std::endl;
+				psfreq::logger::d(log);
 				break;
 			}
 			contents.push_back(content);
 		}
+		log << "\tClosing inputFile..." << std::endl;
+		psfreq::logger::d(log);
+
 		inputFile.close();
 		return contents;
-
 	}
 }

@@ -32,11 +32,22 @@ namespace psfreq {
 
 unsigned int cpu::findNumber() const
 {
+	std::ostringstream log;
+	log << "pstate-frequency [psfreq_cpu_private.cpp]: cpu::findNumber"
+		<< std::endl;
+	psfreq::logger::d(log);
+
 	const std::string cmd = "grep processor /proc/cpuinfo | wc -l";
 	const char *command = cmd.c_str();
+	log << "\tOpen pipe: " << cmd << std::endl;
+	psfreq::logger::d(log);
+
 	std::FILE *pipe = popen(command, "r");
 	char *line = NULL;
         size_t n = 0;
+	log << "\tGet line from pipe" << std::endl;
+	psfreq::logger::d(log);
+
         if (getline(&line, &n, pipe) == -1) {
 		std::ostringstream oss;
 		oss << PSFREQ_COLOR_BOLD_RED << "Could not get a line from file."
@@ -45,6 +56,9 @@ unsigned int cpu::findNumber() const
 		psfreq::logger::close();
                 exit(EXIT_FAILURE);
         }
+	log << "\tClose pipe" << std::endl;
+	psfreq::logger::d(log);
+
 	pclose(pipe);
 	const unsigned int result = stringToNumber(line);
 	free(line);
@@ -53,9 +67,15 @@ unsigned int cpu::findNumber() const
 
 void cpu::initializeVector(std::vector<std::string> &vector, std::string what) const
 {
+	std::ostringstream log;
+	log << "pstate-frequency [psfreq_cpu_private.cpp]: cpu::initializeVector"
+		<< std::endl;
+	psfreq::logger::d(log);
 	for (unsigned int i = 0; i < number; ++i) {
 		std::ostringstream oss;
 		oss << "cpu" << i << "/cpufreq/scaling_" << what;
+		log << "\tVector entry[" << i << "]: " << oss.str() << std::endl;
+		psfreq::logger::d(log);
 		vector.push_back(oss.str());
 	}
 }

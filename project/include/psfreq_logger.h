@@ -36,7 +36,7 @@ private:
 	static const std::string flush()
 	{
 		const std::string str = oss.str();
-		oss.clear();
+		oss.str(std::string());
 		return str;
 	}
 
@@ -58,6 +58,13 @@ public:
 		}
 	}
 
+	static void n(std::ostringstream& stream)
+	{
+		const std::string str = stream.str();
+		stream.str(std::string());
+		n(str);
+	}
+
 	static void d(const std::string& log)
 	{
 		if (verbose == 1) {
@@ -65,6 +72,13 @@ public:
 			const std::string str = flush();
 			std::cout << str;
 		}
+	}
+
+	static void d(std::ostringstream& stream)
+	{
+		const std::string str = stream.str();
+		stream.str(std::string());
+		d(str);
 	}
 
 	static void e(const std::string& log)
@@ -76,9 +90,16 @@ public:
 		}
 	}
 
+	static void e(std::ostringstream& stream)
+	{
+		const std::string str = stream.str();
+		stream.str(std::string());
+		e(str);
+	}
+
 	static void close()
 	{
-		oss.clear();
+		oss.str(std::string());
 		verbose = 0;
 	}
 

@@ -21,40 +21,82 @@
 #include <iostream>
 #include <sstream>
 
-#include "include/psfreq_util.h"
+#include "include/psfreq_logger.h"
 #include "include/psfreq_sysfs.h"
+#include "include/psfreq_util.h"
 
 namespace psfreq {
 
 double stringToNumber(const std::string &line)
 {
+	std::ostringstream log;
+	log << "pstate-frequency [psfreq_util.cpp]: stringToNumber" << std::endl;
+	psfreq::logger::d(log);
+
+	log << "\tLine is: " << line << std::endl;
+	psfreq::logger::d(log);
         std::istringstream iss(line);
+
 	int result;
 	iss >> result;
+
+	log << "\tResult is: " << result << std::endl;
+	psfreq::logger::d(log);
 	return result;
 }
 
 int boundValue(const int value, const int minBound,
 		const int maxBound)
 {
+	std::ostringstream log;
+	log << "pstate-frequency [psfreq_util.cpp]: boundValue" << std::endl;
+	psfreq::logger::d(log);
+
 	if (value < minBound) {
+		log << "\tBound value to minBound: " << minBound << std::endl;
+		psfreq::logger::d(log);
 		return minBound;
 	} else if (value > maxBound) {
+		log << "\tBound value to maxBound: " << maxBound << std::endl;
+		psfreq::logger::d(log);
 		return maxBound;
 	} else {
+		log << "\tNo bounding needed." << std::endl;
+		psfreq::logger::d(log);
 		return value;
 	}
 }
 
 bool stringStartsWith(const std::string &control, const std::string &value)
 {
+	std::ostringstream log;
+	log << "pstate-frequency [psfreq_util.cpp]: stringStartsWith"
+		<< std::endl;
+	psfreq::logger::d(log);
+
+	log << "\tCheck if " << control
+		<< " starts with string: " << value << std::endl;
+	psfreq::logger::d(log);
 	return control.compare(0, value.length(), value) == 0;
 }
 
 bool hasPstate()
 {
+	std::ostringstream log;
+	log << "pstate-frequency [psfreq_util.cpp]: hasPstate"
+		<< std::endl;
+	psfreq::logger::d(log);
+
+	log << "\tCheck for presence of pstate driver"
+		<< std::endl;
+	psfreq::logger::d(log);
+
 	sysfs cpuSysfs;
 	const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
+	log << "Compare found: " << driver << " with driver: intel_pstate"
+		<< std::endl;
+	psfreq::logger::d(log);
+
 	return (driver.compare("intel_pstate") == 0);
 }
 

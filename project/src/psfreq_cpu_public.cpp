@@ -18,7 +18,11 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
+#include <iostream>
+#include <sstream>
+
 #include "include/psfreq_cpu.h"
+#include "include/psfreq_logger.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
@@ -125,6 +129,15 @@ int cpu::getInfoMaxValue() const
 
 void cpu::setSaneDefaults() const
 {
+	std::ostringstream log;
+	log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::setSaneDefaults"
+		<< std::endl;
+	psfreq::logger::d(log);
+
+	log << "\tDefaults are set to MAX: 100, MIN: 0, TURBO: 1, GOVERNOR: powersave"
+		<< std::endl;
+	psfreq::logger::d(log);
+
 	setScalingMax(100);
 	setScalingMin(0);
 	setTurboBoost(1);
