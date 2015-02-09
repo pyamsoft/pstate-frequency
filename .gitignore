@@ -1,3 +1,4 @@
 project/bin/
 project/obj/
 assets/pkgbuild/pstate-frequency*
+assets/pkgbuild/*.tar.gz
