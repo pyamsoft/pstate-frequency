@@ -24,8 +24,8 @@ _gitname=pstate-frequency
 ## even fail to compile. While newer features will enter
 ## 'dev' before 'master' it is not recommended to use
 ## the dev branch on production machines.
-_gitbranch=master
-# _gitbranch=dev
+# _gitbranch=master
+_gitbranch=dev
 
 source=("${_gitname}::git+${url}#branch=${_gitbranch}")
 
