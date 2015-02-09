@@ -66,6 +66,19 @@ RedHat based distributions should also look to using **checkinstall** or a simil
 to produce an RPM for use on such systems.
 
 
+### Versioning
+
+The versioning is rather arbitrary. The scheme is as follows:  
+	X.Y.Z
+
+X is the major version number, it will only be updated when the program is significantly updated.  
+Y is the minor version number, it will be updated when features are added to existing versions.  
+Z is the bugfix version number, it will be updated generally whenever a bug is fixed or patched.
+
+The addition of a ".git" tag after the bugfix version number signifies that the current version is  
+nebulus, and is in the process of fixing a bug or patching a feature that would otherwise lead to  
+the incrementation of the bugfix version number.
+
 ### Usage
 
 The binary by default is named **pstate-frequency**  
