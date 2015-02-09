@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include "include/psfreq_cpuvalues.h"
+#include "include/psfreq_logger.h"
 #include "include/psfreq_sysfs.h"
 #include "include/psfreq_util.h"
 
@@ -166,6 +167,7 @@ void cpuValues::setPlanAuto()
 	const char *const dirName = "/sys/class/power_supply/";
 	DIR *const directory = opendir(dirName);
 	if (!directory) {
+		psfreq::logger::close();
 		exit(EXIT_FAILURE);
 	}
 	struct dirent *entry =  readdir(directory);
@@ -180,12 +182,14 @@ void cpuValues::setPlanAuto()
 					break;
 				}
 			} else {
+				psfreq::logger::close();
 				exit(EXIT_FAILURE);
 			}
 		}
 		entry = readdir(directory);
 	}
 	if (closedir(directory)) {
+		psfreq::logger::close();
 		exit(EXIT_FAILURE);
 	}
 }

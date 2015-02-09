@@ -80,6 +80,7 @@ int planFromOptArg(char *const arg)
 	} else {
 		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid plan: "
 			<< convertedArg << psfreq::PSFREQ_COLOR_OFF << std::endl;
+		psfreq::logger::close();
 		exit(EXIT_FAILURE);
 	}
 	return plan;
@@ -96,13 +97,16 @@ const std::string governorFromOptArg(char *const arg, std::vector<std::string> a
 		}
 	}
 	if (governor == "") {
-		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid governor: "
+		std::ostringstream oss;
+		oss << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid governor: "
 			<< psfreq::PSFREQ_COLOR_BOLD_WHITE << convertedArg << std::endl;
-		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Valid governors are: [ " << psfreq::PSFREQ_COLOR_BOLD_WHITE;
+		oss << psfreq::PSFREQ_COLOR_BOLD_RED << "Valid governors are: [ " << psfreq::PSFREQ_COLOR_BOLD_WHITE;
 		for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
-			std::cerr << availableGovernors[i] << " ";
+			oss << availableGovernors[i] << " ";
 		}
-		std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "]" << psfreq::PSFREQ_COLOR_OFF << std::endl;
+		oss << psfreq::PSFREQ_COLOR_BOLD_RED << "]" << psfreq::PSFREQ_COLOR_OFF << std::endl;
+		psfreq::logger::e(oss.str());
+		psfreq::logger::close();
 		exit(EXIT_FAILURE);
 	}
 	return governor;
@@ -110,52 +114,59 @@ const std::string governorFromOptArg(char *const arg, std::vector<std::string> a
 
 void printGPL()
 {
-	std::cout << "pstate-frequency comes with ABSOLUTELY NO WARRANTY."
+	std::ostringstream oss;
+	oss << "pstate-frequency comes with ABSOLUTELY NO WARRANTY."
 		<< std::endl
 		<< "This is free software, and you are welcome to redistribute it"
 		<< std::endl << "under certain conditions." << std::endl
 		<< "Please see the README for details."
 		<< psfreq::PSFREQ_COLOR_OFF << std::endl << std::endl;
+	psfreq::logger::n(oss.str());
 }
 
 void printVersion()
 {
-	std::cout << std::endl;
+	std::ostringstream oss;
+	oss << std::endl;
 #ifdef VERSION
-	std::cout << psfreq::PSFREQ_COLOR_BOLD_BLUE << "pstate-frequency  "
+	oss << psfreq::PSFREQ_COLOR_BOLD_BLUE << "pstate-frequency  "
 		<< psfreq::PSFREQ_COLOR_BOLD_MAGENTA << VERSION << psfreq::PSFREQ_COLOR_OFF
 		<< std::endl;
 #endif
+	psfreq::logger::n(oss.str());
 }
 
 void printCpuValues(const psfreq::cpu& cpu)
 {
 	printVersion();
-	std::cout << psfreq::PSFREQ_COLOR_BOLD_WHITE
+	std::ostringstream oss;
+	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_DRIVER     -> "
 		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getDriver() << std::endl;
-	std::cout << psfreq::PSFREQ_COLOR_BOLD_WHITE
+	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_GOVERNOR   -> "
 		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getGovernor() << std::endl;
 	const int turbo = cpu.getTurboBoost();
-	std::cout << psfreq::PSFREQ_COLOR_BOLD_WHITE
+	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "NO_TURBO       -> "
 		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << turbo << " : "
 		<< (turbo == 1 ? "OFF" : (turbo == -1 ? "INVALID" : "ON")) << std::endl;
-	std::cout << psfreq::PSFREQ_COLOR_BOLD_WHITE
+	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MIN        -> "
 		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMinPState() << "% : "
 		<< static_cast<int>(cpu.getScalingMinFrequency()) << "KHz" << std::endl;
-	std::cout << psfreq::PSFREQ_COLOR_BOLD_WHITE
+	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MAX        -> "
 		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMaxPState() << "% : "
 		<< static_cast<int>(cpu.getScalingMaxFrequency()) << "KHz" << std::endl;
-	std::cout << psfreq::PSFREQ_COLOR_OFF << std::endl;
+	oss << psfreq::PSFREQ_COLOR_OFF << std::endl;
+	psfreq::logger::n(oss.str());
 }
 
 void printHelp()
 {
-        std::cout << "usage:"
+	std::ostringstream oss;
+        oss << "usage:"
 		<< "pstate-frequency [action] [option]"
 		<< std::endl
 		<< "    actions:" << std::endl
@@ -176,6 +187,7 @@ void printHelp()
 		<< "            -o | --gov      Set the cpufreq governor" << std::endl
 		<< "            -n | --min      Modify current CPU min frequency" << std::endl
 		<< "            -t | --turbo    Modify curent CPU turbo boost state" << std::endl;
+	psfreq::logger::n(oss.str());
 }
 
 int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int result)
@@ -186,19 +198,25 @@ int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int
         case 'h':
 		printGPL();
 		printHelp();
-		std::cout << std::endl;
+		if (!psfreq::logger::isQuiet()) {
+			std::cout << std::endl;
+		}
                 return -1;
         case 'v':
 		printGPL();
 		printVersion();
-		std::cout << std::endl;
+		if (!psfreq::logger::isQuiet()) {
+			std::cout << std::endl;
+		}
                 return -1;
         case 's':
 		cpuValues.setAction(1);
                 return 0;
         case 'd':
+		psfreq::logger::setDebug();
                 return 0;
 	case 'q':
+		psfreq::logger::setQuiet();
 		return 0;
         case 'g':
 		cpuValues.setAction(0);
@@ -253,8 +271,10 @@ int main(int argc, char** argv)
                 } else {
 			finalOptionResult = handleOptionResult(cpu, cpuValues, optionResult);
                         if (finalOptionResult == -1) {
-                                return 0;
+				psfreq::logger::close();
+                                return EXIT_SUCCESS;
                         } else if (finalOptionResult == EXIT_FAILURE) {
+				psfreq::logger::close();
                                 return EXIT_FAILURE;
                         }
                 }
@@ -263,8 +283,11 @@ int main(int argc, char** argv)
 	if (cpuValues.isActionNull()) {
 		printGPL();
 		printHelp();
-		std::cout << std::endl;
-		return 0;
+		if (!psfreq::logger::isQuiet()) {
+			std::cout << std::endl;
+		}
+		psfreq::logger::close();
+		return EXIT_SUCCESS;
 	} else if (cpuValues.isActionGet()) {
 		printCpuValues(cpu);
 	} else {
@@ -276,13 +299,16 @@ int main(int argc, char** argv)
 				std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED
 					<< "Set called with no target"
 					<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+				psfreq::logger::close();
 				return EXIT_FAILURE;
 			}
 		} else {
 			std::cerr << psfreq::PSFREQ_COLOR_BOLD_RED << "Root privilages required"
 				<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::close();
 			return EXIT_FAILURE;
 		}
 	}
+	psfreq::logger::close();
 	return EXIT_SUCCESS;
 }

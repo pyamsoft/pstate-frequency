@@ -33,52 +33,76 @@ private:
 	static std::ostringstream oss;
 	static int verbose;
 
+	static const std::string flush()
+	{
+		const std::string str = oss.str();
+		oss.clear();
+		return str;
+	}
+
 public:
 	logger()
 	{
-		verbose = 0;
 	}
 
 	~logger()
 	{
-		oss.clear();
 	}
 
-	static void log(std::string& str)
+	static void n(const std::string& log)
 	{
-		oss << str;
-	}
-
-	static void d()
-	{
-		if (verbose == 1) {
+		if (verbose != -1) {
+			oss << log;
 			const std::string str = flush();
 			std::cout << str;
 		}
 	}
 
-	static void e()
+	static void d(const std::string& log)
 	{
 		if (verbose == 1) {
+			oss << log;
 			const std::string str = flush();
-			std::cerr << str;
+			std::cout << str;
 		}
 	}
 
-	static const std::string flush()
+	static void e(const std::string& log)
 	{
-		if (verbose == 1) {
-			const std::string str = oss.str();
-			oss.clear();
-			return str;
-		} else {
-			return "";
-		}
+		oss << log;
+		const std::string str = flush();
+		std::cerr << str;
+	}
+
+	static void close()
+	{
+		oss.clear();
+		verbose = 0;
+	}
+
+	static bool isNormal()
+	{
+		return verbose == 0;
+	}
+
+	static bool isDebug()
+	{
+		return verbose == 1;
+	}
+
+	static bool isQuiet()
+	{
+		return verbose == -1;
 	}
 
 	static void setQuiet()
 	{
 		verbose = -1;
+	}
+
+	static void setNormal()
+	{
+		verbose = 0;
 	}
 
 	static void setDebug()

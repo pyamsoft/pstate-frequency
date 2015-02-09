@@ -24,6 +24,7 @@
 #include <cstdlib>
 
 #include "include/psfreq_color.h"
+#include "include/psfreq_logger.h"
 #include "include/psfreq_sysfs.h"
 
 namespace psfreq {
@@ -47,6 +48,7 @@ namespace psfreq {
 		if (!outputFile.is_open()) {
 			std::cerr << PSFREQ_COLOR_BOLD_RED << "Output file: " << absolutePath
 				<< " could not be opened." << PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::close();
 			exit(EXIT_FAILURE);
 		}
 		outputFile << buffer << std::endl;
@@ -81,6 +83,7 @@ namespace psfreq {
 		if (!inputFile.is_open()) {
 			std::cerr << PSFREQ_COLOR_BOLD_RED << "Input file: " << absolutePath
 				<< " could not be opened." << PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::close();
 			exit(EXIT_FAILURE);
 		}
 		std::getline(inputFile, content);
@@ -108,6 +111,7 @@ namespace psfreq {
 		if (!inputFile.is_open()) {
 			std::cerr << PSFREQ_COLOR_BOLD_RED << "Input file: " << absolutePath
 				<< " could not be opened." << PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::close();
 			exit(EXIT_FAILURE);
 		}
 		std::vector<std::string> contents = std::vector<std::string>();
@@ -121,6 +125,6 @@ namespace psfreq {
 		}
 		inputFile.close();
 		return contents;
-	
+
 	}
 }

@@ -25,6 +25,7 @@
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
+#include "include/psfreq_logger.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
@@ -39,6 +40,7 @@ unsigned int cpu::findNumber() const
         if (getline(&line, &n, pipe) == -1) {
 		std::cerr << PSFREQ_COLOR_BOLD_RED << "Could not get a line from file."
 			<< PSFREQ_COLOR_OFF << std::endl;
+		psfreq::logger::close();
                 exit(EXIT_FAILURE);
         }
 	pclose(pipe);
