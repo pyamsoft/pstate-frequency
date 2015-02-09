@@ -13,7 +13,7 @@ provides=('pstate-frequency')
 conflicts=('pstate-frequency')
 license=('GPLv2')
 url="https://github.com/pyamsoft/pstate-frequency/archive/${pkgver}.tar.gz"
-sha256sums=('SKIP')
+sha256sums=('813eae84180ea21f4d4d59010d0792e93a4296985c4c6b18dfb16b654d1d65d5')
 source=("${url}")
 
 ###############################################################################
