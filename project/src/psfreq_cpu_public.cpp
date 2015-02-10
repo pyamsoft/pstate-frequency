@@ -130,13 +130,18 @@ int cpu::getInfoMaxValue() const
 void cpu::setSaneDefaults() const
 {
 	std::ostringstream log;
-	log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::setSaneDefaults"
-		<< std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::setSaneDefaults"
+			<< std::endl;
+		logger::d(log);
+	}
 
-	log << "\tDefaults are set to MAX: 100, MIN: 0, TURBO: 1, GOVERNOR: powersave"
-		<< std::endl;
-	psfreq::logger::d(log);
+
+	if (logger::isDebug()) {
+		log << "\tDefaults are set to MAX: 100, MIN: 0, TURBO: 1, GOVERNOR: powersave"
+			<< std::endl;
+		logger::d(log);
+	}
 
 	setScalingMax(100);
 	setScalingMin(0);
