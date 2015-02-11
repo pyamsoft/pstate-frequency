@@ -97,12 +97,6 @@ public:
 		e(str);
 	}
 
-	static void close()
-	{
-		oss.str(std::string());
-		verbose = 0;
-	}
-
 	static bool isAllQuiet()
 	{
 		return verbose == -2;

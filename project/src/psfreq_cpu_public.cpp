@@ -21,6 +21,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
 #include "include/psfreq_logger.h"
 #include "include/psfreq_util.h"
@@ -70,7 +71,7 @@ double cpu::getInfoMaxFrequency() const
 	return maxInfoFrequency;
 }
 
-int cpu::getNumber() const
+unsigned int cpu::getNumber() const
 {
 	return number;
 }
@@ -88,6 +89,19 @@ const std::string cpu::getIOScheduler() const
 const std::string cpu::getDriver() const
 {
 	return cpuSysfs.read("cpu0/cpufreq/scaling_driver");
+}
+
+const std::vector<std::string> cpu::getRealtimeFrequencies() const
+{
+	std::ostringstream log;
+	if (logger::isDebug()) {
+		log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::getRealtimeFrequencies"
+			<< std::endl;
+		logger::d(log);
+	}
+
+	const char *cmd = "grep MHz /proc/cpuinfo";
+	return cpuSysfs.readPipe(cmd, number);
 }
 
 const std::vector<std::string> cpu::getAvailableGovernors() const
@@ -130,13 +144,18 @@ int cpu::getInfoMaxValue() const
 void cpu::setSaneDefaults() const
 {
 	std::ostringstream log;
-	log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::setSaneDefaults"
-		<< std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::setSaneDefaults"
+			<< std::endl;
+		logger::d(log);
+	}
 
-	log << "\tDefaults are set to MAX: 100, MIN: 0, TURBO: 1, GOVERNOR: powersave"
-		<< std::endl;
-	psfreq::logger::d(log);
+
+	if (logger::isDebug()) {
+		log << "\tDefaults are set to MAX: 100, MIN: 0, TURBO: 1, GOVERNOR: powersave"
+			<< std::endl;
+		logger::d(log);
+	}
 
 	setScalingMax(100);
 	setScalingMin(0);

@@ -30,18 +30,24 @@ namespace psfreq {
 double stringToNumber(const std::string &line)
 {
 	std::ostringstream log;
-	log << "pstate-frequency [psfreq_util.cpp]: stringToNumber" << std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "pstate-frequency [psfreq_util.cpp]: stringToNumber" << std::endl;
+		logger::d(log);
+	}
 
-	log << "\tLine is: " << line << std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "\tLine is: " << line << std::endl;
+		logger::d(log);
+	}
         std::istringstream iss(line);
 
 	int result;
 	iss >> result;
 
-	log << "\tResult is: " << result << std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "\tResult is: " << result << std::endl;
+		logger::d(log);
+	}
 	return result;
 }
 
@@ -49,20 +55,28 @@ int boundValue(const int value, const int minBound,
 		const int maxBound)
 {
 	std::ostringstream log;
-	log << "pstate-frequency [psfreq_util.cpp]: boundValue" << std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "pstate-frequency [psfreq_util.cpp]: boundValue" << std::endl;
+		logger::d(log);
+	}
 
 	if (value < minBound) {
-		log << "\tBound value to minBound: " << minBound << std::endl;
-		psfreq::logger::d(log);
+		if (logger::isDebug()) {
+			log << "\tBound value to minBound: " << minBound << std::endl;
+			logger::d(log);
+		}
 		return minBound;
 	} else if (value > maxBound) {
-		log << "\tBound value to maxBound: " << maxBound << std::endl;
-		psfreq::logger::d(log);
+		if (logger::isDebug()) {
+			log << "\tBound value to maxBound: " << maxBound << std::endl;
+			logger::d(log);
+		}
 		return maxBound;
 	} else {
-		log << "\tNo bounding needed." << std::endl;
-		psfreq::logger::d(log);
+		if (logger::isDebug()) {
+			log << "\tNo bounding needed." << std::endl;
+			logger::d(log);
+		}
 		return value;
 	}
 }
@@ -70,32 +84,43 @@ int boundValue(const int value, const int minBound,
 bool stringStartsWith(const std::string &control, const std::string &value)
 {
 	std::ostringstream log;
-	log << "pstate-frequency [psfreq_util.cpp]: stringStartsWith"
-		<< std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "pstate-frequency [psfreq_util.cpp]: stringStartsWith"
+			<< std::endl;
+		logger::d(log);
+	}
 
-	log << "\tCheck if " << control
-		<< " starts with string: " << value << std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "\tCheck if " << control
+			<< " starts with string: " << value << std::endl;
+		logger::d(log);
+	}
 	return control.compare(0, value.length(), value) == 0;
 }
 
 bool hasPstate()
 {
 	std::ostringstream log;
-	log << "pstate-frequency [psfreq_util.cpp]: hasPstate"
-		<< std::endl;
-	psfreq::logger::d(log);
 
-	log << "\tCheck for presence of pstate driver"
-		<< std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "pstate-frequency [psfreq_util.cpp]: hasPstate"
+			<< std::endl;
+		logger::d(log);
+	}
+
+	if (logger::isDebug()) {
+		log << "\tCheck for presence of pstate driver"
+			<< std::endl;
+		logger::d(log);
+	}
 
 	sysfs cpuSysfs;
 	const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
-	log << "Compare found: " << driver << " with driver: intel_pstate"
-		<< std::endl;
-	psfreq::logger::d(log);
+	if (logger::isDebug()) {
+		log << "Compare found: " << driver << " with driver: intel_pstate"
+			<< std::endl;
+		logger::d(log);
+	}
 
 	return (driver.compare("intel_pstate") == 0);
 }
