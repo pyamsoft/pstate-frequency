@@ -33,6 +33,7 @@ private:
 	int min;
 	int turbo;
 	std::string governor;
+	int requested;
 
 	void setPlanPowersave();
 	void setPlanPerformance();
@@ -52,12 +53,14 @@ public:
 	void setMin(const int newMin);
 	void setTurbo(const int newTurbo);
 	void setPlan(const int plan);
+	void setRequested(const int newRequest);
 	void setGovernor(const std::string& newGovernor);
 
 	int getAction() const;
 	int getMax() const;
 	int getMin() const;
 	int getTurbo() const;
+	int getRequested() const;
 	const std::string getGovernor() const;
 
 	bool hasAction() const;

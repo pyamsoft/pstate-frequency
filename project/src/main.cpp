@@ -32,6 +32,7 @@
 
 void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues);
 void printCpuValues(const psfreq::cpu& cpu);
+void printRealtimeFrequency(const psfreq::cpu& cpu);
 void printGPL();
 void printVersion();
 void printHelp();
@@ -164,6 +165,17 @@ int planFromOptArg(char *const arg)
 	return plan;
 }
 
+void printRealtimeFrequency(const psfreq::cpu& cpu)
+{
+	printVersion();
+	const std::vector<std::string> frequencies = cpu.getRealtimeFrequencies();
+	std::ostringstream oss;
+	for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
+		oss << "    " << frequencies[i];
+		psfreq::logger::n(oss);
+	}
+}
+
 const std::string governorFromOptArg(char *const arg, std::vector<std::string> availableGovernors)
 {
 	const std::string convertedArg(arg);
@@ -279,6 +291,9 @@ void printHelp()
 		<< "            -s | --set       Modify current CPU values" << std::endl
 		<< std::endl
 		<< "    options:" << std::endl
+		<< "        unprivilaged:" << std::endl
+		<< "            -c | --current   Display the current user set CPU values" << std::endl
+		<< "            -r | --real      Display the real time CPU frequencies" << std::endl
 		<< "        privilaged: "<< std::endl
 		<< "            -p | --plan      Set a predefined power plan" << std::endl
 		<< "            -m | --max       Modify current CPU max frequency" << std::endl
@@ -297,6 +312,17 @@ int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int
 		printGPL();
 		printHelp();
                 return -1;
+        case 'c':
+		/*
+		 * KLUDGE
+		 * By default we would run as if this option was set,
+		 * therefore, we do not actually have to do anything
+		 * if this is requested by the user.
+		 */
+		return 0;
+        case 'r':
+		cpuValues.setRequested(1);
+		return 0;
         case 'v':
 		printGPL();
 		printVersion();
@@ -337,17 +363,19 @@ int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int
 
 int main(int argc, char** argv)
 {
-	psfreq::cpu cpu;
-	psfreq::cpuValues cpuValues;
+	psfreq::cpu cpu = psfreq::cpu();
+	psfreq::cpuValues cpuValues = psfreq::cpuValues();
 
 	int finalOptionResult = 0;
 	int optionResult = 0;
-	const char *const shortOptions = "hvsdagqp:m:n:t:o:";
+	const char *const shortOptions = "hvcrsdagqp:m:n:t:o:";
 	struct option longOptions[] = {
                 {"help",          no_argument,        NULL,           'h'},
                 {"version",       no_argument,        NULL,           'v'},
                 {"get",           no_argument,        NULL,           'g'},
                 {"set",           no_argument,        NULL,           's'},
+                {"current",       no_argument,        NULL,           'c'},
+                {"real",          no_argument,        NULL,           'r'},
                 {"quiet",         no_argument,        NULL,           'q'},
                 {"all-quiet",     no_argument,        NULL,           'a'},
                 {"debug",         no_argument,        NULL,           'd'},
@@ -379,7 +407,15 @@ int main(int argc, char** argv)
 		printHelp();
 		return EXIT_SUCCESS;
 	} else if (cpuValues.isActionGet()) {
-		printCpuValues(cpu);
+		if (cpuValues.getRequested() == 0) {
+			printCpuValues(cpu);
+		} else {
+			/*
+			 * TODO
+			 * Retrieve current CPU freq
+			 */
+			printRealtimeFrequency(cpu);
+		}
 	} else {
 		if (geteuid() == 0) {
 			if (cpuValues.isInitialized()) {

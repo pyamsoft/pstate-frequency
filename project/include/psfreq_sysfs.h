@@ -40,6 +40,7 @@ public:
 	const std::string read(const std::string &path, const std::string &file) const;
 	const std::vector<std::string> readAll(const std::string &file) const;
 	const std::vector<std::string> readAll(const std::string &path, const std::string &file) const;
+	const std::vector<std::string> readPipe(const char* command, const unsigned int number) const;
 };
 
 }

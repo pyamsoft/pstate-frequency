@@ -205,4 +205,50 @@ namespace psfreq {
 		inputFile.close();
 		return contents;
 	}
+
+	const std::vector<std::string> sysfs::readPipe(const char* command, const unsigned int number) const
+	{
+		std::ostringstream log;
+		if (logger::isDebug()) {
+			log << "pstate-frequency [psfreq_sysfs.cpp]: sysfs::readPipe"
+				<< std::endl;
+			logger::d(log);
+		}
+
+		if (logger::isDebug()) {
+			log << "\tOpen pipe: " << command << std::endl;
+			logger::d(log);
+		}
+
+		std::FILE *pipe = popen(command, "r");
+		if (logger::isDebug()) {
+			log << "\tGet line from pipe" << std::endl;
+			logger::d(log);
+		}
+
+		size_t n = 0;
+		std::vector<std::string> lines = std::vector<std::string>();
+		for (unsigned int i = 0; i < number; ++i) {
+			char *line = NULL;
+			if (getline(&line, &n, pipe) == -1) {
+				if (!psfreq::logger::isAllQuiet()) {
+					std::ostringstream oss;
+					oss << PSFREQ_COLOR_BOLD_RED << "Could not get a line from file."
+						<< PSFREQ_COLOR_OFF << std::endl;
+					logger::e(oss.str());
+				}
+				exit(EXIT_FAILURE);
+			}
+			lines.push_back(std::string(line));
+			free(line);
+		}
+
+		if (logger::isDebug()) {
+			log << "\tClose pipe" << std::endl;
+			logger::d(log);
+		}
+
+		pclose(pipe);
+		return lines;
+	}
 }

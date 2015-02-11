@@ -52,7 +52,7 @@ public:
 	void setTurboBoost(const int turbo) const;
 	void setGovernor(const std::string &governor) const;
 	int getTurboBoost() const;
-	int getNumber() const;
+	unsigned int getNumber() const;
 	int getInfoMinValue() const;
 	int getInfoMaxValue() const;
 	int getMinPState() const;
@@ -62,6 +62,7 @@ public:
 	double getInfoMinFrequency() const;
 	double getInfoMaxFrequency() const;
 	const std::string getGovernor() const;
+	const std::vector<std::string> getRealtimeFrequencies() const;
 	const std::vector<std::string> getAvailableGovernors() const;
 	const std::string getDriver() const;
 	const std::string getIOScheduler() const;

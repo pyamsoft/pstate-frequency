@@ -39,39 +39,8 @@ unsigned int cpu::findNumber() const
 		logger::d(log);
 	}
 
-	const std::string cmd = "grep processor /proc/cpuinfo | wc -l";
-	const char *command = cmd.c_str();
-	if (logger::isDebug()) {
-		log << "\tOpen pipe: " << cmd << std::endl;
-		logger::d(log);
-	}
-
-	std::FILE *pipe = popen(command, "r");
-	char *line = NULL;
-        size_t n = 0;
-	if (logger::isDebug()) {
-		log << "\tGet line from pipe" << std::endl;
-		logger::d(log);
-	}
-
-        if (getline(&line, &n, pipe) == -1) {
-		if (!psfreq::logger::isAllQuiet()) {
-			std::ostringstream oss;
-			oss << PSFREQ_COLOR_BOLD_RED << "Could not get a line from file."
-				<< PSFREQ_COLOR_OFF << std::endl;
-			logger::e(oss.str());
-		}
-                exit(EXIT_FAILURE);
-        }
-	if (logger::isDebug()) {
-		log << "\tClose pipe" << std::endl;
-		logger::d(log);
-	}
-
-	pclose(pipe);
-	const unsigned int result = stringToNumber(line);
-	free(line);
-	return result;
+	const char *cmd = "grep processor /proc/cpuinfo | wc -l";
+	return stringToNumber(cpuSysfs.readPipe(cmd, 1)[0]);
 }
 
 void cpu::initializeVector(std::vector<std::string> &vector, std::string what) const

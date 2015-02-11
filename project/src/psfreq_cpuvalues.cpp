@@ -40,6 +40,7 @@ cpuValues::cpuValues()
 	min = -1;
 	turbo = -1;
 	governor = "";
+	requested = 0;
 }
 
 cpuValues::~cpuValues()
@@ -97,6 +98,11 @@ void cpuValues::setTurbo(const int newTurbo)
 	turbo = newTurbo;
 }
 
+void cpuValues::setRequested(const int newRequest)
+{
+	requested = newRequest;
+}
+
 const std::string cpuValues::getGovernor() const
 {
 	return governor;
@@ -120,6 +126,11 @@ int cpuValues::getMin() const
 int cpuValues::getTurbo() const
 {
 	return turbo;
+}
+
+int cpuValues::getRequested() const
+{
+	return requested;
 }
 
 void cpuValues::setPlan(const int plan)
