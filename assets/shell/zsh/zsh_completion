@@ -23,9 +23,9 @@ _options()
 	if [ "$words[$index]" = "-s" ] || [ "$words[$index]" = "--set" ]; then
 		_alternative \
 			"privilaged-options:privilaged options:_privilaged_options"
-	# elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--get" ]; then
-	# 	_alternative \
-	# 		"unprivilaged-options:unprivilaged options:_unprivilaged_options"
+	elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--get" ]; then
+		_alternative \
+			"unprivilaged-options:unprivilaged options:_unprivilaged_options"
 	elif [ "$words[$index]" = "-o" ] || [ "$words[$index]" = "--gov" ] || [ "$words[$index]" = "--governor" ]; then
 		_alternative \
 			":cpu governor name:"
@@ -48,15 +48,16 @@ _options()
 
 }
 
-# _unprivilaged_options()
-# {
-# 	# Add long option support
-# 	local options;
-# 	options=(
-# 		"-i:Get the io scheduler"
-# 	)
-# 	_describe -t unprivilaged-options "unprivilaged options" options "$@"
-# }
+_unprivilaged_options()
+{
+	# Add long option support
+	local options;
+	options=(
+		"-c:Get the current CPU values"
+		"-r:Get real-time CPU frequencies"
+	)
+	_describe -t unprivilaged-options "unprivilaged options" options "$@"
+}
 
 _privilaged_options()
 {
@@ -82,6 +83,7 @@ _unprivilaged_actions()
 		"-v:Print the current version"
 		"-g:Access the current CPU values"
 		"-q:Supress non-error output"
+		"-a:Supress all output"
 		"-d:Enable debugging mode"
 	)
 	_describe -t unprivilaged-actions "unprivilaged actions" actions "$@"
