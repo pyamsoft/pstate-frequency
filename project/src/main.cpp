@@ -170,6 +170,12 @@ void printRealtimeFrequency(const psfreq::cpu& cpu)
 	printVersion();
 	const std::vector<std::string> frequencies = cpu.getRealtimeFrequencies();
 	std::ostringstream oss;
+	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+		<< "    Getting real-time CPU frequencies for ("
+		<< psfreq::PSFREQ_COLOR_BOLD_GREEN << cpu.getNumber()
+		<< psfreq::PSFREQ_COLOR_BOLD_WHITE << ") CPUs"
+		<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+	psfreq::logger::n(oss);
 	for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
 		oss << "    " << frequencies[i];
 		psfreq::logger::n(oss);
@@ -266,7 +272,7 @@ void printCpuValues(const psfreq::cpu& cpu)
 		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MAX        -> "
 		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMaxPState() << "% : "
 		<< static_cast<int>(cpu.getScalingMaxFrequency()) << "KHz" << std::endl;
-	oss << psfreq::PSFREQ_COLOR_OFF << std::endl;
+	oss << psfreq::PSFREQ_COLOR_OFF;
 	psfreq::logger::n(oss.str());
 }
 
@@ -313,12 +319,6 @@ int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int
 		printHelp();
                 return -1;
         case 'c':
-		/*
-		 * KLUDGE
-		 * By default we would run as if this option was set,
-		 * therefore, we do not actually have to do anything
-		 * if this is requested by the user.
-		 */
 		return 0;
         case 'r':
 		cpuValues.setRequested(1);
@@ -410,10 +410,6 @@ int main(int argc, char** argv)
 		if (cpuValues.getRequested() == 0) {
 			printCpuValues(cpu);
 		} else {
-			/*
-			 * TODO
-			 * Retrieve current CPU freq
-			 */
 			printRealtimeFrequency(cpu);
 		}
 	} else {
