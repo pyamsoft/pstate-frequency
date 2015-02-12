@@ -175,7 +175,7 @@ void printRealtimeFrequency(const psfreq::cpu& cpu)
 		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
 			<< "CPU[" << psfreq::PSFREQ_COLOR_BOLD_MAGENTA << i
-			<< psfreq::PSFREQ_COLOR_BOLD_GREEN << "] "
+			<< psfreq::PSFREQ_COLOR_BOLD_GREEN << "]  -> "
 			<< psfreq::PSFREQ_COLOR_BOLD_CYAN
 			<< freq.substr(0, freq.size() - 1) << "MHz"
 			<< psfreq::PSFREQ_COLOR_OFF << std::endl;
