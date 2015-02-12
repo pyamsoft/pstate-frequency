@@ -100,7 +100,7 @@ const std::vector<std::string> cpu::getRealtimeFrequencies() const
 		logger::d(log);
 	}
 
-	const char *cmd = "grep MHz /proc/cpuinfo";
+	const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
 	return cpuSysfs.readPipe(cmd, number);
 }
 

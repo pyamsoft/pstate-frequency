@@ -170,14 +170,15 @@ void printRealtimeFrequency(const psfreq::cpu& cpu)
 	printVersion();
 	const std::vector<std::string> frequencies = cpu.getRealtimeFrequencies();
 	std::ostringstream oss;
-	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-		<< "    Getting real-time CPU frequencies for ("
-		<< psfreq::PSFREQ_COLOR_BOLD_GREEN << cpu.getNumber()
-		<< psfreq::PSFREQ_COLOR_BOLD_WHITE << ") CPUs"
-		<< psfreq::PSFREQ_COLOR_OFF << std::endl;
-	psfreq::logger::n(oss);
 	for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
-		oss << "    " << frequencies[i];
+		std::string freq = frequencies[i];
+		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
+			<< "CPU[" << psfreq::PSFREQ_COLOR_BOLD_MAGENTA << i
+			<< psfreq::PSFREQ_COLOR_BOLD_GREEN << "] "
+			<< psfreq::PSFREQ_COLOR_BOLD_CYAN
+			<< freq.substr(0, freq.size() - 1) << "MHz"
+			<< psfreq::PSFREQ_COLOR_OFF << std::endl;
 		psfreq::logger::n(oss);
 	}
 }
