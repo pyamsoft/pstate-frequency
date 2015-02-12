@@ -320,6 +320,7 @@ int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int
 		printHelp();
                 return -1;
         case 'c':
+		cpuValues.setRequested(0);
 		return 0;
         case 'r':
 		cpuValues.setRequested(1);
