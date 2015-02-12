@@ -167,19 +167,21 @@ int planFromOptArg(char *const arg)
 
 void printRealtimeFrequency(const psfreq::cpu& cpu)
 {
-	printVersion();
-	const std::vector<std::string> frequencies = cpu.getRealtimeFrequencies();
-	std::ostringstream oss;
-	for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
-		std::string freq = frequencies[i];
-		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
-			<< "CPU[" << psfreq::PSFREQ_COLOR_BOLD_MAGENTA << i
-			<< psfreq::PSFREQ_COLOR_BOLD_GREEN << "]  -> "
-			<< psfreq::PSFREQ_COLOR_BOLD_CYAN
-			<< freq.substr(0, freq.size() - 1) << "MHz"
-			<< psfreq::PSFREQ_COLOR_OFF << std::endl;
-		psfreq::logger::n(oss);
+	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
+		printVersion();
+		const std::vector<std::string> frequencies = cpu.getRealtimeFrequencies();
+		std::ostringstream oss;
+		for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
+			std::string freq = frequencies[i];
+			oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+				<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
+				<< "CPU[" << psfreq::PSFREQ_COLOR_BOLD_MAGENTA << i
+				<< psfreq::PSFREQ_COLOR_BOLD_GREEN << "]  -> "
+				<< psfreq::PSFREQ_COLOR_BOLD_CYAN
+				<< freq.substr(0, freq.size() - 1) << "MHz"
+				<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+			psfreq::logger::n(oss);
+		}
 	}
 }
 
@@ -228,86 +230,94 @@ const std::string governorFromOptArg(char *const arg, std::vector<std::string> a
 
 void printGPL()
 {
-	std::ostringstream oss;
-	oss << "pstate-frequency comes with ABSOLUTELY NO WARRANTY."
-		<< std::endl
-		<< "This is free software, and you are welcome to redistribute it"
-		<< std::endl << "under certain conditions." << std::endl
-		<< "Please see the README for details."
-		<< psfreq::PSFREQ_COLOR_OFF << std::endl << std::endl;
-	psfreq::logger::n(oss.str());
+	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
+		std::ostringstream oss;
+		oss << "pstate-frequency comes with ABSOLUTELY NO WARRANTY."
+			<< std::endl
+			<< "This is free software, and you are welcome to redistribute it"
+			<< std::endl << "under certain conditions." << std::endl
+			<< "Please see the README for details."
+			<< psfreq::PSFREQ_COLOR_OFF << std::endl << std::endl;
+		psfreq::logger::n(oss.str());
+	}
 }
 
 void printVersion()
 {
-	std::ostringstream oss;
-	oss << std::endl;
+	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
+		std::ostringstream oss;
+		oss << std::endl;
 #ifdef VERSION
-	oss << psfreq::PSFREQ_COLOR_BOLD_BLUE << "pstate-frequency  "
-		<< psfreq::PSFREQ_COLOR_BOLD_MAGENTA << VERSION << psfreq::PSFREQ_COLOR_OFF
-		<< std::endl;
+		oss << psfreq::PSFREQ_COLOR_BOLD_BLUE << "pstate-frequency  "
+			<< psfreq::PSFREQ_COLOR_BOLD_MAGENTA << VERSION << psfreq::PSFREQ_COLOR_OFF
+			<< std::endl;
 #endif
-	psfreq::logger::n(oss.str());
+		psfreq::logger::n(oss.str());
+	}
 }
 
 void printCpuValues(const psfreq::cpu& cpu)
 {
-	printVersion();
-	std::ostringstream oss;
-	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_DRIVER     -> "
-		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getDriver() << std::endl;
-	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_GOVERNOR   -> "
-		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getGovernor() << std::endl;
-	const int turbo = cpu.getTurboBoost();
-	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "NO_TURBO       -> "
-		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << turbo << " : "
-		<< (turbo == 1 ? "OFF" : (turbo == -1 ? "INVALID" : "ON")) << std::endl;
-	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MIN        -> "
-		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMinPState() << "% : "
-		<< static_cast<int>(cpu.getScalingMinFrequency()) << "KHz" << std::endl;
-	oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-		<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MAX        -> "
-		<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMaxPState() << "% : "
-		<< static_cast<int>(cpu.getScalingMaxFrequency()) << "KHz" << std::endl;
-	oss << psfreq::PSFREQ_COLOR_OFF;
-	psfreq::logger::n(oss.str());
+	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
+		printVersion();
+		std::ostringstream oss;
+		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_DRIVER     -> "
+			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getDriver() << std::endl;
+		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_GOVERNOR   -> "
+			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getGovernor() << std::endl;
+		const int turbo = cpu.getTurboBoost();
+		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "NO_TURBO       -> "
+			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << turbo << " : "
+			<< (turbo == 1 ? "OFF" : (turbo == -1 ? "INVALID" : "ON")) << std::endl;
+		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MIN        -> "
+			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMinPState() << "% : "
+			<< static_cast<int>(cpu.getScalingMinFrequency()) << "KHz" << std::endl;
+		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MAX        -> "
+			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMaxPState() << "% : "
+			<< static_cast<int>(cpu.getScalingMaxFrequency()) << "KHz" << std::endl;
+		oss << psfreq::PSFREQ_COLOR_OFF;
+		psfreq::logger::n(oss.str());
+	}
 }
 
 void printHelp()
 {
-	std::ostringstream oss;
-        oss << "usage:"
-		<< "pstate-frequency [verbose] [action] [option(s)]"
-		<< std::endl
-		<< "    verbose:" << std::endl
-		<< "        unprivilaged:" << std::endl
-		<< "            -d | --debug     Print debugging messages to stdout" << std::endl
-		<< "            -q | --quiet     Supress all non-error output" << std::endl
-		<< "            -a | --all-quiet Supress all output" << std::endl
-		<< std::endl
-		<< "    actions:" << std::endl
-		<< "        unprivilaged:" << std::endl
-		<< "            -h | --help      Display this help and exit" << std::endl
-		<< "            -v | --version   Display application version and exit" << std::endl
-		<< "            -g | --get       Access current CPU values" << std::endl
-		<< "        privilaged:" << std::endl
-		<< "            -s | --set       Modify current CPU values" << std::endl
-		<< std::endl
-		<< "    options:" << std::endl
-		<< "        unprivilaged:" << std::endl
-		<< "            -c | --current   Display the current user set CPU values" << std::endl
-		<< "            -r | --real      Display the real time CPU frequencies" << std::endl
-		<< "        privilaged: "<< std::endl
-		<< "            -p | --plan      Set a predefined power plan" << std::endl
-		<< "            -m | --max       Modify current CPU max frequency" << std::endl
-		<< "            -o | --gov       Set the cpufreq governor" << std::endl
-		<< "            -n | --min       Modify current CPU min frequency" << std::endl
-		<< "            -t | --turbo     Modify curent CPU turbo boost state" << std::endl;
-	psfreq::logger::n(oss.str());
+	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
+		std::ostringstream oss;
+		oss << "usage:"
+			<< "pstate-frequency [verbose] [action] [option(s)]"
+			<< std::endl
+			<< "    verbose:" << std::endl
+			<< "        unprivilaged:" << std::endl
+			<< "            -d | --debug     Print debugging messages to stdout" << std::endl
+			<< "            -q | --quiet     Supress all non-error output" << std::endl
+			<< "            -a | --all-quiet Supress all output" << std::endl
+			<< std::endl
+			<< "    actions:" << std::endl
+			<< "        unprivilaged:" << std::endl
+			<< "            -h | --help      Display this help and exit" << std::endl
+			<< "            -v | --version   Display application version and exit" << std::endl
+			<< "            -g | --get       Access current CPU values" << std::endl
+			<< "        privilaged:" << std::endl
+			<< "            -s | --set       Modify current CPU values" << std::endl
+			<< std::endl
+			<< "    options:" << std::endl
+			<< "        unprivilaged:" << std::endl
+			<< "            -c | --current   Display the current user set CPU values" << std::endl
+			<< "            -r | --real      Display the real time CPU frequencies" << std::endl
+			<< "        privilaged: "<< std::endl
+			<< "            -p | --plan      Set a predefined power plan" << std::endl
+			<< "            -m | --max       Modify current CPU max frequency" << std::endl
+			<< "            -o | --gov       Set the cpufreq governor" << std::endl
+			<< "            -n | --min       Modify current CPU min frequency" << std::endl
+			<< "            -t | --turbo     Modify curent CPU turbo boost state" << std::endl;
+		psfreq::logger::n(oss.str());
+	}
 }
 
 int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int result)
