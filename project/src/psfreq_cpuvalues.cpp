@@ -177,7 +177,7 @@ void cpuValues::setPlanPowersave()
 {
 	max = 0;
 	min = 0;
-	turbo = 1;
+	turbo = hasPstate() ? 1 : 0;
 	governor = "powersave";
 }
 
@@ -185,7 +185,7 @@ void cpuValues::setPlanPerformance()
 {
 	max = 100;
 	min = 0;
-	turbo = 1;
+	turbo = hasPstate() ? 1 : 0;
 	governor = hasPstate() ? "powersave" : "ondemand";
 }
 
@@ -193,7 +193,7 @@ void cpuValues::setPlanMaxPerformance()
 {
 	max = 100;
 	min = 100;
-	turbo = 1;
+	turbo = hasPstate() ? 0 : 1;
 	governor = "performance";
 }
 

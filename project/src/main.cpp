@@ -271,7 +271,8 @@ void printCpuValues(const psfreq::cpu& cpu)
 		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "NO_TURBO       -> "
 			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << turbo << " : "
-			<< (turbo == 1 ? "OFF" : (turbo == -1 ? "INVALID" : "ON")) << std::endl;
+			<< (psfreq::hasPstate() ? (turbo == 1 ? "OFF" : "ON")
+					: (turbo == 1 ? "ON" : "OFF")) << std::endl;
 		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MIN        -> "
 			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMinPState() << "% : "
