@@ -11,13 +11,13 @@ and maximum scaling frequencies and the state of turbo boost.
 + Intel P-State driver (included in kernel 3.9 and upwards).  
 Enable it by adding **intel_pstate=enable** to the boot command line.  
 If the p-state driver is not present in your system, the application will still  
-work on a basic level using the default **cpufreq** driver.
+work using the default **cpufreq** driver.
 
 pstate-frequency is distribution independent, and should run on all standard  
 versions of Linux based operating systems which include a recent kernel (3.9+)  
-and come with the set of expected core utilities, including *ls*, *grep*,  
-*wc*, and *modprobe*. The system must also support the use of the **proc** and  
-**sys** mounts, as found on a typical modern system. These attributes are  
+and come with the set of expected core utilities, including *ls*, *grep*, *cat*,  
+*wc*, *cut*, and *modprobe*. The system must also support the use of the **proc**  
+and **sys** mounts, as found on a typical modern system. These attributes are  
 assumed on any system attempting to use the pstate-frequency frontend, and 
 support towards any system which does not conform to these normally expected  
 features cannot be given at this time.
@@ -26,14 +26,6 @@ You are also expected to read and understand the settings in the configuration
 file: config.mk. Undertaking modification of this file is up to the user, and  
 support for any kind of customization that deviates from the shipped  
 configuration file will not be supported.
-
-
-#### Optional
-
-+ **msr-tools** package to provide the **wrmsr** binary
-+ *Please note that*
-**msr-tools**
-*may be named diffrently on your distribution of choice.*
 
 
 ### Installation
@@ -91,13 +83,16 @@ When called with the *-g --get* option, the program will display something like 
 When called with the *-s --set* option, the program will display something like the following:
 ![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_set.png)
 
-The *-g --get* option can be called by a normal user, and will display the current values  
-for the CPU  minimum scaling frequency, the CPU maximum scaling frequency, the state of Turbo Boost.
+The *-g --get* option can be called by a normal user.  
+The *-g --get* option also takes one or more of these flags as necessary arguments:  
++ **-c --current** Display the current user-requested CPU values
++ **-r --real** Display real-time CPU frequencies
 
 The *-s --set* option can only be called by a user with root permissions.  
 The *-s --set* option also takes one or more of these flags as necessary arguments:  
 + **-m --max** Adjust the maximum scaling frequency of the CPU
 + **-n --min** Adjust the minimum scaling frequency of the CPU
++ **-o --gov** Adjust the current CPU scaling governor
 + **-t --turbo** Adjust the current state of Turbo Boost (0 is ON, 1 is OFF)
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
 
