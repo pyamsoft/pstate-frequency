@@ -113,23 +113,23 @@ const std::vector<std::string> cpu::getAvailableGovernors() const
 
 int cpu::getMaxPState() const
 {
-	return static_cast<int>(getScalingMaxFrequency() / getInfoMaxFrequency() * 100);
+	return static_cast<int>(getScalingMaxFrequency()
+			/ getInfoMaxFrequency() * 100);
 }
 
 int cpu::getMinPState() const
 {
-	return static_cast<int>(getScalingMinFrequency() / getInfoMaxFrequency() * 100);
+	return static_cast<int>(getScalingMinFrequency()
+			/ getInfoMaxFrequency() * 100);
 }
 
 int cpu::getTurboBoost() const
 {
-	if (hasPstate()) {
-		const std::string line = cpuSysfs.read("intel_pstate/no_turbo");
-		const int result = stringToNumber(line);
-		return result;
-	} else {
-		return -1;
-	}
+	const std::string line = cpuSysfs.read(hasPstate()
+			? "intel_pstate/no_turbo"
+			: "cpufreq/boost");
+	const int result = stringToNumber(line);
+	return result;
 }
 
 int cpu::getInfoMinValue() const
@@ -159,7 +159,7 @@ void cpu::setSaneDefaults() const
 
 	setScalingMax(100);
 	setScalingMin(0);
-	setTurboBoost(1);
+	setTurboBoost(hasPstate() ? 1 : 0);
 	setGovernor("powersave");
 }
 
@@ -191,9 +191,8 @@ void cpu::setScalingMin(const int min) const
 
 void cpu::setTurboBoost(const int turbo) const
 {
-	if (hasPstate()) {
-		cpuSysfs.write("intel_pstate/no_turbo", turbo);
-	}
+	cpuSysfs.write(hasPstate() ? "intel_pstate/no_turbo"
+			: "cpufreq/boost", turbo);
 }
 
 void cpu::setGovernor(const std::string &governor) const
