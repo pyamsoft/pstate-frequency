@@ -1,5 +1,5 @@
 # Version Number
-VERSION:=1.1.1
+VERSION:=1.1.2
 
 # Standard
 # The standard has been decided as C++11 for a couple of reasons. The kernel
