@@ -2,7 +2,7 @@
 
 pkgname=pstate-frequency
 pkgdesc="Easily control Intel p-state driver"
-pkgver=1.1.1
+pkgver=1.1.2
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
@@ -61,4 +61,4 @@ package() {
 		install
 }
 
-sha256sums=('909d641d3ab408acd47eade781ea2f9769352e71c7cf67ffafa9313c03de22a3')
+sha256sums=('95e24f429eaa6aa3943d08f0b81bc7f3f4446925032aeee7a95116d824f15f79')
