@@ -1,5 +1,5 @@
 # Version Number
-VERSION:=1.1.3.git
+VERSION:=1.1.4.git
 
 # Standard
 # The standard has been decided as C++11 for a couple of reasons. The kernel
@@ -16,14 +16,6 @@ STD:=-std=c++11
 # Include the current directory so that paths for headers are properly
 # resolved.
 INCS:=-Iproject
-
-# Allow use of the msr module and wrmsr binary to write sepcific bits on the
-# CPU register. This is needed on some machines to disble Turbo Boost when
-# using the legacy acpi-cpufreq driver.
-# 0 NO / 1 YES
-#
-#	WRITE_MSR flag is not yet implemented
-#	WRITE_MSR:=0
 
 # Include a bash completion file
 # 0 NO / 1 YES
@@ -56,7 +48,7 @@ BIN_PERMISSION=755
 LDFLAGS:= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all
 
 # Compiler flags
-CXXFLAGS:= -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CXX}]\" \
+CXXFLAGS:= -DVERSION=\"${VERSION}[${CXX}]\" \
 	-DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE} ${STD} ${INCS} -O3 \
 	-march=native -mtune=generic -pipe -fstack-protector-strong \
 	--param=ssp-buffer-size=4 \
