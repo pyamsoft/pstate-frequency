@@ -1,5 +1,5 @@
 # Version Number
-VERSION:=1.1.3
+VERSION:=1.1.4
 
 # Standard
 # The standard has been decided as C++11 for a couple of reasons. The kernel
@@ -56,8 +56,8 @@ BIN_PERMISSION=755
 LDFLAGS:= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all
 
 # Compiler flags
-CXXFLAGS:= -DWRITE_MSR=${WRITE_MSR} -DVERSION=\"${VERSION}[${CXX}]\" \
-	-DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE} ${STD} ${INCS} -O3 \
+CXXFLAGS:= -DVERSION=\"${VERSION}[${CXX}]\" -DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE} \
+	${STD} ${INCS} -O3 \
 	-march=native -mtune=generic -pipe -fstack-protector-strong \
 	--param=ssp-buffer-size=4 \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations -Wunreachable-code
