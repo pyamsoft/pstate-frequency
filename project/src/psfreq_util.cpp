@@ -98,31 +98,4 @@ bool stringStartsWith(const std::string &control, const std::string &value)
 	return control.compare(0, value.length(), value) == 0;
 }
 
-bool hasPstate()
-{
-	std::ostringstream log;
-
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_util.cpp]: hasPstate"
-			<< std::endl;
-		logger::d(log);
-	}
-
-	if (logger::isDebug()) {
-		log << "\tCheck for presence of pstate driver"
-			<< std::endl;
-		logger::d(log);
-	}
-
-	sysfs cpuSysfs;
-	const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
-	if (logger::isDebug()) {
-		log << "Compare found: " << driver << " with driver: intel_pstate"
-			<< std::endl;
-		logger::d(log);
-	}
-
-	return (driver.compare("intel_pstate") == 0);
-}
-
 }

@@ -2,8 +2,8 @@
 
 namespace psfreq {
 
-	int logger::verbose = 0;
-	std::ostringstream logger::oss;
+int logger::verbose = 0;
+std::ostringstream logger::oss;
 
 }
 
