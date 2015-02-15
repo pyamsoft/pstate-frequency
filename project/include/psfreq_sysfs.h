@@ -32,6 +32,8 @@ private:
 public:
 	sysfs();
 	~sysfs();
+	bool exists(const std::string &path, const std::string &file) const;
+	bool exists(const std::string &file) const;
 	void write(const std::string &path, const std::string &file, const std::string &buffer) const;
 	void write(const std::string &path,const std::string &file, const int number) const;
 	void write(const std::string &file, const std::string &buffer) const;

@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #include "include/psfreq_color.h"
+#include "include/psfreq_cpu.h"
 #include "include/psfreq_cpuvalues.h"
 #include "include/psfreq_logger.h"
 #include "include/psfreq_sysfs.h"
@@ -177,7 +178,7 @@ void cpuValues::setPlanPowersave()
 {
 	max = 0;
 	min = 0;
-	turbo = hasPstate() ? 1 : 0;
+	turbo = cpu::hasPstate() ? 1 : 0;
 	governor = "powersave";
 }
 
@@ -185,15 +186,15 @@ void cpuValues::setPlanPerformance()
 {
 	max = 100;
 	min = 0;
-	turbo = hasPstate() ? 1 : 0;
-	governor = hasPstate() ? "powersave" : "ondemand";
+	turbo = cpu::hasPstate() ? 1 : 0;
+	governor = cpu::hasPstate() ? "powersave" : "ondemand";
 }
 
 void cpuValues::setPlanMaxPerformance()
 {
 	max = 100;
 	min = 100;
-	turbo = hasPstate() ? 0 : 1;
+	turbo = cpu::hasPstate() ? 0 : 1;
 	governor = "performance";
 }
 

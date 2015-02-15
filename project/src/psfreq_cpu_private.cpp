@@ -30,6 +30,8 @@
 
 namespace psfreq {
 
+bool cpu::pstate = cpu::findPstate();
+
 unsigned int cpu::findNumber() const
 {
 	std::ostringstream log;

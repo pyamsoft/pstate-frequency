@@ -28,7 +28,6 @@
 
 namespace psfreq {
 
-
 cpu::cpu()
 {
 	number = findNumber();
@@ -45,7 +44,6 @@ cpu::cpu()
 cpu::~cpu()
 {
 }
-
 
 double cpu::getScalingMinFrequency() const
 {
@@ -191,8 +189,12 @@ void cpu::setScalingMin(const int min) const
 
 void cpu::setTurboBoost(const int turbo) const
 {
-	cpuSysfs.write(hasPstate() ? "intel_pstate/no_turbo"
-			: "cpufreq/boost", turbo);
+	const std::string file = hasPstate()
+		? "intel_pstate/no_turbo"
+		: "cpufreq/boost";
+	if (cpuSysfs.exists(file)) {
+		cpuSysfs.write(file, turbo);
+	}
 }
 
 void cpu::setGovernor(const std::string &governor) const
@@ -203,6 +205,5 @@ void cpu::setGovernor(const std::string &governor) const
 		}
 	}
 }
-
 
 }

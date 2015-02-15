@@ -24,12 +24,15 @@
 #include <string>
 #include <vector>
 
+#include "include/psfreq_logger.h"
 #include "include/psfreq_sysfs.h"
 
 namespace psfreq {
 
 class cpu {
 private:
+	static bool pstate;
+
 	sysfs cpuSysfs;
 	unsigned int number;
 	double minInfoFrequency;
@@ -42,6 +45,29 @@ private:
 	unsigned int findNumber() const;
 	double findInfoMinFrequency() const;
 	double findInfoMaxFrequency() const;
+
+	static bool findPstate()
+	{
+		std::ostringstream log;
+		if (logger::isDebug()) {
+			log << "pstate-frequency [psfreq_cpu_private.cpp]: findPstate"
+				<< std::endl;
+			logger::d(log);
+		}
+		if (logger::isDebug()) {
+			log << "\tCheck for presence of pstate driver"
+				<< std::endl;
+			logger::d(log);
+		}
+		sysfs cpuSysfs;
+		const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
+		if (logger::isDebug()) {
+			log << "Compare found: " << driver << " with driver: intel_pstate"
+				<< std::endl;
+			logger::d(log);
+		}
+		return (driver.compare("intel_pstate") == 0);
+	}
 
 public:
 	cpu();
@@ -66,6 +92,11 @@ public:
 	const std::vector<std::string> getAvailableGovernors() const;
 	const std::string getDriver() const;
 	const std::string getIOScheduler() const;
+
+	static bool hasPstate()
+	{
+		return pstate;
+	}
 };
 
 

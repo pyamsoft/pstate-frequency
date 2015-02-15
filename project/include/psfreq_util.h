@@ -25,11 +25,11 @@
 
 namespace psfreq {
 
-	double stringToNumber(const std::string &line);
-	int boundValue(const int value, const int minBound,
-			const int maxBound);
-	bool stringStartsWith(const std::string &control, const std::string &value);
-	bool hasPstate();
+double stringToNumber(const std::string &line);
+int boundValue(const int value, const int minBound,
+		const int maxBound);
+bool stringStartsWith(const std::string &control, const std::string &value);
+
 }
 
 #endif
