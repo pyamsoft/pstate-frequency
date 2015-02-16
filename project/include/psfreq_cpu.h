@@ -24,16 +24,108 @@
 #include <string>
 #include <vector>
 
-#include "include/psfreq_logger.h"
-#include "include/psfreq_sysfs.h"
-
 namespace psfreq {
 
 class cpu {
-private:
-	static bool pstate;
+public:
 
-	sysfs cpuSysfs;
+	class values {
+
+	private:
+		const cpu &parent;
+		int action;
+		int max;
+		int min;
+		int turbo;
+		std::string governor;
+		int requested;
+
+		void setPlanPowersave();
+		void setPlanPerformance();
+		void setPlanMaxPerformance();
+		void setPlanAuto();
+
+		bool hideDirectory(const std::string &entryName);
+		bool discoverPowerSupply(const std::string &fullPath);
+		values();
+
+	public:
+
+		values(cpu &parentCpu) :
+			parent(parentCpu),
+			action(-1),
+			max(-1),
+			min(-1),
+			turbo(-1),
+			governor(std::string()),
+			requested(0)
+		{
+		}
+		~values()
+		{
+		}
+
+		void setAction(const int newAction);
+		void setMax(const int newMax);
+		void setMin(const int newMin);
+		void setTurbo(const int newTurbo);
+		void setPlan(const int plan);
+		void setRequested(const int newRequest);
+		void setGovernor(const std::string& newGovernor);
+
+		int getAction() const;
+		int getMax() const;
+		int getMin() const;
+		int getTurbo() const;
+		int getRequested() const;
+		const std::string getGovernor() const;
+
+		bool hasAction() const;
+		bool isActionNull() const;
+		bool isActionGet() const;
+		bool isActionSet() const;
+		bool isInitialized() const;
+	};
+
+private:
+
+	class sysfs {
+	private:
+		const cpu &parent;
+		const std::string basePath;
+		sysfs();
+	public:
+		sysfs(cpu& parentCpu) :
+			parent(parentCpu),
+			basePath("/sys/devices/system/cpu/")
+		{
+		}
+
+		~sysfs()
+		{
+		}
+
+		bool exists(const std::string &path, const std::string &file) const;
+		bool exists(const std::string &file) const;
+		void write(const std::string &path, const std::string &file,
+				const std::string &buffer) const;
+		void write(const std::string &path,const std::string &file,
+				const int number) const;
+		void write(const std::string &file, const std::string &buffer) const;
+		void write(const std::string &file, const int number) const;
+		const std::string read(const std::string &file) const;
+		const std::string read(const std::string &path,
+				const std::string &file) const;
+		const std::vector<std::string> readAll(const std::string &file) const;
+		const std::vector<std::string> readAll(const std::string &path,
+				const std::string &file) const;
+		const std::vector<std::string> readPipe(const char* command,
+				const unsigned int number) const;
+	};
+
+	const sysfs cpuSysfs;
+
+	bool pstate;
 	unsigned int number;
 	double minInfoFrequency;
 	double maxInfoFrequency;
@@ -43,46 +135,45 @@ private:
 
 	void initializeVector(std::vector<std::string> &vector, std::string what) const;
 	unsigned int findNumber() const;
+	bool findPstate() const;
 	double findInfoMinFrequency() const;
 	double findInfoMaxFrequency() const;
 
-	static bool findPstate()
-	{
-		std::ostringstream log;
-		if (logger::isDebug()) {
-			log << "pstate-frequency [psfreq_cpu_private.cpp]: findPstate"
-				<< std::endl;
-			logger::d(log);
-		}
-		if (logger::isDebug()) {
-			log << "\tCheck for presence of pstate driver"
-				<< std::endl;
-			logger::d(log);
-		}
-		sysfs cpuSysfs;
-		const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
-		if (logger::isDebug()) {
-			log << "Compare found: " << driver << " with driver: intel_pstate"
-				<< std::endl;
-			logger::d(log);
-		}
-		return (driver.compare("intel_pstate") == 0);
-	}
 
 public:
-	cpu();
-	~cpu();
+	values cpuValues;
+
+	cpu() :
+		cpuSysfs(*this),
+		pstate(false),
+		number(0),
+		minInfoFrequency(0),
+		maxInfoFrequency(0),
+		maxFrequencyFileVector(std::vector<std::string>()),
+		minFrequencyFileVector(std::vector<std::string>()),
+		governorFileVector(std::vector<std::string>()),
+		cpuValues(*this)
+	{
+	}
+
+	~cpu()
+	{
+	}
+
+	void init();
 	void setSaneDefaults() const;
 	void setScalingMax(const int max) const;
 	void setScalingMin(const int min) const;
 	void setTurboBoost(const int turbo) const;
 	void setGovernor(const std::string &governor) const;
+	values* getCpuValues() const;
+	bool hasPstate() const;
 	int getTurboBoost() const;
-	unsigned int getNumber() const;
 	int getInfoMinValue() const;
 	int getInfoMaxValue() const;
 	int getMinPState() const;
 	int getMaxPState() const;
+	unsigned int getNumber() const;
 	double getScalingMinFrequency() const;
 	double getScalingMaxFrequency() const;
 	double getInfoMinFrequency() const;
@@ -93,10 +184,6 @@ public:
 	const std::string getDriver() const;
 	const std::string getIOScheduler() const;
 
-	static bool hasPstate()
-	{
-		return pstate;
-	}
 };
 
 

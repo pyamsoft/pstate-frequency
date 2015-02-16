@@ -23,26 +23,24 @@
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
-#include "include/psfreq_logger.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
 
-cpu::cpu()
+void cpu::init()
 {
 	number = findNumber();
+	pstate = findPstate();
 	minInfoFrequency = findInfoMinFrequency();
 	maxInfoFrequency = findInfoMaxFrequency();
-	minFrequencyFileVector = std::vector<std::string>();
-	maxFrequencyFileVector = std::vector<std::string>();
-	governorFileVector = std::vector<std::string>();
 	initializeVector(minFrequencyFileVector, "min_freq");
 	initializeVector(maxFrequencyFileVector, "max_freq");
 	initializeVector(governorFileVector, "governor");
 }
 
-cpu::~cpu()
+bool cpu::hasPstate() const
 {
+	return pstate;
 }
 
 double cpu::getScalingMinFrequency() const
@@ -91,13 +89,6 @@ const std::string cpu::getDriver() const
 
 const std::vector<std::string> cpu::getRealtimeFrequencies() const
 {
-	std::ostringstream log;
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::getRealtimeFrequencies"
-			<< std::endl;
-		logger::d(log);
-	}
-
 	const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
 	return cpuSysfs.readPipe(cmd, number);
 }
@@ -141,20 +132,6 @@ int cpu::getInfoMaxValue() const
 
 void cpu::setSaneDefaults() const
 {
-	std::ostringstream log;
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::setSaneDefaults"
-			<< std::endl;
-		logger::d(log);
-	}
-
-
-	if (logger::isDebug()) {
-		log << "\tDefaults are set to MAX: 100, MIN: 0, TURBO: 1, GOVERNOR: powersave"
-			<< std::endl;
-		logger::d(log);
-	}
-
 	setScalingMax(100);
 	setScalingMin(0);
 	setTurboBoost(hasPstate() ? 1 : 0);

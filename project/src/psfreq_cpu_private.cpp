@@ -18,48 +18,32 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#include <cstdlib>
-#include <cstdio>
 #include <iostream>
 #include <sstream>
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
-#include "include/psfreq_logger.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
 
-bool cpu::pstate = cpu::findPstate();
+bool cpu::findPstate() const
+{
+	const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
+	return (driver.compare("intel_pstate") == 0);
+}
 
 unsigned int cpu::findNumber() const
 {
-	std::ostringstream log;
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_cpu_private.cpp]: cpu::findNumber"
-			<< std::endl;
-		logger::d(log);
-	}
-
 	const char *cmd = "grep processor /proc/cpuinfo | wc -l";
 	return stringToNumber(cpuSysfs.readPipe(cmd, 1)[0]);
 }
 
 void cpu::initializeVector(std::vector<std::string> &vector, std::string what) const
 {
-	std::ostringstream log;
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_cpu_private.cpp]: cpu::initializeVector"
-			<< std::endl;
-		logger::d(log);
-	}
 	for (unsigned int i = 0; i < number; ++i) {
 		std::ostringstream oss;
 		oss << "cpu" << i << "/cpufreq/scaling_" << what;
-	if (logger::isDebug()) {
-			log << "\tVector entry[" << i << "]: " << oss.str() << std::endl;
-			logger::d(log);
-	}
 		vector.push_back(oss.str());
 	}
 }

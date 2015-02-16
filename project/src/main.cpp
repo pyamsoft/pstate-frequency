@@ -18,99 +18,45 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
+#include <sstream>
 
 #include <getopt.h>
 #include <unistd.h>
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
-#include "include/psfreq_cpuvalues.h"
-#include "include/psfreq_logger.h"
 #include "include/psfreq_util.h"
 
-void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues);
+void setCpuValues(const psfreq::cpu &cpu);
 void printCpuValues(const psfreq::cpu& cpu);
 void printRealtimeFrequency(const psfreq::cpu& cpu);
 void printGPL();
 void printVersion();
 void printHelp();
-int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int result);
+int handleOptionResult(psfreq::cpu &cpu, const int result);
 int planFromOptArg(char *const arg);
-const std::string governorFromOptArg(char *const arg, std::vector<std::string> availableGovernors);
+const std::string governorFromOptArg(char *const arg,
+		const std::vector<std::string> &availableGovernors);
 
-void setCpuValues(const psfreq::cpu &cpu, const psfreq::cpuValues &cpuValues)
+void setCpuValues(const psfreq::cpu &cpu)
 {
-	std::ostringstream log;
-	if (psfreq::logger::isDebug()) {
-		log << "pstate-frequency [main.cpp]: setCpuValues" << std::endl;
-		psfreq::logger::d(log);
-	}
-
-	const int max = cpuValues.getMax();
-	if (psfreq::logger::isDebug()) {
-		log << "\tMax: " << max << std::endl;
-		psfreq::logger::d(log);
-	}
-
-	const int min = cpuValues.getMin();
-	if (psfreq::logger::isDebug()) {
-		log << "\tMin: "<< min << std::endl;
-		psfreq::logger::d(log);
-	}
-
-	const int turbo = cpuValues.getTurbo();
-	if (psfreq::logger::isDebug()) {
-		log << "\tTurbo: "<< turbo << std::endl;
-		psfreq::logger::d(log);
-	}
-
-	const std::string governor = cpuValues.getGovernor();
-	if (psfreq::logger::isDebug()) {
-		log << "\tGovernor: "<< governor << std::endl;
-		log << "\tProcessing new CPU values..." << std::endl;
-		psfreq::logger::d(log);
-	}
-
+	const psfreq::cpu::values *cpuValues = &cpu.cpuValues;
+	const int max = cpuValues->getMax();
+	const int min = cpuValues->getMin();
+	const int turbo = cpuValues->getTurbo();
+	const std::string governor = cpuValues->getGovernor();
 	int newTurbo = (turbo != -1 ? turbo : cpu.getTurboBoost());
 	newTurbo = psfreq::boundValue(newTurbo, 0, 1);
-	if (psfreq::logger::isDebug()) {
-		log << "\tnewTurbo: "<< newTurbo << std::endl;
-		psfreq::logger::d(log);
-	}
-
 	int newMin = (min >= 0 ? min : cpu.getMinPState());
 	newMin = psfreq::boundValue(newMin, cpu.getInfoMinValue(), cpu.getInfoMaxValue() - 1);
-	if (psfreq::logger::isDebug()) {
-		log << "\tnewMin: "<< newMin << std::endl;
-		psfreq::logger::d(log);
-	}
-
 	int newMax = (max >= 0 ? max : cpu.getMaxPState());
 	newMax = psfreq::boundValue(newMax, cpu.getInfoMinValue() + 1, cpu.getInfoMaxValue());
 	newMax = (newMax > newMin ? newMax : newMin + 1);
-	if (psfreq::logger::isDebug()) {
-		log << "\tnewMax: " << newMax << std::endl;
-		psfreq::logger::d(log);
-	}
-
 	const std::string newGovernor = (governor != "" ? governor : cpu.getGovernor());
-	if (psfreq::logger::isDebug()) {
-		log << "\tnewGovernor: "<< newGovernor << std::endl;
-		psfreq::logger::d(log);
-	}
-
-	if (psfreq::logger::isDebug()) {
-		log << "\tSetting sane defaults" << std::endl;
-		psfreq::logger::d(log);
-	}
 	cpu.setSaneDefaults();
 
-	if (psfreq::logger::isDebug()) {
-		log << "\tSetting new values" << std::endl;
-		psfreq::logger::d(log);
-	}
 	cpu.setScalingMax(newMax);
 	cpu.setScalingMin(newMin);
 	cpu.setTurboBoost(newTurbo);
@@ -121,53 +67,27 @@ int planFromOptArg(char *const arg)
 {
 	const std::string convertedArg(arg);
 	int plan;
-	std::ostringstream log;
-	if (psfreq::logger::isDebug()) {
-		log << "pstate-frequency [main.cpp]: planFromOptArg" << std::endl;
-		psfreq::logger::d(log);
-	}
 	if (convertedArg.compare("1") == 0 || psfreq::stringStartsWith("powersave", convertedArg)) {
 		plan = 1;
-		if (psfreq::logger::isDebug()) {
-			log << "\tPlan: powersave 1" << std::endl;
-		}
 	} else if (convertedArg.compare("2") == 0 || psfreq::stringStartsWith("performance", convertedArg)) {
 		plan = 2;
-		if (psfreq::logger::isDebug()) {
-			log << "\tPlan: performance 2" << std::endl;
-		}
 	} else if (convertedArg.compare("3") == 0 || psfreq::stringStartsWith("max-performance", convertedArg)) {
 		plan = 3;
-		if (psfreq::logger::isDebug()) {
-			log << "\tPlan: max-performance 3" << std::endl;
-		}
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	} else if (convertedArg.compare("0") == 0 || psfreq::stringStartsWith("auto", convertedArg)) {
 		plan = 0;
-		if (psfreq::logger::isDebug()) {
-			log << "\tPlan: auto 0" << std::endl;
-		}
 #endif
 #endif
 	} else {
-		if (!psfreq::logger::isAllQuiet()) {
-			std::ostringstream err;
-			err << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid plan: "
-				<< convertedArg << psfreq::PSFREQ_COLOR_OFF << std::endl;
-			psfreq::logger::e(err.str());
-		}
-		exit(EXIT_FAILURE);
-	}
-	if (psfreq::logger::isDebug()) {
-		psfreq::logger::d(log);
+		std::cerr << "Bad Plan." << std::endl;
+		std::exit(EXIT_FAILURE);
 	}
 	return plan;
 }
 
 void printRealtimeFrequency(const psfreq::cpu& cpu)
 {
-	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
 		printVersion();
 		const std::vector<std::string> frequencies = cpu.getRealtimeFrequencies();
 		std::ostringstream oss;
@@ -180,57 +100,31 @@ void printRealtimeFrequency(const psfreq::cpu& cpu)
 				<< psfreq::PSFREQ_COLOR_BOLD_CYAN
 				<< freq.substr(0, freq.size() - 1) << "MHz"
 				<< psfreq::PSFREQ_COLOR_OFF << std::endl;
-			psfreq::logger::n(oss);
 		}
-	}
+		std::cout << oss.str();
 }
 
-const std::string governorFromOptArg(char *const arg, std::vector<std::string> availableGovernors)
+const std::string governorFromOptArg(char *const arg,
+		const std::vector<std::string> &availableGovernors)
 {
 	const std::string convertedArg(arg);
 	std::ostringstream gov;
 	std::string governor = "";
-	std::ostringstream log;
-	if (psfreq::logger::isDebug()) {
-		log << "pstate-frequency [main.cpp]: governorFromOptArg" << std::endl;
-		psfreq::logger::d(log);
-	}
-
 	for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
-		if (psfreq::logger::isDebug()) {
-			log << "\tComparing argument: " << convertedArg << " to governor: "
-				<< availableGovernors[i] << std::endl;
-			psfreq::logger::d(log);
-		}
 		if (psfreq::stringStartsWith(availableGovernors[i], convertedArg)) {
 			governor = availableGovernors[i];
 			break;
 		}
 	}
 	if (governor == "") {
-		if (!psfreq::logger::isAllQuiet()) {
-			std::ostringstream oss;
-			oss << psfreq::PSFREQ_COLOR_BOLD_RED << "Invalid governor: "
-				<< psfreq::PSFREQ_COLOR_BOLD_WHITE << convertedArg << std::endl;
-			oss << psfreq::PSFREQ_COLOR_BOLD_RED << "Valid governors are: [ " << psfreq::PSFREQ_COLOR_BOLD_WHITE;
-			for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
-				oss << availableGovernors[i] << " ";
-			}
-			oss << psfreq::PSFREQ_COLOR_BOLD_RED << "]" << psfreq::PSFREQ_COLOR_OFF << std::endl;
-			psfreq::logger::e(oss.str());
-		}
-		exit(EXIT_FAILURE);
-	}
-	if (psfreq::logger::isDebug()) {
-		log << "\tGovernor: " << governor << std::endl;
-		psfreq::logger::d(log);
+		std::cerr << "Bad Governor." << std::endl;
+		std::exit(EXIT_FAILURE);
 	}
 	return governor;
 }
 
 void printGPL()
 {
-	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
 		std::ostringstream oss;
 		oss << "pstate-frequency comes with ABSOLUTELY NO WARRANTY."
 			<< std::endl
@@ -238,13 +132,11 @@ void printGPL()
 			<< std::endl << "under certain conditions." << std::endl
 			<< "Please see the README for details."
 			<< psfreq::PSFREQ_COLOR_OFF << std::endl << std::endl;
-		psfreq::logger::n(oss.str());
-	}
+		std::cout << oss.str();
 }
 
 void printVersion()
 {
-	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
 		std::ostringstream oss;
 		oss << std::endl;
 #ifdef VERSION
@@ -252,13 +144,11 @@ void printVersion()
 			<< psfreq::PSFREQ_COLOR_BOLD_MAGENTA << VERSION << psfreq::PSFREQ_COLOR_OFF
 			<< std::endl;
 #endif
-		psfreq::logger::n(oss.str());
-	}
+		std::cout << oss.str();
 }
 
 void printCpuValues(const psfreq::cpu& cpu)
 {
-	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
 		printVersion();
 		std::ostringstream oss;
 		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
@@ -270,9 +160,9 @@ void printCpuValues(const psfreq::cpu& cpu)
 		const int turbo = cpu.getTurboBoost();
 		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
-			<< (psfreq::cpu::hasPstate() ? "NO_TURBO       -> " : "TURBO_BOOST    -> ")
+			<< (cpu.hasPstate() ? "NO_TURBO       -> " : "TURBO_BOOST    -> ")
 			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << turbo << " : "
-			<< (psfreq::cpu::hasPstate() ? (turbo == 1 ? "OFF" : "ON")
+			<< (cpu.hasPstate() ? (turbo == 1 ? "OFF" : "ON")
 					: (turbo == 1 ? "ON" : "OFF")) << std::endl;
 		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
 			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN << "CPU_MIN        -> "
@@ -283,13 +173,11 @@ void printCpuValues(const psfreq::cpu& cpu)
 			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMaxPState() << "% : "
 			<< static_cast<int>(cpu.getScalingMaxFrequency()) << "KHz" << std::endl;
 		oss << psfreq::PSFREQ_COLOR_OFF;
-		psfreq::logger::n(oss.str());
-	}
+		std::cout << oss.str();
 }
 
 void printHelp()
 {
-	if (psfreq::logger::isNormal() || psfreq::logger::isDebug()) {
 		std::ostringstream oss;
 		oss << "usage:"
 			<< "pstate-frequency [verbose] [action] [option(s)]"
@@ -318,12 +206,12 @@ void printHelp()
 			<< "            -o | --gov       Set the cpufreq governor" << std::endl
 			<< "            -n | --min       Modify current CPU min frequency" << std::endl
 			<< "            -t | --turbo     Modify curent CPU turbo boost state" << std::endl;
-		psfreq::logger::n(oss.str());
-	}
+		std::cout << oss.str();
 }
 
-int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int result)
+int handleOptionResult(psfreq::cpu &cpu, const int result)
 {
+	psfreq::cpu::values *cpuValues = &cpu.cpuValues;
 	switch(result) {
 	case 0:
                 return 0;
@@ -332,53 +220,49 @@ int handleOptionResult(psfreq::cpu &cpu, psfreq::cpuValues &cpuValues, const int
 		printHelp();
                 return -1;
         case 'c':
-		cpuValues.setRequested(0);
+		cpuValues->setRequested(0);
 		return 0;
         case 'r':
-		cpuValues.setRequested(1);
+		cpuValues->setRequested(1);
 		return 0;
         case 'v':
 		printGPL();
 		printVersion();
                 return -1;
         case 's':
-		cpuValues.setAction(1);
+		cpuValues->setAction(1);
                 return 0;
         case 'd':
-		psfreq::logger::setDebug();
                 return 0;
 	case 'a':
-		psfreq::logger::setAllQuiet();
 		return 0;
 	case 'q':
-		psfreq::logger::setQuiet();
 		return 0;
         case 'g':
-		cpuValues.setAction(0);
+		cpuValues->setAction(0);
                 return 0;
         case 'p':
-		cpuValues.setPlan(planFromOptArg(optarg));
+		cpuValues->setPlan(planFromOptArg(optarg));
                 return 0;
         case 'm':
-		cpuValues.setMax(psfreq::stringToNumber(optarg));
+		cpuValues->setMax(psfreq::stringToNumber(optarg));
                 return 0;
 	case 'o':
-		cpuValues.setGovernor(governorFromOptArg(optarg, cpu.getAvailableGovernors()));
+		cpuValues->setGovernor(governorFromOptArg(optarg, cpu.getAvailableGovernors()));
 		return 0;
         case 'n':
-		cpuValues.setMin(psfreq::stringToNumber(optarg));
+		cpuValues->setMin(psfreq::stringToNumber(optarg));
 		return 0;
         case 't':
-		cpuValues.setTurbo(psfreq::stringToNumber(optarg));
+		cpuValues->setTurbo(psfreq::stringToNumber(optarg));
 		return 0;
 	}
-	return EXIT_FAILURE;
+	return 1;
 }
 
 int main(int argc, char** argv)
 {
 	psfreq::cpu cpu = psfreq::cpu();
-	psfreq::cpuValues cpuValues = psfreq::cpuValues();
 
 	int finalOptionResult = 0;
 	int optionResult = 0;
@@ -407,47 +291,39 @@ int main(int argc, char** argv)
                 if (optionResult == -1) {
                         break;
                 } else {
-			finalOptionResult = handleOptionResult(cpu, cpuValues, optionResult);
+			finalOptionResult = handleOptionResult(cpu, optionResult);
                         if (finalOptionResult == -1) {
                                 return EXIT_SUCCESS;
-                        } else if (finalOptionResult == EXIT_FAILURE) {
+                        } else if (finalOptionResult == 1) {
+				std::cerr << "Bad Option." << std::endl;
                                 return EXIT_FAILURE;
                         }
                 }
         }
+	cpu.init();
 
-	if (cpuValues.isActionNull()) {
+	const psfreq::cpu::values *cpuValues = &cpu.cpuValues;
+	if (cpuValues->isActionNull()) {
 		printGPL();
 		printHelp();
 		return EXIT_SUCCESS;
-	} else if (cpuValues.isActionGet()) {
-		if (cpuValues.getRequested() == 0) {
+	} else if (cpuValues->isActionGet()) {
+		if (cpuValues->getRequested() == 0) {
 			printCpuValues(cpu);
 		} else {
 			printRealtimeFrequency(cpu);
 		}
 	} else {
 		if (geteuid() == 0) {
-			if (cpuValues.isInitialized()) {
-				setCpuValues(cpu, cpuValues);
+			if (cpuValues->isInitialized()) {
+				setCpuValues(cpu);
 				printCpuValues(cpu);
 			} else {
-				if (!psfreq::logger::isAllQuiet()) {
-					std::ostringstream oss;
-					oss << psfreq::PSFREQ_COLOR_BOLD_RED
-						<< "Set called with no target"
-						<< psfreq::PSFREQ_COLOR_OFF << std::endl;
-					psfreq::logger::e(oss.str());
-				}
+				std::cerr << "No Requests." << std::endl;
 				return EXIT_FAILURE;
 			}
 		} else {
-			if (!psfreq::logger::isAllQuiet()) {
-				std::ostringstream oss;
-				oss << psfreq::PSFREQ_COLOR_BOLD_RED << "Root privilages required"
-					<< psfreq::PSFREQ_COLOR_OFF << std::endl;
-				psfreq::logger::e(oss.str());
-			}
+			std::cerr << "Permissions Error." << std::endl;
 			return EXIT_FAILURE;
 		}
 	}

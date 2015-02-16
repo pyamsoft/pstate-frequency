@@ -1,5 +1,5 @@
 # Version Number
-VERSION:=1.1.4.git
+VERSION:=1.1.5.git
 
 # Standard
 # The standard has been decided as C++11 for a couple of reasons. The kernel
@@ -32,7 +32,9 @@ INCLUDE_UDEV_RULE:=1
 
 # C++ Compiler to use
 # This will default to the GNU C++ compiler, g++
-# clang is recommended, but not required.
+# The project has been tested against g++ and clang++
+# both successfully build on all levels of optimizations, though
+# -O3 is the default for the most speed and performance benefits.
 CXX?=g++
 
 # Prefix of install
