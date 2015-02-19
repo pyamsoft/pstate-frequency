@@ -18,7 +18,6 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -27,9 +26,10 @@
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
+#include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
 
-void setCpuValues(const psfreq::cpu &cpu);
+bool setCpuValues(const psfreq::cpu &cpu);
 void printCpuValues(const psfreq::cpu& cpu);
 void printRealtimeFrequency(const psfreq::cpu& cpu);
 void printGPL();
@@ -40,27 +40,39 @@ int planFromOptArg(char *const arg);
 const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
 
-void setCpuValues(const psfreq::cpu &cpu)
+bool setCpuValues(const psfreq::cpu &cpu)
 {
-	const psfreq::cpu::values *cpuValues = &cpu.cpuValues;
-	const int max = cpuValues->getMax();
-	const int min = cpuValues->getMin();
-	const int turbo = cpuValues->getTurbo();
-	const std::string governor = cpuValues->getGovernor();
-	int newTurbo = (turbo != -1 ? turbo : cpu.getTurboBoost());
-	newTurbo = psfreq::boundValue(newTurbo, 0, 1);
-	int newMin = (min >= 0 ? min : cpu.getMinPState());
-	newMin = psfreq::boundValue(newMin, cpu.getInfoMinValue(), cpu.getInfoMaxValue() - 1);
-	int newMax = (max >= 0 ? max : cpu.getMaxPState());
-	newMax = psfreq::boundValue(newMax, cpu.getInfoMinValue() + 1, cpu.getInfoMaxValue());
-	newMax = (newMax > newMin ? newMax : newMin + 1);
-	const std::string newGovernor = (governor != "" ? governor : cpu.getGovernor());
-	cpu.setSaneDefaults();
-
-	cpu.setScalingMax(newMax);
-	cpu.setScalingMin(newMin);
-	cpu.setTurboBoost(newTurbo);
-	cpu.setGovernor(newGovernor);
+	const int cpuTurbo = cpu.getTurboBoost();
+	const int cpuInfoMin = cpu.getInfoMinValue();
+	const int cpuInfoMax =  cpu.getInfoMaxValue();
+	const int cpuMinPstate = cpu.getMinPState();
+	const int cpuMaxPstate = cpu.getMaxPState();
+	const std::string cpuGovernor = cpu.getGovernor();
+	if (cpuTurbo == -2 || cpuInfoMin == 1 || cpuInfoMax == 1 ||
+			cpuMinPstate == 0 || cpuMaxPstate == 0
+			|| cpuGovernor == std::string()) {
+		return false;
+	} else {
+		const psfreq::cpu::values *cpuValues = &cpu.cpuValues;
+		const int max = cpuValues->getMax();
+		const int min = cpuValues->getMin();
+		const int turbo = cpuValues->getTurbo();
+		const std::string governor = cpuValues->getGovernor();
+		int newTurbo = (turbo != -1 ? turbo : cpuTurbo);
+		newTurbo = psfreq::boundValue(newTurbo, 0, 1);
+		int newMin = (min >= 0 ? min : cpuMinPstate);
+		newMin = psfreq::boundValue(newMin, cpuInfoMin, cpuInfoMax - 1);
+		int newMax = (max >= 0 ? max : cpuMaxPstate);
+		newMax = psfreq::boundValue(newMax, cpuInfoMin + 1, cpuInfoMax);
+		newMax = (newMax > newMin ? newMax : newMin + 1);
+		const std::string newGovernor = (governor != "" ? governor : cpuGovernor);
+		cpu.setSaneDefaults();
+		cpu.setScalingMax(newMax);
+		cpu.setScalingMin(newMin);
+		cpu.setTurboBoost(newTurbo);
+		cpu.setGovernor(newGovernor);
+		return true;
+	}
 }
 
 int planFromOptArg(char *const arg)
@@ -81,7 +93,7 @@ int planFromOptArg(char *const arg)
 #endif
 	} else {
 		std::cerr << "Bad Plan." << std::endl;
-		std::exit(EXIT_FAILURE);
+		return 4;
 	}
 	return plan;
 }
@@ -90,18 +102,20 @@ void printRealtimeFrequency(const psfreq::cpu& cpu)
 {
 		printVersion();
 		const std::vector<std::string> frequencies = cpu.getRealtimeFrequencies();
-		std::ostringstream oss;
-		for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
-			std::string freq = frequencies[i];
-			oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-				<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
-				<< "CPU[" << psfreq::PSFREQ_COLOR_BOLD_MAGENTA << i
-				<< psfreq::PSFREQ_COLOR_BOLD_GREEN << "]  -> "
-				<< psfreq::PSFREQ_COLOR_BOLD_CYAN
-				<< freq.substr(0, freq.size() - 1) << "MHz"
-				<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+		if (!frequencies.empty()) {
+			std::ostringstream oss;
+			for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
+				std::string freq = frequencies[i];
+				oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+					<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
+					<< "CPU[" << psfreq::PSFREQ_COLOR_BOLD_MAGENTA << i
+					<< psfreq::PSFREQ_COLOR_BOLD_GREEN << "]  -> "
+					<< psfreq::PSFREQ_COLOR_BOLD_CYAN
+					<< freq.substr(0, freq.size() - 1) << "MHz"
+					<< psfreq::PSFREQ_COLOR_OFF << std::endl;
+			}
+			std::cout << oss.str();
 		}
-		std::cout << oss.str();
 }
 
 const std::string governorFromOptArg(char *const arg,
@@ -109,16 +123,16 @@ const std::string governorFromOptArg(char *const arg,
 {
 	const std::string convertedArg(arg);
 	std::ostringstream gov;
-	std::string governor = "";
+	std::string governor;
 	for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
 		if (psfreq::stringStartsWith(availableGovernors[i], convertedArg)) {
 			governor = availableGovernors[i];
 			break;
 		}
 	}
-	if (governor == "") {
+	if (governor == std::string()) {
 		std::cerr << "Bad Governor." << std::endl;
-		std::exit(EXIT_FAILURE);
+		return std::string();
 	}
 	return governor;
 }
@@ -242,7 +256,10 @@ int handleOptionResult(psfreq::cpu &cpu, const int result)
 		cpuValues->setAction(0);
                 return 0;
         case 'p':
-		cpuValues->setPlan(planFromOptArg(optarg));
+		if (!cpuValues->setPlan(planFromOptArg(optarg))) {
+			std::cerr << "Failed to set a power plan." << std::endl;
+			return 1;
+		}
                 return 0;
         case 'm':
 		cpuValues->setMax(psfreq::stringToNumber(optarg));
@@ -262,8 +279,7 @@ int handleOptionResult(psfreq::cpu &cpu, const int result)
 
 int main(int argc, char** argv)
 {
-	psfreq::cpu cpu = psfreq::cpu();
-
+	psfreq::cpu cpu;
 	int finalOptionResult = 0;
 	int optionResult = 0;
 	const char *const shortOptions = "hvcrsdagqp:m:n:t:o:";
@@ -284,7 +300,6 @@ int main(int argc, char** argv)
 		{"turbo",	  required_argument,  NULL,           't'},
 		{0,		  0,                  0,              0}
                 };
-
 	while (true) {
                 int index = 0;
                 optionResult = getopt_long(argc, argv, shortOptions, longOptions, &index);
@@ -293,20 +308,19 @@ int main(int argc, char** argv)
                 } else {
 			finalOptionResult = handleOptionResult(cpu, optionResult);
                         if (finalOptionResult == -1) {
-                                return EXIT_SUCCESS;
+                                return 0;
                         } else if (finalOptionResult == 1) {
 				std::cerr << "Bad Option." << std::endl;
-                                return EXIT_FAILURE;
+                                return 1;
                         }
                 }
         }
 	cpu.init();
-
 	const psfreq::cpu::values *cpuValues = &cpu.cpuValues;
 	if (cpuValues->isActionNull()) {
 		printGPL();
 		printHelp();
-		return EXIT_SUCCESS;
+		return 0;
 	} else if (cpuValues->isActionGet()) {
 		if (cpuValues->getRequested() == 0) {
 			printCpuValues(cpu);
@@ -316,16 +330,21 @@ int main(int argc, char** argv)
 	} else {
 		if (geteuid() == 0) {
 			if (cpuValues->isInitialized()) {
-				setCpuValues(cpu);
+				if (!setCpuValues(cpu)) {
+					std::cerr << "Environment was not sane."
+						<< " Could not set any CPU values"
+						<< std::endl;
+					return 1;
+				}
 				printCpuValues(cpu);
 			} else {
 				std::cerr << "No Requests." << std::endl;
-				return EXIT_FAILURE;
+				return 1;
 			}
 		} else {
 			std::cerr << "Permissions Error." << std::endl;
-			return EXIT_FAILURE;
+			return 1;
 		}
 	}
-	return EXIT_SUCCESS;
+	return 0;
 }

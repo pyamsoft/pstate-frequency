@@ -43,7 +43,7 @@ public:
 		void setPlanPowersave();
 		void setPlanPerformance();
 		void setPlanMaxPerformance();
-		void setPlanAuto();
+		bool setPlanAuto();
 
 		bool hideDirectory(const std::string &entryName);
 		bool discoverPowerSupply(const std::string &fullPath);
@@ -69,9 +69,9 @@ public:
 		void setMax(const int newMax);
 		void setMin(const int newMin);
 		void setTurbo(const int newTurbo);
-		void setPlan(const int plan);
+		bool setPlan(const int plan);
 		void setRequested(const int newRequest);
-		void setGovernor(const std::string& newGovernor);
+		bool setGovernor(const std::string& newGovernor);
 
 		int getAction() const;
 		int getMax() const;
@@ -105,14 +105,12 @@ private:
 		{
 		}
 
-		bool exists(const std::string &path, const std::string &file) const;
-		bool exists(const std::string &file) const;
-		void write(const std::string &path, const std::string &file,
+		bool write(const std::string &path, const std::string &file,
 				const std::string &buffer) const;
-		void write(const std::string &path,const std::string &file,
+		bool write(const std::string &path,const std::string &file,
 				const int number) const;
-		void write(const std::string &file, const std::string &buffer) const;
-		void write(const std::string &file, const int number) const;
+		bool write(const std::string &file, const std::string &buffer) const;
+		bool write(const std::string &file, const int number) const;
 		const std::string read(const std::string &file) const;
 		const std::string read(const std::string &path,
 				const std::string &file) const;

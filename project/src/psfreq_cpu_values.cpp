@@ -18,7 +18,6 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -26,6 +25,7 @@
 #include <unistd.h>
 
 #include "include/psfreq_cpu.h"
+#include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
@@ -57,9 +57,13 @@ bool cpu::values::isActionSet() const
 	return action == 1;
 }
 
-void cpu::values::setGovernor(const std::string& newGovernor)
+bool cpu::values::setGovernor(const std::string& newGovernor)
 {
-	governor = newGovernor;
+	if (newGovernor == std::string()) {
+		governor = newGovernor;
+		return true;
+	}
+	return false;
 }
 
 
@@ -118,21 +122,29 @@ int cpu::values::getRequested() const
 	return requested;
 }
 
-void cpu::values::setPlan(const int plan)
+bool cpu::values::setPlan(const int plan)
 {
 	if (plan == 1) {
 		setPlanPowersave();
+		return true;
 	} else if (plan == 2) {
 		setPlanPerformance();
+		return true;
 	} else if (plan == 3) {
 		setPlanMaxPerformance();
+		return true;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	} else if (plan == 0) {
-		setPlanAuto();
+		if (!setPlanAuto()) {
+			std::cerr << "Failed to decide an automatic plan."
+				<< std::endl;
+			return false;
+		}
 #endif
 #endif
 	}
+	return false;
 }
 
 void cpu::values::setPlanPowersave()
@@ -159,12 +171,14 @@ void cpu::values::setPlanMaxPerformance()
 	governor = "performance";
 }
 
-void cpu::values::setPlanAuto()
+bool cpu::values::setPlanAuto()
 {
 	const char *const dirName = "/sys/class/power_supply/";
 	DIR *const directory = opendir(dirName);
 	if (!directory) {
-		std::exit(EXIT_FAILURE);
+		std::cerr << "Could not open directory: "
+			<< dirName << std::endl;
+		return false;
 	}
 	struct dirent *entry =  readdir(directory);
 	while(entry) {
@@ -178,14 +192,19 @@ void cpu::values::setPlanAuto()
 					break;
 				}
 			} else {
-				std::exit(EXIT_FAILURE);
+				std::cerr << "Path is larger than max allowed."
+					<< std::endl;
+				return false;
 			}
 		}
 		entry = readdir(directory);
 	}
 	if (closedir(directory)) {
-		std::exit(EXIT_FAILURE);
+		std::cerr << "Failed to close directory: "
+			<< dirName << std::endl;
+		return false;
 	}
+	return true;
 }
 
 bool cpu::values::discoverPowerSupply(const std::string &fullPath)

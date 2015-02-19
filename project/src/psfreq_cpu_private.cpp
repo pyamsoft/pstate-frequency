@@ -23,6 +23,7 @@
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
+#include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
@@ -30,13 +31,23 @@ namespace psfreq {
 bool cpu::findPstate() const
 {
 	const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
-	return (driver.compare("intel_pstate") == 0);
+	if (driver != std::string()) {
+		return (driver.compare("intel_pstate") == 0);
+	}
+	std::cerr << "Unable to get read driver to check for intel_pstate"
+		<< std::endl;
+	return false;
 }
 
 unsigned int cpu::findNumber() const
 {
 	const char *cmd = "grep processor /proc/cpuinfo | wc -l";
-	return stringToNumber(cpuSysfs.readPipe(cmd, 1)[0]);
+	const std::vector<std::string> result = cpuSysfs.readPipe(cmd, 1);
+	if (!result.empty()) {
+		return stringToNumber(result[0]);
+	}
+	std::cerr << "Unable to find number of CPUs" << std::endl;
+	return 0;
 }
 
 void cpu::initializeVector(std::vector<std::string> &vector, std::string what) const
@@ -51,15 +62,23 @@ void cpu::initializeVector(std::vector<std::string> &vector, std::string what) c
 double cpu::findInfoMaxFrequency() const
 {
 	const std::string line = cpuSysfs.read("cpu0/cpufreq/cpuinfo_max_freq");
-	const double result = stringToNumber(line);
-	return result;
+	if (line != std::string()) {
+		const double result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Unable to find cpuinfo_max_freq" << std::endl;
+	return 1.0;
 }
 
 double cpu::findInfoMinFrequency() const
 {
 	const std::string line = cpuSysfs.read("cpu0/cpufreq/cpuinfo_min_freq");
-	const double result = stringToNumber(line);
-	return result;
+	if (line != std::string()) {
+		const double result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Unable to find cpuinfo_min_freq" << std::endl;
+	return 1.0;
 }
 
 }

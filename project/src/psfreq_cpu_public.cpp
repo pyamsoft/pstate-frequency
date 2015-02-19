@@ -23,6 +23,7 @@
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
+#include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
@@ -46,15 +47,23 @@ bool cpu::hasPstate() const
 double cpu::getScalingMinFrequency() const
 {
 	const std::string line = cpuSysfs.read("cpu0/cpufreq/scaling_min_freq");
-	const double result = stringToNumber(line);
-	return result;
+	if (line != std::string()) {
+		const double result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Failed to get scaling_min_freq" << std::endl;
+	return 0.0;
 }
 
 double cpu::getScalingMaxFrequency() const
 {
 	const std::string line = cpuSysfs.read("cpu0/cpufreq/scaling_max_freq");
-	const double result = stringToNumber(line);
-	return result;
+	if (line != std::string()) {
+		const double result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Failed to get scaling_max_freq" << std::endl;
+	return 0.0;
 }
 
 double cpu::getInfoMinFrequency() const
@@ -74,29 +83,53 @@ unsigned int cpu::getNumber() const
 
 const std::string cpu::getGovernor() const
 {
-	return cpuSysfs.read("cpu0/cpufreq/scaling_governor");
+	const std::string line = cpuSysfs.read("cpu0/cpufreq/scaling_governor");
+	if (line != std::string()) {
+		return line;
+	}
+	std::cerr << "Failed to get scaling_governor" << std::endl;
+	return line;
 }
 
 const std::string cpu::getIOScheduler() const
 {
-	return cpuSysfs.read("/sys/block/", "sda/queue/scheduler");
+	const std::string line = cpuSysfs.read("/sys/block/", "sda/queue/scheduler");
+	if (line != std::string()) {
+		return line;
+	}
+	std::cerr << "Failed to get scheduler" << std::endl;
+	return line;
 }
 
 const std::string cpu::getDriver() const
 {
-	return cpuSysfs.read("cpu0/cpufreq/scaling_driver");
+	const std::string line = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
+	if (line != std::string()) {
+		return line;
+	}
+	std::cerr << "Failed to get scaling_driver" << std::endl;
+	return line;
 }
 
 const std::vector<std::string> cpu::getRealtimeFrequencies() const
 {
 	const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
-	return cpuSysfs.readPipe(cmd, number);
+	const std::vector<std::string> result = cpuSysfs.readPipe(cmd, number);
+	if (!result.empty()) {
+		return result;
+	}
+	std::cerr << "Failed to get realtime frequencies" << std::endl;
+	return result;
 }
 
 const std::vector<std::string> cpu::getAvailableGovernors() const
 {
-	std::vector<std::string> availableGovernors = std::vector<std::string>();
-	availableGovernors = cpuSysfs.readAll("cpu0/cpufreq/scaling_available_governors");
+	const std::vector<std::string> availableGovernors
+		= cpuSysfs.readAll("cpu0/cpufreq/scaling_available_governors");
+	if (!availableGovernors.empty()) {
+		return availableGovernors;
+	}
+	std::cerr << "Failed to get a list of available governors" << std::endl;
 	return availableGovernors;
 }
 
@@ -117,8 +150,12 @@ int cpu::getTurboBoost() const
 	const std::string line = cpuSysfs.read(hasPstate()
 			? "intel_pstate/no_turbo"
 			: "cpufreq/boost");
-	const int result = stringToNumber(line);
-	return result;
+	if (line != std::string()) {
+		const int result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Unable to read turbo boost value" << std::endl;
+	return -2;
 }
 
 int cpu::getInfoMinValue() const
@@ -143,10 +180,17 @@ void cpu::setScalingMax(const int max) const
 	if (number == maxFrequencyFileVector.size()) {
 		const int scalingMax = maxInfoFrequency / 100 * max;
 		for (unsigned int i = 0; i < number; ++i) {
-			cpuSysfs.write(maxFrequencyFileVector[i], scalingMax);
+			if (!cpuSysfs.write(maxFrequencyFileVector[i], scalingMax)) {
+				std::cerr << "Failed to set"
+					<< " the max frequency of CPU " << i
+					<< std::endl;
+			}
 		}
 		if (hasPstate()) {
-			cpuSysfs.write("intel_pstate/max_perf_pct", max);
+			if (!cpuSysfs.write("intel_pstate/max_perf_pct", max)) {
+				std::cerr << "Failed to set the pstate max"
+					<< std::endl;
+			}
 		}
 	}
 }
@@ -156,10 +200,17 @@ void cpu::setScalingMin(const int min) const
 	if (number == minFrequencyFileVector.size()) {
 		const int scalingMin = maxInfoFrequency / 100 * min;
 		for (unsigned int i = 0; i < number; ++i) {
-			cpuSysfs.write(minFrequencyFileVector[i], scalingMin);
+			if (!cpuSysfs.write(minFrequencyFileVector[i], scalingMin)) {
+				std::cerr << "Failed to set"
+					<< " the min frequency of CPU " << i
+					<< std::endl;
+			}
 		}
 		if (hasPstate()) {
-			cpuSysfs.write("intel_pstate/min_perf_pct", min);
+			if (!cpuSysfs.write("intel_pstate/min_perf_pct", min)) {
+				std::cerr << "Failed to set the pstate min"
+					<< std::endl;
+			}
 		}
 	}
 }
@@ -169,8 +220,9 @@ void cpu::setTurboBoost(const int turbo) const
 	const std::string file = hasPstate()
 		? "intel_pstate/no_turbo"
 		: "cpufreq/boost";
-	if (cpuSysfs.exists(file)) {
-		cpuSysfs.write(file, turbo);
+	if (!cpuSysfs.write(file, turbo)) {
+		std::cerr << "Failed to set the turbo"
+			<< std::endl;
 	}
 }
 
@@ -178,7 +230,11 @@ void cpu::setGovernor(const std::string &governor) const
 {
 	if (number == governorFileVector.size()) {
 		for (unsigned int i = 0; i < number; ++i) {
-			cpuSysfs.write(governorFileVector[i], governor);
+			if (!cpuSysfs.write(governorFileVector[i], governor)) {
+				std::cerr << "Failed to set"
+					<< " the governor of CPU " << i
+					<< std::endl;
+			}
 		}
 	}
 }

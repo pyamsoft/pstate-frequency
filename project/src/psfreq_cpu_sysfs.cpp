@@ -24,30 +24,11 @@
 #include <sstream>
 
 #include "include/psfreq_cpu.h"
+#include "include/psfreq_log.h"
 
 namespace psfreq {
 
-
-bool cpu::sysfs::exists(const std::string &path, const std::string &file) const
-{
-	std::ostringstream oss;
-	oss << path << file;
-	const std::string absolutePath = oss.str();
-	std::ifstream inputFile;
-	inputFile.open(absolutePath.c_str());
-	if (!inputFile.is_open()) {
-		return false;
-	}
-	inputFile.close();
-	return true;
-}
-
-bool cpu::sysfs::exists(const std::string &file) const
-{
-	return exists(basePath, file);
-}
-
-void cpu::sysfs::write(const std::string &path, const std::string &file,
+bool cpu::sysfs::write(const std::string &path, const std::string &file,
 		const std::string &buffer) const
 {
 	std::ostringstream oss;
@@ -56,28 +37,31 @@ void cpu::sysfs::write(const std::string &path, const std::string &file,
 	std::ofstream outputFile;
 	outputFile.open(absolutePath.c_str());
 	if (!outputFile.is_open()) {
-		exit(EXIT_FAILURE);
+		std::cerr << "Failed to write to file: " << absolutePath
+			<< std::endl;
+		return false;
 	}
 	outputFile << buffer << std::endl;
 	outputFile.close();
+	return true;
 }
 
-void cpu::sysfs::write(const std::string &path,const std::string &file,
+bool cpu::sysfs::write(const std::string &path,const std::string &file,
 		const int number) const
 {
 	std::ostringstream oss;
 	oss << number;
-	write(path, file, oss.str());
+	return write(path, file, oss.str());
 }
 
-void cpu::sysfs::write(const std::string &file, const std::string &buffer) const
+bool cpu::sysfs::write(const std::string &file, const std::string &buffer) const
 {
-	write(basePath, file, buffer);
+	return write(basePath, file, buffer);
 }
 
-void cpu::sysfs::write(const std::string &file, const int number) const
+bool cpu::sysfs::write(const std::string &file, const int number) const
 {
-	write(basePath, file, number);
+	return write(basePath, file, number);
 }
 
 const std::string cpu::sysfs::read(const std::string &path,
@@ -90,7 +74,9 @@ const std::string cpu::sysfs::read(const std::string &path,
 	std::ifstream inputFile;
 	inputFile.open(absolutePath.c_str());
 	if (!inputFile.is_open()) {
-		exit(EXIT_FAILURE);
+		std::cerr << "Failed to read from file: " << absolutePath
+			<< std::endl;
+		return std::string();
 	}
 	std::getline(inputFile, content);
 	inputFile.close();
@@ -116,7 +102,7 @@ const std::vector<std::string> cpu::sysfs::readAll(const std::string &path,
 	std::ifstream inputFile;
 	inputFile.open(absolutePath.c_str());
 	if (!inputFile.is_open()) {
-		exit(EXIT_FAILURE);
+		return std::vector<std::string>();
 	}
 	std::vector<std::string> contents = std::vector<std::string>();
 	while (true) {
@@ -135,17 +121,22 @@ const std::vector<std::string> cpu::sysfs::readPipe(const char* command,
 		const unsigned int number) const
 {
 	std::FILE *pipe = popen(command, "r");
-	size_t n = 0;
-	std::vector<std::string> lines = std::vector<std::string>();
-	for (unsigned int i = 0; i < number; ++i) {
-		char *line = NULL;
-		if (getline(&line, &n, pipe) == -1) {
-			exit(EXIT_FAILURE);
+	if (pipe != NULL) {
+		size_t n = 0;
+		std::vector<std::string> lines = std::vector<std::string>();
+		for (unsigned int i = 0; i < number; ++i) {
+			char *line = NULL;
+			if (getline(&line, &n, pipe) == -1) {
+				pclose(pipe);
+				return std::vector<std::string>();
+			}
+			lines.push_back(std::string(line));
+			std::free(line);
 		}
-		lines.push_back(std::string(line));
-		free(line);
+		pclose(pipe);
+		return lines;
 	}
-	pclose(pipe);
-	return lines;
+	return std::vector<std::string>();
 }
+
 }

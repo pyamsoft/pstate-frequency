@@ -18,37 +18,50 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#include <iostream>
-#include <sstream>
-
 #include "include/psfreq_log.h"
-#include "include/psfreq_util.h"
 
 namespace psfreq {
 
-double stringToNumber(const std::string &line)
+unsigned int log::verbosity = PSFREQ_LOG_NORMAL;
+
+bool log::isAllQuiet()
 {
-        std::istringstream iss(line);
-	int result;
-	iss >> result;
-	return result;
+	return verbosity == PSFREQ_LOG_ALL_QUIET;
 }
 
-int boundValue(const int value, const int minBound,
-		const int maxBound)
+bool log::isQuiet()
 {
-	if (value < minBound) {
-		return minBound;
-	} else if (value > maxBound) {
-		return maxBound;
-	} else {
-		return value;
-	}
+	return verbosity == PSFREQ_LOG_QUIET;
 }
 
-bool stringStartsWith(const std::string &control, const std::string &value)
+bool log::isNormal()
 {
-	return control.compare(0, value.length(), value) == 0;
+	return verbosity == PSFREQ_LOG_NORMAL;
+}
+
+bool log::isDebug()
+{
+	return verbosity == PSFREQ_LOG_DEBUG;
+}
+
+void log::setAllQuiet()
+{
+	verbosity = PSFREQ_LOG_ALL_QUIET;
+}
+
+void log::setQuiet()
+{
+	verbosity = PSFREQ_LOG_QUIET;
+}
+
+void log::setNormal()
+{
+	verbosity = PSFREQ_LOG_NORMAL;
+}
+
+void log::setDebug()
+{
+	verbosity = PSFREQ_LOG_DEBUG;
 }
 
 }
