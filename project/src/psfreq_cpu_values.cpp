@@ -141,6 +141,7 @@ bool cpu::values::setPlan(const int plan)
 				<< std::endl;
 			return false;
 		}
+		return true;
 #endif
 #endif
 	}
