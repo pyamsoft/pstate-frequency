@@ -24,40 +24,40 @@
 #include <dirent.h>
 #include <unistd.h>
 
-#include "include/psfreq_cpu.h"
 #include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
+#include "include/psfreq_values.h"
 
 namespace psfreq {
 
 
-bool cpu::values::isInitialized() const
+bool values::isInitialized() const
 {
 	return hasAction() && (max != -1 || min != -1
 			|| turbo != -1 || governor != "");
 }
 
-bool cpu::values::hasAction() const
+bool values::hasAction() const
 {
 	return action != -1;
 }
 
-bool cpu::values::isActionNull() const
+bool values::isActionNull() const
 {
 	return action == -1;
 }
 
-bool cpu::values::isActionGet() const
+bool values::isActionGet() const
 {
 	return action == 0;
 }
 
-bool cpu::values::isActionSet() const
+bool values::isActionSet() const
 {
 	return action == 1;
 }
 
-bool cpu::values::setGovernor(const std::string& newGovernor)
+bool values::setGovernor(const std::string& newGovernor)
 {
 	if (newGovernor == std::string()) {
 		governor = newGovernor;
@@ -67,62 +67,62 @@ bool cpu::values::setGovernor(const std::string& newGovernor)
 }
 
 
-void cpu::values::setAction(const int newAction)
+void values::setAction(const int newAction)
 {
 	action = newAction;
 }
 
-void cpu::values::setMax(const int newMax)
+void values::setMax(const int newMax)
 {
 	max = newMax;
 }
 
-void cpu::values::setMin(const int newMin)
+void values::setMin(const int newMin)
 {
 	min = newMin;
 }
 
-void cpu::values::setTurbo(const int newTurbo)
+void values::setTurbo(const int newTurbo)
 {
 	turbo = newTurbo;
 }
 
-void cpu::values::setRequested(const int newRequest)
+void values::setRequested(const int newRequest)
 {
 	requested = newRequest;
 }
 
-const std::string cpu::values::getGovernor() const
+const std::string values::getGovernor() const
 {
 	return governor;
 }
 
-int cpu::values::getAction() const
+int values::getAction() const
 {
 	return action;
 }
 
-int cpu::values::getMax() const
+int values::getMax() const
 {
 	return max;
 }
 
-int cpu::values::getMin() const
+int values::getMin() const
 {
 	return min;
 }
 
-int cpu::values::getTurbo() const
+int values::getTurbo() const
 {
 	return turbo;
 }
 
-int cpu::values::getRequested() const
+int values::getRequested() const
 {
 	return requested;
 }
 
-bool cpu::values::setPlan(const int plan)
+bool values::setPlan(const int plan)
 {
 	if (plan == 1) {
 		setPlanPowersave();
@@ -148,7 +148,7 @@ bool cpu::values::setPlan(const int plan)
 	return false;
 }
 
-void cpu::values::setPlanPowersave()
+void values::setPlanPowersave()
 {
 	max = 0;
 	min = 0;
@@ -156,7 +156,7 @@ void cpu::values::setPlanPowersave()
 	governor = "powersave";
 }
 
-void cpu::values::setPlanPerformance()
+void values::setPlanPerformance()
 {
 	max = 100;
 	min = 0;
@@ -164,7 +164,7 @@ void cpu::values::setPlanPerformance()
 	governor = parent.hasPstate() ? "powersave" : "ondemand";
 }
 
-void cpu::values::setPlanMaxPerformance()
+void values::setPlanMaxPerformance()
 {
 	max = 100;
 	min = 100;
@@ -172,7 +172,7 @@ void cpu::values::setPlanMaxPerformance()
 	governor = "performance";
 }
 
-bool cpu::values::setPlanAuto()
+bool values::setPlanAuto()
 {
 	const char *const dirName = "/sys/class/power_supply/";
 	DIR *const directory = opendir(dirName);
@@ -208,16 +208,16 @@ bool cpu::values::setPlanAuto()
 	return true;
 }
 
-bool cpu::values::discoverPowerSupply(const std::string &fullPath)
+bool values::discoverPowerSupply(const std::string &fullPath)
 {
 	std::ostringstream oss;
 	oss << fullPath << "/type";
 	const std::string typePath = oss.str();
 	const char *const type = typePath.c_str();
 	if (access(type, F_OK) != -1) {
-		const std::string powerType = parent.cpuSysfs.read(fullPath, "type");
+		const std::string powerType = parent.getSysfs()->read(fullPath, "type");
 		if (powerType.compare("Mains") == 0) {
-			const int status = stringToNumber(parent.cpuSysfs.read(fullPath, "online"));
+			const int status = stringToNumber(parent.getSysfs()->read(fullPath, "online"));
 			if (status == 1) {
 				setPlanPerformance();
 			} else {
@@ -229,7 +229,7 @@ bool cpu::values::discoverPowerSupply(const std::string &fullPath)
 	return false;
 }
 
-bool cpu::values::hideDirectory(const std::string &entryName)
+bool values::hideDirectory(const std::string &entryName)
 {
 	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
 }

@@ -66,6 +66,11 @@ double cpu::getScalingMaxFrequency() const
 	return 0.0;
 }
 
+const cpu::sysfs *cpu::getSysfs() const
+{
+	return &cpuSysfs;
+}
+
 double cpu::getInfoMinFrequency() const
 {
 	return minInfoFrequency;

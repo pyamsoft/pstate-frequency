@@ -27,75 +27,14 @@
 namespace psfreq {
 
 class cpu {
-public:
-
-	class values {
-
-	private:
-		const cpu &parent;
-		int action;
-		int max;
-		int min;
-		int turbo;
-		std::string governor;
-		int requested;
-
-		void setPlanPowersave();
-		void setPlanPerformance();
-		void setPlanMaxPerformance();
-		bool setPlanAuto();
-
-		bool hideDirectory(const std::string &entryName);
-		bool discoverPowerSupply(const std::string &fullPath);
-		values();
-
-	public:
-
-		values(cpu &parentCpu) :
-			parent(parentCpu),
-			action(-1),
-			max(-1),
-			min(-1),
-			turbo(-1),
-			governor(std::string()),
-			requested(0)
-		{
-		}
-		~values()
-		{
-		}
-
-		void setAction(const int newAction);
-		void setMax(const int newMax);
-		void setMin(const int newMin);
-		void setTurbo(const int newTurbo);
-		bool setPlan(const int plan);
-		void setRequested(const int newRequest);
-		bool setGovernor(const std::string& newGovernor);
-
-		int getAction() const;
-		int getMax() const;
-		int getMin() const;
-		int getTurbo() const;
-		int getRequested() const;
-		const std::string getGovernor() const;
-
-		bool hasAction() const;
-		bool isActionNull() const;
-		bool isActionGet() const;
-		bool isActionSet() const;
-		bool isInitialized() const;
-	};
-
 private:
-
 	class sysfs {
 	private:
 		const cpu &parent;
 		const std::string basePath;
 		sysfs();
 	public:
-		sysfs(cpu& parentCpu) :
+		sysfs(const cpu& parentCpu) :
 			parent(parentCpu),
 			basePath("/sys/devices/system/cpu/")
 		{
@@ -122,7 +61,6 @@ private:
 	};
 
 	const sysfs cpuSysfs;
-
 	bool pstate;
 	unsigned int number;
 	double minInfoFrequency;
@@ -137,10 +75,7 @@ private:
 	double findInfoMinFrequency() const;
 	double findInfoMaxFrequency() const;
 
-
 public:
-	values cpuValues;
-
 	cpu() :
 		cpuSysfs(*this),
 		pstate(false),
@@ -149,8 +84,7 @@ public:
 		maxInfoFrequency(0),
 		maxFrequencyFileVector(std::vector<std::string>()),
 		minFrequencyFileVector(std::vector<std::string>()),
-		governorFileVector(std::vector<std::string>()),
-		cpuValues(*this)
+		governorFileVector(std::vector<std::string>())
 	{
 	}
 
@@ -164,7 +98,7 @@ public:
 	void setScalingMin(const int min) const;
 	void setTurboBoost(const int turbo) const;
 	void setGovernor(const std::string &governor) const;
-	values* getCpuValues() const;
+	const sysfs *getSysfs() const;
 	bool hasPstate() const;
 	int getTurboBoost() const;
 	int getInfoMinValue() const;

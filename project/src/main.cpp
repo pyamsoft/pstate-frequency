@@ -28,19 +28,20 @@
 #include "include/psfreq_cpu.h"
 #include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
+#include "include/psfreq_values.h"
 
-bool setCpuValues(const psfreq::cpu &cpu);
+bool setCpuValues(const psfreq::cpu &cpu, const psfreq::values &cpuValues);
 void printCpuValues(const psfreq::cpu& cpu);
 void printRealtimeFrequency(const psfreq::cpu& cpu);
 void printGPL();
 void printVersion();
 void printHelp();
-int handleOptionResult(psfreq::cpu &cpu, const int result);
+int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues, const int result);
 int planFromOptArg(char *const arg);
 const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
 
-bool setCpuValues(const psfreq::cpu &cpu)
+bool setCpuValues(const psfreq::cpu &cpu, const psfreq::values &cpuValues)
 {
 	const int cpuTurbo = cpu.getTurboBoost();
 	const int cpuInfoMin = cpu.getInfoMinValue();
@@ -53,11 +54,10 @@ bool setCpuValues(const psfreq::cpu &cpu)
 			|| cpuGovernor == std::string()) {
 		return false;
 	} else {
-		const psfreq::cpu::values *cpuValues = &cpu.cpuValues;
-		const int max = cpuValues->getMax();
-		const int min = cpuValues->getMin();
-		const int turbo = cpuValues->getTurbo();
-		const std::string governor = cpuValues->getGovernor();
+		const int max = cpuValues.getMax();
+		const int min = cpuValues.getMin();
+		const int turbo = cpuValues.getTurbo();
+		const std::string governor = cpuValues.getGovernor();
 		int newTurbo = (turbo != -1 ? turbo : cpuTurbo);
 		newTurbo = psfreq::boundValue(newTurbo, 0, 1);
 		int newMin = (min >= 0 ? min : cpuMinPstate);
@@ -222,10 +222,8 @@ void printHelp()
 			<< "            -t | --turbo     Modify curent CPU turbo boost state" << std::endl;
 		std::cout << oss.str();
 }
-
-int handleOptionResult(psfreq::cpu &cpu, const int result)
+int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues, const int result)
 {
-	psfreq::cpu::values *cpuValues = &cpu.cpuValues;
 	switch(result) {
 	case 0:
                 return 0;
@@ -234,17 +232,17 @@ int handleOptionResult(psfreq::cpu &cpu, const int result)
 		printHelp();
                 return -1;
         case 'c':
-		cpuValues->setRequested(0);
+		cpuValues.setRequested(0);
 		return 0;
         case 'r':
-		cpuValues->setRequested(1);
+		cpuValues.setRequested(1);
 		return 0;
         case 'v':
 		printGPL();
 		printVersion();
                 return -1;
         case 's':
-		cpuValues->setAction(1);
+		cpuValues.setAction(1);
                 return 0;
         case 'd':
                 return 0;
@@ -253,25 +251,25 @@ int handleOptionResult(psfreq::cpu &cpu, const int result)
 	case 'q':
 		return 0;
         case 'g':
-		cpuValues->setAction(0);
+		cpuValues.setAction(0);
                 return 0;
         case 'p':
-		if (!cpuValues->setPlan(planFromOptArg(optarg))) {
+		if (!cpuValues.setPlan(planFromOptArg(optarg))) {
 			std::cerr << "Failed to set a power plan." << std::endl;
 			return 1;
 		}
                 return 0;
         case 'm':
-		cpuValues->setMax(psfreq::stringToNumber(optarg));
+		cpuValues.setMax(psfreq::stringToNumber(optarg));
                 return 0;
 	case 'o':
-		cpuValues->setGovernor(governorFromOptArg(optarg, cpu.getAvailableGovernors()));
+		cpuValues.setGovernor(governorFromOptArg(optarg, cpu.getAvailableGovernors()));
 		return 0;
         case 'n':
-		cpuValues->setMin(psfreq::stringToNumber(optarg));
+		cpuValues.setMin(psfreq::stringToNumber(optarg));
 		return 0;
         case 't':
-		cpuValues->setTurbo(psfreq::stringToNumber(optarg));
+		cpuValues.setTurbo(psfreq::stringToNumber(optarg));
 		return 0;
 	}
 	return 1;
@@ -280,6 +278,7 @@ int handleOptionResult(psfreq::cpu &cpu, const int result)
 int main(int argc, char** argv)
 {
 	psfreq::cpu cpu;
+	psfreq::values cpuValues = psfreq::values(cpu);
 	int finalOptionResult = 0;
 	int optionResult = 0;
 	const char *const shortOptions = "hvcrsdagqp:m:n:t:o:";
@@ -306,7 +305,7 @@ int main(int argc, char** argv)
                 if (optionResult == -1) {
                         break;
                 } else {
-			finalOptionResult = handleOptionResult(cpu, optionResult);
+			finalOptionResult = handleOptionResult(cpu, cpuValues, optionResult);
                         if (finalOptionResult == -1) {
                                 return 0;
                         } else if (finalOptionResult == 1) {
@@ -316,21 +315,20 @@ int main(int argc, char** argv)
                 }
         }
 	cpu.init();
-	const psfreq::cpu::values *cpuValues = &cpu.cpuValues;
-	if (cpuValues->isActionNull()) {
+	if (cpuValues.isActionNull()) {
 		printGPL();
 		printHelp();
 		return 0;
-	} else if (cpuValues->isActionGet()) {
-		if (cpuValues->getRequested() == 0) {
+	} else if (cpuValues.isActionGet()) {
+		if (cpuValues.getRequested() == 0) {
 			printCpuValues(cpu);
 		} else {
 			printRealtimeFrequency(cpu);
 		}
 	} else {
 		if (geteuid() == 0) {
-			if (cpuValues->isInitialized()) {
-				if (!setCpuValues(cpu)) {
+			if (cpuValues.isInitialized()) {
+				if (!setCpuValues(cpu, cpuValues)) {
 					std::cerr << "Environment was not sane."
 						<< " Could not set any CPU values"
 						<< std::endl;
