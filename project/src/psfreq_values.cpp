@@ -22,7 +22,6 @@
 #include <sstream>
 
 #include <dirent.h>
-#include <unistd.h>
 
 #include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
@@ -34,7 +33,7 @@ namespace psfreq {
 bool values::isInitialized() const
 {
 	return hasAction() && (max != -1 || min != -1
-			|| turbo != -1 || governor != "");
+			|| turbo != -1 || governor != std::string());
 }
 
 bool values::hasAction() const
@@ -59,7 +58,7 @@ bool values::isActionSet() const
 
 bool values::setGovernor(const std::string& newGovernor)
 {
-	if (newGovernor == std::string()) {
+	if (newGovernor != std::string()) {
 		governor = newGovernor;
 		return true;
 	}
@@ -136,10 +135,16 @@ bool values::setPlan(const int plan)
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	} else if (plan == 0) {
-		if (!setPlanAuto()) {
+		const unsigned int result = setPlanAuto();
+		if (result == 0) {
 			std::cerr << "Failed to decide an automatic plan."
 				<< std::endl;
 			return false;
+		}
+		if (result == 1) {
+			setPlanPowersave();
+		} else {
+			setPlanPerformance();
 		}
 		return true;
 #endif
@@ -172,30 +177,32 @@ void values::setPlanMaxPerformance()
 	governor = "performance";
 }
 
-bool values::setPlanAuto()
+unsigned int values::setPlanAuto()
 {
 	const char *const dirName = "/sys/class/power_supply/";
 	DIR *const directory = opendir(dirName);
 	if (!directory) {
 		std::cerr << "Could not open directory: "
 			<< dirName << std::endl;
-		return false;
+		return 0;
 	}
 	struct dirent *entry =  readdir(directory);
+	unsigned int result = 0;
 	while(entry) {
 		const std::string entryName = entry->d_name;
-		if (!hideDirectory(entryName)) {
+		if (!parent.hideDirectory(entryName)) {
 			std::ostringstream oss;
 			oss << dirName << entryName << "/";
 			const std::string fullPath = oss.str();
 			if (fullPath.length() < fullPath.max_size()) {
-				if (discoverPowerSupply(fullPath)) {
+				result = parent.getPowerSupply(fullPath);
+				if (result > 0) {
 					break;
 				}
 			} else {
 				std::cerr << "Path is larger than max allowed."
 					<< std::endl;
-				return false;
+				return 0;
 			}
 		}
 		entry = readdir(directory);
@@ -203,35 +210,9 @@ bool values::setPlanAuto()
 	if (closedir(directory)) {
 		std::cerr << "Failed to close directory: "
 			<< dirName << std::endl;
-		return false;
+		return 0;
 	}
-	return true;
-}
-
-bool values::discoverPowerSupply(const std::string &fullPath)
-{
-	std::ostringstream oss;
-	oss << fullPath << "/type";
-	const std::string typePath = oss.str();
-	const char *const type = typePath.c_str();
-	if (access(type, F_OK) != -1) {
-		const std::string powerType = parent.getSysfs()->read(fullPath, "type");
-		if (powerType.compare("Mains") == 0) {
-			const int status = stringToNumber(parent.getSysfs()->read(fullPath, "online"));
-			if (status == 1) {
-				setPlanPerformance();
-			} else {
-				setPlanPowersave();
-			}
-		return true;
-		}
-	}
-	return false;
-}
-
-bool values::hideDirectory(const std::string &entryName)
-{
-	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
+	return result;
 }
 
 }

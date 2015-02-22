@@ -93,19 +93,20 @@ public:
 	}
 
 	void init();
-	void setSaneDefaults() const;
 	void setScalingMax(const int max) const;
 	void setScalingMin(const int min) const;
 	void setTurboBoost(const int turbo) const;
 	void setGovernor(const std::string &governor) const;
 	const sysfs *getSysfs() const;
 	bool hasPstate() const;
+	bool hideDirectory(const std::string &entryName) const;
 	int getTurboBoost() const;
 	int getInfoMinValue() const;
 	int getInfoMaxValue() const;
 	int getMinPState() const;
 	int getMaxPState() const;
 	unsigned int getNumber() const;
+	unsigned int getPowerSupply(const std::string &fullPath) const;
 	double getScalingMinFrequency() const;
 	double getScalingMaxFrequency() const;
 	double getInfoMinFrequency() const;

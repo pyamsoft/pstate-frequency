@@ -43,33 +43,54 @@ const std::string governorFromOptArg(char *const arg,
 
 bool setCpuValues(const psfreq::cpu &cpu, const psfreq::values &cpuValues)
 {
-	const int cpuTurbo = cpu.getTurboBoost();
 	const int cpuInfoMin = cpu.getInfoMinValue();
 	const int cpuInfoMax =  cpu.getInfoMaxValue();
 	const int cpuMinPstate = cpu.getMinPState();
 	const int cpuMaxPstate = cpu.getMaxPState();
 	const std::string cpuGovernor = cpu.getGovernor();
-	if (cpuTurbo == -2 || cpuInfoMin == 1 || cpuInfoMax == 1 ||
-			cpuMinPstate == 0 || cpuMaxPstate == 0
+	if (cpuInfoMin == 1 || cpuInfoMax == 1
+			|| cpuMinPstate == 0 || cpuMaxPstate == 0
 			|| cpuGovernor == std::string()) {
 		return false;
 	} else {
-		const int max = cpuValues.getMax();
-		const int min = cpuValues.getMin();
-		const int turbo = cpuValues.getTurbo();
-		const std::string governor = cpuValues.getGovernor();
-		int newTurbo = (turbo != -1 ? turbo : cpuTurbo);
-		newTurbo = psfreq::boundValue(newTurbo, 0, 1);
-		int newMin = (min >= 0 ? min : cpuMinPstate);
+		const int requestedMin = cpuValues.getMin();
+		int newMin = (requestedMin >= 0
+				? requestedMin
+				: cpuMinPstate);
 		newMin = psfreq::boundValue(newMin, cpuInfoMin, cpuInfoMax - 1);
-		int newMax = (max >= 0 ? max : cpuMaxPstate);
+
+		const int requestedMax = cpuValues.getMax();
+		int newMax = (requestedMax >= 0
+				? requestedMax
+				: cpuMaxPstate);
 		newMax = psfreq::boundValue(newMax, cpuInfoMin + 1, cpuInfoMax);
-		newMax = (newMax > newMin ? newMax : newMin + 1);
-		const std::string newGovernor = (governor != "" ? governor : cpuGovernor);
-		cpu.setSaneDefaults();
-		cpu.setScalingMax(newMax);
-		cpu.setScalingMin(newMin);
-		cpu.setTurboBoost(newTurbo);
+		newMin = (newMin > newMax
+				? newMax - 1
+				: newMin);
+		newMax = (newMax > newMin
+				? newMax
+				: newMin + 1);
+
+
+		if (cpuMinPstate > newMax) {
+			cpu.setScalingMin(newMin);
+			cpu.setScalingMax(newMax);
+		} else {
+			cpu.setScalingMax(newMax);
+			cpu.setScalingMin(newMin);
+		}
+		const int cpuTurbo = cpu.getTurboBoost();
+		if (cpuTurbo != -2) {
+			const int turbo = cpuValues.getTurbo();
+			int newTurbo = (turbo != -1 ? turbo : cpuTurbo);
+			newTurbo = psfreq::boundValue(newTurbo, 0, 1);
+			cpu.setTurboBoost(newTurbo);
+		}
+
+		const std::string requestedGovernor = cpuValues.getGovernor();
+		const std::string newGovernor = (requestedGovernor != std::string()
+				? requestedGovernor
+				: cpuGovernor);
 		cpu.setGovernor(newGovernor);
 		return true;
 	}
@@ -193,8 +214,8 @@ void printCpuValues(const psfreq::cpu& cpu)
 void printHelp()
 {
 		std::ostringstream oss;
-		oss << "usage:"
-			<< "pstate-frequency [verbose] [action] [option(s)]"
+		oss << "usage:" << std::endl
+			<< "pstate-frequency [verbose] [ACTION] [option(s)]"
 			<< std::endl
 			<< "    verbose:" << std::endl
 			<< "        unprivilaged:" << std::endl
@@ -204,11 +225,11 @@ void printHelp()
 			<< std::endl
 			<< "    actions:" << std::endl
 			<< "        unprivilaged:" << std::endl
-			<< "            -h | --help      Display this help and exit" << std::endl
-			<< "            -v | --version   Display application version and exit" << std::endl
-			<< "            -g | --get       Access current CPU values" << std::endl
+			<< "            -H | --help      Display this help and exit" << std::endl
+			<< "            -V | --version   Display application version and exit" << std::endl
+			<< "            -G | --get       Access current CPU values" << std::endl
 			<< "        privilaged:" << std::endl
-			<< "            -s | --set       Modify current CPU values" << std::endl
+			<< "            -S | --set       Modify current CPU values" << std::endl
 			<< std::endl
 			<< "    options:" << std::endl
 			<< "        unprivilaged:" << std::endl
@@ -217,7 +238,7 @@ void printHelp()
 			<< "        privilaged: "<< std::endl
 			<< "            -p | --plan      Set a predefined power plan" << std::endl
 			<< "            -m | --max       Modify current CPU max frequency" << std::endl
-			<< "            -o | --gov       Set the cpufreq governor" << std::endl
+			<< "            -g | --governor  Set the cpufreq governor" << std::endl
 			<< "            -n | --min       Modify current CPU min frequency" << std::endl
 			<< "            -t | --turbo     Modify curent CPU turbo boost state" << std::endl;
 		std::cout << oss.str();
@@ -227,7 +248,7 @@ int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues, const 
 	switch(result) {
 	case 0:
                 return 0;
-        case 'h':
+        case 'H':
 		printGPL();
 		printHelp();
                 return -1;
@@ -237,11 +258,11 @@ int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues, const 
         case 'r':
 		cpuValues.setRequested(1);
 		return 0;
-        case 'v':
+        case 'V':
 		printGPL();
 		printVersion();
                 return -1;
-        case 's':
+        case 'S':
 		cpuValues.setAction(1);
                 return 0;
         case 'd':
@@ -250,7 +271,7 @@ int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues, const 
 		return 0;
 	case 'q':
 		return 0;
-        case 'g':
+        case 'G':
 		cpuValues.setAction(0);
                 return 0;
         case 'p':
@@ -262,8 +283,11 @@ int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues, const 
         case 'm':
 		cpuValues.setMax(psfreq::stringToNumber(optarg));
                 return 0;
-	case 'o':
-		cpuValues.setGovernor(governorFromOptArg(optarg, cpu.getAvailableGovernors()));
+	case 'g':
+		if (!cpuValues.setGovernor(governorFromOptArg(optarg, cpu.getAvailableGovernors()))) {
+			std::cerr << "Failed to set governor." << std::endl;
+			return 1;
+		}
 		return 0;
         case 'n':
 		cpuValues.setMin(psfreq::stringToNumber(optarg));
@@ -281,19 +305,19 @@ int main(int argc, char** argv)
 	psfreq::values cpuValues = psfreq::values(cpu);
 	int finalOptionResult = 0;
 	int optionResult = 0;
-	const char *const shortOptions = "hvcrsdagqp:m:n:t:o:";
+	const char *const shortOptions = "SGHVcrdaqp:m:n:t:g:";
 	struct option longOptions[] = {
-                {"help",          no_argument,        NULL,           'h'},
-                {"version",       no_argument,        NULL,           'v'},
-                {"get",           no_argument,        NULL,           'g'},
-                {"set",           no_argument,        NULL,           's'},
+                {"help",          no_argument,        NULL,           'H'},
+                {"version",       no_argument,        NULL,           'V'},
+                {"get",           no_argument,        NULL,           'G'},
+                {"set",           no_argument,        NULL,           'S'},
                 {"current",       no_argument,        NULL,           'c'},
                 {"real",          no_argument,        NULL,           'r'},
                 {"quiet",         no_argument,        NULL,           'q'},
                 {"all-quiet",     no_argument,        NULL,           'a'},
                 {"debug",         no_argument,        NULL,           'd'},
                 {"plan",          required_argument,  NULL,           'p'},
-                {"gov",           required_argument,  NULL,           'o'},
+                {"governor",      required_argument,  NULL,           'g'},
 		{"max",		  required_argument,  NULL,           'm'},
 		{"min",		  required_argument,  NULL,           'n'},
 		{"turbo",	  required_argument,  NULL,           't'},

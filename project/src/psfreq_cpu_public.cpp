@@ -21,6 +21,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <unistd.h>
+
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
 #include "include/psfreq_log.h"
@@ -172,14 +174,6 @@ int cpu::getInfoMaxValue() const
 	return 100;
 }
 
-void cpu::setSaneDefaults() const
-{
-	setScalingMax(100);
-	setScalingMin(0);
-	setTurboBoost(hasPstate() ? 1 : 0);
-	setGovernor("powersave");
-}
-
 void cpu::setScalingMax(const int max) const
 {
 	if (number == maxFrequencyFileVector.size()) {
@@ -242,6 +236,31 @@ void cpu::setGovernor(const std::string &governor) const
 			}
 		}
 	}
+}
+
+unsigned int cpu::getPowerSupply(const std::string &fullPath) const
+{
+	std::ostringstream oss;
+	oss << fullPath << "/type";
+	const std::string typePath = oss.str();
+	const char *const type = typePath.c_str();
+	if (access(type, F_OK) != -1) {
+		const std::string powerType = cpuSysfs.read(fullPath, "type");
+		if (powerType.compare("Mains") == 0) {
+			const int status = stringToNumber(cpuSysfs.read(fullPath, "online"));
+			if (status == 1) {
+				return 2;
+			} else {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+bool cpu::hideDirectory(const std::string &entryName) const
+{
+	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
 }
 
 }

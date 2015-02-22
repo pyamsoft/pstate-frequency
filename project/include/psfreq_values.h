@@ -40,10 +40,8 @@ private:
 	void setPlanPowersave();
 	void setPlanPerformance();
 	void setPlanMaxPerformance();
-	bool setPlanAuto();
+	unsigned int setPlanAuto();
 
-	bool hideDirectory(const std::string &entryName);
-	bool discoverPowerSupply(const std::string &fullPath);
 	values();
 
 public:

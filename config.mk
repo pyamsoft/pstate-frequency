@@ -52,6 +52,6 @@ LDFLAGS:= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all
 # Compiler flags
 CXXFLAGS:= -DVERSION=\"${VERSION}[${CXX}]\" \
 	-DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE} ${STD} ${INCS} -O3 \
-	-march=native -mtune=generic -pipe -fstack-protector-strong \
-	--param=ssp-buffer-size=4 \
-	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations -Wunreachable-code
+	-march=native -mtune=generic -pipe \
+	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
+	-Wunreachable-code
