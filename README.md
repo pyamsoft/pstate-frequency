@@ -11,7 +11,7 @@ and maximum scaling frequencies and the state of turbo boost.
 + Intel P-State driver (included in kernel 3.9 and upwards).  
 Enable it by adding **intel_pstate=enable** to the boot command line.  
 If the p-state driver is not present in your system, the application will still  
-work using the default **cpufreq** driver.
+work using the default **acpi-cpufreq** driver.
 
 pstate-frequency is distribution independent, and should run on all standard  
 versions of Linux based operating systems which include a recent kernel (3.9+)  
@@ -33,8 +33,8 @@ configuration file will not be supported.
 The installation process follows the basic *make, make install* process.  
 
 While building, there are a couple of options that one may configure or change:  
-+ The C++ compiler used (defaults to g++, though clang++ is recommended)  
-+ The directory to install to (defaults to /usr/local)  
++ The C++ compiler used (defaults to g++, though clang++ is recommended)
++ The directory to install to (defaults to /usr/local)
 + Whether or not to install bash completion (defaults to Yes)
 + Whether or not to install zsh completion (defaults to Yes)
 + Whether or not to install a udev rule which monitors the state of the power supply  
@@ -77,19 +77,19 @@ The binary by default is named **pstate-frequency**
 When called without any options, the program will display something like the following:  
 ![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_run.png)
 
-When called with the *-g --get* option, the program will display something like the following:
+When called with the *-G --get* option, the program will display something like the following:
 ![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_get.png)
 
-When called with the *-s --set* option, the program will display something like the following:
+When called with the *-S --set* option, the program will display something like the following:
 ![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_set.png)
 
-The *-g --get* option can be called by a normal user.  
-The *-g --get* option also takes one or more of these flags as necessary arguments:  
+The *-G --get* option can be called by a normal user.  
+The *-G --get* option also takes one or more of these flags as necessary arguments:  
 + **-c --current** Display the current user-requested CPU values
 + **-r --real** Display real-time CPU frequencies
 
-The *-s --set* option can only be called by a user with root permissions.  
-The *-s --set* option also takes one or more of these flags as necessary arguments:  
+The *-S --set* option can only be called by a user with root permissions.  
+The *-S --set* option also takes one or more of these flags as necessary arguments:  
 + **-m --max** Adjust the maximum scaling frequency of the CPU
 + **-n --min** Adjust the minimum scaling frequency of the CPU
 + **-o --gov** Adjust the current CPU scaling governor
