@@ -50,7 +50,8 @@ unsigned int cpu::findNumber() const
 	return 0;
 }
 
-void cpu::initializeVector(std::vector<std::string> &vector, std::string what) const
+void cpu::initializeVector(std::vector<std::string> &vector,
+		std::string what) const
 {
 	for (unsigned int i = 0; i < number; ++i) {
 		std::ostringstream oss;

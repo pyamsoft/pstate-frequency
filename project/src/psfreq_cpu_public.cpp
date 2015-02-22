@@ -100,7 +100,8 @@ const std::string cpu::getGovernor() const
 
 const std::string cpu::getIOScheduler() const
 {
-	const std::string line = cpuSysfs.read("/sys/block/", "sda/queue/scheduler");
+	const std::string line = cpuSysfs.read("/sys/block/",
+	"sda/queue/scheduler");
 	if (line != std::string()) {
 		return line;
 	}
@@ -136,7 +137,8 @@ const std::vector<std::string> cpu::getAvailableGovernors() const
 	if (!availableGovernors.empty()) {
 		return availableGovernors;
 	}
-	std::cerr << "Failed to get a list of available governors" << std::endl;
+	std::cerr << "Failed to get a list of available governors"
+		<< std::endl;
 	return availableGovernors;
 }
 
@@ -179,14 +181,16 @@ void cpu::setScalingMax(const int max) const
 	if (number == maxFrequencyFileVector.size()) {
 		const int scalingMax = maxInfoFrequency / 100 * max;
 		for (unsigned int i = 0; i < number; ++i) {
-			if (!cpuSysfs.write(maxFrequencyFileVector[i], scalingMax)) {
+			if (!cpuSysfs.write(maxFrequencyFileVector[i],
+					scalingMax)) {
 				std::cerr << "Failed to set"
 					<< " the max frequency of CPU " << i
 					<< std::endl;
 			}
 		}
 		if (hasPstate()) {
-			if (!cpuSysfs.write("intel_pstate/max_perf_pct", max)) {
+			if (!cpuSysfs.write("intel_pstate/max_perf_pct",
+					max)) {
 				std::cerr << "Failed to set the pstate max"
 					<< std::endl;
 			}
@@ -199,14 +203,16 @@ void cpu::setScalingMin(const int min) const
 	if (number == minFrequencyFileVector.size()) {
 		const int scalingMin = maxInfoFrequency / 100 * min;
 		for (unsigned int i = 0; i < number; ++i) {
-			if (!cpuSysfs.write(minFrequencyFileVector[i], scalingMin)) {
+			if (!cpuSysfs.write(minFrequencyFileVector[i],
+					scalingMin)) {
 				std::cerr << "Failed to set"
 					<< " the min frequency of CPU " << i
 					<< std::endl;
 			}
 		}
 		if (hasPstate()) {
-			if (!cpuSysfs.write("intel_pstate/min_perf_pct", min)) {
+			if (!cpuSysfs.write("intel_pstate/min_perf_pct",
+					min)) {
 				std::cerr << "Failed to set the pstate min"
 					<< std::endl;
 			}
@@ -247,7 +253,8 @@ unsigned int cpu::getPowerSupply(const std::string &fullPath) const
 	if (access(type, F_OK) != -1) {
 		const std::string powerType = cpuSysfs.read(fullPath, "type");
 		if (powerType.compare("Mains") == 0) {
-			const int status = stringToNumber(cpuSysfs.read(fullPath, "online"));
+			const int status = stringToNumber(
+					cpuSysfs.read(fullPath, "online"));
 			if (status == 1) {
 				return 2;
 			} else {

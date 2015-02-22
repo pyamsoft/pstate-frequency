@@ -48,12 +48,14 @@ private:
 				const std::string &buffer) const;
 		bool write(const std::string &path,const std::string &file,
 				const int number) const;
-		bool write(const std::string &file, const std::string &buffer) const;
+		bool write(const std::string &file,
+				const std::string &buffer) const;
 		bool write(const std::string &file, const int number) const;
 		const std::string read(const std::string &file) const;
 		const std::string read(const std::string &path,
 				const std::string &file) const;
-		const std::vector<std::string> readAll(const std::string &file) const;
+		const std::vector<std::string> readAll(
+				const std::string &file) const;
 		const std::vector<std::string> readAll(const std::string &path,
 				const std::string &file) const;
 		const std::vector<std::string> readPipe(const char* command,
@@ -69,7 +71,8 @@ private:
 	std::vector<std::string> minFrequencyFileVector;
 	std::vector<std::string> governorFileVector;
 
-	void initializeVector(std::vector<std::string> &vector, std::string what) const;
+	void initializeVector(std::vector<std::string> &vector,
+			std::string what) const;
 	unsigned int findNumber() const;
 	bool findPstate() const;
 	double findInfoMinFrequency() const;

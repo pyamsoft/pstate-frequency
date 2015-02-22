@@ -54,7 +54,8 @@ bool cpu::sysfs::write(const std::string &path,const std::string &file,
 	return write(path, file, oss.str());
 }
 
-bool cpu::sysfs::write(const std::string &file, const std::string &buffer) const
+bool cpu::sysfs::write(const std::string &file,
+		const std::string &buffer) const
 {
 	return write(basePath, file, buffer);
 }
@@ -88,7 +89,8 @@ const std::string cpu::sysfs::read(const std::string &file) const
 	return read(basePath, file);
 }
 
-const std::vector<std::string> cpu::sysfs::readAll(const std::string &file) const
+const std::vector<std::string> cpu::sysfs::readAll(
+		const std::string &file) const
 {
 	return readAll(basePath, file);
 }
