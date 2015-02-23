@@ -173,8 +173,7 @@ void values::setPlanPowersave()
 
 void values::setPlanPerformance()
 {
-	const int turboPercent = parent.getTurboPercent();
-	max =  turboPercent != -1 ? turboPercent : 100;
+	max =  100;
 	min = 0;
 	turbo = parent.hasPstate() ? 1 : 0;
 	governor = parent.hasPstate() ? "powersave" : "ondemand";

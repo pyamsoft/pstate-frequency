@@ -28,16 +28,6 @@
 
 namespace psfreq {
 
-int cpu::findTurboPercent() const
-{
-	const std::string line = cpuSysfs.read("intel_pstate/turbo_pct");
-	if (line != std::string()) {
-		return stringToNumber(line);
-	}
-	std::cerr << "Unable to find turbo percentage." << std::endl;
-	return -1;
-}
-
 bool cpu::findPstate() const
 {
 	const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");

@@ -65,7 +65,6 @@ private:
 	const sysfs cpuSysfs;
 	bool pstate;
 	unsigned int number;
-	int turboPercent;
 	double minInfoFrequency;
 	double maxInfoFrequency;
 	std::vector<std::string> maxFrequencyFileVector;
@@ -74,7 +73,6 @@ private:
 
 	void initializeVector(std::vector<std::string> &vector,
 			std::string what) const;
-	int findTurboPercent() const;
 	unsigned int findNumber() const;
 	bool findPstate() const;
 	double findInfoMinFrequency() const;
@@ -85,7 +83,6 @@ public:
 		cpuSysfs(*this),
 		pstate(false),
 		number(0),
-		turboPercent(0),
 		minInfoFrequency(0),
 		maxInfoFrequency(0),
 		maxFrequencyFileVector(std::vector<std::string>()),
@@ -111,7 +108,6 @@ public:
 	int getInfoMaxValue() const;
 	int getMinPState() const;
 	int getMaxPState() const;
-	int getTurboPercent() const;
 	unsigned int getNumber() const;
 	unsigned int getPowerSupply(const std::string &fullPath) const;
 	double getScalingMinFrequency() const;
@@ -122,7 +118,6 @@ public:
 	const std::vector<std::string> getRealtimeFrequencies() const;
 	const std::vector<std::string> getAvailableGovernors() const;
 	const std::string getDriver() const;
-	const std::string getIOScheduler() const;
 
 };
 

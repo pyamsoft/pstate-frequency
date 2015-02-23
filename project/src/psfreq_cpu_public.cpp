@@ -34,7 +34,6 @@ void cpu::init()
 {
 	number = findNumber();
 	pstate = findPstate();
-	turboPercent = findTurboPercent();
 	minInfoFrequency = findInfoMinFrequency();
 	maxInfoFrequency = findInfoMaxFrequency();
 	initializeVector(minFrequencyFileVector, "min_freq");
@@ -89,11 +88,6 @@ unsigned int cpu::getNumber() const
 	return number;
 }
 
-int cpu::getTurboPercent() const
-{
-	return turboPercent;
-}
-
 const std::string cpu::getGovernor() const
 {
 	const std::string line = cpuSysfs.read("cpu0/cpufreq/scaling_governor");
@@ -101,17 +95,6 @@ const std::string cpu::getGovernor() const
 		return line;
 	}
 	std::cerr << "Failed to get scaling_governor" << std::endl;
-	return line;
-}
-
-const std::string cpu::getIOScheduler() const
-{
-	const std::string line = cpuSysfs.read("/sys/block/",
-	"sda/queue/scheduler");
-	if (line != std::string()) {
-		return line;
-	}
-	std::cerr << "Failed to get scheduler" << std::endl;
 	return line;
 }
 
