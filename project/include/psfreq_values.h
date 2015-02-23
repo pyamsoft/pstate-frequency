@@ -18,17 +18,20 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#ifndef CPP_PSFREQ_CPUVALUES_H
-#define CPP_PSFREQ_CPUVALUES_H
+#ifndef CPP_PSFREQ_VALUES_H
+#define CPP_PSFREQ_VALUES_H
 
 #include <string>
 
+#include "include/psfreq_cpu.h"
+
 namespace psfreq {
 
-class cpuValues {
-
+class Values {
 private:
+	const Cpu &cpu;
 	int action;
+	int plan;
 	int max;
 	int min;
 	int turbo;
@@ -38,23 +41,34 @@ private:
 	void setPlanPowersave();
 	void setPlanPerformance();
 	void setPlanMaxPerformance();
-	void setPlanAuto();
+	unsigned int setPlanAuto();
 
-	bool hideDirectory(const std::string &entryName);
-	bool discoverPowerSupply(const std::string &fullPath);
+	Values();
 
 public:
+	Values(const Cpu &cpu) :
+		cpu(cpu),
+		action(-1),
+		plan(-1),
+		max(-1),
+		min(-1),
+		turbo(-1),
+		governor(std::string()),
+		requested(0)
+	{
+	}
 
-	cpuValues();
-	~cpuValues();
+	~Values()
+	{
+	}
 
 	void setAction(const int newAction);
 	void setMax(const int newMax);
 	void setMin(const int newMin);
 	void setTurbo(const int newTurbo);
-	void setPlan(const int plan);
 	void setRequested(const int newRequest);
-	void setGovernor(const std::string& newGovernor);
+	bool setPlan(const int powerPlan);
+	bool setGovernor(const std::string& newGovernor);
 
 	int getAction() const;
 	int getMax() const;
@@ -68,6 +82,8 @@ public:
 	bool isActionGet() const;
 	bool isActionSet() const;
 	bool isInitialized() const;
+
+	bool runPlan();
 };
 
 }

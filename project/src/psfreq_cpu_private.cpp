@@ -18,64 +18,68 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#include <cstdlib>
-#include <cstdio>
 #include <iostream>
 #include <sstream>
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
-#include "include/psfreq_logger.h"
+#include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
 
-bool cpu::pstate = cpu::findPstate();
-
-unsigned int cpu::findNumber() const
+bool Cpu::findPstate() const
 {
-	std::ostringstream log;
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_cpu_private.cpp]: cpu::findNumber"
-			<< std::endl;
-		logger::d(log);
+	const std::string driver = sysfs.read("cpu0/cpufreq/scaling_driver");
+	if (driver != std::string()) {
+		return (driver.compare("intel_pstate") == 0);
 	}
-
-	const char *cmd = "grep processor /proc/cpuinfo | wc -l";
-	return stringToNumber(cpuSysfs.readPipe(cmd, 1)[0]);
+	std::cerr << "Unable to get read driver to check for intel_pstate"
+		<< std::endl;
+	return false;
 }
 
-void cpu::initializeVector(std::vector<std::string> &vector, std::string what) const
+unsigned int Cpu::findNumber() const
 {
-	std::ostringstream log;
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_cpu_private.cpp]: cpu::initializeVector"
-			<< std::endl;
-		logger::d(log);
+	const char *cmd = "grep processor /proc/cpuinfo | wc -l";
+	const std::vector<std::string> result = sysfs.readPipe(cmd, 1);
+	if (!result.empty()) {
+		return stringToNumber(result[0]);
 	}
+	std::cerr << "Unable to find number of CPUs" << std::endl;
+	return 0;
+}
+
+void Cpu::initializeVector(std::vector<std::string> &vector,
+		std::string what) const
+{
 	for (unsigned int i = 0; i < number; ++i) {
 		std::ostringstream oss;
 		oss << "cpu" << i << "/cpufreq/scaling_" << what;
-	if (logger::isDebug()) {
-			log << "\tVector entry[" << i << "]: " << oss.str() << std::endl;
-			logger::d(log);
-	}
 		vector.push_back(oss.str());
 	}
 }
 
-double cpu::findInfoMaxFrequency() const
+double Cpu::findInfoMaxFrequency() const
 {
-	const std::string line = cpuSysfs.read("cpu0/cpufreq/cpuinfo_max_freq");
-	const double result = stringToNumber(line);
-	return result;
+	const std::string line = sysfs.read("cpu0/cpufreq/cpuinfo_max_freq");
+	if (line != std::string()) {
+		const double result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Unable to find cpuinfo_max_freq" << std::endl;
+	return 1.0;
 }
 
-double cpu::findInfoMinFrequency() const
+double Cpu::findInfoMinFrequency() const
 {
-	const std::string line = cpuSysfs.read("cpu0/cpufreq/cpuinfo_min_freq");
-	const double result = stringToNumber(line);
-	return result;
+	const std::string line = sysfs.read("cpu0/cpufreq/cpuinfo_min_freq");
+	if (line != std::string()) {
+		const double result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Unable to find cpuinfo_min_freq" << std::endl;
+	return 1.0;
 }
 
 }

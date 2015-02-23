@@ -1,2 +1,2 @@
 # Sets power states based on the current connected state of the AC Adapter
-ACTION=="change" SUBSYSTEM=="power_supply", ATTR{type}=="Mains", RUN+="pstate-frequency -q -s -p 0"
+ACTION=="change" SUBSYSTEM=="power_supply", ATTR{type}=="Mains", RUN+="pstate-frequency -q -S -p 0"

@@ -21,189 +21,237 @@
 #include <iostream>
 #include <sstream>
 
+#include <unistd.h>
+
 #include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
-#include "include/psfreq_logger.h"
+#include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
 
 namespace psfreq {
 
-cpu::cpu()
+void Cpu::init()
 {
 	number = findNumber();
+	pstate = findPstate();
 	minInfoFrequency = findInfoMinFrequency();
 	maxInfoFrequency = findInfoMaxFrequency();
-	minFrequencyFileVector = std::vector<std::string>();
-	maxFrequencyFileVector = std::vector<std::string>();
-	governorFileVector = std::vector<std::string>();
 	initializeVector(minFrequencyFileVector, "min_freq");
 	initializeVector(maxFrequencyFileVector, "max_freq");
 	initializeVector(governorFileVector, "governor");
 }
 
-cpu::~cpu()
+bool Cpu::hasPstate() const
 {
+	return pstate;
 }
 
-double cpu::getScalingMinFrequency() const
+double Cpu::getScalingMinFrequency() const
 {
-	const std::string line = cpuSysfs.read("cpu0/cpufreq/scaling_min_freq");
-	const double result = stringToNumber(line);
-	return result;
+	const std::string line = sysfs.read("cpu0/cpufreq/scaling_min_freq");
+	if (line != std::string()) {
+		const double result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Failed to get scaling_min_freq" << std::endl;
+	return 0.0;
 }
 
-double cpu::getScalingMaxFrequency() const
+double Cpu::getScalingMaxFrequency() const
 {
-	const std::string line = cpuSysfs.read("cpu0/cpufreq/scaling_max_freq");
-	const double result = stringToNumber(line);
-	return result;
+	const std::string line = sysfs.read("cpu0/cpufreq/scaling_max_freq");
+	if (line != std::string()) {
+		const double result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Failed to get scaling_max_freq" << std::endl;
+	return 0.0;
 }
 
-double cpu::getInfoMinFrequency() const
+double Cpu::getInfoMinFrequency() const
 {
 	return minInfoFrequency;
 }
 
-double cpu::getInfoMaxFrequency() const
+double Cpu::getInfoMaxFrequency() const
 {
 	return maxInfoFrequency;
 }
 
-unsigned int cpu::getNumber() const
+unsigned int Cpu::getNumber() const
 {
 	return number;
 }
 
-const std::string cpu::getGovernor() const
+const std::string Cpu::getGovernor() const
 {
-	return cpuSysfs.read("cpu0/cpufreq/scaling_governor");
-}
-
-const std::string cpu::getIOScheduler() const
-{
-	return cpuSysfs.read("/sys/block/", "sda/queue/scheduler");
-}
-
-const std::string cpu::getDriver() const
-{
-	return cpuSysfs.read("cpu0/cpufreq/scaling_driver");
-}
-
-const std::vector<std::string> cpu::getRealtimeFrequencies() const
-{
-	std::ostringstream log;
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::getRealtimeFrequencies"
-			<< std::endl;
-		logger::d(log);
+	const std::string line = sysfs.read("cpu0/cpufreq/scaling_governor");
+	if (line != std::string()) {
+		return line;
 	}
-
-	const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
-	return cpuSysfs.readPipe(cmd, number);
+	std::cerr << "Failed to get scaling_governor" << std::endl;
+	return line;
 }
 
-const std::vector<std::string> cpu::getAvailableGovernors() const
+const std::string Cpu::getDriver() const
 {
-	std::vector<std::string> availableGovernors = std::vector<std::string>();
-	availableGovernors = cpuSysfs.readAll("cpu0/cpufreq/scaling_available_governors");
+	const std::string line = sysfs.read("cpu0/cpufreq/scaling_driver");
+	if (line != std::string()) {
+		return line;
+	}
+	std::cerr << "Failed to get scaling_driver" << std::endl;
+	return line;
+}
+
+const std::vector<std::string> Cpu::getRealtimeFrequencies() const
+{
+	const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
+	const std::vector<std::string> result = sysfs.readPipe(cmd, number);
+	if (!result.empty()) {
+		return result;
+	}
+	std::cerr << "Failed to get realtime frequencies" << std::endl;
+	return result;
+}
+
+const std::vector<std::string> Cpu::getAvailableGovernors() const
+{
+	const std::vector<std::string> availableGovernors
+		= sysfs.readAll("cpu0/cpufreq/scaling_available_governors");
+	if (!availableGovernors.empty()) {
+		return availableGovernors;
+	}
+	std::cerr << "Failed to get a list of available governors"
+		<< std::endl;
 	return availableGovernors;
 }
 
-int cpu::getMaxPState() const
+int Cpu::getMaxPState() const
 {
 	return static_cast<int>(getScalingMaxFrequency()
 			/ getInfoMaxFrequency() * 100);
 }
 
-int cpu::getMinPState() const
+int Cpu::getMinPState() const
 {
 	return static_cast<int>(getScalingMinFrequency()
 			/ getInfoMaxFrequency() * 100);
 }
 
-int cpu::getTurboBoost() const
+int Cpu::getTurboBoost() const
 {
-	const std::string line = cpuSysfs.read(hasPstate()
+	const std::string line = sysfs.read(hasPstate()
 			? "intel_pstate/no_turbo"
 			: "cpufreq/boost");
-	const int result = stringToNumber(line);
-	return result;
+	if (line != std::string()) {
+		const int result = stringToNumber(line);
+		return result;
+	}
+	std::cerr << "Unable to read turbo boost value" << std::endl;
+	return -2;
 }
 
-int cpu::getInfoMinValue() const
+int Cpu::getInfoMinValue() const
 {
 	return static_cast<int>(minInfoFrequency / maxInfoFrequency * 100);
 }
-int cpu::getInfoMaxValue() const
+int Cpu::getInfoMaxValue() const
 {
 	return 100;
 }
 
-void cpu::setSaneDefaults() const
-{
-	std::ostringstream log;
-	if (logger::isDebug()) {
-		log << "pstate-frequency [psfreq_cpu_public.cpp]: cpu::setSaneDefaults"
-			<< std::endl;
-		logger::d(log);
-	}
-
-
-	if (logger::isDebug()) {
-		log << "\tDefaults are set to MAX: 100, MIN: 0, TURBO: 1, GOVERNOR: powersave"
-			<< std::endl;
-		logger::d(log);
-	}
-
-	setScalingMax(100);
-	setScalingMin(0);
-	setTurboBoost(hasPstate() ? 1 : 0);
-	setGovernor("powersave");
-}
-
-void cpu::setScalingMax(const int max) const
+void Cpu::setScalingMax(const int max) const
 {
 	if (number == maxFrequencyFileVector.size()) {
 		const int scalingMax = maxInfoFrequency / 100 * max;
 		for (unsigned int i = 0; i < number; ++i) {
-			cpuSysfs.write(maxFrequencyFileVector[i], scalingMax);
+			if (!sysfs.write(maxFrequencyFileVector[i],
+					scalingMax)) {
+				std::cerr << "Failed to set"
+					<< " the max frequency of CPU " << i
+					<< std::endl;
+			}
 		}
 		if (hasPstate()) {
-			cpuSysfs.write("intel_pstate/max_perf_pct", max);
+			if (!sysfs.write("intel_pstate/max_perf_pct",
+					max)) {
+				std::cerr << "Failed to set the pstate max"
+					<< std::endl;
+			}
 		}
 	}
 }
 
-void cpu::setScalingMin(const int min) const
+void Cpu::setScalingMin(const int min) const
 {
 	if (number == minFrequencyFileVector.size()) {
 		const int scalingMin = maxInfoFrequency / 100 * min;
 		for (unsigned int i = 0; i < number; ++i) {
-			cpuSysfs.write(minFrequencyFileVector[i], scalingMin);
+			if (!sysfs.write(minFrequencyFileVector[i],
+					scalingMin)) {
+				std::cerr << "Failed to set"
+					<< " the min frequency of CPU " << i
+					<< std::endl;
+			}
 		}
 		if (hasPstate()) {
-			cpuSysfs.write("intel_pstate/min_perf_pct", min);
+			if (!sysfs.write("intel_pstate/min_perf_pct",
+					min)) {
+				std::cerr << "Failed to set the pstate min"
+					<< std::endl;
+			}
 		}
 	}
 }
 
-void cpu::setTurboBoost(const int turbo) const
+void Cpu::setTurboBoost(const int turbo) const
 {
 	const std::string file = hasPstate()
 		? "intel_pstate/no_turbo"
 		: "cpufreq/boost";
-	if (cpuSysfs.exists(file)) {
-		cpuSysfs.write(file, turbo);
+	if (!sysfs.write(file, turbo)) {
+		std::cerr << "Failed to set the turbo"
+			<< std::endl;
 	}
 }
 
-void cpu::setGovernor(const std::string &governor) const
+void Cpu::setGovernor(const std::string &governor) const
 {
 	if (number == governorFileVector.size()) {
 		for (unsigned int i = 0; i < number; ++i) {
-			cpuSysfs.write(governorFileVector[i], governor);
+			if (!sysfs.write(governorFileVector[i], governor)) {
+				std::cerr << "Failed to set"
+					<< " the governor of CPU " << i
+					<< std::endl;
+			}
 		}
 	}
+}
+
+unsigned int Cpu::getPowerSupply(const std::string &fullPath) const
+{
+	std::ostringstream oss;
+	oss << fullPath << "/type";
+	const std::string typePath = oss.str();
+	const char *const type = typePath.c_str();
+	if (access(type, F_OK) != -1) {
+		const std::string powerType = sysfs.read(fullPath, "type");
+		if (powerType.compare("Mains") == 0) {
+			const int status = stringToNumber(
+					sysfs.read(fullPath, "online"));
+			if (status == 1) {
+				return 2;
+			} else {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+bool Cpu::hideDirectory(const std::string &entryName) const
+{
+	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
 }
 
 }

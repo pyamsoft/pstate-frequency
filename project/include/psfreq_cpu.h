@@ -24,16 +24,46 @@
 #include <string>
 #include <vector>
 
-#include "include/psfreq_logger.h"
-#include "include/psfreq_sysfs.h"
-
 namespace psfreq {
 
-class cpu {
+class Cpu {
 private:
-	static bool pstate;
+	class Sysfs {
+	private:
+		const Cpu &cpu;
+		const std::string basePath;
+		Sysfs();
+	public:
+		Sysfs(const Cpu& cpu) :
+			cpu(cpu),
+			basePath("/sys/devices/system/cpu/")
+		{
+		}
 
-	sysfs cpuSysfs;
+		~Sysfs()
+		{
+		}
+
+		bool write(const std::string &path, const std::string &file,
+				const std::string &buffer) const;
+		bool write(const std::string &path,const std::string &file,
+				const int number) const;
+		bool write(const std::string &file,
+				const std::string &buffer) const;
+		bool write(const std::string &file, const int number) const;
+		const std::string read(const std::string &file) const;
+		const std::string read(const std::string &path,
+				const std::string &file) const;
+		const std::vector<std::string> readAll(
+				const std::string &file) const;
+		const std::vector<std::string> readAll(const std::string &path,
+				const std::string &file) const;
+		const std::vector<std::string> readPipe(const char* command,
+				const unsigned int number) const;
+	};
+
+	const Sysfs sysfs;
+	bool pstate;
 	unsigned int number;
 	double minInfoFrequency;
 	double maxInfoFrequency;
@@ -41,48 +71,44 @@ private:
 	std::vector<std::string> minFrequencyFileVector;
 	std::vector<std::string> governorFileVector;
 
-	void initializeVector(std::vector<std::string> &vector, std::string what) const;
+	void initializeVector(std::vector<std::string> &vector,
+			std::string what) const;
 	unsigned int findNumber() const;
+	bool findPstate() const;
 	double findInfoMinFrequency() const;
 	double findInfoMaxFrequency() const;
 
-	static bool findPstate()
+public:
+	Cpu() :
+		sysfs(*this),
+		pstate(false),
+		number(0),
+		minInfoFrequency(0),
+		maxInfoFrequency(0),
+		maxFrequencyFileVector(std::vector<std::string>()),
+		minFrequencyFileVector(std::vector<std::string>()),
+		governorFileVector(std::vector<std::string>())
 	{
-		std::ostringstream log;
-		if (logger::isDebug()) {
-			log << "pstate-frequency [psfreq_cpu_private.cpp]: findPstate"
-				<< std::endl;
-			logger::d(log);
-		}
-		if (logger::isDebug()) {
-			log << "\tCheck for presence of pstate driver"
-				<< std::endl;
-			logger::d(log);
-		}
-		sysfs cpuSysfs;
-		const std::string driver = cpuSysfs.read("cpu0/cpufreq/scaling_driver");
-		if (logger::isDebug()) {
-			log << "Compare found: " << driver << " with driver: intel_pstate"
-				<< std::endl;
-			logger::d(log);
-		}
-		return (driver.compare("intel_pstate") == 0);
 	}
 
-public:
-	cpu();
-	~cpu();
-	void setSaneDefaults() const;
+	~Cpu()
+	{
+	}
+
+	void init();
 	void setScalingMax(const int max) const;
 	void setScalingMin(const int min) const;
 	void setTurboBoost(const int turbo) const;
 	void setGovernor(const std::string &governor) const;
+	bool hasPstate() const;
+	bool hideDirectory(const std::string &entryName) const;
 	int getTurboBoost() const;
-	unsigned int getNumber() const;
 	int getInfoMinValue() const;
 	int getInfoMaxValue() const;
 	int getMinPState() const;
 	int getMaxPState() const;
+	unsigned int getNumber() const;
+	unsigned int getPowerSupply(const std::string &fullPath) const;
 	double getScalingMinFrequency() const;
 	double getScalingMaxFrequency() const;
 	double getInfoMinFrequency() const;
@@ -91,12 +117,7 @@ public:
 	const std::vector<std::string> getRealtimeFrequencies() const;
 	const std::vector<std::string> getAvailableGovernors() const;
 	const std::string getDriver() const;
-	const std::string getIOScheduler() const;
 
-	static bool hasPstate()
-	{
-		return pstate;
-	}
 };
 
 
