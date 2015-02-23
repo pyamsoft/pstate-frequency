@@ -31,6 +31,7 @@ class values {
 private:
 	const cpu &parent;
 	int action;
+	int plan;
 	int max;
 	int min;
 	int turbo;
@@ -48,6 +49,7 @@ public:
 	values(const cpu &parentCpu) :
 		parent(parentCpu),
 		action(-1),
+		plan(-1),
 		max(-1),
 		min(-1),
 		turbo(-1),
@@ -64,8 +66,8 @@ public:
 	void setMax(const int newMax);
 	void setMin(const int newMin);
 	void setTurbo(const int newTurbo);
-	bool setPlan(const int plan);
 	void setRequested(const int newRequest);
+	bool setPlan(const int powerPlan);
 	bool setGovernor(const std::string& newGovernor);
 
 	int getAction() const;
@@ -80,6 +82,8 @@ public:
 	bool isActionGet() const;
 	bool isActionSet() const;
 	bool isInitialized() const;
+
+	bool runPlan();
 };
 
 }

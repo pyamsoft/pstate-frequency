@@ -121,9 +121,19 @@ int values::getRequested() const
 	return requested;
 }
 
-bool values::setPlan(const int plan)
+bool values::setPlan(const int powerPlan) {
+	if (powerPlan != -1) {
+		plan = powerPlan;
+		return true;
+	}
+	return false;
+}
+
+bool values::runPlan()
 {
-	if (plan == 1) {
+	if (plan == -1) {
+		return true;
+	} else if (plan == 1) {
 		setPlanPowersave();
 		return true;
 	} else if (plan == 2) {
@@ -163,7 +173,8 @@ void values::setPlanPowersave()
 
 void values::setPlanPerformance()
 {
-	max = 100;
+	const int turboPercent = parent.getTurboPercent();
+	max =  turboPercent != -1 ? turboPercent : 100;
 	min = 0;
 	turbo = parent.hasPstate() ? 1 : 0;
 	governor = parent.hasPstate() ? "powersave" : "ondemand";

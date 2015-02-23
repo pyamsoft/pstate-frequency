@@ -395,6 +395,9 @@ int main(int argc, char** argv)
                 }
         }
 	cpu.init();
+	if (!cpuValues.runPlan()) {
+		return 1;
+	}
 	if (cpuValues.isActionNull()) {
 		printGPL();
 		printHelp();

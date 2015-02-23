@@ -34,6 +34,7 @@ void cpu::init()
 {
 	number = findNumber();
 	pstate = findPstate();
+	turboPercent = findTurboPercent();
 	minInfoFrequency = findInfoMinFrequency();
 	maxInfoFrequency = findInfoMaxFrequency();
 	initializeVector(minFrequencyFileVector, "min_freq");
@@ -86,6 +87,11 @@ double cpu::getInfoMaxFrequency() const
 unsigned int cpu::getNumber() const
 {
 	return number;
+}
+
+int cpu::getTurboPercent() const
+{
+	return turboPercent;
 }
 
 const std::string cpu::getGovernor() const
