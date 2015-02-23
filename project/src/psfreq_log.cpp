@@ -22,44 +22,44 @@
 
 namespace psfreq {
 
-unsigned int log::verbosity = PSFREQ_LOG_NORMAL;
+unsigned int Log::verbosity = PSFREQ_LOG_NORMAL;
 
-bool log::isAllQuiet()
+bool Log::isAllQuiet()
 {
 	return verbosity == PSFREQ_LOG_ALL_QUIET;
 }
 
-bool log::isQuiet()
+bool Log::isQuiet()
 {
 	return verbosity == PSFREQ_LOG_QUIET;
 }
 
-bool log::isNormal()
+bool Log::isNormal()
 {
 	return verbosity == PSFREQ_LOG_NORMAL;
 }
 
-bool log::isDebug()
+bool Log::isDebug()
 {
 	return verbosity == PSFREQ_LOG_DEBUG;
 }
 
-void log::setAllQuiet()
+void Log::setAllQuiet()
 {
 	verbosity = PSFREQ_LOG_ALL_QUIET;
 }
 
-void log::setQuiet()
+void Log::setQuiet()
 {
 	verbosity = PSFREQ_LOG_QUIET;
 }
 
-void log::setNormal()
+void Log::setNormal()
 {
 	verbosity = PSFREQ_LOG_NORMAL;
 }
 
-void log::setDebug()
+void Log::setDebug()
 {
 	verbosity = PSFREQ_LOG_DEBUG;
 }

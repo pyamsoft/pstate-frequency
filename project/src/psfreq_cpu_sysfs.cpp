@@ -28,7 +28,7 @@
 
 namespace psfreq {
 
-bool cpu::sysfs::write(const std::string &path, const std::string &file,
+bool Cpu::Sysfs::write(const std::string &path, const std::string &file,
 		const std::string &buffer) const
 {
 	std::ostringstream oss;
@@ -46,7 +46,7 @@ bool cpu::sysfs::write(const std::string &path, const std::string &file,
 	return true;
 }
 
-bool cpu::sysfs::write(const std::string &path,const std::string &file,
+bool Cpu::Sysfs::write(const std::string &path,const std::string &file,
 		const int number) const
 {
 	std::ostringstream oss;
@@ -54,18 +54,18 @@ bool cpu::sysfs::write(const std::string &path,const std::string &file,
 	return write(path, file, oss.str());
 }
 
-bool cpu::sysfs::write(const std::string &file,
+bool Cpu::Sysfs::write(const std::string &file,
 		const std::string &buffer) const
 {
 	return write(basePath, file, buffer);
 }
 
-bool cpu::sysfs::write(const std::string &file, const int number) const
+bool Cpu::Sysfs::write(const std::string &file, const int number) const
 {
 	return write(basePath, file, number);
 }
 
-const std::string cpu::sysfs::read(const std::string &path,
+const std::string Cpu::Sysfs::read(const std::string &path,
 		const std::string &file) const
 {
 	std::ostringstream oss;
@@ -84,18 +84,18 @@ const std::string cpu::sysfs::read(const std::string &path,
 	return content;
 }
 
-const std::string cpu::sysfs::read(const std::string &file) const
+const std::string Cpu::Sysfs::read(const std::string &file) const
 {
 	return read(basePath, file);
 }
 
-const std::vector<std::string> cpu::sysfs::readAll(
+const std::vector<std::string> Cpu::Sysfs::readAll(
 		const std::string &file) const
 {
 	return readAll(basePath, file);
 }
 
-const std::vector<std::string> cpu::sysfs::readAll(const std::string &path,
+const std::vector<std::string> Cpu::Sysfs::readAll(const std::string &path,
 		const std::string &file) const
 {
 	std::ostringstream oss;
@@ -119,7 +119,7 @@ const std::vector<std::string> cpu::sysfs::readAll(const std::string &path,
 	return contents;
 }
 
-const std::vector<std::string> cpu::sysfs::readPipe(const char* command,
+const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
 		const unsigned int number) const
 {
 	std::FILE *pipe = popen(command, "r");

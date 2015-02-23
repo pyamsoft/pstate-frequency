@@ -30,33 +30,33 @@
 namespace psfreq {
 
 
-bool values::isInitialized() const
+bool Values::isInitialized() const
 {
 	return hasAction() && (max != -1 || min != -1
 			|| turbo != -1 || governor != std::string());
 }
 
-bool values::hasAction() const
+bool Values::hasAction() const
 {
 	return action != -1;
 }
 
-bool values::isActionNull() const
+bool Values::isActionNull() const
 {
 	return action == -1;
 }
 
-bool values::isActionGet() const
+bool Values::isActionGet() const
 {
 	return action == 0;
 }
 
-bool values::isActionSet() const
+bool Values::isActionSet() const
 {
 	return action == 1;
 }
 
-bool values::setGovernor(const std::string& newGovernor)
+bool Values::setGovernor(const std::string& newGovernor)
 {
 	if (newGovernor != std::string()) {
 		governor = newGovernor;
@@ -66,62 +66,62 @@ bool values::setGovernor(const std::string& newGovernor)
 }
 
 
-void values::setAction(const int newAction)
+void Values::setAction(const int newAction)
 {
 	action = newAction;
 }
 
-void values::setMax(const int newMax)
+void Values::setMax(const int newMax)
 {
 	max = newMax;
 }
 
-void values::setMin(const int newMin)
+void Values::setMin(const int newMin)
 {
 	min = newMin;
 }
 
-void values::setTurbo(const int newTurbo)
+void Values::setTurbo(const int newTurbo)
 {
 	turbo = newTurbo;
 }
 
-void values::setRequested(const int newRequest)
+void Values::setRequested(const int newRequest)
 {
 	requested = newRequest;
 }
 
-const std::string values::getGovernor() const
+const std::string Values::getGovernor() const
 {
 	return governor;
 }
 
-int values::getAction() const
+int Values::getAction() const
 {
 	return action;
 }
 
-int values::getMax() const
+int Values::getMax() const
 {
 	return max;
 }
 
-int values::getMin() const
+int Values::getMin() const
 {
 	return min;
 }
 
-int values::getTurbo() const
+int Values::getTurbo() const
 {
 	return turbo;
 }
 
-int values::getRequested() const
+int Values::getRequested() const
 {
 	return requested;
 }
 
-bool values::setPlan(const int powerPlan) {
+bool Values::setPlan(const int powerPlan) {
 	if (powerPlan != -1) {
 		plan = powerPlan;
 		return true;
@@ -129,7 +129,7 @@ bool values::setPlan(const int powerPlan) {
 	return false;
 }
 
-bool values::runPlan()
+bool Values::runPlan()
 {
 	if (plan == -1) {
 		return true;
@@ -163,31 +163,31 @@ bool values::runPlan()
 	return false;
 }
 
-void values::setPlanPowersave()
+void Values::setPlanPowersave()
 {
 	max = 0;
 	min = 0;
-	turbo = parent.hasPstate() ? 1 : 0;
+	turbo = cpu.hasPstate() ? 1 : 0;
 	governor = "powersave";
 }
 
-void values::setPlanPerformance()
+void Values::setPlanPerformance()
 {
 	max =  100;
 	min = 0;
-	turbo = parent.hasPstate() ? 1 : 0;
-	governor = parent.hasPstate() ? "powersave" : "ondemand";
+	turbo = cpu.hasPstate() ? 1 : 0;
+	governor = cpu.hasPstate() ? "powersave" : "ondemand";
 }
 
-void values::setPlanMaxPerformance()
+void Values::setPlanMaxPerformance()
 {
 	max = 100;
 	min = 100;
-	turbo = parent.hasPstate() ? 0 : 1;
+	turbo = cpu.hasPstate() ? 0 : 1;
 	governor = "performance";
 }
 
-unsigned int values::setPlanAuto()
+unsigned int Values::setPlanAuto()
 {
 	const char *const dirName = "/sys/class/power_supply/";
 	DIR *const directory = opendir(dirName);
@@ -200,12 +200,12 @@ unsigned int values::setPlanAuto()
 	unsigned int result = 0;
 	while(entry) {
 		const std::string entryName = entry->d_name;
-		if (!parent.hideDirectory(entryName)) {
+		if (!cpu.hideDirectory(entryName)) {
 			std::ostringstream oss;
 			oss << dirName << entryName << "/";
 			const std::string fullPath = oss.str();
 			if (fullPath.length() < fullPath.max_size()) {
-				result = parent.getPowerSupply(fullPath);
+				result = cpu.getPowerSupply(fullPath);
 				if (result > 0) {
 					break;
 				}

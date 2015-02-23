@@ -30,19 +30,23 @@
 #include "include/psfreq_util.h"
 #include "include/psfreq_values.h"
 
-bool setCpuValues(const psfreq::cpu &cpu, const psfreq::values &cpuValues);
-void printCpuValues(const psfreq::cpu& cpu);
-void printRealtimeFrequency(const psfreq::cpu& cpu);
+bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues);
+void printCpuValues(const psfreq::Cpu& cpu);
+void printRealtimeFrequency(const psfreq::Cpu& cpu);
 void printGPL();
 void printVersion();
 void printHelp();
-int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues,
+int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const int result);
+int parseOptions(const int argc, char **const argv,
+		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+		const char *const shortOptions,
+		const struct option longOptions[]);
 int planFromOptArg(char *const arg);
 const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
 
-bool setCpuValues(const psfreq::cpu &cpu, const psfreq::values &cpuValues)
+bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 {
 	const int cpuInfoMin = cpu.getInfoMinValue();
 	const int cpuInfoMax =  cpu.getInfoMaxValue();
@@ -130,7 +134,7 @@ int planFromOptArg(char *const arg)
 	return plan;
 }
 
-void printRealtimeFrequency(const psfreq::cpu& cpu)
+void printRealtimeFrequency(const psfreq::Cpu& cpu)
 {
 		printVersion();
 		const std::vector<std::string> frequencies =
@@ -202,7 +206,7 @@ void printVersion()
 		std::cout << oss.str();
 }
 
-void printCpuValues(const psfreq::cpu& cpu)
+void printCpuValues(const psfreq::Cpu& cpu)
 {
 		printVersion();
 		std::ostringstream oss;
@@ -289,7 +293,7 @@ void printHelp()
 			<< "boost state" << std::endl;
 		std::cout << oss.str();
 }
-int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues,
+int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const int result)
 {
 	switch(result) {
@@ -305,6 +309,15 @@ int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues,
         case 'r':
 		cpuValues.setRequested(1);
 		return 0;
+	case 'd':
+		psfreq::Log::setDebug();
+		return 0;
+	case 'a':
+		psfreq::Log::setAllQuiet();
+		return 0;
+	case 'q':
+		psfreq::Log::setQuiet();
+		return 0;
         case 'V':
 		printGPL();
 		printVersion();
@@ -312,12 +325,6 @@ int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues,
         case 'S':
 		cpuValues.setAction(1);
                 return 0;
-        case 'd':
-                return 0;
-	case 'a':
-		return 0;
-	case 'q':
-		return 0;
         case 'G':
 		cpuValues.setAction(0);
                 return 0;
@@ -356,21 +363,20 @@ int handleOptionResult(const psfreq::cpu &cpu, psfreq::values &cpuValues,
 
 int main(int argc, char** argv)
 {
-	psfreq::cpu cpu;
-	psfreq::values cpuValues = psfreq::values(cpu);
-	int finalOptionResult = 0;
-	int optionResult = 0;
+	psfreq::Cpu cpu;
+	psfreq::Values cpuValues = psfreq::Values(cpu);
+
 	const char *const shortOptions = ":SGHVcrdaqp:m:n:t:g:";
-	struct option longOptions[] = {
+	const struct option longOptions[] = {
                 {"help",          no_argument,        NULL,           'H'},
                 {"version",       no_argument,        NULL,           'V'},
+                {"quiet",         no_argument,        NULL,           'q'},
+                {"all-quiet",     no_argument,        NULL,           'a'},
+                {"debug",         no_argument,        NULL,           'd'},
                 {"get",           no_argument,        NULL,           'G'},
                 {"set",           no_argument,        NULL,           'S'},
                 {"current",       no_argument,        NULL,           'c'},
                 {"real",          no_argument,        NULL,           'r'},
-                {"quiet",         no_argument,        NULL,           'q'},
-                {"all-quiet",     no_argument,        NULL,           'a'},
-                {"debug",         no_argument,        NULL,           'd'},
                 {"plan",          required_argument,  NULL,           'p'},
                 {"governor",      required_argument,  NULL,           'g'},
 		{"max",		  required_argument,  NULL,           'm'},
@@ -378,22 +384,15 @@ int main(int argc, char** argv)
 		{"turbo",	  required_argument,  NULL,           't'},
 		{0,		  0,                  0,              0}
                 };
-	while (true) {
-                optionResult = getopt_long(argc, argv, shortOptions,
-                		longOptions, NULL);
-                if (optionResult == -1) {
-                        break;
-                } else {
-			finalOptionResult = handleOptionResult(cpu, cpuValues,
-					optionResult);
-                        if (finalOptionResult == -1) {
-                                return 0;
-                        } else if (finalOptionResult == 1) {
-				std::cerr << "Bad Option." << std::endl;
-                                return 1;
-                        }
-                }
-        }
+	const int parseResult = parseOptions(argc, argv, cpu, cpuValues,
+			shortOptions, longOptions);
+	if (parseResult != 0) {
+		if (parseResult == -1) {
+			return 0;
+		} else {
+			return 1;
+		}
+	}
 	cpu.init();
 	if (!cpuValues.runPlan()) {
 		return 1;
@@ -427,5 +426,30 @@ int main(int argc, char** argv)
 			return 1;
 		}
 	}
+	return 0;
+}
+
+int parseOptions(const int argc, char **const argv,
+		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+		const char *const shortOptions,
+		const struct option longOptions[]) {
+	int finalOptionResult = 0;
+	int optionResult = 0;
+	while (true) {
+                optionResult = getopt_long(argc, argv, shortOptions,
+				longOptions, NULL);
+                if (optionResult == -1) {
+                        break;
+                } else {
+			finalOptionResult = handleOptionResult(cpu, cpuValues,
+					optionResult);
+			if (finalOptionResult == -1) {
+				return -1;
+			} else if (finalOptionResult == 1) {
+				std::cerr << "Bad Option." << std::endl;
+				return 1;
+			}
+                }
+        }
 	return 0;
 }

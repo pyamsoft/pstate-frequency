@@ -28,7 +28,7 @@
 
 namespace psfreq {
 
-class log {
+class Log {
 private:
 	static unsigned int verbosity;
 public:

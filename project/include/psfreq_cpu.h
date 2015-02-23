@@ -26,21 +26,21 @@
 
 namespace psfreq {
 
-class cpu {
+class Cpu {
 private:
-	class sysfs {
+	class Sysfs {
 	private:
-		const cpu &parent;
+		const Cpu &cpu;
 		const std::string basePath;
-		sysfs();
+		Sysfs();
 	public:
-		sysfs(const cpu& parentCpu) :
-			parent(parentCpu),
+		Sysfs(const Cpu& cpu) :
+			cpu(cpu),
 			basePath("/sys/devices/system/cpu/")
 		{
 		}
 
-		~sysfs()
+		~Sysfs()
 		{
 		}
 
@@ -62,7 +62,7 @@ private:
 				const unsigned int number) const;
 	};
 
-	const sysfs cpuSysfs;
+	const Sysfs sysfs;
 	bool pstate;
 	unsigned int number;
 	double minInfoFrequency;
@@ -79,8 +79,8 @@ private:
 	double findInfoMaxFrequency() const;
 
 public:
-	cpu() :
-		cpuSysfs(*this),
+	Cpu() :
+		sysfs(*this),
 		pstate(false),
 		number(0),
 		minInfoFrequency(0),
@@ -91,7 +91,7 @@ public:
 	{
 	}
 
-	~cpu()
+	~Cpu()
 	{
 	}
 
@@ -100,7 +100,6 @@ public:
 	void setScalingMin(const int min) const;
 	void setTurboBoost(const int turbo) const;
 	void setGovernor(const std::string &governor) const;
-	const sysfs *getSysfs() const;
 	bool hasPstate() const;
 	bool hideDirectory(const std::string &entryName) const;
 	int getTurboBoost() const;

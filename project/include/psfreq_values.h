@@ -27,9 +27,9 @@
 
 namespace psfreq {
 
-class values {
+class Values {
 private:
-	const cpu &parent;
+	const Cpu &cpu;
 	int action;
 	int plan;
 	int max;
@@ -43,11 +43,11 @@ private:
 	void setPlanMaxPerformance();
 	unsigned int setPlanAuto();
 
-	values();
+	Values();
 
 public:
-	values(const cpu &parentCpu) :
-		parent(parentCpu),
+	Values(const Cpu &cpu) :
+		cpu(cpu),
 		action(-1),
 		plan(-1),
 		max(-1),
@@ -58,7 +58,7 @@ public:
 	{
 	}
 
-	~values()
+	~Values()
 	{
 	}
 
