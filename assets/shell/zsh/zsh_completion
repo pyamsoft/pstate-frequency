@@ -20,10 +20,10 @@ _options()
 	# Array size ${#words}
 	local index
 	let "index=${#words} - 1"
-	if [ "$words[$index]" = "-s" ] || [ "$words[$index]" = "--set" ]; then
+	if [ "$words[$index]" = "-S" ] || [ "$words[$index]" = "--set" ]; then
 		_alternative \
 			"privilaged-options:privilaged options:_privilaged_options"
-	elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--get" ]; then
+	elif [ "$words[$index]" = "-G" ] || [ "$words[$index]" = "--get" ]; then
 		_alternative \
 			"unprivilaged-options:unprivilaged options:_unprivilaged_options"
 	elif [ "$words[$index]" = "-o" ] || [ "$words[$index]" = "--gov" ] || [ "$words[$index]" = "--governor" ]; then
@@ -79,9 +79,9 @@ _unprivilaged_actions()
 	# Add long option support
 	local actions;
 	actions=(
-		"-h:Print the help output"
-		"-v:Print the current version"
-		"-g:Access the current CPU values"
+		"-H:Print the help output"
+		"-V:Print the current version"
+		"-G:Access the current CPU values"
 		"-q:Supress non-error output"
 		"-a:Supress all output"
 		"-d:Enable debugging mode"
@@ -94,7 +94,7 @@ _privilaged_actions()
 	# Add long option support
 	local actions;
 	actions=(
-		"-s:Modify the current CPU values"
+		"-S:Modify the current CPU values"
 	)
 	_describe -t privilaged-actions "privilaged actions" actions "$@"
 }

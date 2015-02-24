@@ -25,7 +25,7 @@ _pstate-frequency()
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
-	short_actions="-v -h -s -g -d -q -a"
+	short_actions="-V -H -S -G -d -q -a"
 	long_actions="--quiet --version --help --set --get --quiet --all-quiet"
 	short_set_options="-m -n -t -p -o"
 	short_get_options="-c -r"
@@ -45,9 +45,9 @@ _pstate-frequency()
 		fi
 		return 0
 	elif [[ ${cur} = * ]]; then
-		if [[ ${prev} = "-s" ]]; then
+		if [[ ${prev} = "-S" ]]; then
 			COMPREPLY=( $(compgen -W "${short_set_options}" -- ${cur}) )
-		elif [[ ${prev} = "-g" ]]; then
+		elif [[ ${prev} = "-G" ]]; then
 			COMPREPLY=( $(compgen -W "${short_get_options}" -- ${cur}) )
 		elif [[ ${prev} = "-p" ]]; then
 			COMPREPLY=( $(compgen -W "${plans}" -- ${cur}) )
