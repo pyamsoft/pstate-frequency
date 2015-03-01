@@ -34,22 +34,22 @@ _pstate-frequency()
 	plans="powersave performance max-performance"
 
 	if [[ ${cur} = --* ]]; then
-		if [[ ${prev} = "--set" ]]; then
+		if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
 			COMPREPLY=( $(compgen -W "${long_set_options}" -- ${cur}) )
-		elif [[ ${prev} = "--get" ]]; then
+		elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
 			COMPREPLY=( $(compgen -W "${long_get_options}" -- ${cur}) )
-		elif [[ ${prev} = "--plan" ]]; then
+		elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
 			COMPREPLY=( $(compgen -W "${plans}" -- ${cur}) )
 		else
 			COMPREPLY=( $(compgen -W "${long_actions}" -- ${cur}) )
 		fi
 		return 0
 	elif [[ ${cur} = * ]]; then
-		if [[ ${prev} = "-S" ]]; then
+		if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
 			COMPREPLY=( $(compgen -W "${short_set_options}" -- ${cur}) )
-		elif [[ ${prev} = "-G" ]]; then
+		elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
 			COMPREPLY=( $(compgen -W "${short_get_options}" -- ${cur}) )
-		elif [[ ${prev} = "-p" ]]; then
+		elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
 			COMPREPLY=( $(compgen -W "${plans}" -- ${cur}) )
 		else
 			COMPREPLY=( $(compgen -W "${short_actions}" -- ${cur}) )
