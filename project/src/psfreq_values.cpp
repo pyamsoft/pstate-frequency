@@ -23,6 +23,7 @@
 
 #include <dirent.h>
 
+#include "include/psfreq_color.h"
 #include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
 #include "include/psfreq_values.h"
@@ -147,8 +148,13 @@ bool Values::runPlan()
 	} else if (plan == 0) {
 		const unsigned int result = setPlanAuto();
 		if (result == 0) {
-			std::cerr << "Failed to decide an automatic plan."
-				<< std::endl;
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "Failed to decide an automatic"
+					<< " plan."
+					<< Color::reset()
+					<< std::endl;
+			}
 			return false;
 		}
 		if (result == 1) {
@@ -192,8 +198,13 @@ unsigned int Values::setPlanAuto()
 	const char *const dirName = "/sys/class/power_supply/";
 	DIR *const directory = opendir(dirName);
 	if (!directory) {
-		std::cerr << "Could not open directory: "
-			<< dirName << std::endl;
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Could not open directory: "
+				<< dirName
+				<< Color::reset()
+				<< std::endl;
+		}
 		return 0;
 	}
 	struct dirent *entry =  readdir(directory);
@@ -210,16 +221,26 @@ unsigned int Values::setPlanAuto()
 					break;
 				}
 			} else {
-				std::cerr << "Path is larger than max allowed."
-					<< std::endl;
+				if (!Log::isAllQuiet()) {
+					std::cerr << Color::boldRed()
+						<< "Path is larger than"
+						<< " max allowed."
+						<< Color::reset()
+						<< std::endl;
+				}
 				return 0;
 			}
 		}
 		entry = readdir(directory);
 	}
 	if (closedir(directory)) {
-		std::cerr << "Failed to close directory: "
-			<< dirName << std::endl;
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to close directory: "
+				<< dirName
+				<< Color::reset()
+				<< std::endl;
+		}
 		return 0;
 	}
 	return result;

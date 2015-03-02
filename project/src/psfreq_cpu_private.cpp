@@ -34,8 +34,12 @@ bool Cpu::findPstate() const
 	if (driver != std::string()) {
 		return (driver.compare("intel_pstate") == 0);
 	}
-	std::cerr << "Unable to get read driver to check for intel_pstate"
-		<< std::endl;
+	if (!Log::isAllQuiet()) {
+		std::cerr << Color::boldRed()
+			<< "Unable to get read driver to check for"
+			<< " intel_pstate" << Color::reset()
+			<< std::endl;
+	}
 	return false;
 }
 
@@ -46,7 +50,11 @@ unsigned int Cpu::findNumber() const
 	if (!result.empty()) {
 		return stringToNumber(result[0]);
 	}
-	std::cerr << "Unable to find number of CPUs" << std::endl;
+	if (!Log::isAllQuiet()) {
+		std::cerr << Color::boldRed()
+			<< "Unable to find number of CPUs"
+			<< Color::reset() << std::endl;
+	}
 	return 0;
 }
 
@@ -67,7 +75,9 @@ double Cpu::findInfoMaxFrequency() const
 		const double result = stringToNumber(line);
 		return result;
 	}
-	std::cerr << "Unable to find cpuinfo_max_freq" << std::endl;
+	std::cerr << Color::boldRed()
+		<< "Unable to find cpuinfo_max_freq"
+		<< Color::reset() << std::endl;
 	return 1.0;
 }
 
@@ -78,7 +88,12 @@ double Cpu::findInfoMinFrequency() const
 		const double result = stringToNumber(line);
 		return result;
 	}
-	std::cerr << "Unable to find cpuinfo_min_freq" << std::endl;
+	if (!Log::isAllQuiet()) {
+		std::cerr << Color::boldRed()
+			<< "Unable to find cpuinfo_min_freq"
+			<< Color::reset()
+			<< std::endl;
+	}
 	return 1.0;
 }
 

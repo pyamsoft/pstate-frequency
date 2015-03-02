@@ -105,8 +105,8 @@ public:
 	int getTurboBoost() const;
 	int getInfoMinValue() const;
 	int getInfoMaxValue() const;
-	int getMinPState() const;
-	int getMaxPState() const;
+	int getMinValue() const;
+	int getMaxValue() const;
 	unsigned int getNumber() const;
 	unsigned int getPowerSupply(const std::string &fullPath) const;
 	double getScalingMinFrequency() const;

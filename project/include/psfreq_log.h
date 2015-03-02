@@ -36,6 +36,7 @@ public:
 	static bool isQuiet();
 	static bool isNormal();
 	static bool isDebug();
+	static bool isOutputCapable();
 	static void setAllQuiet();
 	static void setQuiet();
 	static void setNormal();
