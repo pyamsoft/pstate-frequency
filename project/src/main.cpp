@@ -143,16 +143,16 @@ void printRealtimeFrequency(const psfreq::Cpu& cpu)
 			std::ostringstream oss;
 			for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
 				std::string freq = frequencies[i];
-				oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
+				oss << psfreq::Color::boldWhite()
 					<< "    pstate::"
-					<< psfreq::PSFREQ_COLOR_BOLD_GREEN
+					<< psfreq::Color::boldGreen()
 					<< "CPU["
-					<< psfreq::PSFREQ_COLOR_BOLD_MAGENTA
-					<< i << psfreq::PSFREQ_COLOR_BOLD_GREEN
+					<< psfreq::Color::boldMagenta()
+					<< i << psfreq::Color::boldGreen()
 					<< "]  -> "
-					<< psfreq::PSFREQ_COLOR_BOLD_CYAN
+					<< psfreq::Color::boldCyan()
 					<< freq.substr(0, freq.size() - 1)
-					<< "MHz" << psfreq::PSFREQ_COLOR_OFF
+					<< "MHz" << psfreq::Color::reset()
 					<< std::endl;
 			}
 			std::cout << oss.str();
@@ -189,7 +189,8 @@ void printGPL()
 			<< std::endl << "under certain conditions."
 			<< std::endl
 			<< "Please see the README for details."
-			<< psfreq::PSFREQ_COLOR_OFF << std::endl << std::endl;
+			<< psfreq::Color::reset()
+			<< std::endl << std::endl;
 		std::cout << oss.str();
 }
 
@@ -198,9 +199,9 @@ void printVersion()
 		std::ostringstream oss;
 		oss << std::endl;
 #ifdef VERSION
-		oss << psfreq::PSFREQ_COLOR_BOLD_BLUE << "pstate-frequency  "
-			<< psfreq::PSFREQ_COLOR_BOLD_MAGENTA << VERSION
-			<< psfreq::PSFREQ_COLOR_OFF
+		oss << psfreq::Color::boldBlue() << "pstate-frequency  "
+			<< psfreq::Color::boldMagenta() << VERSION
+			<< psfreq::Color::reset()
 			<< std::endl;
 #endif
 		std::cout << oss.str();
@@ -210,40 +211,40 @@ void printCpuValues(const psfreq::Cpu& cpu)
 {
 		printVersion();
 		std::ostringstream oss;
-		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
+		oss << psfreq::Color::boldWhite()
+			<< "    pstate::" << psfreq::Color::boldGreen()
 			<< "CPU_DRIVER     -> "
-			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getDriver()
+			<< psfreq::Color::boldCyan() << cpu.getDriver()
 			<< std::endl;
-		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
+		oss << psfreq::Color::boldWhite()
+			<< "    pstate::" << psfreq::Color::boldGreen()
 			<< "CPU_GOVERNOR   -> "
-			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getGovernor()
+			<< psfreq::Color::boldCyan() << cpu.getGovernor()
 			<< std::endl;
 		const int turbo = cpu.getTurboBoost();
-		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
+		oss << psfreq::Color::boldWhite()
+			<< "    pstate::" << psfreq::Color::boldGreen()
 			<< (cpu.hasPstate() ? "NO_TURBO       -> "
 					: "TURBO_BOOST    -> ")
-			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << turbo << " : "
+			<< psfreq::Color::boldCyan() << turbo << " : "
 			<< (cpu.hasPstate() ? (turbo == 1 ? "OFF" : "ON")
 					: (turbo == 1 ? "ON" : "OFF"))
 			<< std::endl;
-		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
+		oss << psfreq::Color::boldWhite()
+			<< "    pstate::" << psfreq::Color::boldGreen()
 			<< "CPU_MIN        -> "
-			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMinPState()
+			<< psfreq::Color::boldCyan() << cpu.getMinPState()
 			<< "% : "
 			<< static_cast<int>(cpu.getScalingMinFrequency())
 			<< "KHz" << std::endl;
-		oss << psfreq::PSFREQ_COLOR_BOLD_WHITE
-			<< "    pstate::" << psfreq::PSFREQ_COLOR_BOLD_GREEN
+		oss << psfreq::Color::boldWhite()
+			<< "    pstate::" << psfreq::Color::boldGreen()
 			<< "CPU_MAX        -> "
-			<< psfreq::PSFREQ_COLOR_BOLD_CYAN << cpu.getMaxPState()
+			<< psfreq::Color::boldCyan() << cpu.getMaxPState()
 			<< "% : "
 			<< static_cast<int>(cpu.getScalingMaxFrequency())
 			<< "KHz" << std::endl;
-		oss << psfreq::PSFREQ_COLOR_OFF;
+		oss << psfreq::Color::reset();
 		std::cout << oss.str();
 }
 
@@ -260,6 +261,8 @@ void printHelp()
 			<< "    -q | --quiet     Supress all non-error output"
 			<< std::endl
 			<< "    -a | --all-quiet Supress all output"
+			<< std::endl
+			<< "    --color          Colorize output"
 			<< std::endl
 			<< std::endl
 			<< "actions:" << std::endl
@@ -351,6 +354,9 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
         case 't':
 		cpuValues.setTurbo(psfreq::stringToNumber(optarg));
 		return 0;
+        case '1':
+		psfreq::Color::setEnabled();
+		return 0;
 	case ':':
 		std::cerr << "Missing argument for option. "<< std::endl;
 		return 1;
@@ -377,6 +383,7 @@ int main(int argc, char** argv)
                 {"set",           no_argument,        NULL,           'S'},
                 {"current",       no_argument,        NULL,           'c'},
                 {"real",          no_argument,        NULL,           'r'},
+		{"color",	  no_argument,	      NULL,           '1'},
                 {"plan",          required_argument,  NULL,           'p'},
                 {"governor",      required_argument,  NULL,           'g'},
 		{"max",		  required_argument,  NULL,           'm'},

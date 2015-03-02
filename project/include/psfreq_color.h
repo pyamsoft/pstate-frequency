@@ -23,13 +23,28 @@
 
 namespace psfreq {
 
-const char *const PSFREQ_COLOR_OFF = "\033[0m";
-const char *const PSFREQ_COLOR_BOLD_RED = "\033[1;31m";
-const char *const PSFREQ_COLOR_BOLD_GREEN = "\033[1;32m";
-const char *const PSFREQ_COLOR_BOLD_BLUE = "\033[1;34m";
-const char *const PSFREQ_COLOR_BOLD_MAGENTA = "\033[1;35m";
-const char *const PSFREQ_COLOR_BOLD_CYAN = "\033[1;36m";
-const char *const PSFREQ_COLOR_BOLD_WHITE = "\033[1;37m";
+class Color
+{
+private:
+	static bool enabled;
+	static const char *const OFF;
+	static const char *const BOLD_RED;
+	static const char *const BOLD_GREEN;
+	static const char *const BOLD_BLUE;
+	static const char *const BOLD_MAGENTA;
+	static const char *const BOLD_CYAN;
+	static const char *const BOLD_WHITE;
+public:
+	static void setEnabled();
+	static const char *reset();
+	static const char *boldRed();
+	static const char *boldGreen();
+	static const char *boldBlue();
+	static const char *boldMagenta();
+	static const char *boldCyan();
+	static const char *boldWhite();
+};
+
 
 }
 
