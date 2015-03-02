@@ -1,5 +1,5 @@
 # Version Number
-VERSION:=1.1.10.git
+VERSION:=1.1.11.git
 
 # Standard
 # The standard has been decided as C++11 for a couple of reasons. The kernel
