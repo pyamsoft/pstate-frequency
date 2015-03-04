@@ -44,6 +44,12 @@ bool Log::isDebug()
 	return verbosity == PSFREQ_LOG_DEBUG;
 }
 
+bool Log::isOutputCapable()
+{
+	return (verbosity == PSFREQ_LOG_DEBUG
+			|| verbosity == PSFREQ_LOG_NORMAL);
+}
+
 void Log::setAllQuiet()
 {
 	verbosity = PSFREQ_LOG_ALL_QUIET;

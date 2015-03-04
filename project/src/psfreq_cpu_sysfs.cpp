@@ -23,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "include/psfreq_color.h"
 #include "include/psfreq_cpu.h"
 #include "include/psfreq_log.h"
 
@@ -37,8 +38,12 @@ bool Cpu::Sysfs::write(const std::string &path, const std::string &file,
 	std::ofstream outputFile;
 	outputFile.open(absolutePath.c_str());
 	if (!outputFile.is_open()) {
-		std::cerr << "Failed to write to file: " << absolutePath
-			<< std::endl;
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to write to file: "
+				<< absolutePath
+				<< Color::reset() << std::endl;
+		}
 		return false;
 	}
 	outputFile << buffer << std::endl;
@@ -75,8 +80,12 @@ const std::string Cpu::Sysfs::read(const std::string &path,
 	std::ifstream inputFile;
 	inputFile.open(absolutePath.c_str());
 	if (!inputFile.is_open()) {
-		std::cerr << "Failed to read from file: " << absolutePath
-			<< std::endl;
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to read from file: "
+				<< absolutePath
+				<< Color::reset() << std::endl;
+		}
 		return std::string();
 	}
 	std::getline(inputFile, content);
