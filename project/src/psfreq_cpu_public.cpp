@@ -30,15 +30,33 @@
 
 namespace psfreq {
 
+/*
+ * Initialize the CPU. This function is meant to be called only once, and
+ * will allow the CPU to be able to handle the cpufreq sysfs.
+ */
 void Cpu::init()
 {
-	number = findNumber();
-	pstate = findPstate();
-	minInfoFrequency = findInfoMinFrequency();
-	maxInfoFrequency = findInfoMaxFrequency();
-	initializeVector(minFrequencyFileVector, "min_freq");
-	initializeVector(maxFrequencyFileVector, "max_freq");
-	initializeVector(governorFileVector, "governor");
+	/*
+	 * If the init function has not been called before,
+	 * initialize the CPU.
+	 */
+	if (!initialized) {
+		number = findNumber();
+		pstate = findPstate();
+		minInfoFrequency = findInfoMinFrequency();
+		maxInfoFrequency = findInfoMaxFrequency();
+		initializeVector(minFrequencyFileVector, "min_freq");
+		initializeVector(maxFrequencyFileVector, "max_freq");
+		initializeVector(governorFileVector, "governor");
+		initialized = true;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "CPU already initialized"
+				<< Color::reset()
+				<< std::endl;
+		}
+	}
 }
 
 bool Cpu::hasPstate() const
@@ -291,6 +309,11 @@ void Cpu::setGovernor(const std::string &governor) const
 	}
 }
 
+/*
+ * Given a sysfs power_supply path, decide whether the power_supply is
+ * the 'Mains' type adapter and if so, return whether or not the adapter
+ * is online.
+ */
 unsigned int Cpu::getPowerSupply(const std::string &fullPath) const
 {
 	std::ostringstream oss;
@@ -312,6 +335,10 @@ unsigned int Cpu::getPowerSupply(const std::string &fullPath) const
 	return 0;
 }
 
+/*
+ * Return a boolean to decide whether to display the directory entry
+ * based on whether or not the entry is the current . or parent .. directory.
+ */
 bool Cpu::hideDirectory(const std::string &entryName) const
 {
 	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
