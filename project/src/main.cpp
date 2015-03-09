@@ -99,7 +99,7 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 		 * Make sure that the minimum frequency is not going
 		 * to be greater than or equal to the maximum frequency
 		 */
-		newMin = (newMin => newMax
+		newMin = (newMin >= newMax
 				? newMax - 1
 				: newMin);
 
