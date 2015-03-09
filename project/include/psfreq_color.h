@@ -45,7 +45,6 @@ public:
 	static const char *boldWhite();
 };
 
-
 }
 
 #endif

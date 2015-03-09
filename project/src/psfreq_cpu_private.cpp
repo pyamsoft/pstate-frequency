@@ -28,6 +28,10 @@
 
 namespace psfreq {
 
+/*
+ * Return a boolean based on whether or not the system is currently using the
+ * intel_pstate driver to handle CPU frequency scaling.
+ */
 bool Cpu::findPstate() const
 {
 	const std::string driver = sysfs.read("cpu0/cpufreq/scaling_driver");
@@ -43,6 +47,10 @@ bool Cpu::findPstate() const
 	return false;
 }
 
+/*
+ * Find the total number of CPUS (logical and physical) that exist on the
+ * system.
+ */
 unsigned int Cpu::findNumber() const
 {
 	const char *cmd = "grep processor /proc/cpuinfo | wc -l";
@@ -58,6 +66,10 @@ unsigned int Cpu::findNumber() const
 	return 0;
 }
 
+/*
+ * Fill a vector with path values to the cpufreq sysfs
+ * of a certain index.
+ */
 void Cpu::initializeVector(std::vector<std::string> &vector,
 		std::string what) const
 {
@@ -68,6 +80,9 @@ void Cpu::initializeVector(std::vector<std::string> &vector,
 	}
 }
 
+/*
+ * Find what the sytem considers to be its absolute maximum CPU frequency.
+ */
 double Cpu::findInfoMaxFrequency() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/cpuinfo_max_freq");
@@ -81,6 +96,9 @@ double Cpu::findInfoMaxFrequency() const
 	return 1.0;
 }
 
+/*
+ * Find what the sytem considers to be its absolute minimum CPU frequency.
+ */
 double Cpu::findInfoMinFrequency() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/cpuinfo_min_freq");

@@ -46,18 +46,37 @@ int planFromOptArg(char *const arg);
 const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
 
+/*
+ * Retrieves the values requested by the user and makes sure that they are
+ * sane, or sanitizes them. Then attempts to set the values requested by the
+ * user.
+ */
 bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 {
+	/*
+	 * Retrieve the system constant values including the
+	 * full range of available CPU frequencies
+	 */
 	const int cpuInfoMin = cpu.getInfoMinValue();
 	const int cpuInfoMax =  cpu.getInfoMaxValue();
 	const int cpuMinPstate = cpu.getMinValue();
 	const int cpuMaxPstate = cpu.getMaxValue();
 	const std::string cpuGovernor = cpu.getGovernor();
+
+	/*
+	 * Check for sane system, if any of these values are not stable,
+	 * exit immediately, this system is not supported by
+	 * pstate-frequency
+	 */
 	if (cpuInfoMin == 1 || cpuInfoMax == 1
 			|| cpuMinPstate == 0 || cpuMaxPstate == 0
 			|| cpuGovernor == std::string()) {
 		return false;
 	} else {
+		/*
+		 * Sanitize the minimum CPU frequency so that
+		 * it can safely be set.
+		 */
 		const int requestedMin = cpuValues.getMin();
 		int newMin = (requestedMin >= 0
 				? requestedMin
@@ -65,20 +84,32 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 		newMin = psfreq::boundValue(newMin, cpuInfoMin,
 				cpuInfoMax - 1);
 
+		/*
+		 * Sanitize the maximum CPU frequency, including
+		 * the condition that it be greater than the
+		 * minimum, so that it can safely be set.
+		 */
 		const int requestedMax = cpuValues.getMax();
 		int newMax = (requestedMax >= 0
 				? requestedMax
 				: cpuMaxPstate);
 		newMax = psfreq::boundValue(newMax, cpuInfoMin + 1,
 				cpuInfoMax);
-		newMin = (newMin > newMax
+		/*
+		 * Make sure that the minimum frequency is not going
+		 * to be greater than or equal to the maximum frequency
+		 */
+		newMin = (newMin => newMax
 				? newMax - 1
 				: newMin);
-		newMax = (newMax > newMin
-				? newMax
-				: newMin + 1);
 
 
+		/*
+		 * If the new maximum frequency that is requested
+		 * is less than the current minimum, we must
+		 * modify the minimum first before we can actually
+		 * change the max frequency
+		 */
 		if (cpuMinPstate > newMax) {
 			cpu.setScalingMin(newMin);
 			cpu.setScalingMax(newMax);
@@ -86,6 +117,11 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 			cpu.setScalingMax(newMax);
 			cpu.setScalingMin(newMin);
 		}
+		/*
+		 * If the system supports a Turbo Boost
+		 * type functionality, attempt to set it
+		 * as well.
+		 */
 		const int cpuTurbo = cpu.getTurboBoost();
 		if (cpuTurbo != -2) {
 			const int turbo = cpuValues.getTurbo();
@@ -94,6 +130,9 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 			cpu.setTurboBoost(newTurbo);
 		}
 
+		/*
+		 * Set the software CPU governor
+		 */
 		const std::string requestedGovernor = cpuValues.getGovernor();
 		const std::string newGovernor =
 				(requestedGovernor != std::string()
@@ -104,6 +143,10 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 	}
 }
 
+/*
+ * Given the user command line input of either a number or a plan name,
+ * decide what the proper power plan to run should be.
+ */
 int planFromOptArg(char *const arg)
 {
 	const std::string convertedArg(arg);
@@ -137,6 +180,10 @@ int planFromOptArg(char *const arg)
 	return plan;
 }
 
+/*
+ * Grab the current CPU frequencies from /proc/cpuinfo
+ * and pretty print them to the stdout
+ */
 void printRealtimeFrequency(const psfreq::Cpu& cpu)
 {
 	if (psfreq::Log::isOutputCapable()) {
@@ -164,6 +211,11 @@ void printRealtimeFrequency(const psfreq::Cpu& cpu)
 	}
 }
 
+/*
+ * Given the user input which is a governor name, and the list of currently
+ * available governors, decide on the governor to set or none if the user
+ * requested input is a value which does not exist on the system.
+ */
 const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors)
 {
@@ -188,6 +240,9 @@ const std::string governorFromOptArg(char *const arg,
 	return governor;
 }
 
+/*
+ * Print the first part of the GPL v2 License.
+ */
 void printGPL()
 {
 	if (psfreq::Log::isOutputCapable()) {
@@ -205,6 +260,9 @@ void printGPL()
 	}
 }
 
+/*
+ * Display the current program version if it is set.
+ */
 void printVersion()
 {
 	if (psfreq::Log::isOutputCapable()) {
@@ -220,6 +278,10 @@ void printVersion()
 	}
 }
 
+/*
+ * Print out the current CPU settings as configured either from
+ * the cpufreq sysfs files or the intel_pstate sysfs files.
+ */
 void printCpuValues(const psfreq::Cpu& cpu)
 {
 	if (psfreq::Log::isOutputCapable()) {
@@ -263,6 +325,9 @@ void printCpuValues(const psfreq::Cpu& cpu)
 	}
 }
 
+/*
+ * Print the program's options and the intended methods of use.
+ */
 void printHelp()
 {
 	if (psfreq::Log::isOutputCapable()) {
@@ -313,6 +378,11 @@ void printHelp()
 		std::cout << oss.str();
 	}
 }
+
+/*
+ * Given the return value from the getopt_long function as parameter 'result'
+ * decide how to handle the option that was entered by the user.
+ */
 int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const int result)
 {
@@ -399,8 +469,17 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 	return 1;
 }
 
+/*
+ * The main program function.
+ */
 int main(int argc, char** argv)
 {
+	/*
+	 * The cpu and cpuValues are defined here, though by default they
+	 * do not actually have the functionality to modify or access much.
+	 * The cpu must be initialized at a later period after option parsing
+	 * by calling cpu.init()
+	 */
 	psfreq::Cpu cpu;
 	psfreq::Values cpuValues = psfreq::Values(cpu);
 
@@ -423,6 +502,7 @@ int main(int argc, char** argv)
 		{"turbo",	  required_argument,  NULL,           't'},
 		{0,		  0,                  0,              0}
                 };
+
 	const int parseResult = parseOptions(argc, argv, cpu, cpuValues,
 			shortOptions, longOptions);
 	if (parseResult != 0) {
@@ -432,6 +512,10 @@ int main(int argc, char** argv)
 			return 1;
 		}
 	}
+
+	/*
+	 * Initialize the cpu so that it may now act on sysfs values.
+	 */
 	cpu.init();
 	if (!cpuValues.runPlan()) {
 		return 1;
@@ -447,6 +531,10 @@ int main(int argc, char** argv)
 			printRealtimeFrequency(cpu);
 		}
 	} else {
+		/*
+		 * User must have root privilages to set
+		 * values here.
+		 */
 		if (geteuid() == 0) {
 			if (!cpuValues.isInitialized()) {
 				if (!psfreq::Log::isAllQuiet()) {
@@ -483,6 +571,10 @@ int main(int argc, char** argv)
 	return 0;
 }
 
+/*
+ * As long as command line options exist, loop over the input and
+ * run the getopt_long function to figure out the option requested.
+ */
 int parseOptions(const int argc, char **const argv,
 		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const char *const shortOptions,

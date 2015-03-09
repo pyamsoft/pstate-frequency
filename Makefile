@@ -7,7 +7,6 @@ OBJECTS=$(patsubst $(PROJECT_ROOT)/src/%.cpp,$(PROJECT_ROOT)/obj/%.o,$(SOURCES))
 UDEV=99-$(EXEC_NAME).rules
 TARGET=$(PROJECT_ROOT)/bin/$(EXEC_NAME)
 
-# The Target Build
 all: $(TARGET)
 
 options:

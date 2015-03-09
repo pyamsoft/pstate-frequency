@@ -70,9 +70,11 @@ private:
 	std::vector<std::string> maxFrequencyFileVector;
 	std::vector<std::string> minFrequencyFileVector;
 	std::vector<std::string> governorFileVector;
+	bool initialized;
 
 	void initializeVector(std::vector<std::string> &vector,
 			std::string what) const;
+
 	unsigned int findNumber() const;
 	bool findPstate() const;
 	double findInfoMinFrequency() const;
@@ -87,7 +89,8 @@ public:
 		maxInfoFrequency(0),
 		maxFrequencyFileVector(std::vector<std::string>()),
 		minFrequencyFileVector(std::vector<std::string>()),
-		governorFileVector(std::vector<std::string>())
+		governorFileVector(std::vector<std::string>()),
+		initialized(false)
 	{
 	}
 
@@ -96,12 +99,7 @@ public:
 	}
 
 	void init();
-	void setScalingMax(const int max) const;
-	void setScalingMin(const int min) const;
-	void setTurboBoost(const int turbo) const;
-	void setGovernor(const std::string &governor) const;
-	bool hasPstate() const;
-	bool hideDirectory(const std::string &entryName) const;
+
 	int getTurboBoost() const;
 	int getInfoMinValue() const;
 	int getInfoMaxValue() const;
@@ -117,9 +115,15 @@ public:
 	const std::vector<std::string> getRealtimeFrequencies() const;
 	const std::vector<std::string> getAvailableGovernors() const;
 	const std::string getDriver() const;
+	bool hasPstate() const;
 
+	void setScalingMax(const int max) const;
+	void setScalingMin(const int min) const;
+	void setTurboBoost(const int turbo) const;
+	void setGovernor(const std::string &governor) const;
+
+	bool hideDirectory(const std::string &entryName) const;
 };
-
 
 }
 

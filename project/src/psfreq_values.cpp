@@ -30,7 +30,6 @@
 
 namespace psfreq {
 
-
 bool Values::isInitialized() const
 {
 	return hasAction() && (max != -1 || min != -1
@@ -57,6 +56,11 @@ bool Values::isActionSet() const
 	return action == 1;
 }
 
+/*
+ * If the governor to set is a valid governor,
+ * continue with normal operation, otherwise
+ * exit the program from main.
+ */
 bool Values::setGovernor(const std::string& newGovernor)
 {
 	if (newGovernor != std::string()) {
@@ -122,6 +126,11 @@ int Values::getRequested() const
 	return requested;
 }
 
+/*
+ * If the plan to set is a valid plan,
+ * continue with normal operation, otherwise
+ * exit the program from main.
+ */
 bool Values::setPlan(const int powerPlan) {
 	if (powerPlan != -1) {
 		plan = powerPlan;
@@ -130,6 +139,11 @@ bool Values::setPlan(const int powerPlan) {
 	return false;
 }
 
+/*
+ * If the plan has not been requesed, return true and continue,
+ * otherwise make sure that the plan requested does infact exist,
+ * if not return false and exit the program from main.
+ */
 bool Values::runPlan()
 {
 	if (plan == -1) {
@@ -193,6 +207,12 @@ void Values::setPlanMaxPerformance()
 	governor = "performance";
 }
 
+/*
+ * When requested, this plan will search the power_supply sysfs to
+ * find which interface is considered the 'Mains' type adapter.
+ * Once found, it will set a power plan based on the online status
+ * on the 'Mains' adapter.
+ */
 unsigned int Values::setPlanAuto()
 {
 	const char *const dirName = "/sys/class/power_supply/";
