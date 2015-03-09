@@ -40,7 +40,7 @@ _INCLUDE_UDEV_RULE=1
 
 pkgver() {
 	cd "$srcdir/$_gitname"
-	echo "$(head -n 2 config.mk | tail -n 1 | cut -c10-)"
+	awk -F '=' '{if (/^VERSION:=/) {print $2}}' "config.mk"
 }
 
 prepare() {
