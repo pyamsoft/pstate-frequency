@@ -30,6 +30,14 @@
 
 namespace psfreq {
 
+const std::vector<std::string> Cpu::BAD_VECTOR = std::vector<std::string>();
+const std::string Cpu::BAD_READ = std::string();
+const std::string Cpu::GOVERNOR_INSANE = std::string();
+const double Cpu::INFO_FREQUENCY_INSANE = 1.0;
+const double Cpu::SCALING_FREQUENCY_INSANE = 0.0;
+const int Cpu::PSTATE_VALUE_INSANE = 0;
+const int Cpu::TURBO_BOOST_INSANE = 2;
+
 /*
  * Initialize the CPU. This function is meant to be called only once, and
  * will allow the CPU to be able to handle the cpufreq sysfs.
@@ -67,7 +75,7 @@ bool Cpu::hasPstate() const
 double Cpu::getScalingMinFrequency() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_min_freq");
-	if (line != std::string()) {
+	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
 		return result;
 	}
@@ -77,13 +85,13 @@ double Cpu::getScalingMinFrequency() const
 			<< Color::reset()
 			<< std::endl;
 	}
-	return 0.0;
+	return SCALING_FREQUENCY_INSANE;
 }
 
 double Cpu::getScalingMaxFrequency() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_max_freq");
-	if (line != std::string()) {
+	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
 		return result;
 	}
@@ -93,7 +101,7 @@ double Cpu::getScalingMaxFrequency() const
 			<< Color::reset()
 			<< std::endl;
 	}
-	return 0.0;
+	return SCALING_FREQUENCY_INSANE;
 }
 
 double Cpu::getInfoMinFrequency() const
@@ -114,7 +122,7 @@ unsigned int Cpu::getNumber() const
 const std::string Cpu::getGovernor() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_governor");
-	if (line != std::string()) {
+	if (line != BAD_READ) {
 		return line;
 	}
 	if (!Log::isAllQuiet()) {
@@ -123,13 +131,13 @@ const std::string Cpu::getGovernor() const
 			<< Color::reset()
 			<< std::endl;
 	}
-	return line;
+	return BAD_READ;
 }
 
 const std::string Cpu::getDriver() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_driver");
-	if (line != std::string()) {
+	if (line != BAD_READ) {
 		return line;
 	}
 	if (!Log::isAllQuiet()) {
@@ -138,7 +146,7 @@ const std::string Cpu::getDriver() const
 			<< Color::reset()
 			<< std::endl;
 	}
-	return line;
+	return BAD_READ;
 }
 
 const std::vector<std::string> Cpu::getRealtimeFrequencies() const
@@ -154,7 +162,7 @@ const std::vector<std::string> Cpu::getRealtimeFrequencies() const
 			<< Color::reset()
 			<< std::endl;
 	}
-	return result;
+	return BAD_VECTOR;
 }
 
 const std::vector<std::string> Cpu::getAvailableGovernors() const
@@ -170,7 +178,7 @@ const std::vector<std::string> Cpu::getAvailableGovernors() const
 			<< Color::reset()
 			<< std::endl;
 	}
-	return availableGovernors;
+	return BAD_VECTOR;
 }
 
 int Cpu::getMaxValue() const
@@ -190,7 +198,7 @@ int Cpu::getTurboBoost() const
 	const std::string line = sysfs.read(hasPstate()
 			? "intel_pstate/no_turbo"
 			: "cpufreq/boost");
-	if (line != std::string()) {
+	if (line != BAD_READ) {
 		const int result = stringToNumber(line);
 		return result;
 	}
@@ -200,7 +208,7 @@ int Cpu::getTurboBoost() const
 			<< Color::reset()
 			<< std::endl;
 	}
-	return -2;
+	return TURBO_BOOST_INSANE;
 }
 
 int Cpu::getInfoMinValue() const

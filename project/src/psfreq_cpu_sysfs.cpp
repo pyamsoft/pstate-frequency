@@ -86,7 +86,7 @@ const std::string Cpu::Sysfs::read(const std::string &path,
 				<< absolutePath
 				<< Color::reset() << std::endl;
 		}
-		return std::string();
+		return Cpu::BAD_READ;
 	}
 	std::getline(inputFile, content);
 	inputFile.close();

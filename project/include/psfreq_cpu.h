@@ -123,6 +123,14 @@ public:
 	void setGovernor(const std::string &governor) const;
 
 	bool hideDirectory(const std::string &entryName) const;
+
+	static const std::string BAD_READ;
+	static const std::string GOVERNOR_INSANE;
+	static const std::vector<std::string> BAD_VECTOR;
+	static const double INFO_FREQUENCY_INSANE;
+	static const double SCALING_FREQUENCY_INSANE;
+	static const int PSTATE_VALUE_INSANE;
+	static const int TURBO_BOOST_INSANE;
 };
 
 }
