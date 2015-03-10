@@ -131,6 +131,9 @@ public:
 	static const double SCALING_FREQUENCY_INSANE;
 	static const int PSTATE_VALUE_INSANE;
 	static const int TURBO_BOOST_INSANE;
+	static const int POWER_SOURCE_AC;
+	static const int POWER_SOURCE_BAT;
+	static const int POWER_SOURCE_NONE;
 };
 
 }

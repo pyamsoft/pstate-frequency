@@ -161,20 +161,20 @@ int planFromOptArg(char *const arg)
 	if (convertedArg.compare("1") == 0
 			|| psfreq::stringStartsWith("powersave",
 				convertedArg)) {
-		plan = 1;
+		plan = psfreq::Values::POWER_PLAN_POWERSAVE;
 	} else if (convertedArg.compare("2") == 0
 			|| psfreq::stringStartsWith("performance",
 			convertedArg)) {
-		plan = 2;
+		plan = psfreq::Values::POWER_PLAN_PERFORMANCE;
 	} else if (convertedArg.compare("3") == 0
 			|| psfreq::stringStartsWith("max-performance",
 				convertedArg)) {
-		plan = 3;
+		plan = psfreq::Values::POWER_PLAN_MAX_PERFORMANCE;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	} else if (convertedArg.compare("0") == 0
 		|| psfreq::stringStartsWith("auto", convertedArg)) {
-		plan = 0;
+		plan = psfreq::Values::POWER_PLAN_AUTO;
 #endif
 #endif
 	} else {
@@ -182,7 +182,7 @@ int planFromOptArg(char *const arg)
 			std::cerr << psfreq::Color::boldRed() << "Bad Plan."
 				<< psfreq::Color::reset() << std::endl;
 		}
-		return 4;
+		return psfreq::Values::POWER_PLAN_NONE;
 	}
 	return plan;
 }

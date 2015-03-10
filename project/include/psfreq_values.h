@@ -99,6 +99,12 @@ public:
 	static const int AUTO_NONE;
 	static const int AUTO_POWERSAVE;
 	static const int AUTO_PERFORMANCE;
+	static const int CPUFREQ_NO_TURBO;
+	static const int CPUFREQ_TURBO;
+	static const int PSTATE_NO_TURBO;
+	static const int PSTATE_TURBO;
+	static const int MIN_POSSIBLE_FREQ;
+	static const int MAX_POSSIBLE_FREQ;
 
 };
 

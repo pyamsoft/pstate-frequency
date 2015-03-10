@@ -42,6 +42,12 @@ const int Values::POWER_PLAN_PERFORMANCE = 2;
 const int Values::POWER_PLAN_MAX_PERFORMANCE = 3;
 const int Values::POWER_PLAN_AUTO = 0;
 const int Values::AUTO_NONE = 0;
+const int Values::CPUFREQ_NO_TURBO = 0;
+const int Values::CPUFREQ_TURBO = 1;
+const int Values::PSTATE_NO_TURBO = 0;
+const int Values::PSTATE_TURBO = 1;
+const int Values::MIN_POSSIBLE_FREQ = 0;
+const int Values::MAX_POSSIBLE_FREQ = 100;
 
 bool Values::isInitialized() const
 {
@@ -200,25 +206,25 @@ bool Values::runPlan()
 
 void Values::setPlanPowersave()
 {
-	max = 0;
-	min = 0;
-	turbo = cpu.hasPstate() ? 1 : 0;
+	max = MIN_POSSIBLE_FREQ;
+	min = MIN_POSSIBLE_FREQ;
+	turbo = cpu.hasPstate() ? PSTATE_NO_TURBO : CPUFREQ_NO_TURBO;
 	governor = "powersave";
 }
 
 void Values::setPlanPerformance()
 {
-	max =  100;
-	min = 0;
-	turbo = cpu.hasPstate() ? 1 : 0;
+	max = MAX_POSSIBLE_FREQ;
+	min = MIN_POSSIBLE_FREQ;
+	turbo = cpu.hasPstate() ? PSTATE_NO_TURBO : CPUFREQ_NO_TURBO;
 	governor = cpu.hasPstate() ? "powersave" : "ondemand";
 }
 
 void Values::setPlanMaxPerformance()
 {
-	max = 100;
-	min = 100;
-	turbo = cpu.hasPstate() ? 0 : 1;
+	max = MAX_POSSIBLE_FREQ;
+	min = MAX_POSSIBLE_FREQ;
+	turbo = cpu.hasPstate() ? PSTATE_TURBO : CPUFREQ_TURBO;
 	governor = "performance";
 }
 

@@ -36,7 +36,10 @@ const std::string Cpu::GOVERNOR_INSANE = std::string();
 const double Cpu::INFO_FREQUENCY_INSANE = 1.0;
 const double Cpu::SCALING_FREQUENCY_INSANE = 0.0;
 const int Cpu::PSTATE_VALUE_INSANE = 0;
-const int Cpu::TURBO_BOOST_INSANE = 2;
+const int Cpu::TURBO_BOOST_INSANE = -2;
+const int Cpu::POWER_SOURCE_NONE = 0;
+const int Cpu::POWER_SOURCE_BAT = 1;
+const int Cpu::POWER_SOURCE_AC = 2;
 
 /*
  * Initialize the CPU. This function is meant to be called only once, and
@@ -334,13 +337,13 @@ unsigned int Cpu::getPowerSupply(const std::string &fullPath) const
 			const int status = stringToNumber(
 					sysfs.read(fullPath, "online"));
 			if (status == 1) {
-				return 2;
+				return POWER_SOURCE_AC;
 			} else {
-				return 1;
+				return POWER_SOURCE_BAT;
 			}
 		}
 	}
-	return 0;
+	return POWER_SOURCE_NONE;
 }
 
 /*
