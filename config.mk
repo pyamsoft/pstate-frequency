@@ -15,7 +15,7 @@ VERSION:=1.1.11.git
 # able to compile successfully without needing to declare a C++ standard version
 # at all.
 ##
-STD:=-std=c++11
+# STD:=-std=c++11
 
 ##
 # Include the current directory so that paths for headers are properly

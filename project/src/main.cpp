@@ -18,6 +18,7 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -50,6 +51,7 @@ const std::string governorFromOptArg(char *const arg,
 const int PARSE_EXIT_GOOD = -1;
 const int PARSE_EXIT_BAD = 1;
 const int PARSE_EXIT_NORMAL = 0;
+const int UID_ROOT = 0;
 
 /*
  * Retrieves the values requested by the user and makes sure that they are
@@ -401,10 +403,10 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		printHelp();
                 return PARSE_EXIT_GOOD;
         case 'c':
-		cpuValues.setRequested(0);
+		cpuValues.setRequested(psfreq::Values::REQUESTED_CURRENT);
 		return PARSE_EXIT_NORMAL;
         case 'r':
-		cpuValues.setRequested(1);
+		cpuValues.setRequested(psfreq::Values::REQUESTED_REAL);
 		return PARSE_EXIT_NORMAL;
 	case 'd':
 		psfreq::Log::setDebug();
@@ -420,10 +422,10 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		printVersion();
                 return PARSE_EXIT_GOOD;
         case 'S':
-		cpuValues.setAction(1);
+		cpuValues.setAction(psfreq::Values::ACTION_SET);
                 return PARSE_EXIT_NORMAL;
         case 'G':
-		cpuValues.setAction(0);
+		cpuValues.setAction(psfreq::Values::ACTION_GET);
                 return PARSE_EXIT_NORMAL;
         case 'p':
 		if (!cpuValues.setPlan(planFromOptArg(optarg))) {
@@ -514,9 +516,9 @@ int main(int argc, char** argv)
 			shortOptions, longOptions);
 	if (parseResult != PARSE_EXIT_NORMAL) {
 		if (parseResult == PARSE_EXIT_GOOD) {
-			return 0;
+			return EXIT_SUCCESS;
 		} else {
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -525,14 +527,15 @@ int main(int argc, char** argv)
 	 */
 	cpu.init();
 	if (!cpuValues.runPlan()) {
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (cpuValues.isActionNull()) {
 		printGPL();
 		printHelp();
-		return 0;
+		return EXIT_SUCCESS;
 	} else if (cpuValues.isActionGet()) {
-		if (cpuValues.getRequested() == 0) {
+		if (cpuValues.getRequested() ==
+				psfreq::Values::REQUESTED_CURRENT) {
 			printCpuValues(cpu);
 		} else {
 			printRealtimeFrequency(cpu);
@@ -542,7 +545,7 @@ int main(int argc, char** argv)
 		 * User must have root privilages to set
 		 * values here.
 		 */
-		if (geteuid() == 0) {
+		if (geteuid() == UID_ROOT) {
 			if (!cpuValues.isInitialized()) {
 				if (!psfreq::Log::isAllQuiet()) {
 					std::cerr << psfreq::Color::boldRed()
@@ -550,7 +553,7 @@ int main(int argc, char** argv)
 						<< psfreq::Color::reset()
 						<< std::endl;
 				}
-				return 1;
+				return EXIT_FAILURE;
 			}
 			if (!setCpuValues(cpu, cpuValues)) {
 				if (!psfreq::Log::isAllQuiet()) {
@@ -563,7 +566,7 @@ int main(int argc, char** argv)
 						<< psfreq::Color::reset()
 						<< std::endl;
 				}
-				return 1;
+				return EXIT_FAILURE;
 			}
 			printCpuValues(cpu);
 		} else {
@@ -572,10 +575,10 @@ int main(int argc, char** argv)
 					<< "Permissions Error."
 					<< psfreq::Color::reset() << std::endl;
 			}
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /*
