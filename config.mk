@@ -1,7 +1,7 @@
 ##
 # Version Number
 ##
-VERSION:=1.1.11.git
+VERSION:=1.1.12.git
 
 ##
 # Standard
