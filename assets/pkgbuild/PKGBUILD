@@ -65,4 +65,4 @@ package() {
 		install
 }
 
-sha256sums=('SKIP')
+sha256sums=('c32293563d5921c651fcffb829c0b23c009cce3683fceff9ac759631e0857a78')
