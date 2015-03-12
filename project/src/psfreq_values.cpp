@@ -44,8 +44,8 @@ const int Values::POWER_PLAN_AUTO = 0;
 const int Values::AUTO_NONE = 0;
 const int Values::CPUFREQ_NO_TURBO = 0;
 const int Values::CPUFREQ_TURBO = 1;
-const int Values::PSTATE_NO_TURBO = 0;
-const int Values::PSTATE_TURBO = 1;
+const int Values::PSTATE_NO_TURBO = 1;
+const int Values::PSTATE_TURBO = 0;
 const int Values::MIN_POSSIBLE_FREQ = 0;
 const int Values::MAX_POSSIBLE_FREQ = 100;
 
