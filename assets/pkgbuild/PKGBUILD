@@ -5,7 +5,7 @@
 pkgname=pstate-frequency-git
 _gitname=pstate-frequency
 pkgdesc="Easily control Intel p-state driver (git version)"
-pkgver=1.1.12.git
+pkgver=1.1.12.git.git
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
@@ -48,7 +48,7 @@ _INCLUDE_SYSTEMD_UNIT=1
 
 pkgver() {
 	cd "$srcdir/$_gitname"
-	awk -F '=' '{if (/^VERSION:=/) {print $2}}' "config.mk"
+	echo "$(awk -F '=' '{if (/^VERSION:=/) {print $2}}' 'config.mk').git"
 }
 
 prepare() {
