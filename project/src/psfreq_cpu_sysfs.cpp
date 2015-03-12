@@ -86,7 +86,7 @@ const std::string Cpu::Sysfs::read(const std::string &path,
 				<< absolutePath
 				<< Color::reset() << std::endl;
 		}
-		return std::string();
+		return Cpu::BAD_READ;
 	}
 	std::getline(inputFile, content);
 	inputFile.close();
@@ -113,7 +113,7 @@ const std::vector<std::string> Cpu::Sysfs::readAll(const std::string &path,
 	std::ifstream inputFile;
 	inputFile.open(absolutePath.c_str());
 	if (!inputFile.is_open()) {
-		return std::vector<std::string>();
+		return Cpu::BAD_VECTOR;
 	}
 	std::vector<std::string> contents = std::vector<std::string>();
 	while (true) {
@@ -139,7 +139,7 @@ const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
 			char *line = NULL;
 			if (getline(&line, &n, pipe) == -1) {
 				pclose(pipe);
-				return std::vector<std::string>();
+				return Cpu::BAD_VECTOR;
 			}
 			lines.push_back(std::string(line));
 			std::free(line);
@@ -147,7 +147,7 @@ const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
 		pclose(pipe);
 		return lines;
 	}
-	return std::vector<std::string>();
+	return Cpu::BAD_VECTOR;
 }
 
 }

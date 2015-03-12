@@ -35,7 +35,7 @@ namespace psfreq {
 bool Cpu::findPstate() const
 {
 	const std::string driver = sysfs.read("cpu0/cpufreq/scaling_driver");
-	if (driver != std::string()) {
+	if (driver != BAD_READ) {
 		return (driver.compare("intel_pstate") == 0);
 	}
 	if (!Log::isAllQuiet()) {
@@ -86,14 +86,14 @@ void Cpu::initializeVector(std::vector<std::string> &vector,
 double Cpu::findInfoMaxFrequency() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/cpuinfo_max_freq");
-	if (line != std::string()) {
+	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
 		return result;
 	}
 	std::cerr << Color::boldRed()
 		<< "Unable to find cpuinfo_max_freq"
 		<< Color::reset() << std::endl;
-	return 1.0;
+	return INFO_FREQUENCY_INSANE;
 }
 
 /*
@@ -102,7 +102,7 @@ double Cpu::findInfoMaxFrequency() const
 double Cpu::findInfoMinFrequency() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/cpuinfo_min_freq");
-	if (line != std::string()) {
+	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
 		return result;
 	}
@@ -112,7 +112,7 @@ double Cpu::findInfoMinFrequency() const
 			<< Color::reset()
 			<< std::endl;
 	}
-	return 1.0;
+	return INFO_FREQUENCY_INSANE;
 }
 
 }

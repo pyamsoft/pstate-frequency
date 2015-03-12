@@ -23,13 +23,14 @@
 namespace psfreq {
 
 bool Color::enabled = false;
-const char *const Color::OFF = "\033[0m";
+const char *const Color::COLOR_RESET = "\033[0m";
 const char *const Color::BOLD_RED = "\033[1;31m";
 const char *const Color::BOLD_GREEN = "\033[1;32m";
 const char *const Color::BOLD_BLUE = "\033[1;34m";
 const char *const Color::BOLD_MAGENTA = "\033[1;35m";
 const char *const Color::BOLD_CYAN = "\033[1;36m";
 const char *const Color::BOLD_WHITE = "\033[1;37m";
+const char *const Color::NO_COLOR = "";
 
 void Color::setEnabled()
 {
@@ -39,9 +40,9 @@ void Color::setEnabled()
 const char *Color::reset()
 {
 	if (enabled) {
-		return OFF;
+		return COLOR_RESET;
 	} else {
-		return "";
+		return NO_COLOR;
 	}
 }
 
@@ -50,7 +51,7 @@ const char *Color::boldRed()
 	if (enabled) {
 		return BOLD_RED;
 	} else {
-		return "";
+		return NO_COLOR;
 	}
 }
 
@@ -59,7 +60,7 @@ const char *Color::boldGreen()
 	if (enabled) {
 		return BOLD_GREEN;
 	} else {
-		return "";
+		return NO_COLOR;
 	}
 }
 
@@ -68,7 +69,7 @@ const char *Color::boldBlue()
 	if (enabled) {
 		return BOLD_BLUE;
 	} else {
-		return "";
+		return NO_COLOR;
 	}
 }
 
@@ -77,7 +78,7 @@ const char *Color::boldMagenta()
 	if (enabled) {
 		return BOLD_MAGENTA;
 	} else {
-		return "";
+		return NO_COLOR;
 	}
 }
 
@@ -86,7 +87,7 @@ const char *Color::boldCyan()
 	if (enabled) {
 		return BOLD_CYAN;
 	} else {
-		return "";
+		return NO_COLOR;
 	}
 }
 
@@ -95,7 +96,7 @@ const char *Color::boldWhite()
 	if (enabled) {
 		return BOLD_WHITE;
 	} else {
-		return "";
+		return NO_COLOR;
 	}
 }
 

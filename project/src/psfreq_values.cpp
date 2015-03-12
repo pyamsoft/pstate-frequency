@@ -30,30 +30,51 @@
 
 namespace psfreq {
 
+const std::string Values::BAD_READ = std::string();
+const int Values::ACTION_NULL = -1;
+const int Values::ACTION_SET = 1;
+const int Values::ACTION_GET = 0;
+const int Values::REQUESTED_CURRENT = 0;
+const int Values::REQUESTED_REAL = 1;
+const int Values::POWER_PLAN_NONE = -1;
+const int Values::POWER_PLAN_POWERSAVE = 1;
+const int Values::POWER_PLAN_PERFORMANCE = 2;
+const int Values::POWER_PLAN_MAX_PERFORMANCE = 3;
+const int Values::POWER_PLAN_AUTO = 0;
+const int Values::AUTO_NONE = 0;
+const int Values::CPUFREQ_NO_TURBO = 0;
+const int Values::CPUFREQ_TURBO = 1;
+const int Values::PSTATE_NO_TURBO = 1;
+const int Values::PSTATE_TURBO = 0;
+const int Values::MIN_POSSIBLE_FREQ = 0;
+const int Values::MAX_POSSIBLE_FREQ = 100;
+
 bool Values::isInitialized() const
 {
-	return hasAction() && (max != -1 || min != -1
-			|| turbo != -1 || governor != std::string());
+	return hasAction() && (max != ACTION_NULL
+			|| min != ACTION_NULL
+			|| turbo != ACTION_NULL
+			|| governor != BAD_READ);
 }
 
 bool Values::hasAction() const
 {
-	return action != -1;
+	return action != ACTION_NULL;
 }
 
 bool Values::isActionNull() const
 {
-	return action == -1;
+	return action == ACTION_NULL;
 }
 
 bool Values::isActionGet() const
 {
-	return action == 0;
+	return action == ACTION_GET;
 }
 
 bool Values::isActionSet() const
 {
-	return action == 1;
+	return action == ACTION_SET;
 }
 
 /*
@@ -63,7 +84,7 @@ bool Values::isActionSet() const
  */
 bool Values::setGovernor(const std::string& newGovernor)
 {
-	if (newGovernor != std::string()) {
+	if (newGovernor != BAD_READ) {
 		governor = newGovernor;
 		return true;
 	}
@@ -132,7 +153,7 @@ int Values::getRequested() const
  * exit the program from main.
  */
 bool Values::setPlan(const int powerPlan) {
-	if (powerPlan != -1) {
+	if (powerPlan != POWER_PLAN_NONE) {
 		plan = powerPlan;
 		return true;
 	}
@@ -146,22 +167,22 @@ bool Values::setPlan(const int powerPlan) {
  */
 bool Values::runPlan()
 {
-	if (plan == -1) {
+	if (plan == POWER_PLAN_NONE) {
 		return true;
-	} else if (plan == 1) {
+	} else if (plan == POWER_PLAN_POWERSAVE) {
 		setPlanPowersave();
 		return true;
-	} else if (plan == 2) {
+	} else if (plan == POWER_PLAN_PERFORMANCE) {
 		setPlanPerformance();
 		return true;
-	} else if (plan == 3) {
+	} else if (plan == POWER_PLAN_MAX_PERFORMANCE) {
 		setPlanMaxPerformance();
 		return true;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
-	} else if (plan == 0) {
+	} else if (plan == POWER_PLAN_AUTO) {
 		const unsigned int result = setPlanAuto();
-		if (result == 0) {
+		if (result == AUTO_NONE) {
 			if (!Log::isAllQuiet()) {
 				std::cerr << Color::boldRed()
 					<< "Failed to decide an automatic"
@@ -171,7 +192,7 @@ bool Values::runPlan()
 			}
 			return false;
 		}
-		if (result == 1) {
+		if (result == POWER_PLAN_POWERSAVE) {
 			setPlanPowersave();
 		} else {
 			setPlanPerformance();
@@ -185,25 +206,25 @@ bool Values::runPlan()
 
 void Values::setPlanPowersave()
 {
-	max = 0;
-	min = 0;
-	turbo = cpu.hasPstate() ? 1 : 0;
+	max = MIN_POSSIBLE_FREQ;
+	min = MIN_POSSIBLE_FREQ;
+	turbo = cpu.hasPstate() ? PSTATE_NO_TURBO : CPUFREQ_NO_TURBO;
 	governor = "powersave";
 }
 
 void Values::setPlanPerformance()
 {
-	max =  100;
-	min = 0;
-	turbo = cpu.hasPstate() ? 1 : 0;
+	max = MAX_POSSIBLE_FREQ;
+	min = MIN_POSSIBLE_FREQ;
+	turbo = cpu.hasPstate() ? PSTATE_NO_TURBO : CPUFREQ_NO_TURBO;
 	governor = cpu.hasPstate() ? "powersave" : "ondemand";
 }
 
 void Values::setPlanMaxPerformance()
 {
-	max = 100;
-	min = 100;
-	turbo = cpu.hasPstate() ? 0 : 1;
+	max = MAX_POSSIBLE_FREQ;
+	min = MAX_POSSIBLE_FREQ;
+	turbo = cpu.hasPstate() ? PSTATE_TURBO : CPUFREQ_TURBO;
 	governor = "performance";
 }
 
@@ -225,10 +246,10 @@ unsigned int Values::setPlanAuto()
 				<< Color::reset()
 				<< std::endl;
 		}
-		return 0;
+		return AUTO_NONE;
 	}
 	struct dirent *entry =  readdir(directory);
-	unsigned int result = 0;
+	unsigned int result = AUTO_NONE;
 	while(entry) {
 		const std::string entryName = entry->d_name;
 		if (!cpu.hideDirectory(entryName)) {
@@ -237,7 +258,7 @@ unsigned int Values::setPlanAuto()
 			const std::string fullPath = oss.str();
 			if (fullPath.length() < fullPath.max_size()) {
 				result = cpu.getPowerSupply(fullPath);
-				if (result > 0) {
+				if (result > AUTO_NONE) {
 					break;
 				}
 			} else {
@@ -248,7 +269,7 @@ unsigned int Values::setPlanAuto()
 						<< Color::reset()
 						<< std::endl;
 				}
-				return 0;
+				return AUTO_NONE;
 			}
 		}
 		entry = readdir(directory);
@@ -261,7 +282,7 @@ unsigned int Values::setPlanAuto()
 				<< Color::reset()
 				<< std::endl;
 		}
-		return 0;
+		return AUTO_NONE;
 	}
 	return result;
 }

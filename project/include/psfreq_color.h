@@ -27,13 +27,14 @@ class Color
 {
 private:
 	static bool enabled;
-	static const char *const OFF;
+	static const char *const COLOR_RESET;
 	static const char *const BOLD_RED;
 	static const char *const BOLD_GREEN;
 	static const char *const BOLD_BLUE;
 	static const char *const BOLD_MAGENTA;
 	static const char *const BOLD_CYAN;
 	static const char *const BOLD_WHITE;
+	static const char *const NO_COLOR;
 public:
 	static void setEnabled();
 	static const char *reset();

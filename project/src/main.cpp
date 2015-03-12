@@ -18,6 +18,7 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -46,6 +47,12 @@ int planFromOptArg(char *const arg);
 const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
 
+
+const int PARSE_EXIT_GOOD = -1;
+const int PARSE_EXIT_BAD = 1;
+const int PARSE_EXIT_NORMAL = 0;
+const int UID_ROOT = 0;
+
 /*
  * Retrieves the values requested by the user and makes sure that they are
  * sane, or sanitizes them. Then attempts to set the values requested by the
@@ -68,9 +75,11 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 	 * exit immediately, this system is not supported by
 	 * pstate-frequency
 	 */
-	if (cpuInfoMin == 1 || cpuInfoMax == 1
-			|| cpuMinPstate == 0 || cpuMaxPstate == 0
-			|| cpuGovernor == std::string()) {
+	if (cpuInfoMin == psfreq::Cpu::INFO_FREQUENCY_INSANE
+			|| cpuInfoMax == psfreq::Cpu::INFO_FREQUENCY_INSANE
+			|| cpuMinPstate == psfreq::Cpu::PSTATE_VALUE_INSANE
+			|| cpuMaxPstate == psfreq::Cpu::PSTATE_VALUE_INSANE
+			|| cpuGovernor == psfreq::Cpu::GOVERNOR_INSANE) {
 		return false;
 	} else {
 		/*
@@ -123,7 +132,7 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 		 * as well.
 		 */
 		const int cpuTurbo = cpu.getTurboBoost();
-		if (cpuTurbo != -2) {
+		if (cpuTurbo != psfreq::Cpu::TURBO_BOOST_INSANE) {
 			const int turbo = cpuValues.getTurbo();
 			int newTurbo = (turbo != -1 ? turbo : cpuTurbo);
 			newTurbo = psfreq::boundValue(newTurbo, 0, 1);
@@ -154,20 +163,20 @@ int planFromOptArg(char *const arg)
 	if (convertedArg.compare("1") == 0
 			|| psfreq::stringStartsWith("powersave",
 				convertedArg)) {
-		plan = 1;
+		plan = psfreq::Values::POWER_PLAN_POWERSAVE;
 	} else if (convertedArg.compare("2") == 0
 			|| psfreq::stringStartsWith("performance",
 			convertedArg)) {
-		plan = 2;
+		plan = psfreq::Values::POWER_PLAN_PERFORMANCE;
 	} else if (convertedArg.compare("3") == 0
 			|| psfreq::stringStartsWith("max-performance",
 				convertedArg)) {
-		plan = 3;
+		plan = psfreq::Values::POWER_PLAN_MAX_PERFORMANCE;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	} else if (convertedArg.compare("0") == 0
 		|| psfreq::stringStartsWith("auto", convertedArg)) {
-		plan = 0;
+		plan = psfreq::Values::POWER_PLAN_AUTO;
 #endif
 #endif
 	} else {
@@ -175,7 +184,7 @@ int planFromOptArg(char *const arg)
 			std::cerr << psfreq::Color::boldRed() << "Bad Plan."
 				<< psfreq::Color::reset() << std::endl;
 		}
-		return 4;
+		return psfreq::Values::POWER_PLAN_NONE;
 	}
 	return plan;
 }
@@ -388,36 +397,36 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 {
 	switch(result) {
 	case 0:
-                return 0;
+                return PARSE_EXIT_NORMAL;
         case 'H':
 		printGPL();
 		printHelp();
-                return -1;
+                return PARSE_EXIT_GOOD;
         case 'c':
-		cpuValues.setRequested(0);
-		return 0;
+		cpuValues.setRequested(psfreq::Values::REQUESTED_CURRENT);
+		return PARSE_EXIT_NORMAL;
         case 'r':
-		cpuValues.setRequested(1);
-		return 0;
+		cpuValues.setRequested(psfreq::Values::REQUESTED_REAL);
+		return PARSE_EXIT_NORMAL;
 	case 'd':
 		psfreq::Log::setDebug();
-		return 0;
+		return PARSE_EXIT_NORMAL;
 	case 'a':
 		psfreq::Log::setAllQuiet();
-		return 0;
+		return PARSE_EXIT_NORMAL;
 	case 'q':
 		psfreq::Log::setQuiet();
-		return 0;
+		return PARSE_EXIT_NORMAL;
         case 'V':
 		printGPL();
 		printVersion();
-                return -1;
+                return PARSE_EXIT_GOOD;
         case 'S':
-		cpuValues.setAction(1);
-                return 0;
+		cpuValues.setAction(psfreq::Values::ACTION_SET);
+                return PARSE_EXIT_NORMAL;
         case 'G':
-		cpuValues.setAction(0);
-                return 0;
+		cpuValues.setAction(psfreq::Values::ACTION_GET);
+                return PARSE_EXIT_NORMAL;
         case 'p':
 		if (!cpuValues.setPlan(planFromOptArg(optarg))) {
 			if (!psfreq::Log::isAllQuiet()) {
@@ -425,12 +434,12 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 					<< "Failed to set a power plan."
 					<< psfreq::Color::reset() << std::endl;
 			}
-			return 1;
+			return PARSE_EXIT_BAD;
 		}
-                return 0;
+                return PARSE_EXIT_NORMAL;
         case 'm':
 		cpuValues.setMax(psfreq::stringToNumber(optarg));
-                return 0;
+                return PARSE_EXIT_NORMAL;
 	case 'g':
 		if (!cpuValues.setGovernor(governorFromOptArg(optarg,
 					cpu.getAvailableGovernors()))) {
@@ -439,34 +448,34 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 					<< "Failed to set governor."
 					<< psfreq::Color::reset() << std::endl;
 			}
-			return 1;
+			return PARSE_EXIT_BAD;
 		}
-		return 0;
+		return PARSE_EXIT_NORMAL;
         case 'n':
 		cpuValues.setMin(psfreq::stringToNumber(optarg));
-		return 0;
+		return PARSE_EXIT_NORMAL;
         case 't':
 		cpuValues.setTurbo(psfreq::stringToNumber(optarg));
-		return 0;
+		return PARSE_EXIT_NORMAL;
         case '1':
 		psfreq::Color::setEnabled();
-		return 0;
+		return PARSE_EXIT_NORMAL;
 	case ':':
 		if (!psfreq::Log::isAllQuiet()) {
 			std::cerr << psfreq::Color::boldRed()
 				<< "Missing argument for option. "
 				<< psfreq::Color::reset() << std::endl;
 		}
-		return 1;
+		return PARSE_EXIT_BAD;
 	case '?':
 		if (!psfreq::Log::isAllQuiet()) {
 			std::cerr << psfreq::Color::boldRed()
 				<< "Unknown option."
 				<< psfreq::Color::reset() << std::endl;
 		}
-		return 1;
+		return PARSE_EXIT_BAD;
 	}
-	return 1;
+	return PARSE_EXIT_BAD;
 }
 
 /*
@@ -505,11 +514,11 @@ int main(int argc, char** argv)
 
 	const int parseResult = parseOptions(argc, argv, cpu, cpuValues,
 			shortOptions, longOptions);
-	if (parseResult != 0) {
-		if (parseResult == -1) {
-			return 0;
+	if (parseResult != PARSE_EXIT_NORMAL) {
+		if (parseResult == PARSE_EXIT_GOOD) {
+			return EXIT_SUCCESS;
 		} else {
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -518,14 +527,15 @@ int main(int argc, char** argv)
 	 */
 	cpu.init();
 	if (!cpuValues.runPlan()) {
-		return 1;
+		return EXIT_FAILURE;
 	}
 	if (cpuValues.isActionNull()) {
 		printGPL();
 		printHelp();
-		return 0;
+		return EXIT_SUCCESS;
 	} else if (cpuValues.isActionGet()) {
-		if (cpuValues.getRequested() == 0) {
+		if (cpuValues.getRequested() ==
+				psfreq::Values::REQUESTED_CURRENT) {
 			printCpuValues(cpu);
 		} else {
 			printRealtimeFrequency(cpu);
@@ -535,7 +545,7 @@ int main(int argc, char** argv)
 		 * User must have root privilages to set
 		 * values here.
 		 */
-		if (geteuid() == 0) {
+		if (geteuid() == UID_ROOT) {
 			if (!cpuValues.isInitialized()) {
 				if (!psfreq::Log::isAllQuiet()) {
 					std::cerr << psfreq::Color::boldRed()
@@ -543,7 +553,7 @@ int main(int argc, char** argv)
 						<< psfreq::Color::reset()
 						<< std::endl;
 				}
-				return 1;
+				return EXIT_FAILURE;
 			}
 			if (!setCpuValues(cpu, cpuValues)) {
 				if (!psfreq::Log::isAllQuiet()) {
@@ -556,7 +566,7 @@ int main(int argc, char** argv)
 						<< psfreq::Color::reset()
 						<< std::endl;
 				}
-				return 1;
+				return EXIT_FAILURE;
 			}
 			printCpuValues(cpu);
 		} else {
@@ -565,10 +575,10 @@ int main(int argc, char** argv)
 					<< "Permissions Error."
 					<< psfreq::Color::reset() << std::endl;
 			}
-			return 1;
+			return EXIT_FAILURE;
 		}
 	}
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 /*
@@ -589,18 +599,18 @@ int parseOptions(const int argc, char **const argv,
                 } else {
 			finalOptionResult = handleOptionResult(cpu, cpuValues,
 					optionResult);
-			if (finalOptionResult == -1) {
-				return -1;
-			} else if (finalOptionResult == 1) {
+			if (finalOptionResult == PARSE_EXIT_GOOD) {
+				return PARSE_EXIT_GOOD;
+			} else if (finalOptionResult == PARSE_EXIT_BAD) {
 				if (!psfreq::Log::isAllQuiet()) {
 					std::cerr << psfreq::Color::boldRed()
 						<< "Bad Option."
 						<< psfreq::Color::reset()
 						<< std::endl;
 				}
-				return 1;
+				return PARSE_EXIT_BAD;
 			}
                 }
         }
-	return 0;
+	return PARSE_EXIT_NORMAL;
 }

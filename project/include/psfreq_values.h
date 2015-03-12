@@ -84,6 +84,28 @@ public:
 	bool isInitialized() const;
 
 	bool runPlan();
+
+	static const std::string BAD_READ;
+	static const int ACTION_NULL;
+	static const int ACTION_SET;
+	static const int ACTION_GET;
+	static const int REQUESTED_CURRENT;
+	static const int REQUESTED_REAL;
+	static const int POWER_PLAN_NONE;
+	static const int POWER_PLAN_POWERSAVE;
+	static const int POWER_PLAN_PERFORMANCE;
+	static const int POWER_PLAN_MAX_PERFORMANCE;
+	static const int POWER_PLAN_AUTO;
+	static const int AUTO_NONE;
+	static const int AUTO_POWERSAVE;
+	static const int AUTO_PERFORMANCE;
+	static const int CPUFREQ_NO_TURBO;
+	static const int CPUFREQ_TURBO;
+	static const int PSTATE_NO_TURBO;
+	static const int PSTATE_TURBO;
+	static const int MIN_POSSIBLE_FREQ;
+	static const int MAX_POSSIBLE_FREQ;
+
 };
 
 }
