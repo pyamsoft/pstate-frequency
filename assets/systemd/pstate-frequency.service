@@ -1,0 +1,9 @@
+[Unit]
+Description=pstate-frequency to manage CPU frequencies
+
+[Service]
+Type=simple
+ExecStart=pstate-frequency -q -S -p 0
+
+[Install]
+WantedBy=multi-user.target
