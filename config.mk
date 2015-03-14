@@ -38,6 +38,10 @@ INCLUDE_ZSH_COMPLETION:=1
 ##
 # Include a systemd unit
 # 0 NO / 1 YES
+#
+# Enable this unit only if you have also enabled to udev rule, as the
+# unit will issue calls to the automatic power plan, which is only enabled
+# when compiled with the udev rule.
 ##
 INCLUDE_SYSTEMD_UNIT:=1
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=pstate-frequency to manage CPU frequencies
+Description=Program to manage CPU frequencies
 
 [Service]
 Type=simple
