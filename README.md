@@ -175,3 +175,7 @@ as any output you get when running **udevadm monitor** would be of great help.
 
 Questions or issues should be either posted in the issue section of this  
 repository, or directed by email to pyamsoft @ pyam.soft@gmail.com
+
+## License
+
+GPL v2
