@@ -52,3 +52,4 @@ bool stringStartsWith(const std::string &control, const std::string &value)
 }
 
 }
+

@@ -151,3 +151,4 @@ const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
 }
 
 }
+

@@ -71,3 +71,4 @@ void Log::setDebug()
 }
 
 }
+
