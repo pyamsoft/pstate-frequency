@@ -229,7 +229,6 @@ const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors)
 {
 	const std::string convertedArg(arg);
-	std::ostringstream gov;
 	std::string governor;
 	for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
 		if (psfreq::stringStartsWith(availableGovernors[i],
@@ -589,15 +588,13 @@ int parseOptions(const int argc, char **const argv,
 		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const char *const shortOptions,
 		const struct option longOptions[]) {
-	int finalOptionResult = 0;
-	int optionResult = 0;
 	while (true) {
-                optionResult = getopt_long(argc, argv, shortOptions,
+                int optionResult = getopt_long(argc, argv, shortOptions,
 				longOptions, NULL);
                 if (optionResult == -1) {
                         break;
                 } else {
-			finalOptionResult = handleOptionResult(cpu, cpuValues,
+			int finalOptionResult = handleOptionResult(cpu, cpuValues,
 					optionResult);
 			if (finalOptionResult == PARSE_EXIT_GOOD) {
 				return PARSE_EXIT_GOOD;
