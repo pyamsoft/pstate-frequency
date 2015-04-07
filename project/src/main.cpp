@@ -589,12 +589,12 @@ int parseOptions(const int argc, char **const argv,
 		const char *const shortOptions,
 		const struct option longOptions[]) {
 	while (true) {
-                int optionResult = getopt_long(argc, argv, shortOptions,
+                const int optionResult = getopt_long(argc, argv, shortOptions,
 				longOptions, NULL);
                 if (optionResult == -1) {
                         break;
                 } else {
-			int finalOptionResult = handleOptionResult(cpu, cpuValues,
+			const int finalOptionResult = handleOptionResult(cpu, cpuValues,
 					optionResult);
 			if (finalOptionResult == PARSE_EXIT_GOOD) {
 				return PARSE_EXIT_GOOD;
