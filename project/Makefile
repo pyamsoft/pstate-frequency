@@ -1,8 +1,7 @@
 include config.mk
 
 EXEC_NAME=pstate-frequency
-SOURCES=$(wildcard src/*.cpp)
-OBJECTS=$(patsubst src/%.cpp,obj/%.o,$(SOURCES))
+OBJECTS=$(patsubst src/%.cpp,obj/%.o, $(wildcard src/*.cpp))
 UDEV=99-$(EXEC_NAME).rules
 SYSTEMD=$(EXEC_NAME).service
 TARGET=bin/$(EXEC_NAME)
