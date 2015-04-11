@@ -11,3 +11,6 @@ install:
 
 uninstall:
 	$(MAKE) -C project uninstall
+
+options:
+	$(MAKE) -C project options
