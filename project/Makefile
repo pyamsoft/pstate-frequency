@@ -44,20 +44,20 @@ ifeq ($(INCLUDE_BASH_COMPLETION), 1)
 	@echo -n "  INSTALL  "
 	@echo "$(DESTDIR)/etc/bash_completion/$(EXEC_NAME)"
 	@install -d $(DESTDIR)/etc/bash_completion.d
-	@install -m 644 assets/shell/bash/bash_completion \
+	@install -m 644 ../assets/shell/bash/bash_completion \
 		$(DESTDIR)/etc/bash_completion.d/$(EXEC_NAME)
 endif
 ifeq ($(INCLUDE_ZSH_COMPLETION), 1)
 	@echo -n "  INSTALL  "
 	@echo "$(DESTDIR)$(PREFIX)/share/zsh/site-functions/_$(EXEC_NAME)"
 	@install -d $(DESTDIR)$(PREFIX)/share/zsh/site-functions
-	@install -m 644 assets/shell/zsh/zsh_completion \
+	@install -m 644 ../assets/shell/zsh/zsh_completion \
 		$(DESTDIR)$(PREFIX)/share/zsh/site-functions/_$(EXEC_NAME)
 endif
 ifeq ($(INCLUDE_UDEV_RULE), 1)
 	@echo "  INSTALL  $(DESTDIR)/etc/udev/rules.d/$(UDEV)"
 	@install -d $(DESTDIR)/etc/udev/rules.d
-	@install -m 644 assets/udev/$(UDEV) \
+	@install -m 644 ../assets/udev/$(UDEV) \
 		$(DESTDIR)/etc/udev/rules.d/$(UDEV)
 	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
 		$(DESTDIR)/etc/udev/rules.d/$(UDEV)
@@ -65,7 +65,7 @@ endif
 ifeq ($(INCLUDE_SYSTEMD_UNIT), 1)
 	@echo "  INSTALL  $(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD)"
 	@install -d $(DESTDIR)/usr/lib/systemd/system
-	@install -m 644 assets/systemd/$(SYSTEMD) \
+	@install -m 644 ../assets/systemd/$(SYSTEMD) \
 		$(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD)
 	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
 		$(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD)
