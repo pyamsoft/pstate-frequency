@@ -2,8 +2,7 @@ include config.mk
 
 PROJECT_ROOT=project
 EXEC_NAME=pstate-frequency
-SOURCES=$(wildcard $(PROJECT_ROOT)/src/*.cpp)
-OBJECTS=$(patsubst $(PROJECT_ROOT)/src/%.cpp,$(PROJECT_ROOT)/obj/%.o,$(SOURCES))
+OBJECTS=$(patsubst $(PROJECT_ROOT)/src/%.cpp,$(PROJECT_ROOT)/obj/%.o,$(wildcard $(PROJECT_ROOT)/src/*.cpp))
 UDEV=99-$(EXEC_NAME).rules
 SYSTEMD=$(EXEC_NAME).service
 TARGET=$(PROJECT_ROOT)/bin/$(EXEC_NAME)
