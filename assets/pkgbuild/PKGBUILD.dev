@@ -39,8 +39,6 @@ source=("${_gitname}::git+${url}#branch=dev")
 # _INCLUDE_SYSTEMD_UNIT=1
 ##
 
-_PROJECTDIR="$_gitname"
-
 _CXX="g++"
 _PREFIX="/usr"
 _INCLUDE_BASH_COMPLETION=1
@@ -49,8 +47,33 @@ _INCLUDE_UDEV_RULE=1
 _INCLUDE_SYSTEMD_UNIT=1
 
 pkgver() {
-	cd "$_PROJECTDIR"
+	cd "$srcdir/$_gitname"
 	echo "$(awk -F '=' '{if (/^VERSION:=/) {print $2}}' 'config.mk').git"
 }
 
-. .PKGBUILD.functions
+prepare() {
+	cd "$srcdir/$_gitname"
+	make options \
+		CXX="${_CXX}"
+}
+
+build() {
+	cd "$srcdir/$_gitname"
+	make \
+		CXX="${_CXX}" \
+		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE}
+}
+
+package() {
+	cd "$srcdir/$_gitname"
+	make \
+		DESTDIR="$pkgdir" \
+		CXX="${_CXX}" \
+		PREFIX="${_PREFIX}" \
+		INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
+		INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
+		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
+		INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
+		install
+}
+

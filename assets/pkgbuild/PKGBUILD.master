@@ -33,8 +33,6 @@ sha256sums=('c32293563d5921c651fcffb829c0b23c009cce3683fceff9ac759631e0857a78')
 # _INCLUDE_SYSTEMD_UNIT=1
 ##
 
-_PROJECTDIR="${pkgname}-${pkgver}"
-
 _CXX="g++"
 _PREFIX="/usr"
 _INCLUDE_BASH_COMPLETION=1
@@ -42,4 +40,29 @@ _INCLUDE_ZSH_COMPLETION=1
 _INCLUDE_UDEV_RULE=1
 _INCLUDE_SYSTEMD_UNIT=1
 
-. .PKGBUILD.functions
+prepare() {
+	cd "$srcdir/${pkgname}-${pkgver}"
+	make options \
+		CXX="${_CXX}"
+}
+
+build() {
+	cd "$srcdir/${pkgname}-${pkgver}"
+	make \
+		CXX="${_CXX}" \
+		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE}
+}
+
+package() {
+	cd "$srcdir/${pkgname}-${pkgver}"
+	make \
+		DESTDIR="$pkgdir" \
+		CXX="${_CXX}" \
+		PREFIX="${_PREFIX}" \
+		INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
+		INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
+		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
+		INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
+		install
+}
+
