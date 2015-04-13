@@ -2,9 +2,10 @@
 # Maintainer: pyamsoft <pyam.soft@gmail.com>
 ##
 
-pkgname=pstate-frequency
-pkgdesc="Easily control Intel p-state driver"
-pkgver=1.1.12
+pkgname=pstate-frequency-git
+_gitname=pstate-frequency
+pkgdesc="Easily control Intel p-state driver (git version)"
+pkgver=1.1.12.git
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
@@ -12,8 +13,14 @@ optdepends=()
 provides=('pstate-frequency')
 conflicts=('pstate-frequency')
 license=('GPLv2')
-url="https://github.com/pyamsoft/pstate-frequency/archive/${pkgver}.tar.gz"
-source=("${url}")
+url="https://github.com/pyamsoft/pstate-frequency.git"
+
+##
+# The SHA256 is constantly changing since this is
+# pulled from git so skip the verification check
+##
+sha256sums=('SKIP')
+source=("${_gitname}::git+${url}#branch=dev")
 
 ###############################################################################
 
@@ -32,6 +39,8 @@ source=("${url}")
 # _INCLUDE_SYSTEMD_UNIT=1
 ##
 
+_PROJECTDIR="$_gitname"
+
 _CXX="g++"
 _PREFIX="/usr"
 _INCLUDE_BASH_COMPLETION=1
@@ -39,30 +48,9 @@ _INCLUDE_ZSH_COMPLETION=1
 _INCLUDE_UDEV_RULE=1
 _INCLUDE_SYSTEMD_UNIT=1
 
-prepare() {
-	cd "$srcdir/${pkgname}-${pkgver}"
-	make options \
-		CXX="${_CXX}"
+pkgver() {
+	cd "$_PROJECTDIR"
+	echo "$(awk -F '=' '{if (/^VERSION:=/) {print $2}}' 'config.mk').git"
 }
 
-build() {
-	cd "$srcdir/${pkgname}-${pkgver}"
-	make \
-		CXX="${_CXX}" \
-		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE}
-}
-
-package() {
-	cd "$srcdir/${pkgname}-${pkgver}"
-	make \
-		DESTDIR="$pkgdir" \
-		CXX="${_CXX}" \
-		PREFIX="${_PREFIX}" \
-		INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
-		INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
-		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
-		INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
-		install
-}
-
-sha256sums=('c32293563d5921c651fcffb829c0b23c009cce3683fceff9ac759631e0857a78')
+. .PKGBUILD.functions
