@@ -21,7 +21,7 @@ VERSION:=1.1.12
 # Include the current directory so that paths for headers are properly
 # resolved.
 ##
-INCS:=-I.
+INCS:=-Iproject
 
 ##
 # Include a bash completion file
