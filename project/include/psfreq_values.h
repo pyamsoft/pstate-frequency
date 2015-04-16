@@ -22,6 +22,7 @@
 #define CPP_PSFREQ_VALUES_H
 
 #include <string>
+#include <dirent.h>
 
 #include "include/psfreq_cpu.h"
 
@@ -42,6 +43,8 @@ private:
 	void setPlanPerformance();
 	void setPlanMaxPerformance();
 	unsigned int setPlanAuto();
+	unsigned int getPowerSourceDirectory(DIR *const directory,
+		const char *const dirName);
 
 	Values();
 

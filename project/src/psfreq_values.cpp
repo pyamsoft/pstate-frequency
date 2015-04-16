@@ -21,8 +21,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <dirent.h>
-
 #include "include/psfreq_color.h"
 #include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
@@ -248,6 +246,23 @@ unsigned int Values::setPlanAuto()
 		}
 		return AUTO_NONE;
 	}
+	unsigned int result = getPowerSourceDirectory(directory, dirName);
+	if (closedir(directory)) {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to close directory: "
+				<< dirName
+				<< Color::reset()
+				<< std::endl;
+		}
+		return AUTO_NONE;
+	}
+	return result;
+}
+
+unsigned int Values::getPowerSourceDirectory(DIR *const directory,
+		const char *const dirName)
+{
 	struct dirent *entry =  readdir(directory);
 	unsigned int result = AUTO_NONE;
 	while(entry) {
@@ -269,20 +284,15 @@ unsigned int Values::setPlanAuto()
 						<< Color::reset()
 						<< std::endl;
 				}
-				return AUTO_NONE;
+				/*
+				 * Breaking here is safe, as the result should
+				 * still be equivalent to AUTO_NONE, meaning that
+				 * the final return will still work
+				 */
+				break;
 			}
 		}
 		entry = readdir(directory);
-	}
-	if (closedir(directory)) {
-		if (!Log::isAllQuiet()) {
-			std::cerr << Color::boldRed()
-				<< "Failed to close directory: "
-				<< dirName
-				<< Color::reset()
-				<< std::endl;
-		}
-		return AUTO_NONE;
 	}
 	return result;
 }
