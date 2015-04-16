@@ -39,65 +39,37 @@ void Color::setEnabled()
 
 const char *Color::reset()
 {
-	if (enabled) {
-		return COLOR_RESET;
-	} else {
-		return NO_COLOR;
-	}
+	return enabled ? COLOR_RESET : NO_COLOR;
 }
 
 const char *Color::boldRed()
 {
-	if (enabled) {
-		return BOLD_RED;
-	} else {
-		return NO_COLOR;
-	}
+	return enabled ? BOLD_RED : NO_COLOR;
 }
 
 const char *Color::boldGreen()
 {
-	if (enabled) {
-		return BOLD_GREEN;
-	} else {
-		return NO_COLOR;
-	}
+	return enabled ? BOLD_GREEN : NO_COLOR;
 }
 
 const char *Color::boldBlue()
 {
-	if (enabled) {
-		return BOLD_BLUE;
-	} else {
-		return NO_COLOR;
-	}
+	return enabled ? BOLD_BLUE : NO_COLOR;
 }
 
 const char *Color::boldMagenta()
 {
-	if (enabled) {
-		return BOLD_MAGENTA;
-	} else {
-		return NO_COLOR;
-	}
+	return enabled ? BOLD_MAGENTA : NO_COLOR;
 }
 
 const char *Color::boldCyan()
 {
-	if (enabled) {
-		return BOLD_CYAN;
-	} else {
-		return NO_COLOR;
-	}
+	return enabled ? BOLD_CYAN : NO_COLOR;
 }
 
 const char *Color::boldWhite()
 {
-	if (enabled) {
-		return BOLD_WHITE;
-	} else {
-		return NO_COLOR;
-	}
+	return enabled ? BOLD_WHITE : NO_COLOR;
 }
 
 }
