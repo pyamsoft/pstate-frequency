@@ -32,8 +32,8 @@
 #include "include/psfreq_values.h"
 
 bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues);
-void printCpuValues(const psfreq::Cpu& cpu);
-void printRealtimeFrequency(const psfreq::Cpu& cpu);
+void printCpuValues(const psfreq::Cpu &cpu);
+void printRealtimeFrequency(const psfreq::Cpu &cpu);
 void printGPL();
 void printVersion();
 void printHelp();
@@ -193,7 +193,7 @@ int planFromOptArg(char *const arg)
  * Grab the current CPU frequencies from /proc/cpuinfo
  * and pretty print them to the stdout
  */
-void printRealtimeFrequency(const psfreq::Cpu& cpu)
+void printRealtimeFrequency(const psfreq::Cpu &cpu)
 {
 	if (psfreq::Log::isOutputCapable()) {
 		printVersion();
@@ -290,7 +290,7 @@ void printVersion()
  * Print out the current CPU settings as configured either from
  * the cpufreq sysfs files or the intel_pstate sysfs files.
  */
-void printCpuValues(const psfreq::Cpu& cpu)
+void printCpuValues(const psfreq::Cpu &cpu)
 {
 	if (psfreq::Log::isOutputCapable()) {
 		printVersion();
