@@ -139,6 +139,15 @@ mean users are unable to use thermald and pstate-frequency, just understand
 that pstate-frequency may override the automatic values set by thermald, and  
 thermald may attempt to override the manually set values of pstate-frequency.
 
+One particular setting of thermald that may conflict with pstate-frequency  
+depending on one's desired use cases is that thermald by default will gain  
+absolute control over the Turbo settings for the intel_pstate driver.  
+This means that thermald will override any user set values for the  
+no_turbo variable in pstate-frequency. One solution to this problem  
+if a user wishes to use pstate-frequency to control turbo boost is to  
+comment out or remove the intel_pstate line in the default thermald  
+configuration file: **/etc/thermald/thermal-cpu-cdev-order.xml**.
+
 
 #### pstate-frequency doesn't work
 
