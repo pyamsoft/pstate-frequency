@@ -2,3 +2,7 @@ project/bin/
 project/obj/
 assets/pkgbuild/pstate-frequency*
 assets/pkgbuild/*.tar.gz
+doc-pak/
+description-pak
+backup-*-pre-pstate-frequency.tgz
+*.deb
