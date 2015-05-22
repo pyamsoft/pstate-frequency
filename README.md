@@ -185,6 +185,13 @@ as any output you get when running **udevadm monitor** would be of great help.
 Questions or issues should be either posted in the issue section of this  
 repository, or directed by email to pyamsoft @ pyam.soft@gmail.com
 
+## Issues
+
+Check the issues page on GitHub for any notes about outstanding or existing  
+issues. If you encounter a problem with pstate-frequency of which no such  
+issue already exists please feel free to help the developer by creating an  
+issue ticket.
+
 ## License
 
 GPL v2
