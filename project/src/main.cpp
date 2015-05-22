@@ -521,17 +521,15 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 			std::cerr << psfreq::Color::boldRed()
 				<< "Missing argument for option. "
 				<< psfreq::Color::reset() << std::endl;
-		} else {
-			return PARSE_EXIT_BAD;
 		}
+		return PARSE_EXIT_BAD;
 	case '?':
 		if (!psfreq::Log::isAllQuiet()) {
 			std::cerr << psfreq::Color::boldRed()
 				<< "Unknown option."
 				<< psfreq::Color::reset() << std::endl;
-		} else {
-			return PARSE_EXIT_BAD;
 		}
+		return PARSE_EXIT_BAD;
 	}
 	return PARSE_EXIT_BAD;
 }
@@ -628,7 +626,6 @@ int main(int argc, char** argv)
 				return EXIT_FAILURE;
 			}
 			printCpuValues(cpu);
-			return EXIT_SUCCESS;
 		} else {
 			if (!psfreq::Log::isAllQuiet()) {
 				std::cerr << psfreq::Color::boldRed()
@@ -638,6 +635,7 @@ int main(int argc, char** argv)
 			return EXIT_FAILURE;
 		}
 	}
+	return EXIT_SUCCESS;
 }
 
 /*
