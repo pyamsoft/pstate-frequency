@@ -81,14 +81,15 @@ double Cpu::getScalingMinFrequency() const
 	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
 		return result;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to get scaling_min_freq"
+				<< Color::reset()
+				<< std::endl;
+		}
+		return SCALING_FREQUENCY_INSANE;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Failed to get scaling_min_freq"
-			<< Color::reset()
-			<< std::endl;
-	}
-	return SCALING_FREQUENCY_INSANE;
 }
 
 double Cpu::getScalingMaxFrequency() const
@@ -97,14 +98,15 @@ double Cpu::getScalingMaxFrequency() const
 	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
 		return result;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to get scaling_max_freq"
+				<< Color::reset()
+				<< std::endl;
+		}
+		return SCALING_FREQUENCY_INSANE;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Failed to get scaling_max_freq"
-			<< Color::reset()
-			<< std::endl;
-	}
-	return SCALING_FREQUENCY_INSANE;
 }
 
 double Cpu::getInfoMinFrequency() const
@@ -127,14 +129,15 @@ const std::string Cpu::getGovernor() const
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_governor");
 	if (line != BAD_READ) {
 		return line;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to get scaling_governor"
+				<< Color::reset()
+				<< std::endl;
+		}
+		return BAD_READ;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Failed to get scaling_governor"
-			<< Color::reset()
-			<< std::endl;
-	}
-	return BAD_READ;
 }
 
 const std::string Cpu::getDriver() const
@@ -142,14 +145,15 @@ const std::string Cpu::getDriver() const
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_driver");
 	if (line != BAD_READ) {
 		return line;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to get scaling_driver"
+				<< Color::reset()
+				<< std::endl;
+		}
+		return BAD_READ;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Failed to get scaling_driver"
-			<< Color::reset()
-			<< std::endl;
-	}
-	return BAD_READ;
 }
 
 const std::vector<std::string> Cpu::getRealtimeFrequencies() const
@@ -158,14 +162,15 @@ const std::vector<std::string> Cpu::getRealtimeFrequencies() const
 	const std::vector<std::string> result = sysfs.readPipe(cmd, number);
 	if (!result.empty()) {
 		return result;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to get realtime frequencies"
+				<< Color::reset()
+				<< std::endl;
+		}
+		return BAD_VECTOR;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Failed to get realtime frequencies"
-			<< Color::reset()
-			<< std::endl;
-	}
-	return BAD_VECTOR;
 }
 
 const std::vector<std::string> Cpu::getAvailableGovernors() const
@@ -174,14 +179,15 @@ const std::vector<std::string> Cpu::getAvailableGovernors() const
 		= sysfs.readAll("cpu0/cpufreq/scaling_available_governors");
 	if (!availableGovernors.empty()) {
 		return availableGovernors;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Failed to get a list of available governors"
+				<< Color::reset()
+				<< std::endl;
+		}
+		return BAD_VECTOR;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Failed to get a list of available governors"
-			<< Color::reset()
-			<< std::endl;
-	}
-	return BAD_VECTOR;
 }
 
 int Cpu::getMaxValue() const
@@ -204,14 +210,15 @@ int Cpu::getTurboBoost() const
 	if (line != BAD_READ) {
 		const int result = stringToNumber(line);
 		return result;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Unable to read turbo boost value"
+				<< Color::reset()
+				<< std::endl;
+		}
+		return TURBO_BOOST_INSANE;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Unable to read turbo boost value"
-			<< Color::reset()
-			<< std::endl;
-	}
-	return TURBO_BOOST_INSANE;
 }
 
 int Cpu::getInfoMinValue() const
@@ -240,14 +247,13 @@ void Cpu::setScalingMax(const int max) const
 				}
 			}
 		}
+
 		if (hasPstate()) {
-			if (!sysfs.write("intel_pstate/max_perf_pct",
-					max)) {
+			if (!sysfs.write("intel_pstate/max_perf_pct", max)) {
 				if (!Log::isAllQuiet()) {
 					std::cerr << Color::boldRed()
-						<< "Failed to set the"
-						<< " pstate max"
-						<< Color::reset()
+						<< "Failed to set the pstate"
+						<< " max" << Color::reset()
 						<< std::endl;
 				}
 			}
@@ -272,14 +278,13 @@ void Cpu::setScalingMin(const int min) const
 				}
 			}
 		}
+
 		if (hasPstate()) {
-			if (!sysfs.write("intel_pstate/min_perf_pct",
-					min)) {
+			if (!sysfs.write("intel_pstate/min_perf_pct", min)) {
 				if (!Log::isAllQuiet()) {
 					std::cerr << Color::boldRed()
-						<< "Failed to set the"
-						<< " pstate min"
-						<< Color::reset()
+						<< "Failed to set the pstate"
+						<< " min" << Color::reset()
 						<< std::endl;
 				}
 			}

@@ -85,8 +85,9 @@ bool Values::setGovernor(const std::string& newGovernor)
 	if (newGovernor != BAD_READ) {
 		governor = newGovernor;
 		return true;
+	} else {
+		return false;
 	}
-	return false;
 }
 
 
@@ -154,8 +155,9 @@ bool Values::setPlan(const int powerPlan) {
 	if (powerPlan != POWER_PLAN_NONE) {
 		plan = powerPlan;
 		return true;
+	} else {
+		return false;
 	}
-	return false;
 }
 
 /*
@@ -165,21 +167,23 @@ bool Values::setPlan(const int powerPlan) {
  */
 bool Values::runPlan()
 {
-	if (plan == POWER_PLAN_NONE) {
+	unsigned int result;
+	switch(plan) {
+	case POWER_PLAN_NONE:
 		return true;
-	} else if (plan == POWER_PLAN_POWERSAVE) {
+	case POWER_PLAN_POWERSAVE:
 		setPlanPowersave();
 		return true;
-	} else if (plan == POWER_PLAN_PERFORMANCE) {
+	case POWER_PLAN_PERFORMANCE:
 		setPlanPerformance();
 		return true;
-	} else if (plan == POWER_PLAN_MAX_PERFORMANCE) {
+	case POWER_PLAN_MAX_PERFORMANCE:
 		setPlanMaxPerformance();
 		return true;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
-	} else if (plan == POWER_PLAN_AUTO) {
-		const unsigned int result = setPlanAuto();
+	case POWER_PLAN_AUTO:
+		result = setPlanAuto();
 		if (result == AUTO_NONE) {
 			if (!Log::isAllQuiet()) {
 				std::cerr << Color::boldRed()
@@ -189,8 +193,7 @@ bool Values::runPlan()
 					<< std::endl;
 			}
 			return false;
-		}
-		if (result == POWER_PLAN_POWERSAVE) {
+		} else if (result == POWER_PLAN_POWERSAVE) {
 			setPlanPowersave();
 		} else {
 			setPlanPerformance();
@@ -198,8 +201,9 @@ bool Values::runPlan()
 		return true;
 #endif
 #endif
+	default:
+		return false;
 	}
-	return false;
 }
 
 void Values::setPlanPowersave()
@@ -239,25 +243,27 @@ unsigned int Values::setPlanAuto()
 	if (!directory) {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
-				<< "Could not open directory: "
-				<< dirName
+				<< "Could not open directory: " << dirName
 				<< Color::reset()
 				<< std::endl;
 		}
 		return AUTO_NONE;
-	}
-	unsigned int result = getPowerSourceDirectory(directory, dirName);
-	if (closedir(directory)) {
-		if (!Log::isAllQuiet()) {
-			std::cerr << Color::boldRed()
-				<< "Failed to close directory: "
-				<< dirName
-				<< Color::reset()
-				<< std::endl;
+	} else {
+		unsigned int result = getPowerSourceDirectory(directory,
+							      dirName);
+		if (closedir(directory)) {
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "Failed to close directory: "
+					<< dirName
+					<< Color::reset()
+					<< std::endl;
+			}
+			return AUTO_NONE;
+		} else {
+			return result;
 		}
-		return AUTO_NONE;
 	}
-	return result;
 }
 
 unsigned int Values::getPowerSourceDirectory(DIR *const directory,

@@ -18,12 +18,6 @@ VERSION:=1.1.14
 STD:=-std=c++11
 
 ##
-# Include the current directory so that paths for headers are properly
-# resolved.
-##
-INCS:=-I.
-
-##
 # Include a bash completion file
 # 0 NO / 1 YES
 ##
@@ -79,8 +73,14 @@ LDFLAGS:= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all
 ##
 # Compiler flags
 ##
-CXXFLAGS:= -DVERSION=\"${VERSION}[${CXX}]\" \
-	-DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE} ${STD} ${INCS} -O3 \
+CXXFLAGS:= ${STD} -I. -O3 \
 	-march=native -mtune=generic -pipe \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
 	-Wunreachable-code
+
+ifdef VERSION
+	CXXFLAGS+= -DVERSION=\"${VERSION}[${CXX}]\"
+endif
+ifeq ($(INCLUDE_UDEV_RULE), 1)
+	CXXFLAGS+= -DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE}
+endif

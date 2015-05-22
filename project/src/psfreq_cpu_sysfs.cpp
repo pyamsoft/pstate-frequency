@@ -45,10 +45,11 @@ bool Cpu::Sysfs::write(const std::string &path, const std::string &file,
 				<< Color::reset() << std::endl;
 		}
 		return false;
+	} else {
+		outputFile << buffer << std::endl;
+		outputFile.close();
+		return true;
 	}
-	outputFile << buffer << std::endl;
-	outputFile.close();
-	return true;
 }
 
 bool Cpu::Sysfs::write(const std::string &path,const std::string &file,
@@ -87,10 +88,11 @@ const std::string Cpu::Sysfs::read(const std::string &path,
 				<< Color::reset() << std::endl;
 		}
 		return Cpu::BAD_READ;
+	} else {
+		std::getline(inputFile, content);
+		inputFile.close();
+		return content;
 	}
-	std::getline(inputFile, content);
-	inputFile.close();
-	return content;
 }
 
 const std::string Cpu::Sysfs::read(const std::string &file) const
@@ -114,18 +116,19 @@ const std::vector<std::string> Cpu::Sysfs::readAll(const std::string &path,
 	inputFile.open(absolutePath.c_str());
 	if (!inputFile.is_open()) {
 		return Cpu::BAD_VECTOR;
-	}
-	std::vector<std::string> contents = std::vector<std::string>();
-	while (true) {
-		std::string content;
-		inputFile >> content;
-		if (inputFile.eof()) {
-			break;
+	} else {
+		std::vector<std::string> contents = std::vector<std::string>();
+		while (true) {
+			std::string content;
+			inputFile >> content;
+			if (inputFile.eof()) {
+				break;
+			}
+			contents.push_back(content);
 		}
-		contents.push_back(content);
+		inputFile.close();
+		return contents;
 	}
-	inputFile.close();
-	return contents;
 }
 
 const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
@@ -146,8 +149,9 @@ const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
 		}
 		pclose(pipe);
 		return lines;
+	} else {
+		return Cpu::BAD_VECTOR;
 	}
-	return Cpu::BAD_VECTOR;
 }
 
 }

@@ -37,6 +37,8 @@ void printRealtimeFrequency(const psfreq::Cpu &cpu);
 void printGPL();
 void printVersion();
 void printHelp();
+void printPlanHelp();
+void printGovernorHelp(const std::vector<std::string> &availableGovernors);
 int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const int result);
 int parseOptions(const int argc, char **const argv,
@@ -50,8 +52,58 @@ const std::string governorFromOptArg(char *const arg,
 
 const int PARSE_EXIT_GOOD = -1;
 const int PARSE_EXIT_BAD = 1;
+const int PARSE_EXIT_BAD_HANDLED = 2;
 const int PARSE_EXIT_NORMAL = 0;
 const int UID_ROOT = 0;
+
+/*
+ * Print the available power plans
+ */
+void printPlanHelp()
+{
+	std::ostringstream oss;
+#ifdef INCLUDE_UDEV_RULE
+#if INCLUDE_UDEV_RULE == 1
+	oss << psfreq::Color::boldCyan()
+	    << "** Compiled with support for automatic plan switching"
+	    << "via udev rules **" << psfreq::Color::reset() << std::endl;
+#endif
+#endif
+	oss << psfreq::Color::boldWhite() << "Available Power Plans:"
+	    << std::endl
+	    << "(1) " << psfreq::Color::boldRed() << "powersave"
+	    << psfreq::Color::boldWhite() << std::endl
+	    << "(2) " << psfreq::Color::boldRed() << "powersave"
+	    << psfreq::Color::boldWhite() << std::endl
+	    << "(3) " << psfreq::Color::boldRed() << "powersave"
+	    << psfreq::Color::boldWhite() << std::endl
+#ifdef INCLUDE_UDEV_RULE
+#if INCLUDE_UDEV_RULE == 1
+	    << "(0) " << psfreq::Color::boldRed() << "auto"
+	    << psfreq::Color::boldWhite() << std::endl
+#endif
+#endif
+	    << psfreq::Color::reset() << std::endl;
+	std::cerr << oss.str();
+}
+
+/*
+ * Print the available cpu governors
+ */
+void printGovernorHelp(const std::vector<std::string> &availableGovernors)
+{
+	std::ostringstream oss;
+	oss << psfreq::Color::boldWhite() << "Available CPU Governors:"
+	    << std::endl;
+	const unsigned int size = availableGovernors.size();
+	for (unsigned int i = 0; i < size; ++i) {
+		oss << psfreq::Color::boldWhite() << "(" << i << ") "
+		    << psfreq::Color::boldRed() << availableGovernors.at(i)
+		    << std::endl;
+	}
+	oss << psfreq::Color::reset() << std::endl;
+	std::cerr << oss.str();
+}
 
 /*
  * Retrieves the values requested by the user and makes sure that they are
@@ -181,8 +233,7 @@ int planFromOptArg(char *const arg)
 #endif
 	} else {
 		if (!psfreq::Log::isAllQuiet()) {
-			std::cerr << psfreq::Color::boldRed() << "Bad Plan."
-				<< psfreq::Color::reset() << std::endl;
+			printPlanHelp();
 		}
 		return psfreq::Values::POWER_PLAN_NONE;
 	}
@@ -239,13 +290,12 @@ const std::string governorFromOptArg(char *const arg,
 	}
 	if (governor == std::string()) {
 		if (!psfreq::Log::isAllQuiet()) {
-			std::cerr << psfreq::Color::boldRed()
-				<< "Bad Governor." << psfreq::Color::reset()
-				<< std::endl;
+			printGovernorHelp(availableGovernors);
 		}
 		return std::string();
+	} else {
+		return governor;
 	}
-	return governor;
 }
 
 /*
@@ -343,6 +393,11 @@ void printHelp()
 		oss << "usage:" << std::endl
 			<< "pstate-frequency [verbose] [ACTION] [option(s)]"
 			<< std::endl
+#ifdef INCLUDE_UDEV_RULE
+			<< "** Compiled with support for automatic plan switching via udev rules **"
+			<< std::endl
+#endif
+			<< std::endl
 			<< "verbose:" << std::endl
 			<< "    unprivilaged:" << std::endl
 			<< "    -d | --debug     Print debugging messages to "
@@ -428,28 +483,20 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
                 return PARSE_EXIT_NORMAL;
         case 'p':
 		if (!cpuValues.setPlan(planFromOptArg(optarg))) {
-			if (!psfreq::Log::isAllQuiet()) {
-				std::cerr << psfreq::Color::boldRed()
-					<< "Failed to set a power plan."
-					<< psfreq::Color::reset() << std::endl;
-			}
-			return PARSE_EXIT_BAD;
+			return PARSE_EXIT_BAD_HANDLED;
+		} else {
+			return PARSE_EXIT_NORMAL;
 		}
-                return PARSE_EXIT_NORMAL;
         case 'm':
 		cpuValues.setMax(psfreq::stringToNumber(optarg));
                 return PARSE_EXIT_NORMAL;
 	case 'g':
 		if (!cpuValues.setGovernor(governorFromOptArg(optarg,
-					cpu.getAvailableGovernors()))) {
-			if (!psfreq::Log::isAllQuiet()) {
-				std::cerr << psfreq::Color::boldRed()
-					<< "Failed to set governor."
-					<< psfreq::Color::reset() << std::endl;
-			}
-			return PARSE_EXIT_BAD;
+					   cpu.getAvailableGovernors()))) {
+			return PARSE_EXIT_BAD_HANDLED;
+		} else {
+			return PARSE_EXIT_NORMAL;
 		}
-		return PARSE_EXIT_NORMAL;
         case 'n':
 		cpuValues.setMin(psfreq::stringToNumber(optarg));
 		return PARSE_EXIT_NORMAL;
@@ -464,15 +511,17 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 			std::cerr << psfreq::Color::boldRed()
 				<< "Missing argument for option. "
 				<< psfreq::Color::reset() << std::endl;
+		} else {
+			return PARSE_EXIT_BAD;
 		}
-		return PARSE_EXIT_BAD;
 	case '?':
 		if (!psfreq::Log::isAllQuiet()) {
 			std::cerr << psfreq::Color::boldRed()
 				<< "Unknown option."
 				<< psfreq::Color::reset() << std::endl;
+		} else {
+			return PARSE_EXIT_BAD;
 		}
-		return PARSE_EXIT_BAD;
 	}
 	return PARSE_EXIT_BAD;
 }
@@ -528,6 +577,7 @@ int main(int argc, char** argv)
 	if (!cpuValues.runPlan()) {
 		return EXIT_FAILURE;
 	}
+
 	if (cpuValues.isActionNull()) {
 		printGPL();
 		printHelp();
@@ -568,6 +618,7 @@ int main(int argc, char** argv)
 				return EXIT_FAILURE;
 			}
 			printCpuValues(cpu);
+			return EXIT_SUCCESS;
 		} else {
 			if (!psfreq::Log::isAllQuiet()) {
 				std::cerr << psfreq::Color::boldRed()
@@ -577,7 +628,6 @@ int main(int argc, char** argv)
 			return EXIT_FAILURE;
 		}
 	}
-	return EXIT_SUCCESS;
 }
 
 /*
@@ -605,6 +655,8 @@ int parseOptions(const int argc, char **const argv,
 						<< psfreq::Color::reset()
 						<< std::endl;
 				}
+				return PARSE_EXIT_BAD;
+			} else if (finalOptionResult == PARSE_EXIT_BAD_HANDLED) {
 				return PARSE_EXIT_BAD;
 			}
                 }

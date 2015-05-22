@@ -37,14 +37,15 @@ bool Cpu::findPstate() const
 	const std::string driver = sysfs.read("cpu0/cpufreq/scaling_driver");
 	if (driver != BAD_READ) {
 		return (driver.compare("intel_pstate") == 0);
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Unable to get read driver to check for"
+				<< " intel_pstate" << Color::reset()
+				<< std::endl;
+		}
+		return false;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Unable to get read driver to check for"
-			<< " intel_pstate" << Color::reset()
-			<< std::endl;
-	}
-	return false;
 }
 
 /*
@@ -57,13 +58,14 @@ unsigned int Cpu::findNumber() const
 	const std::vector<std::string> result = sysfs.readPipe(cmd, 1);
 	if (!result.empty()) {
 		return stringToNumber(result[0]);
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Unable to find number of CPUs"
+				<< Color::reset() << std::endl;
+		}
+		return 0;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Unable to find number of CPUs"
-			<< Color::reset() << std::endl;
-	}
-	return 0;
 }
 
 /*
@@ -89,11 +91,12 @@ double Cpu::findInfoMaxFrequency() const
 	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
 		return result;
+	} else {
+		std::cerr << Color::boldRed()
+			<< "Unable to find cpuinfo_max_freq"
+			<< Color::reset() << std::endl;
+		return INFO_FREQUENCY_INSANE;
 	}
-	std::cerr << Color::boldRed()
-		<< "Unable to find cpuinfo_max_freq"
-		<< Color::reset() << std::endl;
-	return INFO_FREQUENCY_INSANE;
 }
 
 /*
@@ -105,14 +108,15 @@ double Cpu::findInfoMinFrequency() const
 	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
 		return result;
+	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "Unable to find cpuinfo_min_freq"
+				<< Color::reset()
+				<< std::endl;
+		}
+		return INFO_FREQUENCY_INSANE;
 	}
-	if (!Log::isAllQuiet()) {
-		std::cerr << Color::boldRed()
-			<< "Unable to find cpuinfo_min_freq"
-			<< Color::reset()
-			<< std::endl;
-	}
-	return INFO_FREQUENCY_INSANE;
 }
 
 }
