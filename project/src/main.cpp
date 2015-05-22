@@ -289,6 +289,16 @@ const std::string governorFromOptArg(char *const arg,
 		}
 	}
 	if (governor == std::string()) {
+		const unsigned int govNumber =
+			psfreq::stringToNumber(convertedArg);
+		for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
+			if (govNumber == i) {
+				governor = availableGovernors[i];
+				break;
+			}
+		}
+	}
+	if (governor == std::string()) {
 		if (!psfreq::Log::isAllQuiet()) {
 			printGovernorHelp(availableGovernors);
 		}
