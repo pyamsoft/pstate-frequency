@@ -100,7 +100,7 @@ The *-S --set* option also takes one or more of these flags as necessary
 arguments:  
 + **-m --max** Adjust the maximum scaling frequency of the CPU
 + **-n --min** Adjust the minimum scaling frequency of the CPU
-+ **-o --gov** Adjust the current CPU scaling governor
++ **-g --gov** Adjust the current CPU scaling governor
 + **-t --turbo** Adjust the current state of Turbo Boost (0 is ON, 1 is OFF)
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
 
@@ -115,7 +115,7 @@ to the highest available frequency taking into account Turbo Boost
 frequencies, and enables Turbo Boost.  
 
 There is also a power plan meant to be used with the udev rule:  
-1. **auto (0)** If the computer's main powersource is online, then the  
+4. **auto (0)** If the computer's main powersource is online, then the  
 *performance* plan is set. If the main powersource is offline, then the  
 *powersave* plan is set.  
 
