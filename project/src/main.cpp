@@ -467,11 +467,28 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		printHelp();
                 return PARSE_EXIT_GOOD;
         case 'c':
-		cpuValues.setRequested(psfreq::Values::REQUESTED_CURRENT);
-		return PARSE_EXIT_NORMAL;
+		/*
+		 * The --current option is only valid when using
+		 * pstate-frequency to get CPU values
+		 */
+		if (cpuValues.isActionNull() || cpuValues.isActionSet()) {
+			return PARSE_EXIT_BAD;
+		} else {
+			cpuValues.setRequested(psfreq::
+					Values::REQUESTED_CURRENT);
+			return PARSE_EXIT_NORMAL;
+		}
         case 'r':
-		cpuValues.setRequested(psfreq::Values::REQUESTED_REAL);
-		return PARSE_EXIT_NORMAL;
+		/*
+		 * The --real option is only valid when using
+		 * pstate-frequency to get CPU values
+		 */
+		if (cpuValues.isActionNull() || cpuValues.isActionSet()) {
+			return PARSE_EXIT_BAD;
+		} else {
+			cpuValues.setRequested(psfreq::Values::REQUESTED_REAL);
+			return PARSE_EXIT_NORMAL;
+		}
 	case 'd':
 		psfreq::Log::setDebug();
 		return PARSE_EXIT_NORMAL;
@@ -492,27 +509,64 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		cpuValues.setAction(psfreq::Values::ACTION_GET);
                 return PARSE_EXIT_NORMAL;
         case 'p':
-		if (!cpuValues.setPlan(planFromOptArg(optarg))) {
-			return PARSE_EXIT_BAD_HANDLED;
+		/*
+		 * The --plan option is only valid when using pstate-frequency
+		 * to set CPU values
+		 */
+		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
+			return PARSE_EXIT_BAD;
 		} else {
-			return PARSE_EXIT_NORMAL;
+			return (!cpuValues.setPlan(planFromOptArg(optarg))
+					? PARSE_EXIT_BAD_HANDLED
+					: PARSE_EXIT_NORMAL);
 		}
         case 'm':
-		cpuValues.setMax(psfreq::stringToNumber(optarg));
-                return PARSE_EXIT_NORMAL;
-	case 'g':
-		if (!cpuValues.setGovernor(governorFromOptArg(optarg,
-					   cpu.getAvailableGovernors()))) {
-			return PARSE_EXIT_BAD_HANDLED;
+		/*
+		 * The --max option is only valid when using pstate-frequency
+		 * to set CPU values
+		 */
+		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
+			return PARSE_EXIT_BAD;
 		} else {
+			cpuValues.setMax(psfreq::stringToNumber(optarg));
 			return PARSE_EXIT_NORMAL;
 		}
+	case 'g':
+		/*
+		 * The --governor option is only valid when using
+		 * pstate-frequency to set CPU values
+		 */
+		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
+			return PARSE_EXIT_BAD;
+		} else {
+			return (!cpuValues.setGovernor(
+					governorFromOptArg(optarg,
+					cpu.getAvailableGovernors()))
+					? PARSE_EXIT_BAD_HANDLED
+					: PARSE_EXIT_NORMAL);
+		}
         case 'n':
-		cpuValues.setMin(psfreq::stringToNumber(optarg));
-		return PARSE_EXIT_NORMAL;
+		/*
+		 * The --min option is only valid when using
+		 * pstate-frequency to set CPU values
+		 */
+		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
+			return PARSE_EXIT_BAD;
+		} else {
+			cpuValues.setMin(psfreq::stringToNumber(optarg));
+			return PARSE_EXIT_NORMAL;
+		}
         case 't':
-		cpuValues.setTurbo(psfreq::stringToNumber(optarg));
-		return PARSE_EXIT_NORMAL;
+		/*
+		 * The --turbo option is only valid when using
+		 * pstate-frequency to set CPU values
+		 */
+		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
+			return PARSE_EXIT_BAD;
+		} else {
+			cpuValues.setTurbo(psfreq::stringToNumber(optarg));
+			return PARSE_EXIT_NORMAL;
+		}
         case '1':
 		psfreq::Color::setEnabled();
 		return PARSE_EXIT_NORMAL;
