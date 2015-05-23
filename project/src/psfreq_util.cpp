@@ -18,6 +18,7 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
+#include <cctype>
 #include <iostream>
 #include <sstream>
 
@@ -28,10 +29,24 @@ namespace psfreq {
 
 double stringToNumber(const std::string &line)
 {
+	const unsigned int length = line.length();
+	for (unsigned int i = 0; i < length; ++i) {
+		const char check = line[i];
+		if (!std::isdigit(check) && !std::iscntrl(check)) {
+			return -1;
+		}
+	}
         std::istringstream iss(line);
 	int result;
 	iss >> result;
 	return result;
+}
+
+const std::string numberToString(const unsigned int number)
+{
+        std::ostringstream oss;
+	oss << number;
+	return oss.str();
 }
 
 int boundValue(const int value, const int minBound,

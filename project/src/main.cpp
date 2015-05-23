@@ -31,23 +31,24 @@
 #include "include/psfreq_util.h"
 #include "include/psfreq_values.h"
 
-bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues);
-void printCpuValues(const psfreq::Cpu &cpu);
-void printRealtimeFrequency(const psfreq::Cpu &cpu);
-void printGPL();
-void printVersion();
-void printHelp();
-void printPlanHelp();
-void printGovernorHelp(const std::vector<std::string> &availableGovernors);
-int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
-		const int result);
-int parseOptions(const int argc, char **const argv,
-		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
-		const char *const shortOptions,
-		const struct option longOptions[]);
-int planFromOptArg(char *const arg);
-const std::string governorFromOptArg(char *const arg,
+static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues);
+static void printCpuValues(const psfreq::Cpu &cpu);
+static void printRealtimeFrequency(const psfreq::Cpu &cpu);
+static void printGPL();
+static void printVersion();
+static void printHelp();
+static void printPlanHelp();
+static void printGovernorHelp(const std::vector<std::string> &availableGovernors);
+static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+ 		const int result);
+static int parseOptions(const int argc, char **const argv,
+ 		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+ 		const char *const shortOptions,
+ 		const struct option longOptions[]);
+static int planFromOptArg(char *const arg);
+static const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
+static int turboFromOptArg(const psfreq::Cpu &cpu, char *const arg);
 
 
 const int PARSE_EXIT_GOOD = -1;
@@ -55,11 +56,12 @@ const int PARSE_EXIT_BAD = 1;
 const int PARSE_EXIT_BAD_HANDLED = 2;
 const int PARSE_EXIT_NORMAL = 0;
 const int UID_ROOT = 0;
+const std::string UNINITIALIZED_STR = std::string();
 
 /*
  * Print the available power plans
  */
-void printPlanHelp()
+static void printPlanHelp()
 {
 	std::ostringstream oss;
 #ifdef INCLUDE_UDEV_RULE
@@ -90,7 +92,7 @@ void printPlanHelp()
 /*
  * Print the available cpu governors
  */
-void printGovernorHelp(const std::vector<std::string> &availableGovernors)
+static void printGovernorHelp(const std::vector<std::string> &availableGovernors)
 {
 	std::ostringstream oss;
 	oss << psfreq::Color::boldWhite() << "Available CPU Governors:"
@@ -110,7 +112,7 @@ void printGovernorHelp(const std::vector<std::string> &availableGovernors)
  * sane, or sanitizes them. Then attempts to set the values requested by the
  * user.
  */
-bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
+static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 {
 	/*
 	 * Retrieve the system constant values including the
@@ -196,7 +198,7 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
 		 */
 		const std::string requestedGovernor = cpuValues.getGovernor();
 		const std::string newGovernor =
-				(requestedGovernor != std::string()
+				(requestedGovernor != UNINITIALIZED_STR
 				? requestedGovernor
 				: cpuGovernor);
 		cpu.setGovernor(newGovernor);
@@ -208,7 +210,7 @@ bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
  * Given the user command line input of either a number or a plan name,
  * decide what the proper power plan to run should be.
  */
-int planFromOptArg(char *const arg)
+static int planFromOptArg(char *const arg)
 {
 	const std::string convertedArg(arg);
 	int plan;
@@ -238,6 +240,38 @@ int planFromOptArg(char *const arg)
 		return psfreq::Values::POWER_PLAN_NONE;
 	}
 	return plan;
+}
+
+static int turboFromOptArg(const psfreq::Cpu &cpu, char *const arg)
+{
+	const std::string convertedArg(arg);
+	int turbo;
+	if (cpu.hasPstate()) {
+		if (convertedArg.compare("0") == 0
+				|| psfreq::stringStartsWith("on",
+					convertedArg)) {
+			turbo = psfreq::Values::PSTATE_TURBO;
+		} else if (convertedArg.compare("1") == 0
+				|| psfreq::stringStartsWith("off",
+				convertedArg)) {
+			turbo = psfreq::Values::PSTATE_NO_TURBO;
+		} else {
+			turbo = psfreq::Values::TURBO_INSANE;
+		}
+	} else {
+		if (convertedArg.compare("0") == 0
+				|| psfreq::stringStartsWith("off",
+					convertedArg)) {
+			turbo = psfreq::Values::CPUFREQ_NO_TURBO;
+		} else if (convertedArg.compare("1") == 0
+				|| psfreq::stringStartsWith("on",
+				convertedArg)) {
+			turbo = psfreq::Values::CPUFREQ_TURBO;
+		} else {
+			turbo = psfreq::Values::TURBO_INSANE;
+		}
+	}
+	return turbo;
 }
 
 /*
@@ -276,7 +310,7 @@ void printRealtimeFrequency(const psfreq::Cpu &cpu)
  * available governors, decide on the governor to set or none if the user
  * requested input is a value which does not exist on the system.
  */
-const std::string governorFromOptArg(char *const arg,
+static const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors)
 {
 	const std::string convertedArg(arg);
@@ -288,21 +322,20 @@ const std::string governorFromOptArg(char *const arg,
 			break;
 		}
 	}
-	if (governor == std::string()) {
-		const unsigned int govNumber =
-			psfreq::stringToNumber(convertedArg);
+	if (governor == UNINITIALIZED_STR) {
 		for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
-			if (govNumber == i) {
+			if (convertedArg.compare(psfreq::numberToString(i))
+						== 0) {
 				governor = availableGovernors[i];
 				break;
 			}
 		}
 	}
-	if (governor == std::string()) {
+	if (governor == UNINITIALIZED_STR) {
 		if (!psfreq::Log::isAllQuiet()) {
 			printGovernorHelp(availableGovernors);
 		}
-		return std::string();
+		return UNINITIALIZED_STR;
 	} else {
 		return governor;
 	}
@@ -311,7 +344,7 @@ const std::string governorFromOptArg(char *const arg,
 /*
  * Print the first part of the GPL v2 License.
  */
-void printGPL()
+static void printGPL()
 {
 	if (psfreq::Log::isOutputCapable()) {
 		std::ostringstream oss;
@@ -331,7 +364,7 @@ void printGPL()
 /*
  * Display the current program version if it is set.
  */
-void printVersion()
+static void printVersion()
 {
 	if (psfreq::Log::isOutputCapable()) {
 		std::ostringstream oss;
@@ -350,7 +383,7 @@ void printVersion()
  * Print out the current CPU settings as configured either from
  * the cpufreq sysfs files or the intel_pstate sysfs files.
  */
-void printCpuValues(const psfreq::Cpu &cpu)
+static void printCpuValues(const psfreq::Cpu &cpu)
 {
 	if (psfreq::Log::isOutputCapable()) {
 		printVersion();
@@ -396,7 +429,7 @@ void printCpuValues(const psfreq::Cpu &cpu)
 /*
  * Print the program's options and the intended methods of use.
  */
-void printHelp()
+static void printHelp()
 {
 	if (psfreq::Log::isOutputCapable()) {
 		std::ostringstream oss;
@@ -404,7 +437,8 @@ void printHelp()
 			<< "pstate-frequency [verbose] [ACTION] [option(s)]"
 			<< std::endl
 #ifdef INCLUDE_UDEV_RULE
-			<< "** Compiled with support for automatic plan switching via udev rules **"
+			<< "** Compiled with support for automatic plan "
+			<< "switching via udev rules **"
 			<< std::endl
 #endif
 			<< std::endl
@@ -456,7 +490,7 @@ void printHelp()
  * Given the return value from the getopt_long function as parameter 'result'
  * decide how to handle the option that was entered by the user.
  */
-int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const int result)
 {
 	switch(result) {
@@ -564,7 +598,7 @@ int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return PARSE_EXIT_BAD;
 		} else {
-			cpuValues.setTurbo(psfreq::stringToNumber(optarg));
+			cpuValues.setTurbo(turboFromOptArg(cpu, optarg));
 			return PARSE_EXIT_NORMAL;
 		}
         case '1':
@@ -622,6 +656,11 @@ int main(int argc, char** argv)
 		{0,		  0,                  0,              0}
                 };
 
+	/*
+	 * Initialize the cpu so that it may now act on sysfs values.
+	 */
+	cpu.init();
+
 	const int parseResult = parseOptions(argc, argv, cpu, cpuValues,
 			shortOptions, longOptions);
 	if (parseResult != PARSE_EXIT_NORMAL) {
@@ -632,10 +671,6 @@ int main(int argc, char** argv)
 		}
 	}
 
-	/*
-	 * Initialize the cpu so that it may now act on sysfs values.
-	 */
-	cpu.init();
 	if (!cpuValues.runPlan()) {
 		return EXIT_FAILURE;
 	}
@@ -696,7 +731,7 @@ int main(int argc, char** argv)
  * As long as command line options exist, loop over the input and
  * run the getopt_long function to figure out the option requested.
  */
-int parseOptions(const int argc, char **const argv,
+static int parseOptions(const int argc, char **const argv,
 		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const char *const shortOptions,
 		const struct option longOptions[]) {

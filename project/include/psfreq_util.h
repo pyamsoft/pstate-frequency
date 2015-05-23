@@ -26,6 +26,7 @@
 namespace psfreq {
 
 double stringToNumber(const std::string &line);
+const std::string numberToString(const unsigned int number);
 int boundValue(const int value, const int minBound,
 		const int maxBound);
 bool stringStartsWith(const std::string &control, const std::string &value);

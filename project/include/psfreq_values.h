@@ -106,6 +106,7 @@ public:
 	static const int CPUFREQ_TURBO;
 	static const int PSTATE_NO_TURBO;
 	static const int PSTATE_TURBO;
+	static const int TURBO_INSANE;
 	static const int MIN_POSSIBLE_FREQ;
 	static const int MAX_POSSIBLE_FREQ;
 

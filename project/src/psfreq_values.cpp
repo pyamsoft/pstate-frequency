@@ -44,6 +44,7 @@ const int Values::CPUFREQ_NO_TURBO = 0;
 const int Values::CPUFREQ_TURBO = 1;
 const int Values::PSTATE_NO_TURBO = 1;
 const int Values::PSTATE_TURBO = 0;
+const int Values::TURBO_INSANE = -1;
 const int Values::MIN_POSSIBLE_FREQ = 0;
 const int Values::MAX_POSSIBLE_FREQ = 100;
 
