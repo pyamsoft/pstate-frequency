@@ -100,7 +100,7 @@ The *-S --set* option also takes one or more of these flags as necessary
 arguments:  
 + **-m --max** Adjust the maximum scaling frequency of the CPU
 + **-n --min** Adjust the minimum scaling frequency of the CPU
-+ **-g --gov** Adjust the current CPU scaling governor
++ **-g --governor** Adjust the current CPU scaling governor
 + **-t --turbo** Adjust the current state of Turbo Boost (0 is ON, 1 is OFF)
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
 
