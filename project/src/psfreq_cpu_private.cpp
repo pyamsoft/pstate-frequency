@@ -28,6 +28,8 @@
 
 namespace psfreq {
 
+const unsigned int Cpu::NO_CPUS = 0;
+
 /*
  * Return a boolean based on whether or not the system is currently using the
  * intel_pstate driver to handle CPU frequency scaling.
@@ -57,7 +59,15 @@ unsigned int Cpu::findNumber() const
 	const char *cmd = "grep processor /proc/cpuinfo | wc -l";
 	const std::vector<std::string> result = sysfs.readPipe(cmd, 1);
 	if (!result.empty()) {
-		return stringToNumber(result[0]);
+		/*
+		 * Handle stringToNumber errors
+		 */
+		const int n = stringToNumber(result[0]);
+		if (n == BAD_NUMBER) {
+			return NO_CPUS;
+		} else {
+			return n;
+		}
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()

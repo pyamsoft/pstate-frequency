@@ -45,7 +45,7 @@ const int Cpu::POWER_SOURCE_AC = 2;
  * Initialize the CPU. This function is meant to be called only once, and
  * will allow the CPU to be able to handle the cpufreq sysfs.
  */
-void Cpu::init()
+bool Cpu::init()
 {
 	/*
 	 * If the init function has not been called before,
@@ -53,6 +53,9 @@ void Cpu::init()
 	 */
 	if (!initialized) {
 		number = findNumber();
+		if (number == NO_CPUS) {
+			return false;
+		}
 		pstate = findPstate();
 		minInfoFrequency = findInfoMinFrequency();
 		maxInfoFrequency = findInfoMaxFrequency();
@@ -60,6 +63,7 @@ void Cpu::init()
 		initializeVector(maxFrequencyFileVector, "max_freq");
 		initializeVector(governorFileVector, "governor");
 		initialized = true;
+		return true;
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
@@ -67,6 +71,7 @@ void Cpu::init()
 				<< Color::reset()
 				<< std::endl;
 		}
+		return false;
 	}
 }
 

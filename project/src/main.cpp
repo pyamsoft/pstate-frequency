@@ -659,7 +659,9 @@ int main(int argc, char** argv)
 	/*
 	 * Initialize the cpu so that it may now act on sysfs values.
 	 */
-	cpu.init();
+	if (!cpu.init()) {
+		return EXIT_FAILURE;
+	}
 
 	const int parseResult = parseOptions(argc, argv, cpu, cpuValues,
 			shortOptions, longOptions);

@@ -23,6 +23,8 @@
 
 #include <string>
 
+#define BAD_NUMBER -1
+
 namespace psfreq {
 
 double stringToNumber(const std::string &line);

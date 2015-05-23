@@ -98,7 +98,7 @@ public:
 	{
 	}
 
-	void init();
+	bool init();
 
 	int getTurboBoost() const;
 	int getInfoMinValue() const;
@@ -134,6 +134,7 @@ public:
 	static const int POWER_SOURCE_AC;
 	static const int POWER_SOURCE_BAT;
 	static const int POWER_SOURCE_NONE;
+	static const unsigned int NO_CPUS;
 };
 
 }

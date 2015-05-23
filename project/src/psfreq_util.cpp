@@ -33,7 +33,7 @@ double stringToNumber(const std::string &line)
 	for (unsigned int i = 0; i < length; ++i) {
 		const char check = line[i];
 		if (!std::isdigit(check) && !std::iscntrl(check)) {
-			return -1;
+			return BAD_NUMBER;
 		}
 	}
         std::istringstream iss(line);
