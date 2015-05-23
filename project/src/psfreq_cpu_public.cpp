@@ -86,7 +86,11 @@ double Cpu::getScalingMinFrequency() const
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_min_freq");
 	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
-		return result;
+		if (result == BAD_NUMBER) {
+			return SCALING_FREQUENCY_INSANE;
+		} else {
+			return result;
+		}
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
@@ -103,7 +107,11 @@ double Cpu::getScalingMaxFrequency() const
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_max_freq");
 	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
-		return result;
+		if (result == BAD_NUMBER) {
+			return SCALING_FREQUENCY_INSANE;
+		} else {
+			return result;
+		}
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
@@ -215,7 +223,11 @@ int Cpu::getTurboBoost() const
 			: "cpufreq/boost");
 	if (line != BAD_READ) {
 		const int result = stringToNumber(line);
-		return result;
+		if (result == BAD_NUMBER) {
+			return TURBO_BOOST_INSANE;
+		} else {
+			return result;
+		}
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
@@ -347,7 +359,9 @@ unsigned int Cpu::getPowerSupply(const std::string &fullPath) const
 		if (powerType.compare("Mains") == 0) {
 			const int status = stringToNumber(
 					sysfs.read(fullPath, "online"));
-			if (status == 1) {
+			if (status == BAD_NUMBER) {
+				return POWER_SOURCE_NONE;
+			} else if (status == 1) {
 				return POWER_SOURCE_AC;
 			} else {
 				return POWER_SOURCE_BAT;
