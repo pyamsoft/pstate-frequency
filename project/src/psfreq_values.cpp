@@ -97,19 +97,34 @@ void Values::setAction(const int newAction)
 	action = newAction;
 }
 
-void Values::setMax(const int newMax)
+bool Values::setMax(const int newMax)
 {
-	max = newMax;
+	if (newMax != BAD_NUMBER) {
+		max = newMax;
+		return true;
+	} else {
+		return false;
+	}
 }
 
-void Values::setMin(const int newMin)
+bool Values::setMin(const int newMin)
 {
-	min = newMin;
+	if (newMin != BAD_NUMBER) {
+		min = newMin;
+		return true;
+	} else {
+		return false;
+	}
 }
 
-void Values::setTurbo(const int newTurbo)
+bool Values::setTurbo(const int newTurbo)
 {
-	turbo = newTurbo;
+	if (newTurbo != TURBO_INSANE) {
+		turbo = newTurbo;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void Values::setRequested(const int newRequest)

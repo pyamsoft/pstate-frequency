@@ -66,9 +66,9 @@ public:
 	}
 
 	void setAction(const int newAction);
-	void setMax(const int newMax);
-	void setMin(const int newMin);
-	void setTurbo(const int newTurbo);
+	bool setMax(const int newMax);
+	bool setMin(const int newMin);
+	bool setTurbo(const int newTurbo);
 	void setRequested(const int newRequest);
 	bool setPlan(const int powerPlan);
 	bool setGovernor(const std::string& newGovernor);

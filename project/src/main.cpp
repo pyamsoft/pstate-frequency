@@ -49,6 +49,8 @@ static int planFromOptArg(char *const arg);
 static const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
 static int turboFromOptArg(const psfreq::Cpu &cpu, char *const arg);
+static int maxFromOptArg(char *const arg);
+static int minFromOptArg(char *const arg);
 
 
 const int PARSE_EXIT_GOOD = -1;
@@ -272,6 +274,44 @@ static int turboFromOptArg(const psfreq::Cpu &cpu, char *const arg)
 		}
 	}
 	return turbo;
+}
+
+static int maxFromOptArg(char *const arg)
+{
+	const std::string convertedArg(arg);
+	int max;
+	if (convertedArg.compare("min") == 0) {
+		max = 0;
+	} else if (convertedArg.compare("max") == 0) {
+		max = 100;
+	} else {
+		const int n = psfreq::stringToNumber(convertedArg);
+		if (n == BAD_NUMBER) {
+			max = BAD_NUMBER;
+		} else {
+			max = n;
+		}
+	}
+	return max;
+}
+
+static int minFromOptArg(char *const arg)
+{
+	const std::string convertedArg(arg);
+	int min;
+	if (convertedArg.compare("min") == 0) {
+		min = 0;
+	} else if (convertedArg.compare("max") == 0) {
+		min = 99;
+	} else {
+		const int n = psfreq::stringToNumber(convertedArg);
+		if (n == BAD_NUMBER) {
+			min = BAD_NUMBER;
+		} else {
+			min = n;
+		}
+	}
+	return min;
 }
 
 /*
@@ -562,8 +602,9 @@ static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return PARSE_EXIT_BAD;
 		} else {
-			cpuValues.setMax(psfreq::stringToNumber(optarg));
-			return PARSE_EXIT_NORMAL;
+			return (cpuValues.setMax(maxFromOptArg(optarg))
+					? PARSE_EXIT_NORMAL
+					: PARSE_EXIT_BAD);
 		}
 	case 'g':
 		/*
@@ -587,8 +628,9 @@ static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return PARSE_EXIT_BAD;
 		} else {
-			cpuValues.setMin(psfreq::stringToNumber(optarg));
-			return PARSE_EXIT_NORMAL;
+			return (cpuValues.setMin(minFromOptArg(optarg))
+					? PARSE_EXIT_NORMAL
+					: PARSE_EXIT_BAD);
 		}
         case 't':
 		/*
@@ -598,8 +640,10 @@ static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return PARSE_EXIT_BAD;
 		} else {
-			cpuValues.setTurbo(turboFromOptArg(cpu, optarg));
-			return PARSE_EXIT_NORMAL;
+			return (cpuValues.setTurbo(
+					turboFromOptArg(cpu, optarg))
+					? PARSE_EXIT_NORMAL
+					: PARSE_EXIT_BAD);
 		}
         case '1':
 		psfreq::Color::setEnabled();
