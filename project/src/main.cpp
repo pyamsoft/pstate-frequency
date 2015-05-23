@@ -100,6 +100,9 @@ static void printGovernorHelp(const std::vector<std::string> &availableGovernors
 	oss << psfreq::Color::boldWhite() << "Available CPU Governors:"
 	    << std::endl;
 	const unsigned int size = availableGovernors.size();
+	if (psfreq::Log::isDebug()) {
+		std::cout << "Governors available: " << size << std::endl;
+	}
 	for (unsigned int i = 0; i < size; ++i) {
 		oss << psfreq::Color::boldWhite() << "(" << i << ") "
 		    << psfreq::Color::boldRed() << availableGovernors.at(i)
@@ -136,12 +139,18 @@ static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues
 			|| cpuMinPstate == psfreq::Cpu::PSTATE_VALUE_INSANE
 			|| cpuMaxPstate == psfreq::Cpu::PSTATE_VALUE_INSANE
 			|| cpuGovernor == psfreq::Cpu::GOVERNOR_INSANE) {
+		if (psfreq::Log::isDebug()) {
+			std::cout << "CPU system is insane, exit" << std::endl;
+		}
 		return false;
 	} else {
 		/*
 		 * Sanitize the minimum CPU frequency so that
 		 * it can safely be set.
 		 */
+		if (psfreq::Log::isDebug()) {
+			std::cout << "bound the CPU min" << std::endl;
+		}
 		const int requestedMin = cpuValues.getMin();
 		int newMin = (requestedMin >= 0
 				? requestedMin
@@ -154,6 +163,9 @@ static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues
 		 * the condition that it be greater than the
 		 * minimum, so that it can safely be set.
 		 */
+		if (psfreq::Log::isDebug()) {
+			std::cout << "bound the CPU max" << std::endl;
+		}
 		const int requestedMax = cpuValues.getMax();
 		int newMax = (requestedMax >= 0
 				? requestedMax
@@ -176,9 +188,19 @@ static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues
 		 * change the max frequency
 		 */
 		if (cpuMinPstate > newMax) {
+			if (psfreq::Log::isDebug()) {
+				std::cout << "Current min is higher than the "
+					<<"new max, set the min first before "
+					<< "adjusting max" << std::endl;
+			}
 			cpu.setScalingMin(newMin);
 			cpu.setScalingMax(newMax);
 		} else {
+			if (psfreq::Log::isDebug()) {
+				std::cout << "Current min is lower, than the "
+					<<"new max, can safely adjust max"
+					<< std::endl;
+			}
 			cpu.setScalingMax(newMax);
 			cpu.setScalingMin(newMin);
 		}
@@ -189,6 +211,10 @@ static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues
 		 */
 		const int cpuTurbo = cpu.getTurboBoost();
 		if (cpuTurbo != psfreq::Cpu::TURBO_BOOST_INSANE) {
+			if (psfreq::Log::isDebug()) {
+				std::cout << "Turbo is available to set"
+					<< std::endl;
+			}
 			const int turbo = cpuValues.getTurbo();
 			int newTurbo = (turbo != -1 ? turbo : cpuTurbo);
 			newTurbo = psfreq::boundValue(newTurbo, 0, 1);
@@ -198,6 +224,9 @@ static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues
 		/*
 		 * Set the software CPU governor
 		 */
+		if (psfreq::Log::isDebug()) {
+			std::cout << "Set the cpu governor" << std::endl;
+		}
 		const std::string requestedGovernor = cpuValues.getGovernor();
 		const std::string newGovernor =
 				(requestedGovernor != UNINITIALIZED_STR
