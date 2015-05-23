@@ -70,7 +70,7 @@ static void printPlanHelp()
 #if INCLUDE_UDEV_RULE == 1
 	oss << psfreq::Color::boldCyan()
 	    << "** Compiled with support for automatic plan switching"
-	    << "via udev rules **" << psfreq::Color::reset() << std::endl;
+	    << " via udev rules **" << psfreq::Color::reset() << std::endl;
 #endif
 #endif
 	oss << psfreq::Color::boldWhite() << "Available Power Plans:"
