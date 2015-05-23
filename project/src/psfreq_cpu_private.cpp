@@ -29,6 +29,7 @@
 namespace psfreq {
 
 const unsigned int Cpu::NO_CPUS = 0;
+const unsigned int Cpu::NO_FREQ = 0;
 
 /*
  * Return a boolean based on whether or not the system is currently using the
@@ -99,8 +100,15 @@ double Cpu::findInfoMaxFrequency() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/cpuinfo_max_freq");
 	if (line != BAD_READ) {
+		/*
+		 * Handle stringToNumber errors
+		 */
 		const double result = stringToNumber(line);
-		return result;
+		if (result == BAD_NUMBER) {
+			return NO_FREQ;
+		} else {
+			return result;
+		}
 	} else {
 		std::cerr << Color::boldRed()
 			<< "Unable to find cpuinfo_max_freq"
@@ -116,7 +124,15 @@ double Cpu::findInfoMinFrequency() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/cpuinfo_min_freq");
 	if (line != BAD_READ) {
+		/*
+		 * Handle stringToNumber errors
+		 */
 		const double result = stringToNumber(line);
+		if (result == BAD_NUMBER) {
+			return NO_FREQ;
+		} else {
+			return result;
+		}
 		return result;
 	} else {
 		if (!Log::isAllQuiet()) {

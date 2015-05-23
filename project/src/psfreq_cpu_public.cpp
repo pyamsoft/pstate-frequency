@@ -53,12 +53,13 @@ bool Cpu::init()
 	 */
 	if (!initialized) {
 		number = findNumber();
-		if (number == NO_CPUS) {
-			return false;
-		}
 		pstate = findPstate();
 		minInfoFrequency = findInfoMinFrequency();
 		maxInfoFrequency = findInfoMaxFrequency();
+		if (minInfoFrequency == NO_FREQ || maxInfoFrequency == NO_FREQ
+				|| number == NO_CPUS) {
+			return false;
+		}
 		initializeVector(minFrequencyFileVector, "min_freq");
 		initializeVector(maxFrequencyFileVector, "max_freq");
 		initializeVector(governorFileVector, "governor");

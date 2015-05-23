@@ -135,6 +135,7 @@ public:
 	static const int POWER_SOURCE_BAT;
 	static const int POWER_SOURCE_NONE;
 	static const unsigned int NO_CPUS;
+	static const unsigned int NO_FREQ;
 };
 
 }
