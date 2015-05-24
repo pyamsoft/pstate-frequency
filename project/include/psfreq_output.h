@@ -18,23 +18,23 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#ifndef CPP_PSFREQ_UTIL_H
-#define CPP_PSFREQ_UTIL_H
+#ifndef C_PSFREQ_OUTPUT_H_
+#define C_PSFREQ_OUTPUT_H_
 
-#include <string>
 
-#define BAD_NUMBER -1
+#include "include/psfreq_cpu.h"
 
 namespace psfreq {
 
-const std::string UNINITIALIZED_STR = std::string();
-
-double stringToNumber(const std::string &line);
-const std::string numberToString(const unsigned int number);
-int boundValue(const int value, const int minBound,
-		const int maxBound);
-bool stringStartsWith(const std::string &control, const std::string &value);
+void printCpuValues(const psfreq::Cpu &cpu);
+void printRealtimeFrequency(const psfreq::Cpu &cpu);
+void printGPL();
+void printVersion();
+void printHelp();
+void printPlanHelp();
+void printGovernorHelp(const std::vector<std::string> &availableGovernors);
 
 }
 
 #endif
+

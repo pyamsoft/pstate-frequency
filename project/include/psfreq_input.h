@@ -18,23 +18,26 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#ifndef CPP_PSFREQ_UTIL_H
-#define CPP_PSFREQ_UTIL_H
+#ifndef C_PSFREQ_INPUT_H_
+#define C_PSFREQ_INPUT_H_
 
-#include <string>
-
-#define BAD_NUMBER -1
+#include "include/psfreq_cpu.h"
+#include "include/psfreq_values.h"
 
 namespace psfreq {
 
-const std::string UNINITIALIZED_STR = std::string();
+const int PARSE_EXIT_GOOD = -1;
+const int PARSE_EXIT_BAD = 1;
+const int PARSE_EXIT_BAD_HANDLED = 2;
+const int PARSE_EXIT_NORMAL = 0;
+const int UID_ROOT = 0;
 
-double stringToNumber(const std::string &line);
-const std::string numberToString(const unsigned int number);
-int boundValue(const int value, const int minBound,
-		const int maxBound);
-bool stringStartsWith(const std::string &control, const std::string &value);
+int parseOptions(const int argc, char **const argv,
+ 		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+ 		const char *const shortOptions,
+ 		const struct option longOptions[]);
 
 }
 
 #endif
+
