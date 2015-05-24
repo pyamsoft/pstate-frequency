@@ -36,8 +36,6 @@
 static bool setCpuValues(const psfreq::Cpu &cpu,
 		const psfreq::Values &cpuValues);
 
-
-
 /*
  * Retrieves the values requested by the user and makes sure that they are
  * sane, or sanitizes them. Then attempts to set the values requested by the

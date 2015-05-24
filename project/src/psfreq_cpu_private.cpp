@@ -31,6 +31,21 @@ namespace psfreq {
 const unsigned int Cpu::NO_CPUS = 0;
 const unsigned int Cpu::NO_FREQ = 0;
 
+unsigned int Cpu::getNumber() const
+{
+	return number;
+}
+
+double Cpu::getInfoMinFrequency() const
+{
+	return minInfoFrequency;
+}
+
+double Cpu::getInfoMaxFrequency() const
+{
+	return maxInfoFrequency;
+}
+
 /*
  * Return a boolean based on whether or not the system is currently using the
  * intel_pstate driver to handle CPU frequency scaling.

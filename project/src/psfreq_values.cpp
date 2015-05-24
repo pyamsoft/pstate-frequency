@@ -289,7 +289,7 @@ unsigned int Values::getPowerSourceDirectory(DIR *const directory,
 	unsigned int result = AUTO_NONE;
 	while(entry) {
 		const std::string entryName = entry->d_name;
-		if (!cpu.hideDirectory(entryName)) {
+		if (!hideDirectory(entryName)) {
 			std::ostringstream oss;
 			oss << dirName << entryName << "/";
 			const std::string fullPath = oss.str();
@@ -317,6 +317,16 @@ unsigned int Values::getPowerSourceDirectory(DIR *const directory,
 		entry = readdir(directory);
 	}
 	return result;
+}
+
+
+/*
+ * Return a boolean to decide whether to display the directory entry
+ * based on whether or not the entry is the current . or parent .. directory.
+ */
+bool Values::hideDirectory(const std::string &entryName)
+{
+	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
 }
 
 }

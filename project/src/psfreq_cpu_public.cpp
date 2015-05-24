@@ -41,6 +41,15 @@ const int Cpu::POWER_SOURCE_NONE = 0;
 const int Cpu::POWER_SOURCE_BAT = 1;
 const int Cpu::POWER_SOURCE_AC = 2;
 
+int Cpu::getInfoMinValue() const
+{
+	return static_cast<int>(minInfoFrequency / maxInfoFrequency * 100);
+}
+int Cpu::getInfoMaxValue() const
+{
+	return 100;
+}
+
 /*
  * Initialize the CPU. This function is meant to be called only once, and
  * will allow the CPU to be able to handle the cpufreq sysfs.
@@ -120,20 +129,6 @@ double Cpu::getScalingMaxFrequency() const
 	}
 }
 
-double Cpu::getInfoMinFrequency() const
-{
-	return minInfoFrequency;
-}
-
-double Cpu::getInfoMaxFrequency() const
-{
-	return maxInfoFrequency;
-}
-
-unsigned int Cpu::getNumber() const
-{
-	return number;
-}
 
 const std::string Cpu::getGovernor() const
 {
@@ -229,15 +224,6 @@ int Cpu::getTurboBoost() const
 		}
 		return TURBO_BOOST_INSANE;
 	}
-}
-
-int Cpu::getInfoMinValue() const
-{
-	return static_cast<int>(minInfoFrequency / maxInfoFrequency * 100);
-}
-int Cpu::getInfoMaxValue() const
-{
-	return 100;
 }
 
 void Cpu::setScalingMax(const int max) const
@@ -364,15 +350,6 @@ unsigned int Cpu::getPowerSupply(const std::string &fullPath) const
 		}
 	}
 	return POWER_SOURCE_NONE;
-}
-
-/*
- * Return a boolean to decide whether to display the directory entry
- * based on whether or not the entry is the current . or parent .. directory.
- */
-bool Cpu::hideDirectory(const std::string &entryName) const
-{
-	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
 }
 
 }

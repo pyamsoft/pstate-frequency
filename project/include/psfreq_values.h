@@ -45,6 +45,7 @@ private:
 	unsigned int setPlanAuto();
 	unsigned int getPowerSourceDirectory(DIR *const directory,
 		const char *const dirName);
+	bool hideDirectory(const std::string &entryName);
 
 	Values();
 

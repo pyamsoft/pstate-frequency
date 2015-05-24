@@ -74,8 +74,10 @@ private:
 
 	void initializeVector(std::vector<std::string> &vector,
 			std::string what) const;
-
+	double getInfoMinFrequency() const;
+	double getInfoMaxFrequency() const;
 	unsigned int findNumber() const;
+	unsigned int getNumber() const;
 	bool findPstate() const;
 	double findInfoMinFrequency() const;
 	double findInfoMaxFrequency() const;
@@ -105,12 +107,9 @@ public:
 	int getInfoMaxValue() const;
 	int getMinValue() const;
 	int getMaxValue() const;
-	unsigned int getNumber() const;
 	unsigned int getPowerSupply(const std::string &fullPath) const;
 	double getScalingMinFrequency() const;
 	double getScalingMaxFrequency() const;
-	double getInfoMinFrequency() const;
-	double getInfoMaxFrequency() const;
 	const std::string getGovernor() const;
 	const std::vector<std::string> getRealtimeFrequencies() const;
 	const std::vector<std::string> getAvailableGovernors() const;

@@ -92,7 +92,8 @@ void printRealtimeFrequency(const psfreq::Cpu &cpu)
 				cpu.getRealtimeFrequencies();
 		if (!frequencies.empty()) {
 			std::ostringstream oss;
-			for (unsigned int i = 0; i < cpu.getNumber(); ++i) {
+			const unsigned int size = frequencies.size();
+			for (unsigned int i = 0; i < size; ++i) {
 				std::string freq = frequencies[i];
 				oss << psfreq::Color::boldWhite()
 					<< "    pstate::"
