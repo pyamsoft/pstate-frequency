@@ -33,7 +33,8 @@
 #include "include/psfreq_util.h"
 #include "include/psfreq_values.h"
 
-static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues);
+static bool setCpuValues(const psfreq::Cpu &cpu,
+		const psfreq::Values &cpuValues);
 
 
 
@@ -42,7 +43,8 @@ static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues
  * sane, or sanitizes them. Then attempts to set the values requested by the
  * user.
  */
-static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues)
+static bool setCpuValues(const psfreq::Cpu &cpu,
+		const psfreq::Values &cpuValues)
 {
 	/*
 	 * Retrieve the system constant values including the
@@ -64,8 +66,9 @@ static bool setCpuValues(const psfreq::Cpu &cpu, const psfreq::Values &cpuValues
 			|| cpuMinPstate == psfreq::Cpu::PSTATE_VALUE_INSANE
 			|| cpuMaxPstate == psfreq::Cpu::PSTATE_VALUE_INSANE
 			|| cpuGovernor == psfreq::Cpu::GOVERNOR_INSANE) {
-		if (psfreq::Log::isDebug()) {
-			std::cout << "CPU system is insane, exit" << std::endl;
+		if (!psfreq::Log::isAllQuiet()) {
+			std::cerr << "[Error] CPU system is insane, exit"
+				  << std::endl;
 		}
 		return false;
 	} else {
@@ -204,8 +207,8 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	const psfreq::Pair opts = parseOptions(argc, argv, cpu, cpuValues,
-			shortOptions, longOptions);
+	const psfreq::Pair opts = psfreq::parseOptions(argc, argv, cpu,
+			cpuValues, shortOptions, longOptions);
 	if (opts.code != psfreq::PARSE_EXIT_NORMAL) {
 		if (opts.msg.length() != 0) {
 			std::cerr << psfreq::Color::boldRed() << opts.msg
@@ -227,9 +230,9 @@ int main(int argc, char** argv)
 	} else if (cpuValues.isActionGet()) {
 		if (cpuValues.getRequested() ==
 				psfreq::Values::REQUESTED_CURRENT) {
-			printCpuValues(cpu);
+			psfreq::printCpuValues(cpu);
 		} else {
-			printRealtimeFrequency(cpu);
+			psfreq::printRealtimeFrequency(cpu);
 		}
 	} else {
 		/*
@@ -259,7 +262,7 @@ int main(int argc, char** argv)
 				}
 				return EXIT_FAILURE;
 			}
-			printCpuValues(cpu);
+			psfreq::printCpuValues(cpu);
 		} else {
 			if (!psfreq::Log::isAllQuiet()) {
 				std::cerr << psfreq::Color::boldRed()
