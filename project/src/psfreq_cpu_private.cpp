@@ -43,6 +43,7 @@ bool Cpu::findPstate() const
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
+				<< "[Error] "
 				<< "Unable to get read driver to check for"
 				<< " intel_pstate" << Color::reset()
 				<< std::endl;
@@ -72,6 +73,7 @@ unsigned int Cpu::findNumber() const
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
+				<< "[Error] "
 				<< "Unable to find number of CPUs"
 				<< Color::reset() << std::endl;
 		}
@@ -111,6 +113,7 @@ double Cpu::findInfoMaxFrequency() const
 		}
 	} else {
 		std::cerr << Color::boldRed()
+			<< "[Error] "
 			<< "Unable to find cpuinfo_max_freq"
 			<< Color::reset() << std::endl;
 		return INFO_FREQUENCY_INSANE;
@@ -137,6 +140,7 @@ double Cpu::findInfoMinFrequency() const
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
+				<< "[Error] "
 				<< "Unable to find cpuinfo_min_freq"
 				<< Color::reset()
 				<< std::endl;

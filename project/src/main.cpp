@@ -240,7 +240,7 @@ int main(int argc, char** argv)
 			if (!cpuValues.isInitialized()) {
 				if (!psfreq::Log::isAllQuiet()) {
 					std::cerr << psfreq::Color::boldRed()
-						<< "No Requests."
+						<< "[Error] No Requests."
 						<< psfreq::Color::reset()
 						<< std::endl;
 				}
@@ -250,7 +250,7 @@ int main(int argc, char** argv)
 				if (!psfreq::Log::isAllQuiet()) {
 					std::cerr
 						<< psfreq::Color::boldRed()
-						<< "Environment was"
+						<< "[Error] Environment was"
 						<< " not sane. Could"
 						<< " not set any"
 						<< " values"
@@ -263,7 +263,7 @@ int main(int argc, char** argv)
 		} else {
 			if (!psfreq::Log::isAllQuiet()) {
 				std::cerr << psfreq::Color::boldRed()
-					<< "Permissions Error."
+					<< "[Error] Insufficient Permissions."
 					<< psfreq::Color::reset() << std::endl;
 			}
 			return EXIT_FAILURE;

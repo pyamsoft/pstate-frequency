@@ -40,7 +40,7 @@ bool Cpu::Sysfs::write(const std::string &path, const std::string &file,
 	if (!outputFile.is_open()) {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
-				<< "Failed to write to file: "
+				<< "[Error] Failed to write to file: "
 				<< absolutePath
 				<< Color::reset() << std::endl;
 		}
@@ -83,7 +83,7 @@ const std::string Cpu::Sysfs::read(const std::string &path,
 	if (!inputFile.is_open()) {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
-				<< "Failed to read from file: "
+				<< "[Error] Failed to read from file: "
 				<< absolutePath
 				<< Color::reset() << std::endl;
 		}

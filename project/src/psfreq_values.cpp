@@ -203,8 +203,8 @@ bool Values::runPlan()
 		if (result == AUTO_NONE) {
 			if (!Log::isAllQuiet()) {
 				std::cerr << Color::boldRed()
-					<< "Failed to decide an automatic"
-					<< " plan."
+					<< "[Error] Failed to decide an "
+					<< "automatic plan."
 					<< Color::reset()
 					<< std::endl;
 			}
@@ -259,8 +259,8 @@ unsigned int Values::setPlanAuto()
 	if (!directory) {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
-				<< "Could not open directory: " << dirName
-				<< Color::reset()
+				<< "[Error] Could not open directory: "
+				<< dirName << Color::reset()
 				<< std::endl;
 		}
 		return AUTO_NONE;
@@ -270,8 +270,8 @@ unsigned int Values::setPlanAuto()
 		if (closedir(directory)) {
 			if (!Log::isAllQuiet()) {
 				std::cerr << Color::boldRed()
-					<< "Failed to close directory: "
-					<< dirName
+					<< "[Error] Failed to close "
+					<< "directory: " << dirName
 					<< Color::reset()
 					<< std::endl;
 			}
@@ -301,8 +301,8 @@ unsigned int Values::getPowerSourceDirectory(DIR *const directory,
 			} else {
 				if (!Log::isAllQuiet()) {
 					std::cerr << Color::boldRed()
-						<< "Path is larger than"
-						<< " max allowed."
+						<< "[Error] Path is larger "
+						<< "than max allowed."
 						<< Color::reset()
 						<< std::endl;
 				}

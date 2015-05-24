@@ -56,7 +56,7 @@ void printPlanHelp()
 #endif
 #endif
 	    << psfreq::Color::reset() << std::endl;
-	std::cerr << oss.str();
+	std::cerr << "[Error] " << oss.str();
 }
 
 /*
@@ -77,7 +77,7 @@ void printGovernorHelp(const std::vector<std::string> &availableGovernors)
 		    << std::endl;
 	}
 	oss << psfreq::Color::reset() << std::endl;
-	std::cerr << oss.str();
+	std::cerr << "[Error] " << oss.str();
 }
 
 /*

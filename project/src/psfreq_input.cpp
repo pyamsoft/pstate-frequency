@@ -182,6 +182,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 		psfreq::Values &cpuValues, const int result)
 {
 	std::ostringstream err;
+	err << "[Error] ";
 	switch(result) {
 	case 0:
                 return Pair(PARSE_EXIT_NORMAL);
@@ -243,7 +244,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 				return Pair(PARSE_EXIT_NORMAL);
 			} else {
 				err << "Invalid power plan specified: "
-				    << optarg << std::endl;
+				    << optarg;
 				return Pair(PARSE_EXIT_BAD, err.str());
 			}
 		}
@@ -259,7 +260,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 				return Pair(PARSE_EXIT_NORMAL);
 			} else {
 				err << "Invalid max specified: "
-				    << optarg << std::endl;
+				    << optarg;
 				return Pair(PARSE_EXIT_BAD, err.str());
 			}
 		}
@@ -276,7 +277,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 				return Pair(PARSE_EXIT_NORMAL);
 			} else {
 				err << "Invalid governor specified: "
-				    << optarg << std::endl;
+				    << optarg;
 				return Pair(PARSE_EXIT_BAD, err.str());
 			}
 		}
@@ -292,7 +293,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 				return Pair(PARSE_EXIT_NORMAL);
 			} else {
 				err << "Invalid min specified: "
-				    << optarg << std::endl;
+				    << optarg;
 				return Pair(PARSE_EXIT_BAD, err.str());
 			}
 		}
@@ -308,7 +309,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 				return Pair(PARSE_EXIT_NORMAL);
 			} else {
 				err << "Invalid turbo specified: "
-				    << optarg << std::endl;
+				    << optarg;
 				return Pair(PARSE_EXIT_BAD, err.str());
 			}
 		}
