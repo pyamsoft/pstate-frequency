@@ -18,8 +18,6 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
-#include <iostream>
-
 #include <getopt.h>
 
 #include "include/psfreq_color.h"
@@ -31,7 +29,7 @@
 
 namespace psfreq {
 
-static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
  		const int result);
 static int planFromOptArg(char *const arg);
 static const std::string governorFromOptArg(char *const arg,
@@ -188,27 +186,27 @@ static const std::string governorFromOptArg(char *const arg,
  * Given the return value from the getopt_long function as parameter 'result'
  * decide how to handle the option that was entered by the user.
  */
-static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const int result)
 {
 	switch(result) {
 	case 0:
-                return PARSE_EXIT_NORMAL;
+                return Pair(PARSE_EXIT_NORMAL);
         case 'H':
 		printGPL();
 		printHelp();
-                return PARSE_EXIT_GOOD;
+                return Pair(PARSE_EXIT_GOOD);
         case 'c':
 		/*
 		 * The --current option is only valid when using
 		 * pstate-frequency to get CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionSet()) {
-			return PARSE_EXIT_BAD;
+			return Pair(PARSE_EXIT_BAD, "Action is not GET");
 		} else {
 			cpuValues.setRequested(psfreq::
 					Values::REQUESTED_CURRENT);
-			return PARSE_EXIT_NORMAL;
+			return Pair(PARSE_EXIT_NORMAL);
 		}
         case 'r':
 		/*
@@ -216,41 +214,42 @@ static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		 * pstate-frequency to get CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionSet()) {
-			return PARSE_EXIT_BAD;
+			return Pair(PARSE_EXIT_BAD, "Action is not GET");
 		} else {
 			cpuValues.setRequested(psfreq::Values::REQUESTED_REAL);
-			return PARSE_EXIT_NORMAL;
+			return Pair(PARSE_EXIT_NORMAL);
 		}
 	case 'd':
 		psfreq::Log::setDebug();
-		return PARSE_EXIT_NORMAL;
+		return Pair(PARSE_EXIT_NORMAL);
 	case 'a':
 		psfreq::Log::setAllQuiet();
-		return PARSE_EXIT_NORMAL;
+		return Pair(PARSE_EXIT_NORMAL);
 	case 'q':
 		psfreq::Log::setQuiet();
-		return PARSE_EXIT_NORMAL;
+		return Pair(PARSE_EXIT_NORMAL);
         case 'V':
 		printGPL();
 		printVersion();
-                return PARSE_EXIT_GOOD;
+		return Pair(PARSE_EXIT_GOOD);
         case 'S':
 		cpuValues.setAction(psfreq::Values::ACTION_SET);
-                return PARSE_EXIT_NORMAL;
+		return Pair(PARSE_EXIT_NORMAL);
         case 'G':
 		cpuValues.setAction(psfreq::Values::ACTION_GET);
-                return PARSE_EXIT_NORMAL;
+		return Pair(PARSE_EXIT_NORMAL);
         case 'p':
 		/*
 		 * The --plan option is only valid when using pstate-frequency
 		 * to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return PARSE_EXIT_BAD;
+			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
-			return (!cpuValues.setPlan(planFromOptArg(optarg))
-					? PARSE_EXIT_BAD_HANDLED
-					: PARSE_EXIT_NORMAL);
+			return (cpuValues.setPlan(planFromOptArg(optarg))
+					? Pair(PARSE_EXIT_NORMAL)
+					: Pair(PARSE_EXIT_BAD,
+						"Invalid plan"));
 		}
         case 'm':
 		/*
@@ -258,11 +257,11 @@ static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		 * to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return PARSE_EXIT_BAD;
+			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
 			return (cpuValues.setMax(maxFromOptArg(optarg))
-					? PARSE_EXIT_NORMAL
-					: PARSE_EXIT_BAD);
+					? Pair(PARSE_EXIT_NORMAL)
+					: Pair(PARSE_EXIT_BAD, "Bad input"));
 		}
 	case 'g':
 		/*
@@ -270,13 +269,13 @@ static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		 * pstate-frequency to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return PARSE_EXIT_BAD;
+			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
-			return (!cpuValues.setGovernor(
+			return (cpuValues.setGovernor(
 					governorFromOptArg(optarg,
 					cpu.getAvailableGovernors()))
-					? PARSE_EXIT_BAD_HANDLED
-					: PARSE_EXIT_NORMAL);
+					? Pair(PARSE_EXIT_NORMAL)
+					: Pair(PARSE_EXIT_BAD, "Bad input"));
 		}
         case 'n':
 		/*
@@ -284,11 +283,11 @@ static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		 * pstate-frequency to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return PARSE_EXIT_BAD;
+			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
 			return (cpuValues.setMin(minFromOptArg(optarg))
-					? PARSE_EXIT_NORMAL
-					: PARSE_EXIT_BAD);
+					? Pair(PARSE_EXIT_NORMAL)
+					: Pair(PARSE_EXIT_BAD, "Bad input"));
 		}
         case 't':
 		/*
@@ -296,65 +295,45 @@ static int handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		 * pstate-frequency to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return PARSE_EXIT_BAD;
+			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
 			return (cpuValues.setTurbo(
 					turboFromOptArg(cpu, optarg))
-					? PARSE_EXIT_NORMAL
-					: PARSE_EXIT_BAD);
+					? Pair(PARSE_EXIT_NORMAL)
+					: Pair(PARSE_EXIT_BAD, "Bad input"));
 		}
         case '1':
 		psfreq::Color::setEnabled();
-		return PARSE_EXIT_NORMAL;
+		return Pair(PARSE_EXIT_NORMAL);
 	case ':':
-		if (!psfreq::Log::isAllQuiet()) {
-			std::cerr << psfreq::Color::boldRed()
-				<< "Missing argument for option. "
-				<< psfreq::Color::reset() << std::endl;
-		}
-		return PARSE_EXIT_BAD;
+		return Pair(PARSE_EXIT_BAD, "Missing argument");
 	case '?':
-		if (!psfreq::Log::isAllQuiet()) {
-			std::cerr << psfreq::Color::boldRed()
-				<< "Unknown option."
-				<< psfreq::Color::reset() << std::endl;
-		}
-		return PARSE_EXIT_BAD;
+		return Pair(PARSE_EXIT_BAD, "Unknown option");
 	}
-	return PARSE_EXIT_BAD;
+	return Pair(PARSE_EXIT_BAD, "End of options reached");
 }
 
 /*
  * As long as command line options exist, loop over the input and
  * run the getopt_long function to figure out the option requested.
  */
-int parseOptions(const int argc, char **const argv,
+Pair parseOptions(const int argc, char **const argv,
 		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
 		const char *const shortOptions,
 		const struct option longOptions[]) {
 	while (true) {
-                const int optionResult = getopt_long(argc, argv, shortOptions,
+                const int opt = getopt_long(argc, argv, shortOptions,
 				longOptions, NULL);
-                if (optionResult == -1) {
+                if (opt == -1) {
                         break;
                 } else {
-			const int finalOptionResult = handleOptionResult(cpu, cpuValues,
-					optionResult);
-			if (finalOptionResult == PARSE_EXIT_GOOD) {
-				return PARSE_EXIT_GOOD;
-			} else if (finalOptionResult == PARSE_EXIT_BAD) {
-				if (!psfreq::Log::isAllQuiet()) {
-					std::cerr << psfreq::Color::boldRed()
-						<< "Bad Option."
-						<< psfreq::Color::reset()
-						<< std::endl;
-				}
-				return PARSE_EXIT_BAD;
-			} else if (finalOptionResult == PARSE_EXIT_BAD_HANDLED) {
-				return PARSE_EXIT_BAD;
+			const Pair result = handleOptionResult(cpu, cpuValues,
+					opt);
+			if (result.code != PARSE_EXIT_NORMAL) {
+				return result;
 			}
                 }
         }
-	return PARSE_EXIT_NORMAL;
+	return Pair(PARSE_EXIT_NORMAL);
 }
 }

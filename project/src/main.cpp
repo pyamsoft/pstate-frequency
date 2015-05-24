@@ -204,14 +204,16 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	const int parseResult = parseOptions(argc, argv, cpu, cpuValues,
+	const psfreq::Pair opts = parseOptions(argc, argv, cpu, cpuValues,
 			shortOptions, longOptions);
-	if (parseResult != psfreq::PARSE_EXIT_NORMAL) {
-		if (parseResult == psfreq::PARSE_EXIT_GOOD) {
-			return EXIT_SUCCESS;
-		} else {
-			return EXIT_FAILURE;
+	if (opts.code != psfreq::PARSE_EXIT_NORMAL) {
+		if (opts.msg.length() != 0) {
+			std::cerr << psfreq::Color::boldRed() << opts.msg
+				  << psfreq::Color::reset() << std::endl;
 		}
+		return ((opts.code == psfreq::PARSE_EXIT_GOOD)
+			? EXIT_SUCCESS
+			: EXIT_FAILURE);
 	}
 
 	if (!cpuValues.runPlan()) {

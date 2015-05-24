@@ -26,13 +26,31 @@
 
 namespace psfreq {
 
-const int PARSE_EXIT_GOOD = -1;
-const int PARSE_EXIT_BAD = 1;
-const int PARSE_EXIT_BAD_HANDLED = 2;
-const int PARSE_EXIT_NORMAL = 0;
-const int UID_ROOT = 0;
+const unsigned int PARSE_EXIT_GOOD = 2;
+const unsigned int PARSE_EXIT_BAD = 1;
+const unsigned int PARSE_EXIT_NORMAL = 0;
+const unsigned int UID_ROOT = 0;
 
-int parseOptions(const int argc, char **const argv,
+class Pair {
+private:
+	explicit Pair();
+public:
+	unsigned int code;
+	const std::string msg;
+
+	explicit Pair(const unsigned int code)
+		: code(code), msg(std::string())
+	{
+	}
+
+	explicit Pair(const unsigned int code, const std::string& msg)
+		: code(code), msg(msg)
+	{
+	}
+
+};
+
+Pair parseOptions(const int argc, char **const argv,
  		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
  		const char *const shortOptions,
  		const struct option longOptions[]);
