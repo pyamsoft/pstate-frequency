@@ -18,6 +18,8 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
+#include <sstream>
+
 #include <getopt.h>
 
 #include "include/psfreq_color.h"
@@ -29,8 +31,8 @@
 
 namespace psfreq {
 
-static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
- 		const int result);
+static Pair handleOptionResult(const psfreq::Cpu &cpu,
+		psfreq::Values &cpuValues, const int result);
 static int planFromOptArg(char *const arg);
 static const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
@@ -115,12 +117,7 @@ static int maxFromOptArg(char *const arg)
 	} else if (convertedArg.compare("max") == 0) {
 		max = 100;
 	} else {
-		const int n = psfreq::stringToNumber(convertedArg);
-		if (n == BAD_NUMBER) {
-			max = BAD_NUMBER;
-		} else {
-			max = n;
-		}
+		max = psfreq::stringToNumber(convertedArg);
 	}
 	return max;
 }
@@ -134,12 +131,7 @@ static int minFromOptArg(char *const arg)
 	} else if (convertedArg.compare("max") == 0) {
 		min = 99;
 	} else {
-		const int n = psfreq::stringToNumber(convertedArg);
-		if (n == BAD_NUMBER) {
-			min = BAD_NUMBER;
-		} else {
-			min = n;
-		}
+		min = psfreq::stringToNumber(convertedArg);
 	}
 	return min;
 }
@@ -186,9 +178,10 @@ static const std::string governorFromOptArg(char *const arg,
  * Given the return value from the getopt_long function as parameter 'result'
  * decide how to handle the option that was entered by the user.
  */
-static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
-		const int result)
+static Pair handleOptionResult(const psfreq::Cpu &cpu,
+		psfreq::Values &cpuValues, const int result)
 {
+	std::ostringstream err;
 	switch(result) {
 	case 0:
                 return Pair(PARSE_EXIT_NORMAL);
@@ -246,10 +239,13 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
-			return (cpuValues.setPlan(planFromOptArg(optarg))
-					? Pair(PARSE_EXIT_NORMAL)
-					: Pair(PARSE_EXIT_BAD,
-						"Invalid plan"));
+			if (cpuValues.setPlan(planFromOptArg(optarg))) {
+				return Pair(PARSE_EXIT_NORMAL);
+			} else {
+				err << "Invalid power plan specified: "
+				    << optarg << std::endl;
+				return Pair(PARSE_EXIT_BAD, err.str());
+			}
 		}
         case 'm':
 		/*
@@ -259,9 +255,13 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
-			return (cpuValues.setMax(maxFromOptArg(optarg))
-					? Pair(PARSE_EXIT_NORMAL)
-					: Pair(PARSE_EXIT_BAD, "Bad input"));
+			if (cpuValues.setMax(maxFromOptArg(optarg))) {
+				return Pair(PARSE_EXIT_NORMAL);
+			} else {
+				err << "Invalid max specified: "
+				    << optarg << std::endl;
+				return Pair(PARSE_EXIT_BAD, err.str());
+			}
 		}
 	case 'g':
 		/*
@@ -271,11 +271,14 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
-			return (cpuValues.setGovernor(
-					governorFromOptArg(optarg,
-					cpu.getAvailableGovernors()))
-					? Pair(PARSE_EXIT_NORMAL)
-					: Pair(PARSE_EXIT_BAD, "Bad input"));
+			if (cpuValues.setGovernor(governorFromOptArg(optarg,
+					cpu.getAvailableGovernors()))) {
+				return Pair(PARSE_EXIT_NORMAL);
+			} else {
+				err << "Invalid governor specified: "
+				    << optarg << std::endl;
+				return Pair(PARSE_EXIT_BAD, err.str());
+			}
 		}
         case 'n':
 		/*
@@ -285,9 +288,13 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
-			return (cpuValues.setMin(minFromOptArg(optarg))
-					? Pair(PARSE_EXIT_NORMAL)
-					: Pair(PARSE_EXIT_BAD, "Bad input"));
+			if (cpuValues.setMin(minFromOptArg(optarg))) {
+				return Pair(PARSE_EXIT_NORMAL);
+			} else {
+				err << "Invalid min specified: "
+				    << optarg << std::endl;
+				return Pair(PARSE_EXIT_BAD, err.str());
+			}
 		}
         case 't':
 		/*
@@ -297,10 +304,13 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu, psfreq::Values &cpuValues
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
 			return Pair(PARSE_EXIT_BAD, "Action is not SET");
 		} else {
-			return (cpuValues.setTurbo(
-					turboFromOptArg(cpu, optarg))
-					? Pair(PARSE_EXIT_NORMAL)
-					: Pair(PARSE_EXIT_BAD, "Bad input"));
+			if (cpuValues.setTurbo(turboFromOptArg(cpu, optarg))) {
+				return Pair(PARSE_EXIT_NORMAL);
+			} else {
+				err << "Invalid turbo specified: "
+				    << optarg << std::endl;
+				return Pair(PARSE_EXIT_BAD, err.str());
+			}
 		}
         case '1':
 		psfreq::Color::setEnabled();
