@@ -65,8 +65,9 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 			|| cpuMaxPstate == psfreq::Cpu::PSTATE_VALUE_INSANE
 			|| cpuGovernor == psfreq::Cpu::GOVERNOR_INSANE) {
 		if (!psfreq::Log::isAllQuiet()) {
-			std::cerr << "[Error] CPU system is insane, exit"
-				  << std::endl;
+			std::cerr << psfreq::Color::boldRed()
+				  << "[Error] System is insane"
+				  << psfreq::Color::reset() << std::endl;
 		}
 		return false;
 	} else {
@@ -213,14 +214,10 @@ int main(int argc, char** argv)
 		return EXIT_FAILURE;
 	}
 
-	const psfreq::Pair opts = psfreq::parseOptions(argc, argv, cpu,
+	const unsigned int opts = psfreq::parseOptions(argc, argv, cpu,
 			cpuValues, shortOptions, longOptions);
-	if (opts.code != psfreq::PARSE_EXIT_NORMAL) {
-		if (opts.msg.length() != 0) {
-			std::cerr << psfreq::Color::boldRed() << opts.msg
-				  << psfreq::Color::reset() << std::endl;
-		}
-		return ((opts.code == psfreq::PARSE_EXIT_GOOD)
+	if (opts != psfreq::PARSE_EXIT_NORMAL) {
+		return ((opts == psfreq::PARSE_EXIT_GOOD)
 			? EXIT_SUCCESS
 			: EXIT_FAILURE);
 	}

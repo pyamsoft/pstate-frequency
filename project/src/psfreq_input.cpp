@@ -32,7 +32,7 @@
 
 namespace psfreq {
 
-static Pair handleOptionResult(const Cpu &cpu,
+static unsigned int handleOptionResult(const Cpu &cpu,
 		Values &cpuValues, const int result);
 static int planFromOptArg(char *const arg);
 static const std::string governorFromOptArg(char *const arg,
@@ -262,28 +262,31 @@ static const std::string governorFromOptArg(char *const arg,
  * Given the return value from the getopt_long function as parameter 'result'
  * decide how to handle the option that was entered by the user.
  */
-static Pair handleOptionResult(const Cpu &cpu,
+static unsigned int handleOptionResult(const Cpu &cpu,
 		Values &cpuValues, const int result)
 {
-	std::ostringstream err;
-	err << "[Error] ";
 	switch(result) {
 	case 0:
-                return Pair(PARSE_EXIT_NORMAL);
+                return PARSE_EXIT_NORMAL;
         case 'H':
 		printGPL();
 		printHelp();
-                return Pair(PARSE_EXIT_GOOD);
+                return PARSE_EXIT_GOOD;
         case 'c':
 		/*
 		 * The --current option is only valid when using
 		 * pstate-frequency to get CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionSet()) {
-			return Pair(PARSE_EXIT_BAD, "Action is not GET");
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] Action is not GET"
+					<< Color::reset() << std::endl;
+			}
+			return PARSE_EXIT_BAD;
 		} else {
 			cpuValues.setRequested(Values::REQUESTED_CURRENT);
-			return Pair(PARSE_EXIT_NORMAL);
+			return PARSE_EXIT_NORMAL;
 		}
         case 'r':
 		/*
@@ -291,44 +294,58 @@ static Pair handleOptionResult(const Cpu &cpu,
 		 * pstate-frequency to get CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionSet()) {
-			return Pair(PARSE_EXIT_BAD, "Action is not GET");
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] Action is not GET"
+					<< Color::reset() << std::endl;
+			}
+			return PARSE_EXIT_BAD;
 		} else {
 			cpuValues.setRequested(Values::REQUESTED_REAL);
-			return Pair(PARSE_EXIT_NORMAL);
+			return PARSE_EXIT_NORMAL;
 		}
 	case 'd':
 		Log::setDebug();
-		return Pair(PARSE_EXIT_NORMAL);
+		return PARSE_EXIT_NORMAL;
 	case 'a':
 		Log::setAllQuiet();
-		return Pair(PARSE_EXIT_NORMAL);
+		return PARSE_EXIT_NORMAL;
 	case 'q':
 		Log::setQuiet();
-		return Pair(PARSE_EXIT_NORMAL);
+		return PARSE_EXIT_NORMAL;
         case 'V':
 		printGPL();
 		printVersion();
-		return Pair(PARSE_EXIT_GOOD);
+		return PARSE_EXIT_GOOD;
         case 'S':
 		cpuValues.setAction(Values::ACTION_SET);
-		return Pair(PARSE_EXIT_NORMAL);
+		return PARSE_EXIT_NORMAL;
         case 'G':
 		cpuValues.setAction(Values::ACTION_GET);
-		return Pair(PARSE_EXIT_NORMAL);
+		return PARSE_EXIT_NORMAL;
         case 'p':
 		/*
 		 * The --plan option is only valid when using pstate-frequency
 		 * to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return Pair(PARSE_EXIT_BAD, "Action is not SET");
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] Action is not SET"
+					<< Color::reset() << std::endl;
+			}
+			return PARSE_EXIT_BAD;
 		} else {
 			if (cpuValues.setPlan(planFromOptArg(optarg))) {
-				return Pair(PARSE_EXIT_NORMAL);
+				return PARSE_EXIT_NORMAL;
 			} else {
-				err << "Invalid power plan specified: "
-				    << optarg;
-				return Pair(PARSE_EXIT_BAD, err.str());
+				if (!Log::isAllQuiet()) {
+					std::cerr << Color::boldRed()
+						<< "[Error] Invalid power "
+						<< "plan specified: " << optarg
+						<< Color::reset() << std::endl;
+				}
+				return PARSE_EXIT_BAD;
 			}
 		}
         case 'm':
@@ -337,14 +354,23 @@ static Pair handleOptionResult(const Cpu &cpu,
 		 * to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return Pair(PARSE_EXIT_BAD, "Action is not SET");
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] Action is not SET"
+					<< Color::reset() << std::endl;
+			}
+			return PARSE_EXIT_BAD;
 		} else {
 			if (cpuValues.setMax(maxFromOptArg(optarg))) {
-				return Pair(PARSE_EXIT_NORMAL);
+				return PARSE_EXIT_NORMAL;
 			} else {
-				err << "Invalid max specified: "
-				    << optarg;
-				return Pair(PARSE_EXIT_BAD, err.str());
+				if (!Log::isAllQuiet()) {
+					std::cerr << Color::boldRed()
+						<< "[Error] Invalid max "
+						<< "specified: " << optarg
+						<< Color::reset() << std::endl;
+				}
+				return PARSE_EXIT_BAD;
 			}
 		}
 	case 'g':
@@ -353,15 +379,24 @@ static Pair handleOptionResult(const Cpu &cpu,
 		 * pstate-frequency to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return Pair(PARSE_EXIT_BAD, "Action is not SET");
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] Action is not SET"
+					<< Color::reset() << std::endl;
+			}
+			return PARSE_EXIT_BAD;
 		} else {
 			if (cpuValues.setGovernor(governorFromOptArg(optarg,
 					cpu.getAvailableGovernors()))) {
-				return Pair(PARSE_EXIT_NORMAL);
+				return PARSE_EXIT_NORMAL;
 			} else {
-				err << "Invalid governor specified: "
-				    << optarg;
-				return Pair(PARSE_EXIT_BAD, err.str());
+				if (!Log::isAllQuiet()) {
+					std::cerr << Color::boldRed()
+						<< "[Error] Invalid governor "
+						<< "specified: " << optarg
+						<< Color::reset() << std::endl;
+				}
+				return PARSE_EXIT_BAD;
 			}
 		}
         case 'n':
@@ -370,14 +405,23 @@ static Pair handleOptionResult(const Cpu &cpu,
 		 * pstate-frequency to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return Pair(PARSE_EXIT_BAD, "Action is not SET");
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] Action is not SET"
+					<< Color::reset() << std::endl;
+			}
+			return PARSE_EXIT_BAD;
 		} else {
 			if (cpuValues.setMin(minFromOptArg(optarg))) {
-				return Pair(PARSE_EXIT_NORMAL);
+				return PARSE_EXIT_NORMAL;
 			} else {
-				err << "Invalid min specified: "
-				    << optarg;
-				return Pair(PARSE_EXIT_BAD, err.str());
+				if (!Log::isAllQuiet()) {
+					std::cerr << Color::boldRed()
+						<< "[Error] Invalid min "
+						<< "specified: " << optarg
+						<< Color::reset() << std::endl;
+				}
+				return PARSE_EXIT_BAD;
 			}
 		}
         case 't':
@@ -386,32 +430,58 @@ static Pair handleOptionResult(const Cpu &cpu,
 		 * pstate-frequency to set CPU values
 		 */
 		if (cpuValues.isActionNull() || cpuValues.isActionGet()) {
-			return Pair(PARSE_EXIT_BAD, "Action is not SET");
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] Action is not SET"
+					<< Color::reset() << std::endl;
+			}
+			return PARSE_EXIT_BAD;
 		} else {
 			if (cpuValues.setTurbo(turboFromOptArg(cpu, optarg))) {
-				return Pair(PARSE_EXIT_NORMAL);
+				return PARSE_EXIT_NORMAL;
 			} else {
-				err << "Invalid turbo specified: "
-				    << optarg;
-				return Pair(PARSE_EXIT_BAD, err.str());
+				if (!Log::isAllQuiet()) {
+					std::cerr << Color::boldRed()
+						<< "[Error] Invalid turbo "
+						<< "specified: " << optarg
+						<< Color::reset() << std::endl;
+				}
+				return PARSE_EXIT_BAD;
 			}
 		}
         case '1':
 		Color::setEnabled();
-		return Pair(PARSE_EXIT_NORMAL);
+		return PARSE_EXIT_NORMAL;
 	case ':':
-		return Pair(PARSE_EXIT_BAD, "Missing argument");
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "[Error] Missing arguments"
+				<< Color::reset() << std::endl;
+		}
+		return PARSE_EXIT_BAD;
 	case '?':
-		return Pair(PARSE_EXIT_BAD, "Unknown option");
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "[Error] Invalid option"
+				<< Color::reset() << std::endl;
+		}
+		return PARSE_EXIT_BAD;
+	default:
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "[Error] End of options reached"
+				<< Color::reset() << std::endl;
+		}
+		return PARSE_EXIT_BAD;
+
 	}
-	return Pair(PARSE_EXIT_BAD, "End of options reached");
 }
 
 /*
  * As long as command line options exist, loop over the input and
  * run the getopt_long function to figure out the option requested.
  */
-Pair parseOptions(const int argc, char **const argv,
+unsigned int parseOptions(const int argc, char **const argv,
 		const Cpu &cpu, Values &cpuValues,
 		const char *const shortOptions,
 		const struct option longOptions[]) {
@@ -429,13 +499,13 @@ Pair parseOptions(const int argc, char **const argv,
 				std::cout << "[Debug] opt found"
 					<< std::endl;
 			}
-			const Pair result = handleOptionResult(cpu, cpuValues,
-					opt);
-			if (result.code != PARSE_EXIT_NORMAL) {
+			const unsigned int result = handleOptionResult(cpu,
+					cpuValues, opt);
+			if (result != PARSE_EXIT_NORMAL) {
 				return result;
 			}
                 }
         }
-	return Pair(PARSE_EXIT_NORMAL);
+	return PARSE_EXIT_NORMAL;
 }
 }
