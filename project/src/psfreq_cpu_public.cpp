@@ -67,6 +67,11 @@ bool Cpu::init()
 		maxInfoFrequency = findInfoMaxFrequency();
 		if (minInfoFrequency == NO_FREQ || maxInfoFrequency == NO_FREQ
 				|| number == NO_CPUS) {
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] Unable to find CPU vars"
+					<< Color::reset() << std::endl;
+			}
 			return false;
 		}
 		initializeVector(minFrequencyFileVector, "min_freq");
@@ -94,11 +99,13 @@ double Cpu::getScalingMinFrequency() const
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_min_freq");
 	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
-		if (result == BAD_NUMBER) {
-			return SCALING_FREQUENCY_INSANE;
-		} else {
-			return result;
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Check the scaling_min_freq: '"
+				  << result << "'" << std::endl;
 		}
+		return (result == BAD_NUMBER)
+			? SCALING_FREQUENCY_INSANE
+			: result;
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
@@ -114,11 +121,13 @@ double Cpu::getScalingMaxFrequency() const
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_max_freq");
 	if (line != BAD_READ) {
 		const double result = stringToNumber(line);
-		if (result == BAD_NUMBER) {
-			return SCALING_FREQUENCY_INSANE;
-		} else {
-			return result;
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Check the scaling_max_freq: '"
+				  << result << "'" << std::endl;
 		}
+		return (result == BAD_NUMBER)
+			? SCALING_FREQUENCY_INSANE
+			: result;
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
@@ -134,6 +143,10 @@ const std::string Cpu::getGovernor() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_governor");
 	if (line != BAD_READ) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Check the scaling_governor: '"
+				  << line << "'" << std::endl;
+		}
 		return line;
 	} else {
 		if (!Log::isAllQuiet()) {
@@ -149,6 +162,10 @@ const std::string Cpu::getDriver() const
 {
 	const std::string line = sysfs.read("cpu0/cpufreq/scaling_driver");
 	if (line != BAD_READ) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Check the scaling_driver: '"
+				  << line << "'" << std::endl;
+		}
 		return line;
 	} else {
 		if (!Log::isAllQuiet()) {
@@ -165,6 +182,10 @@ const std::vector<std::string> Cpu::getRealtimeFrequencies() const
 	const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
 	const std::vector<std::string> result = sysfs.readPipe(cmd, number);
 	if (!result.empty()) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Found realtime frequency vector"
+				  << std::endl;
+		}
 		return result;
 	} else {
 		if (!Log::isAllQuiet()) {
@@ -181,6 +202,10 @@ const std::vector<std::string> Cpu::getAvailableGovernors() const
 	const std::vector<std::string> availableGovernors
 		= sysfs.readAll("cpu0/cpufreq/scaling_available_governors");
 	if (!availableGovernors.empty()) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Found available governors vector"
+				  << std::endl;
+		}
 		return availableGovernors;
 	} else {
 		if (!Log::isAllQuiet()) {
@@ -211,11 +236,13 @@ int Cpu::getTurboBoost() const
 			: "cpufreq/boost");
 	if (line != BAD_READ) {
 		const int result = stringToNumber(line);
-		if (result == BAD_NUMBER) {
-			return TURBO_BOOST_INSANE;
-		} else {
-			return result;
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Check the no_turbo: '"
+				  << result << "'" << std::endl;
 		}
+		return (result == BAD_NUMBER)
+			? TURBO_BOOST_INSANE
+			: result;
 	} else {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
@@ -335,11 +362,23 @@ unsigned int Cpu::getPowerSupply(const std::string &fullPath) const
 	oss << fullPath << "/type";
 	const std::string typePath = oss.str();
 	const char *const type = typePath.c_str();
+	if (Log::isDebug()) {
+		std::cout << "[Debug] getting power supply from path: '"
+			  << typePath << "'" << std::endl;
+	}
 	if (access(type, F_OK) != -1) {
 		const std::string powerType = sysfs.read(fullPath, "type");
+		if (Log::isDebug()) {
+			std::cout << "[Debug] power type: '"
+				<< powerType << "'" << std::endl;
+		}
 		if (powerType.compare("Mains") == 0) {
 			const int status = stringToNumber(
 					sysfs.read(fullPath, "online"));
+			if (Log::isDebug()) {
+				std::cout << "[Debug] power status: '"
+					<< status << "'" << std::endl;
+			}
 			if (status == BAD_NUMBER) {
 				return POWER_SOURCE_NONE;
 			} else if (status == 1) {
