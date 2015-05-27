@@ -101,7 +101,8 @@ double Cpu::getScalingMinFrequency() const
 		const double result = stringToNumber(line);
 		if (Log::isDebug()) {
 			std::cout << "[Debug] Check the scaling_min_freq: '"
-				  << result << "'" << std::endl;
+				  << static_cast<int>(result) << "'"
+				  << std::endl;
 		}
 		return (result == BAD_NUMBER)
 			? SCALING_FREQUENCY_INSANE
@@ -123,7 +124,8 @@ double Cpu::getScalingMaxFrequency() const
 		const double result = stringToNumber(line);
 		if (Log::isDebug()) {
 			std::cout << "[Debug] Check the scaling_max_freq: '"
-				  << result << "'" << std::endl;
+				  << static_cast<int>(result) << "'"
+				  << std::endl;
 		}
 		return (result == BAD_NUMBER)
 			? SCALING_FREQUENCY_INSANE

@@ -59,23 +59,48 @@ const std::string numberToString(const unsigned int number)
 {
         std::ostringstream oss;
 	oss << number;
-	return oss.str();
+	const std::string s = oss.str();
+	if (Log::isDebug()) {
+		std::cout << "[Debug] number: '" << number
+			<< "' to string: '" << s << "'"
+			<< std::endl;
+	}
+	return s;
 }
 
 int boundValue(const int value, const int minBound,
 		const int maxBound)
 {
 	if (value < minBound) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] value: '" << value
+				<< "' bound to min: '" << minBound << "'"
+				<< std::endl;
+		}
 		return minBound;
 	} else if (value > maxBound) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] value: '" << value
+				<< "' bound to max: '" << maxBound << "'"
+				<< std::endl;
+		}
 		return maxBound;
 	} else {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] value: '" << value
+				<< "' not bound" << std::endl;
+		}
 		return value;
 	}
 }
 
 bool stringStartsWith(const std::string &control, const std::string &value)
 {
+	if (Log::isDebug()) {
+		std::cout << "[Debug] compare control string: '" << control
+			<< "' starts with string '" << value
+			<< "'" << std::endl;
+	}
 	return control.compare(0, value.length(), value) == 0;
 }
 

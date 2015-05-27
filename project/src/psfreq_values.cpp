@@ -184,22 +184,41 @@ bool Values::setPlan(const int powerPlan) {
 bool Values::runPlan()
 {
 	bool result = true;
-	unsigned int autoPlan;
+	unsigned int autoPlan = AUTO_NONE;
 	switch(plan) {
 	case POWER_PLAN_NONE:
+		if (Log::isDebug()) {
+			std::cout << "[Debug] no power plan" << std::endl;
+		}
 		break;
 	case POWER_PLAN_POWERSAVE:
+		if (Log::isDebug()) {
+			std::cout << "[Debug] power plan: powersave"
+				<< std::endl;
+		}
 		setPlanPowersave();
 		break;
 	case POWER_PLAN_PERFORMANCE:
+		if (Log::isDebug()) {
+			std::cout << "[Debug] power plan: performance"
+				<< std::endl;
+		}
 		setPlanPerformance();
 		break;
 	case POWER_PLAN_MAX_PERFORMANCE:
+		if (Log::isDebug()) {
+			std::cout << "[Debug] power plan: max-performance"
+				<< std::endl;
+		}
 		setPlanMaxPerformance();
 		break;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	case POWER_PLAN_AUTO:
+		if (Log::isDebug()) {
+			std::cout << "[Debug] power plan: auto"
+				<< std::endl;
+		}
 		autoPlan = setPlanAuto();
 		if (autoPlan == AUTO_NONE) {
 			if (!Log::isAllQuiet()) {
@@ -212,8 +231,16 @@ bool Values::runPlan()
 			result = false;
 			break;
 		} else if (autoPlan == POWER_PLAN_POWERSAVE) {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] power plan: powersave "
+					<< "from auto" << std::endl;
+			}
 			setPlanPowersave();
 		} else {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] power plan: performance "
+					<< "from auto" << std::endl;
+			}
 			setPlanPerformance();
 		}
 		break;
@@ -222,8 +249,8 @@ bool Values::runPlan()
 	default:
 		result = false;
 	}
-	if (Log::isDebug()) {
-		std::cout << "Auto Plan is: " << autoPlan << std::endl;
+	if (Log::isDebug() && autoPlan == AUTO_NONE) {
+		std::cout << "[Debug] autoPlan unused" << std::endl;
 	}
 	return result;
 }
@@ -262,6 +289,9 @@ unsigned int Values::setPlanAuto()
 {
 	const char *const dirName = "/sys/class/power_supply/";
 	DIR *const directory = opendir(dirName);
+	if (Log::isDebug()) {
+		std::cout << "[Debug] open dir: " << dirName << std::endl;
+	}
 	if (!directory) {
 		if (!Log::isAllQuiet()) {
 			std::cerr << Color::boldRed()
@@ -299,9 +329,25 @@ unsigned int Values::getPowerSourceDirectory(DIR *const directory,
 			std::ostringstream oss;
 			oss << dirName << entryName << "/";
 			const std::string fullPath = oss.str();
+			if (Log::isDebug()) {
+				std::cout << "[Debug] power supply "
+					<< "path: '" << fullPath
+					<< "'" << std::endl;
+			}
 			if (fullPath.length() < fullPath.max_size()) {
 				result = cpu.getPowerSupply(fullPath);
+				if (Log::isDebug()) {
+					std::cout << "[Debug] power supply "
+						<< "result: '" << result
+						<< "'" << std::endl;
+				}
 				if (result > AUTO_NONE) {
+					if (Log::isDebug()) {
+						std::cout << "[Debug] power "
+							<< "supply result is "
+							<< "valid. Break."
+							<< std::endl;
+					}
 					break;
 				}
 			} else {
@@ -314,11 +360,15 @@ unsigned int Values::getPowerSourceDirectory(DIR *const directory,
 				}
 				/*
 				 * Breaking here is safe, as the result should
-				 * still be equivalent to AUTO_NONE, meaning that
-				 * the final return will still work
+				 * still be equivalent to AUTO_NONE, meaning
+				 * that the final return will still work
 				 */
 				break;
 			}
+		}
+		if (Log::isDebug()) {
+			std::cout << "[Debug] read the next dir in directory"
+				<< std::endl;
 		}
 		entry = readdir(directory);
 	}
@@ -332,6 +382,10 @@ unsigned int Values::getPowerSourceDirectory(DIR *const directory,
  */
 bool Values::hideDirectory(const std::string &entryName)
 {
+	if (Log::isDebug()) {
+		std::cout << "[Debug] entryName: '" << entryName
+			<< "'" << std::endl;
+	}
 	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
 }
 
