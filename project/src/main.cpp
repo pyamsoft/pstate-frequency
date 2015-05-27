@@ -75,7 +75,7 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 		 * it can safely be set.
 		 */
 		if (psfreq::Log::isDebug()) {
-			std::cout << "bound the CPU min" << std::endl;
+			std::cout << "[Debug] bound the CPU min" << std::endl;
 		}
 		const int requestedMin = cpuValues.getMin();
 		int newMin = (requestedMin >= 0
@@ -90,7 +90,7 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 		 * minimum, so that it can safely be set.
 		 */
 		if (psfreq::Log::isDebug()) {
-			std::cout << "bound the CPU max" << std::endl;
+			std::cout << "[Debug] bound the CPU max" << std::endl;
 		}
 		const int requestedMax = cpuValues.getMax();
 		int newMax = (requestedMax >= 0
@@ -115,16 +115,18 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 		 */
 		if (cpuMinPstate > newMax) {
 			if (psfreq::Log::isDebug()) {
-				std::cout << "Current min is higher than the "
-					<<"new max, set the min first before "
-					<< "adjusting max" << std::endl;
+				std::cout << "[Debug] Current min is higher "
+					<< "than the new max, set the min "
+					<< "first before adjusting max"
+					<< std::endl;
 			}
 			cpu.setScalingMin(newMin);
 			cpu.setScalingMax(newMax);
 		} else {
 			if (psfreq::Log::isDebug()) {
-				std::cout << "Current min is lower, than the "
-					<<"new max, can safely adjust max"
+				std::cout << "[Debug] Current min is lower "
+					<< "than the new max, can safely "
+					<< "adjust the new max"
 					<< std::endl;
 			}
 			cpu.setScalingMax(newMax);
@@ -138,7 +140,7 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 		const int cpuTurbo = cpu.getTurboBoost();
 		if (cpuTurbo != psfreq::Cpu::TURBO_BOOST_INSANE) {
 			if (psfreq::Log::isDebug()) {
-				std::cout << "Turbo is available to set"
+				std::cout << "[Debug] Turbo is available"
 					<< std::endl;
 			}
 			const int turbo = cpuValues.getTurbo();
@@ -151,7 +153,8 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 		 * Set the software CPU governor
 		 */
 		if (psfreq::Log::isDebug()) {
-			std::cout << "Set the cpu governor" << std::endl;
+			std::cout << "[Debug] Set the cpu governor"
+				  << std::endl;
 		}
 		const std::string requestedGovernor = cpuValues.getGovernor();
 		const std::string newGovernor =
@@ -202,6 +205,11 @@ int main(int argc, char** argv)
 	 * Initialize the cpu so that it may now act on sysfs values.
 	 */
 	if (!cpu.init()) {
+		if (!psfreq::Log::isAllQuiet()) {
+			std::cerr << psfreq::Color::boldRed()
+				  << "[Error] Could not init CPU"
+				  << psfreq::Color::reset() << std::endl;
+		}
 		return EXIT_FAILURE;
 	}
 
