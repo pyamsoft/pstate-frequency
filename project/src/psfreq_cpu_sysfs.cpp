@@ -35,6 +35,10 @@ bool Cpu::Sysfs::write(const std::string &path, const std::string &file,
 	std::ostringstream oss;
 	oss << path << file;
 	const std::string absolutePath = oss.str();
+	if (Log::isDebug()) {
+		std::cout << "[Debug] Attempt to write to file: '"
+			  << absolutePath << "'" << std::endl;
+	}
 	std::ofstream outputFile;
 	outputFile.open(absolutePath.c_str());
 	if (!outputFile.is_open()) {
@@ -46,13 +50,18 @@ bool Cpu::Sysfs::write(const std::string &path, const std::string &file,
 		}
 		return false;
 	} else {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Write buffer: '" << buffer
+				  << "' to file: '" << absolutePath
+				  << "'" << std::endl;
+		}
 		outputFile << buffer << std::endl;
 		outputFile.close();
 		return true;
 	}
 }
 
-bool Cpu::Sysfs::write(const std::string &path,const std::string &file,
+bool Cpu::Sysfs::write(const std::string &path, const std::string &file,
 		const int number) const
 {
 	std::ostringstream oss;
@@ -77,6 +86,10 @@ const std::string Cpu::Sysfs::read(const std::string &path,
 	std::ostringstream oss;
 	oss << path << file;
 	const std::string absolutePath = oss.str();
+	if (Log::isDebug()) {
+		std::cout << "[Debug] Attempt to read from file: '"
+			  << absolutePath << "'" << std::endl;
+	}
 	std::string content;
 	std::ifstream inputFile;
 	inputFile.open(absolutePath.c_str());
@@ -91,6 +104,11 @@ const std::string Cpu::Sysfs::read(const std::string &path,
 	} else {
 		std::getline(inputFile, content);
 		inputFile.close();
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Read buffer: '" << content
+				<< "' from file: '" << absolutePath
+				  << "'" << std::endl;
+		}
 		return content;
 	}
 }
@@ -112,9 +130,19 @@ const std::vector<std::string> Cpu::Sysfs::readAll(const std::string &path,
 	std::ostringstream oss;
 	oss << path << file;
 	const std::string absolutePath = oss.str();
+	if (Log::isDebug()) {
+		std::cout << "[Debug] Attempt to read from file: '"
+			  << absolutePath << "'" << std::endl;
+	}
 	std::ifstream inputFile;
 	inputFile.open(absolutePath.c_str());
 	if (!inputFile.is_open()) {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "[Error] Failed to read from file: "
+				<< absolutePath
+				<< Color::reset() << std::endl;
+		}
 		return Cpu::BAD_VECTOR;
 	} else {
 		std::vector<std::string> contents = std::vector<std::string>();
@@ -123,6 +151,11 @@ const std::vector<std::string> Cpu::Sysfs::readAll(const std::string &path,
 			inputFile >> content;
 			if (inputFile.eof()) {
 				break;
+			}
+			if (Log::isDebug()) {
+				std::cout << "[Debug] ReadAll buffer: '"
+					<< content << "' from file: '"
+					<< absolutePath << "'" << std::endl;
 			}
 			contents.push_back(content);
 		}
@@ -134,6 +167,10 @@ const std::vector<std::string> Cpu::Sysfs::readAll(const std::string &path,
 const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
 		const unsigned int number) const
 {
+	if (Log::isDebug()) {
+		std::cout << "[Debug] Attempt to read from pipe: '"
+			  << command << "'" << std::endl;
+	}
 	std::FILE *pipe = popen(command, "r");
 	if (pipe != NULL) {
 		size_t n = 0;
@@ -141,6 +178,13 @@ const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
 		for (unsigned int i = 0; i < number; ++i) {
 			char *line = NULL;
 			if (getline(&line, &n, pipe) == -1) {
+				if (!Log::isAllQuiet()) {
+					std::cerr << Color::boldRed()
+						<< "[Error] Failed to read "
+						<< "from pipe[" << i << "]: "
+						<< command << Color::reset()
+						<< std::endl;
+				}
 				pclose(pipe);
 				return Cpu::BAD_VECTOR;
 			}
@@ -150,6 +194,12 @@ const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
 		pclose(pipe);
 		return lines;
 	} else {
+		if (!Log::isAllQuiet()) {
+			std::cerr << Color::boldRed()
+				<< "[Error] Failed to read from pipe: "
+				<< command
+				<< Color::reset() << std::endl;
+		}
 		return Cpu::BAD_VECTOR;
 	}
 }
