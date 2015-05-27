@@ -36,27 +36,27 @@ void printPlanHelp()
 	std::ostringstream oss;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
-	oss << psfreq::Color::boldCyan()
+	oss << Color::boldCyan()
 	    << "** Compiled with support for automatic plan switching"
-	    << " via udev rules **" << psfreq::Color::reset() << std::endl;
+	    << " via udev rules **" << Color::reset() << std::endl;
 #endif
 #endif
-	oss << psfreq::Color::boldWhite() << "Available Power Plans:"
-	    << std::endl
-	    << "(1) " << psfreq::Color::boldRed() << "powersave"
-	    << psfreq::Color::boldWhite() << std::endl
-	    << "(2) " << psfreq::Color::boldRed() << "performance"
-	    << psfreq::Color::boldWhite() << std::endl
-	    << "(3) " << psfreq::Color::boldRed() << "max-performance"
-	    << psfreq::Color::boldWhite() << std::endl
+	oss << Color::boldRed() << "Error "
+	    << Color::boldWhite() << "Available Power Plans:" << std::endl
+	    << "(1) " << Color::boldRed() << "powersave"
+	    << Color::boldWhite() << std::endl
+	    << "(2) " << Color::boldRed() << "performance"
+	    << Color::boldWhite() << std::endl
+	    << "(3) " << Color::boldRed() << "max-performance"
+	    << Color::boldWhite() << std::endl
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
-	    << "(0) " << psfreq::Color::boldRed() << "auto"
-	    << psfreq::Color::boldWhite() << std::endl
+	    << "(0) " << Color::boldRed() << "auto"
+	    << Color::boldWhite() << std::endl
 #endif
 #endif
-	    << psfreq::Color::reset() << std::endl;
-	std::cerr << "[Error] " << oss.str();
+	    << Color::reset() << std::endl;
+	std::cerr << oss.str();
 }
 
 /*
@@ -65,47 +65,44 @@ void printPlanHelp()
 void printGovernorHelp(const std::vector<std::string> &availableGovernors)
 {
 	std::ostringstream oss;
-	oss << psfreq::Color::boldWhite() << "Available CPU Governors:"
+	oss << Color::boldRed() << "Error "
+	    << Color::boldWhite() << "Available CPU Governors:"
 	    << std::endl;
 	const unsigned int size = availableGovernors.size();
-	if (psfreq::Log::isDebug()) {
+	if (Log::isDebug()) {
 		std::cout << "Governors available: " << size << std::endl;
 	}
 	for (unsigned int i = 0; i < size; ++i) {
-		oss << psfreq::Color::boldWhite() << "(" << i << ") "
-		    << psfreq::Color::boldRed() << availableGovernors.at(i)
+		oss << Color::boldWhite() << "(" << i << ") "
+		    << Color::boldRed() << availableGovernors.at(i)
 		    << std::endl;
 	}
-	oss << psfreq::Color::reset() << std::endl;
-	std::cerr << "[Error] " << oss.str();
+	oss << Color::reset() << std::endl;
+	std::cerr << oss.str();
 }
 
 /*
  * Grab the current CPU frequencies from /proc/cpuinfo
  * and pretty print them to the stdout
  */
-void printRealtimeFrequency(const psfreq::Cpu &cpu)
+void printRealtimeFrequency(const Cpu &cpu)
 {
-	if (psfreq::Log::isOutputCapable()) {
+	if (Log::isOutputCapable()) {
 		printVersion();
 		const std::vector<std::string> frequencies =
-				cpu.getRealtimeFrequencies();
+			cpu.getRealtimeFrequencies();
 		if (!frequencies.empty()) {
 			std::ostringstream oss;
 			const unsigned int size = frequencies.size();
 			for (unsigned int i = 0; i < size; ++i) {
 				std::string freq = frequencies[i];
-				oss << psfreq::Color::boldWhite()
-					<< "    pstate::"
-					<< psfreq::Color::boldGreen()
-					<< "CPU["
-					<< psfreq::Color::boldMagenta()
-					<< i << psfreq::Color::boldGreen()
-					<< "]  -> "
-					<< psfreq::Color::boldCyan()
-					<< freq.substr(0, freq.size() - 1)
-					<< "MHz" << psfreq::Color::reset()
-					<< std::endl;
+				oss << Color::boldWhite()
+				    << "    pstate::" << Color::boldGreen()
+				    << "CPU[" << Color::boldMagenta()
+				    << i << Color::boldGreen() << "]  -> "
+				    << Color::boldCyan()
+				    << freq.substr(0, freq.size() - 1)
+				    << "MHz" << Color::reset() << std::endl;
 			}
 			std::cout << oss.str();
 		}
@@ -117,7 +114,7 @@ void printRealtimeFrequency(const psfreq::Cpu &cpu)
  */
 void printGPL()
 {
-	if (psfreq::Log::isOutputCapable()) {
+	if (Log::isOutputCapable()) {
 		std::ostringstream oss;
 		oss << "pstate-frequency comes with ABSOLUTELY NO WARRANTY."
 			<< std::endl
@@ -126,7 +123,7 @@ void printGPL()
 			<< std::endl << "under certain conditions."
 			<< std::endl
 			<< "Please see the README for details."
-			<< psfreq::Color::reset()
+			<< Color::reset()
 			<< std::endl << std::endl;
 		std::cout << oss.str();
 	}
@@ -137,13 +134,12 @@ void printGPL()
  */
 void printVersion()
 {
-	if (psfreq::Log::isOutputCapable()) {
+	if (Log::isOutputCapable()) {
 		std::ostringstream oss;
 		oss << std::endl;
 #ifdef VERSION
-		oss << psfreq::Color::boldBlue() << "pstate-frequency  "
-			<< psfreq::Color::boldMagenta() << VERSION
-			<< psfreq::Color::reset()
+		oss << Color::boldBlue() << "pstate-frequency  "
+			<< Color::boldMagenta() << VERSION << Color::reset()
 			<< std::endl;
 #endif
 		std::cout << oss.str();
@@ -154,45 +150,49 @@ void printVersion()
  * Print out the current CPU settings as configured either from
  * the cpufreq sysfs files or the intel_pstate sysfs files.
  */
-void printCpuValues(const psfreq::Cpu &cpu)
+void printCpuValues(const Cpu &cpu)
 {
-	if (psfreq::Log::isOutputCapable()) {
+	if (Log::isOutputCapable()) {
 		printVersion();
 		std::ostringstream oss;
-		oss << psfreq::Color::boldWhite()
-			<< "    pstate::" << psfreq::Color::boldGreen()
+		oss << Color::boldWhite()
+			<< "    pstate::" << Color::boldGreen()
 			<< "CPU_DRIVER     -> "
-			<< psfreq::Color::boldCyan() << cpu.getDriver()
+			<< Color::boldCyan() << cpu.getDriver()
 			<< std::endl;
-		oss << psfreq::Color::boldWhite()
-			<< "    pstate::" << psfreq::Color::boldGreen()
+		oss << Color::boldWhite()
+			<< "    pstate::" << Color::boldGreen()
 			<< "CPU_GOVERNOR   -> "
-			<< psfreq::Color::boldCyan() << cpu.getGovernor()
+			<< Color::boldCyan() << cpu.getGovernor()
 			<< std::endl;
 		const int turbo = cpu.getTurboBoost();
-		oss << psfreq::Color::boldWhite()
-			<< "    pstate::" << psfreq::Color::boldGreen()
-			<< (cpu.hasPstate() ? "NO_TURBO       -> "
-					: "TURBO_BOOST    -> ")
-			<< psfreq::Color::boldCyan() << turbo << " : "
-			<< (cpu.hasPstate() ? (turbo == 1 ? "OFF" : "ON")
-					: (turbo == 1 ? "ON" : "OFF"))
+		oss << Color::boldWhite()
+			<< "    pstate::" << Color::boldGreen()
+			<< (cpu.hasPstate()
+				? "NO_TURBO       -> "
+				: "TURBO_BOOST    -> ")
+			<< Color::boldCyan() << turbo << " : "
+			<< (cpu.hasPstate()
+				? (turbo == 1
+					? "OFF"
+					: "ON")
+				: (turbo == 1
+					? "ON"
+					: "OFF"))
 			<< std::endl;
-		oss << psfreq::Color::boldWhite()
-			<< "    pstate::" << psfreq::Color::boldGreen()
+		oss << Color::boldWhite()
+			<< "    pstate::" << Color::boldGreen()
 			<< "CPU_MIN        -> "
-			<< psfreq::Color::boldCyan() << cpu.getMinValue()
-			<< "% : "
+			<< Color::boldCyan() << cpu.getMinValue() << "% : "
 			<< static_cast<int>(cpu.getScalingMinFrequency())
 			<< "KHz" << std::endl;
-		oss << psfreq::Color::boldWhite()
-			<< "    pstate::" << psfreq::Color::boldGreen()
+		oss << Color::boldWhite()
+			<< "    pstate::" << Color::boldGreen()
 			<< "CPU_MAX        -> "
-			<< psfreq::Color::boldCyan() << cpu.getMaxValue()
-			<< "% : "
+			<< Color::boldCyan() << cpu.getMaxValue() << "% : "
 			<< static_cast<int>(cpu.getScalingMaxFrequency())
 			<< "KHz" << std::endl;
-		oss << psfreq::Color::reset();
+		oss << Color::reset();
 		std::cout << oss.str();
 	}
 }
@@ -202,7 +202,7 @@ void printCpuValues(const psfreq::Cpu &cpu)
  */
 void printHelp()
 {
-	if (psfreq::Log::isOutputCapable()) {
+	if (Log::isOutputCapable()) {
 		std::ostringstream oss;
 		oss << "usage:" << std::endl
 			<< "pstate-frequency [verbose] [ACTION] [option(s)]"
