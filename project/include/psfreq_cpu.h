@@ -46,7 +46,7 @@ private:
 
 		bool write(const std::string &path, const std::string &file,
 				const std::string &buffer) const;
-		bool write(const std::string &path,const std::string &file,
+		bool write(const std::string &path, const std::string &file,
 				const int number) const;
 		bool write(const std::string &file,
 				const std::string &buffer) const;
