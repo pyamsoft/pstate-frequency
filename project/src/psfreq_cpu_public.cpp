@@ -31,8 +31,8 @@
 namespace psfreq {
 
 const std::vector<std::string> Cpu::BAD_VECTOR = std::vector<std::string>();
-const std::string Cpu::BAD_READ = std::string();
-const std::string Cpu::GOVERNOR_INSANE = std::string();
+const std::string Cpu::BAD_READ = UNINITIALIZED_STR;
+const std::string Cpu::GOVERNOR_INSANE = UNINITIALIZED_STR;
 const double Cpu::INFO_FREQUENCY_INSANE = 1.0;
 const double Cpu::SCALING_FREQUENCY_INSANE = 0.0;
 const int Cpu::PSTATE_VALUE_INSANE = 0;
@@ -61,6 +61,9 @@ bool Cpu::init()
 	 * initialize the CPU.
 	 */
 	if (!initialized) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Initialize CPU" << std::endl;
+		}
 		number = findNumber();
 		pstate = findPstate();
 		minInfoFrequency = findInfoMinFrequency();

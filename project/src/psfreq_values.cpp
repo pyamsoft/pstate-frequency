@@ -23,7 +23,6 @@
 
 #include "include/psfreq_color.h"
 #include "include/psfreq_log.h"
-#include "include/psfreq_util.h"
 #include "include/psfreq_values.h"
 
 namespace psfreq {
@@ -47,6 +46,7 @@ const int Values::PSTATE_TURBO = 0;
 const int Values::TURBO_INSANE = -1;
 const int Values::MIN_POSSIBLE_FREQ = 0;
 const int Values::MAX_POSSIBLE_FREQ = 100;
+const int Values::UNINITIALIZED = -1;
 
 bool Values::isInitialized() const
 {
@@ -59,6 +59,11 @@ bool Values::isInitialized() const
 bool Values::hasAction() const
 {
 	return action != ACTION_NULL;
+}
+
+bool Values::hasPlan() const
+{
+	return plan != POWER_PLAN_NONE;
 }
 
 bool Values::isActionNull() const

@@ -222,7 +222,7 @@ int main(int argc, char** argv)
 			: EXIT_FAILURE);
 	}
 
-	if (!cpuValues.runPlan()) {
+	if (cpuValues.hasPlan() && !cpuValues.runPlan()) {
 		return EXIT_FAILURE;
 	}
 

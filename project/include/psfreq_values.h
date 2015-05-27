@@ -25,6 +25,7 @@
 #include <dirent.h>
 
 #include "include/psfreq_cpu.h"
+#include "include/psfreq_util.h"
 
 namespace psfreq {
 
@@ -52,13 +53,13 @@ private:
 public:
 	Values(const Cpu &cpu) :
 		cpu(cpu),
-		action(-1),
-		plan(-1),
-		max(-1),
-		min(-1),
-		turbo(-1),
-		governor(std::string()),
-		requested(0)
+		action(ACTION_NULL),
+		plan(POWER_PLAN_NONE),
+		max(UNINITIALIZED),
+		min(UNINITIALIZED),
+		turbo(TURBO_INSANE),
+		governor(UNINITIALIZED_STR),
+		requested(REQUESTED_CURRENT)
 	{
 	}
 
@@ -82,6 +83,7 @@ public:
 	const std::string getGovernor() const;
 
 	bool hasAction() const;
+	bool hasPlan() const;
 	bool isActionNull() const;
 	bool isActionGet() const;
 	bool isActionSet() const;
@@ -110,6 +112,7 @@ public:
 	static const int TURBO_INSANE;
 	static const int MIN_POSSIBLE_FREQ;
 	static const int MAX_POSSIBLE_FREQ;
+	static const int UNINITIALIZED;
 
 };
 
