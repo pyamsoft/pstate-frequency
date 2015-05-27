@@ -22,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "include/psfreq_color.h"
 #include "include/psfreq_log.h"
 #include "include/psfreq_util.h"
 
@@ -33,12 +34,24 @@ double stringToNumber(const std::string &line)
 	for (unsigned int i = 0; i < length; ++i) {
 		const char check = line[i];
 		if (!std::isdigit(check) && !std::iscntrl(check)) {
+			if (!Log::isAllQuiet()) {
+				std::cerr << Color::boldRed()
+					<< "[Error] string: '" << line
+					<< "' is non digit at [" << i << "]"
+					<< Color::reset()
+					<< std::endl;
+			}
 			return BAD_NUMBER;
 		}
 	}
         std::istringstream iss(line);
 	int result;
 	iss >> result;
+	if (Log::isDebug()) {
+		std::cout << "[Debug] string: '" << line
+			<< "' to number: '" << result << "'"
+			<< std::endl;
+	}
 	return result;
 }
 

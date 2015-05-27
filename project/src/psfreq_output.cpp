@@ -70,7 +70,8 @@ void printGovernorHelp(const std::vector<std::string> &availableGovernors)
 	    << std::endl;
 	const unsigned int size = availableGovernors.size();
 	if (Log::isDebug()) {
-		std::cout << "Governors available: " << size << std::endl;
+		std::cout << "[Debug] Governors available: " << size
+			<< std::endl;
 	}
 	for (unsigned int i = 0; i < size; ++i) {
 		oss << Color::boldWhite() << "(" << i << ") "
