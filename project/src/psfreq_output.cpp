@@ -45,9 +45,9 @@ void printPlanHelp()
 	    << std::endl
 	    << "(1) " << psfreq::Color::boldRed() << "powersave"
 	    << psfreq::Color::boldWhite() << std::endl
-	    << "(2) " << psfreq::Color::boldRed() << "powersave"
+	    << "(2) " << psfreq::Color::boldRed() << "performance"
 	    << psfreq::Color::boldWhite() << std::endl
-	    << "(3) " << psfreq::Color::boldRed() << "powersave"
+	    << "(3) " << psfreq::Color::boldRed() << "max-performance"
 	    << psfreq::Color::boldWhite() << std::endl
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
