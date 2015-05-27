@@ -183,24 +183,25 @@ bool Values::setPlan(const int powerPlan) {
  */
 bool Values::runPlan()
 {
-	unsigned int result;
+	bool result = true;
+	unsigned int autoPlan;
 	switch(plan) {
 	case POWER_PLAN_NONE:
-		return true;
+		break;
 	case POWER_PLAN_POWERSAVE:
 		setPlanPowersave();
-		return true;
+		break;
 	case POWER_PLAN_PERFORMANCE:
 		setPlanPerformance();
-		return true;
+		break;
 	case POWER_PLAN_MAX_PERFORMANCE:
 		setPlanMaxPerformance();
-		return true;
+		break;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	case POWER_PLAN_AUTO:
-		result = setPlanAuto();
-		if (result == AUTO_NONE) {
+		autoPlan = setPlanAuto();
+		if (autoPlan == AUTO_NONE) {
 			if (!Log::isAllQuiet()) {
 				std::cerr << Color::boldRed()
 					<< "[Error] Failed to decide an "
@@ -208,18 +209,23 @@ bool Values::runPlan()
 					<< Color::reset()
 					<< std::endl;
 			}
-			return false;
-		} else if (result == POWER_PLAN_POWERSAVE) {
+			result = false;
+			break;
+		} else if (autoPlan == POWER_PLAN_POWERSAVE) {
 			setPlanPowersave();
 		} else {
 			setPlanPerformance();
 		}
-		return true;
+		break;
 #endif
 #endif
 	default:
-		return false;
+		result = false;
 	}
+	if (Log::isDebug()) {
+		std::cout << "Auto Plan is: " << autoPlan << std::endl;
+	}
+	return result;
 }
 
 void Values::setPlanPowersave()
