@@ -31,12 +31,12 @@
 
 namespace psfreq {
 
-static Pair handleOptionResult(const psfreq::Cpu &cpu,
-		psfreq::Values &cpuValues, const int result);
+static Pair handleOptionResult(const Cpu &cpu,
+		Values &cpuValues, const int result);
 static int planFromOptArg(char *const arg);
 static const std::string governorFromOptArg(char *const arg,
 		const std::vector<std::string> &availableGovernors);
-static int turboFromOptArg(const psfreq::Cpu &cpu, char *const arg);
+static int turboFromOptArg(const Cpu &cpu, char *const arg);
 static int maxFromOptArg(char *const arg);
 static int minFromOptArg(char *const arg);
 
@@ -49,60 +49,60 @@ static int planFromOptArg(char *const arg)
 	const std::string convertedArg(arg);
 	int plan;
 	if (convertedArg.compare("1") == 0
-			|| psfreq::stringStartsWith("powersave",
+			|| stringStartsWith("powersave",
 				convertedArg)) {
-		plan = psfreq::Values::POWER_PLAN_POWERSAVE;
+		plan = Values::POWER_PLAN_POWERSAVE;
 	} else if (convertedArg.compare("2") == 0
-			|| psfreq::stringStartsWith("performance",
+			|| stringStartsWith("performance",
 			convertedArg)) {
-		plan = psfreq::Values::POWER_PLAN_PERFORMANCE;
+		plan = Values::POWER_PLAN_PERFORMANCE;
 	} else if (convertedArg.compare("3") == 0
-			|| psfreq::stringStartsWith("max-performance",
+			|| stringStartsWith("max-performance",
 				convertedArg)) {
-		plan = psfreq::Values::POWER_PLAN_MAX_PERFORMANCE;
+		plan = Values::POWER_PLAN_MAX_PERFORMANCE;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	} else if (convertedArg.compare("0") == 0
-		|| psfreq::stringStartsWith("auto", convertedArg)) {
-		plan = psfreq::Values::POWER_PLAN_AUTO;
+		|| stringStartsWith("auto", convertedArg)) {
+		plan = Values::POWER_PLAN_AUTO;
 #endif
 #endif
 	} else {
-		if (!psfreq::Log::isAllQuiet()) {
+		if (!Log::isAllQuiet()) {
 			printPlanHelp();
 		}
-		return psfreq::Values::POWER_PLAN_NONE;
+		return Values::POWER_PLAN_NONE;
 	}
 	return plan;
 }
 
-static int turboFromOptArg(const psfreq::Cpu &cpu, char *const arg)
+static int turboFromOptArg(const Cpu &cpu, char *const arg)
 {
 	const std::string convertedArg(arg);
 	int turbo;
 	if (cpu.hasPstate()) {
 		if (convertedArg.compare("0") == 0
-				|| psfreq::stringStartsWith("on",
+				|| stringStartsWith("on",
 					convertedArg)) {
-			turbo = psfreq::Values::PSTATE_TURBO;
+			turbo = Values::PSTATE_TURBO;
 		} else if (convertedArg.compare("1") == 0
-				|| psfreq::stringStartsWith("off",
+				|| stringStartsWith("off",
 				convertedArg)) {
-			turbo = psfreq::Values::PSTATE_NO_TURBO;
+			turbo = Values::PSTATE_NO_TURBO;
 		} else {
-			turbo = psfreq::Values::TURBO_INSANE;
+			turbo = Values::TURBO_INSANE;
 		}
 	} else {
 		if (convertedArg.compare("0") == 0
-				|| psfreq::stringStartsWith("off",
+				|| stringStartsWith("off",
 					convertedArg)) {
-			turbo = psfreq::Values::CPUFREQ_NO_TURBO;
+			turbo = Values::CPUFREQ_NO_TURBO;
 		} else if (convertedArg.compare("1") == 0
-				|| psfreq::stringStartsWith("on",
+				|| stringStartsWith("on",
 				convertedArg)) {
-			turbo = psfreq::Values::CPUFREQ_TURBO;
+			turbo = Values::CPUFREQ_TURBO;
 		} else {
-			turbo = psfreq::Values::TURBO_INSANE;
+			turbo = Values::TURBO_INSANE;
 		}
 	}
 	return turbo;
@@ -117,7 +117,7 @@ static int maxFromOptArg(char *const arg)
 	} else if (convertedArg.compare("max") == 0) {
 		max = 100;
 	} else {
-		max = psfreq::stringToNumber(convertedArg);
+		max = stringToNumber(convertedArg);
 	}
 	return max;
 }
@@ -131,7 +131,7 @@ static int minFromOptArg(char *const arg)
 	} else if (convertedArg.compare("max") == 0) {
 		min = 99;
 	} else {
-		min = psfreq::stringToNumber(convertedArg);
+		min = stringToNumber(convertedArg);
 	}
 	return min;
 }
@@ -148,7 +148,7 @@ static const std::string governorFromOptArg(char *const arg,
 	const std::string convertedArg(arg);
 	std::string governor;
 	for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
-		if (psfreq::stringStartsWith(availableGovernors[i],
+		if (stringStartsWith(availableGovernors[i],
 				convertedArg)) {
 			governor = availableGovernors[i];
 			break;
@@ -156,7 +156,7 @@ static const std::string governorFromOptArg(char *const arg,
 	}
 	if (governor == UNINITIALIZED_STR) {
 		for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
-			if (convertedArg.compare(psfreq::numberToString(i))
+			if (convertedArg.compare(numberToString(i))
 						== 0) {
 				governor = availableGovernors[i];
 				break;
@@ -164,7 +164,7 @@ static const std::string governorFromOptArg(char *const arg,
 		}
 	}
 	if (governor == UNINITIALIZED_STR) {
-		if (!psfreq::Log::isAllQuiet()) {
+		if (!Log::isAllQuiet()) {
 			printGovernorHelp(availableGovernors);
 		}
 		return UNINITIALIZED_STR;
@@ -178,8 +178,8 @@ static const std::string governorFromOptArg(char *const arg,
  * Given the return value from the getopt_long function as parameter 'result'
  * decide how to handle the option that was entered by the user.
  */
-static Pair handleOptionResult(const psfreq::Cpu &cpu,
-		psfreq::Values &cpuValues, const int result)
+static Pair handleOptionResult(const Cpu &cpu,
+		Values &cpuValues, const int result)
 {
 	std::ostringstream err;
 	err << "[Error] ";
@@ -198,8 +198,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 		if (cpuValues.isActionNull() || cpuValues.isActionSet()) {
 			return Pair(PARSE_EXIT_BAD, "Action is not GET");
 		} else {
-			cpuValues.setRequested(psfreq::
-					Values::REQUESTED_CURRENT);
+			cpuValues.setRequested(Values::REQUESTED_CURRENT);
 			return Pair(PARSE_EXIT_NORMAL);
 		}
         case 'r':
@@ -210,27 +209,27 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 		if (cpuValues.isActionNull() || cpuValues.isActionSet()) {
 			return Pair(PARSE_EXIT_BAD, "Action is not GET");
 		} else {
-			cpuValues.setRequested(psfreq::Values::REQUESTED_REAL);
+			cpuValues.setRequested(Values::REQUESTED_REAL);
 			return Pair(PARSE_EXIT_NORMAL);
 		}
 	case 'd':
-		psfreq::Log::setDebug();
+		Log::setDebug();
 		return Pair(PARSE_EXIT_NORMAL);
 	case 'a':
-		psfreq::Log::setAllQuiet();
+		Log::setAllQuiet();
 		return Pair(PARSE_EXIT_NORMAL);
 	case 'q':
-		psfreq::Log::setQuiet();
+		Log::setQuiet();
 		return Pair(PARSE_EXIT_NORMAL);
         case 'V':
 		printGPL();
 		printVersion();
 		return Pair(PARSE_EXIT_GOOD);
         case 'S':
-		cpuValues.setAction(psfreq::Values::ACTION_SET);
+		cpuValues.setAction(Values::ACTION_SET);
 		return Pair(PARSE_EXIT_NORMAL);
         case 'G':
-		cpuValues.setAction(psfreq::Values::ACTION_GET);
+		cpuValues.setAction(Values::ACTION_GET);
 		return Pair(PARSE_EXIT_NORMAL);
         case 'p':
 		/*
@@ -314,7 +313,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
 			}
 		}
         case '1':
-		psfreq::Color::setEnabled();
+		Color::setEnabled();
 		return Pair(PARSE_EXIT_NORMAL);
 	case ':':
 		return Pair(PARSE_EXIT_BAD, "Missing argument");
@@ -329,7 +328,7 @@ static Pair handleOptionResult(const psfreq::Cpu &cpu,
  * run the getopt_long function to figure out the option requested.
  */
 Pair parseOptions(const int argc, char **const argv,
-		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+		const Cpu &cpu, Values &cpuValues,
 		const char *const shortOptions,
 		const struct option longOptions[]) {
 	while (true) {
