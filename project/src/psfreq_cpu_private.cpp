@@ -54,6 +54,10 @@ bool Cpu::findPstate() const
 {
 	const std::string driver = sysfs.read("cpu0/cpufreq/scaling_driver");
 	if (driver != BAD_READ) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] driver is: '" << driver << "'"
+				  << std::endl;
+		}
 		return (driver.compare("intel_pstate") == 0);
 	} else {
 		if (!Log::isAllQuiet()) {
@@ -80,6 +84,10 @@ unsigned int Cpu::findNumber() const
 		 * Handle stringToNumber errors
 		 */
 		const int n = stringToNumber(result[0]);
+		if (Log::isDebug()) {
+			std::cout << "[Debug] cpu number is: '" << n << "'"
+				  << std::endl;
+		}
 		if (n == BAD_NUMBER) {
 			return NO_CPUS;
 		} else {
@@ -101,8 +109,13 @@ unsigned int Cpu::findNumber() const
  * of a certain index.
  */
 void Cpu::initializeVector(std::vector<std::string> &vector,
-		std::string what) const
+		const std::string what) const
 {
+	if (Log::isDebug()) {
+		std::cout << "[Debug] fill frequency vector: '"
+			  << "cpu0/cpufreq/scaling_" << what << "'"
+			  << std::endl;
+	}
 	for (unsigned int i = 0; i < number; ++i) {
 		std::ostringstream oss;
 		oss << "cpu" << i << "/cpufreq/scaling_" << what;
@@ -121,6 +134,10 @@ double Cpu::findInfoMaxFrequency() const
 		 * Handle stringToNumber errors
 		 */
 		const double result = stringToNumber(line);
+		if (Log::isDebug()) {
+			std::cout << "[Debug] cpuinfo_max_freq is: '"
+				  << result << "'" << std::endl;
+		}
 		if (result == BAD_NUMBER) {
 			return NO_FREQ;
 		} else {
@@ -146,6 +163,10 @@ double Cpu::findInfoMinFrequency() const
 		 * Handle stringToNumber errors
 		 */
 		const double result = stringToNumber(line);
+		if (Log::isDebug()) {
+			std::cout << "[Debug] cpuinfo_min_freq is: '"
+				  << result << "'" << std::endl;
+		}
 		if (result == BAD_NUMBER) {
 			return NO_FREQ;
 		} else {

@@ -73,7 +73,7 @@ private:
 	bool initialized;
 
 	void initializeVector(std::vector<std::string> &vector,
-			std::string what) const;
+			const std::string what) const;
 	double getInfoMinFrequency() const;
 	double getInfoMaxFrequency() const;
 	unsigned int findNumber() const;
