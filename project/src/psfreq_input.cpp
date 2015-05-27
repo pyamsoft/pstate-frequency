@@ -18,6 +18,7 @@
  * For questions please contact pyamsoft at pyam.soft@gmail.com
  */
 
+#include <iostream>
 #include <sstream>
 
 #include <getopt.h>
@@ -51,19 +52,35 @@ static int planFromOptArg(char *const arg)
 	if (convertedArg.compare("1") == 0
 			|| stringStartsWith("powersave",
 				convertedArg)) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Plan is powersave"
+				<< std::endl;
+		}
 		plan = Values::POWER_PLAN_POWERSAVE;
 	} else if (convertedArg.compare("2") == 0
 			|| stringStartsWith("performance",
 			convertedArg)) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Plan is performance"
+				<< std::endl;
+		}
 		plan = Values::POWER_PLAN_PERFORMANCE;
 	} else if (convertedArg.compare("3") == 0
 			|| stringStartsWith("max-performance",
 				convertedArg)) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Plan is max-performance"
+				<< std::endl;
+		}
 		plan = Values::POWER_PLAN_MAX_PERFORMANCE;
 #ifdef INCLUDE_UDEV_RULE
 #if INCLUDE_UDEV_RULE == 1
 	} else if (convertedArg.compare("0") == 0
 		|| stringStartsWith("auto", convertedArg)) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] Plan is auto"
+				<< std::endl;
+		}
 		plan = Values::POWER_PLAN_AUTO;
 #endif
 #endif
@@ -81,27 +98,59 @@ static int turboFromOptArg(const Cpu &cpu, char *const arg)
 	const std::string convertedArg(arg);
 	int turbo;
 	if (cpu.hasPstate()) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] System has intel_pstate"
+				<< std::endl;
+		}
 		if (convertedArg.compare("0") == 0
 				|| stringStartsWith("on",
 					convertedArg)) {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] Turbo On"
+					<< std::endl;
+			}
 			turbo = Values::PSTATE_TURBO;
 		} else if (convertedArg.compare("1") == 0
 				|| stringStartsWith("off",
 				convertedArg)) {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] Turbo Off"
+					<< std::endl;
+			}
 			turbo = Values::PSTATE_NO_TURBO;
 		} else {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] Turbo is insane"
+					<< std::endl;
+			}
 			turbo = Values::TURBO_INSANE;
 		}
 	} else {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] System does not have "
+				<< "intel_pstate" << std::endl;
+		}
 		if (convertedArg.compare("0") == 0
 				|| stringStartsWith("off",
 					convertedArg)) {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] Turbo Off"
+					<< std::endl;
+			}
 			turbo = Values::CPUFREQ_NO_TURBO;
 		} else if (convertedArg.compare("1") == 0
 				|| stringStartsWith("on",
 				convertedArg)) {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] Turbo On"
+					<< std::endl;
+			}
 			turbo = Values::CPUFREQ_TURBO;
 		} else {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] Turbo is insane"
+					<< std::endl;
+			}
 			turbo = Values::TURBO_INSANE;
 		}
 	}
@@ -113,10 +162,22 @@ static int maxFromOptArg(char *const arg)
 	const std::string convertedArg(arg);
 	int max;
 	if (convertedArg.compare("min") == 0) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] 'min' converted to 0"
+				<< std::endl;
+		}
 		max = 0;
 	} else if (convertedArg.compare("max") == 0) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] 'max' converted to 100"
+				<< std::endl;
+		}
 		max = 100;
 	} else {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] input converted to number"
+				<< std::endl;
+		}
 		max = stringToNumber(convertedArg);
 	}
 	return max;
@@ -127,10 +188,22 @@ static int minFromOptArg(char *const arg)
 	const std::string convertedArg(arg);
 	int min;
 	if (convertedArg.compare("min") == 0) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] 'min' converted to 0"
+				<< std::endl;
+		}
 		min = 0;
 	} else if (convertedArg.compare("max") == 0) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] 'max' converted to 99"
+				<< std::endl;
+		}
 		min = 99;
 	} else {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] input converted to number"
+				<< std::endl;
+		}
 		min = stringToNumber(convertedArg);
 	}
 	return min;
@@ -150,6 +223,11 @@ static const std::string governorFromOptArg(char *const arg,
 	for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
 		if (stringStartsWith(availableGovernors[i],
 				convertedArg)) {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] valid governor found: "
+					<< availableGovernors[i]
+					<< std::endl;
+			}
 			governor = availableGovernors[i];
 			break;
 		}
@@ -158,6 +236,12 @@ static const std::string governorFromOptArg(char *const arg,
 		for (unsigned int i = 0; i < availableGovernors.size(); ++i) {
 			if (convertedArg.compare(numberToString(i))
 						== 0) {
+				if (Log::isDebug()) {
+					std::cout << "[Debug] valid governor "
+						<< "found: "
+						<< availableGovernors[i]
+						<< std::endl;
+				}
 				governor = availableGovernors[i];
 				break;
 			}
@@ -335,8 +419,16 @@ Pair parseOptions(const int argc, char **const argv,
                 const int opt = getopt_long(argc, argv, shortOptions,
 				longOptions, NULL);
                 if (opt == -1) {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] no more options"
+					<< std::endl;
+			}
                         break;
                 } else {
+			if (Log::isDebug()) {
+				std::cout << "[Debug] opt found"
+					<< std::endl;
+			}
 			const Pair result = handleOptionResult(cpu, cpuValues,
 					opt);
 			if (result.code != PARSE_EXIT_NORMAL) {
