@@ -4,7 +4,7 @@
 
 pkgname=pstate-frequency
 pkgdesc="Easily control Intel p-state driver"
-pkgver=1.1.12
+pkgver=1.2.2
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=()
@@ -14,7 +14,7 @@ conflicts=('pstate-frequency')
 license=('GPLv2')
 url="https://github.com/pyamsoft/pstate-frequency/archive/${pkgver}.tar.gz"
 source=("${url}")
-sha256sums=('c32293563d5921c651fcffb829c0b23c009cce3683fceff9ac759631e0857a78')
+sha256sums=('SKIP')
 
 ###############################################################################
 
