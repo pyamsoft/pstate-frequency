@@ -7,8 +7,8 @@ StopWhenUnneeded=yes
 Type=simple
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/bin/pstate-frequency -q -S -p 0
-ExecStop=/usr/bin/pstate-frequency -q -S -p 0
+ExecStart=pstate-frequency -q -S -p 0
+ExecStop=pstate-frequency -q -S -p 0
 
 [Install]
 WantedBy=sleep.target
