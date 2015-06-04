@@ -4,6 +4,7 @@ PROJECT_ROOT=project
 EXEC_NAME=pstate-frequency
 UDEV=99-$(EXEC_NAME).rules
 SYSTEMD=$(EXEC_NAME).service
+SYSTEMD_SLEEP=$(EXEC_NAME)-sleep.service
 
 .PHONY: install uninstall
 
@@ -37,6 +38,12 @@ ifeq ($(INCLUDE_SYSTEMD_UNIT), 1)
 		$(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD)
 	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
 		$(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD)
+	@echo "  INSTALL  $(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD_SLEEP)"
+	@install -d $(DESTDIR)/usr/lib/systemd/system
+	@install -m 644 systemd/$(SYSTEMD_SLEEP) \
+		$(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD_SLEEP)
+	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
+		$(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD_SLEEP)
 endif
 
 uninstall:
