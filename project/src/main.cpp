@@ -107,6 +107,37 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 				? newMax - 1
 				: newMin);
 
+		/* If intel_pstate only source the max_perf_pct and
+		 * min_perf_pct files when they change, then we need to force
+		 * a change somehow. Though ugly, setting the CPU first to a
+		 * powersave state and then a performance state should force
+		 * the driver to re-read the CPU in almost all situations
+		 */
+		if (psfreq::Log::isDebug()) {
+			std::cout << "[Debug] Setting sane min/max values"
+				<< std::endl;
+		}
+		int saneMin = 0;
+		int saneMax = 100;
+		saneMin = psfreq::boundValue(saneMin, cpuInfoMin,
+				cpuInfoMax - 1);
+		saneMax = psfreq::boundValue(saneMax, cpuInfoMin + 1,
+				cpuInfoMax);
+		saneMin = (saneMin >= saneMax
+				? saneMax - 1
+				: saneMin);
+		if (psfreq::Log::isDebug()) {
+			std::cout << "[Debug] Sane Max: " << saneMax
+				  << " Sane Min: " << saneMin
+				  << std::endl;
+		}
+		cpu.setScalingMin(saneMin);
+		cpu.setScalingMax(saneMax);
+		if (psfreq::Log::isDebug()) {
+			std::cout << "[Debug] Sleep for two seconds"
+				  << std::endl;
+		}
+		sleep(2);
 
 		/*
 		 * If the new maximum frequency that is requested
