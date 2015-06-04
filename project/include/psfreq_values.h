@@ -37,6 +37,7 @@ private:
 	int max;
 	int min;
 	int turbo;
+	bool doSleep;
 	std::string governor;
 	int requested;
 
@@ -58,6 +59,7 @@ public:
 		max(UNINITIALIZED),
 		min(UNINITIALIZED),
 		turbo(TURBO_INSANE),
+		doSleep(SLEEP),
 		governor(UNINITIALIZED_STR),
 		requested(REQUESTED_CURRENT)
 	{
@@ -74,6 +76,7 @@ public:
 	void setRequested(const int newRequest);
 	bool setPlan(const int powerPlan);
 	bool setGovernor(const std::string& newGovernor);
+	void dontSleep();
 
 	int getAction() const;
 	int getMax() const;
@@ -88,6 +91,7 @@ public:
 	bool isActionGet() const;
 	bool isActionSet() const;
 	bool isInitialized() const;
+	bool shouldSleep() const;
 
 	bool runPlan();
 
@@ -113,6 +117,8 @@ public:
 	static const int MIN_POSSIBLE_FREQ;
 	static const int MAX_POSSIBLE_FREQ;
 	static const int UNINITIALIZED;
+	static const bool NO_SLEEP;
+	static const bool SLEEP;
 
 };
 

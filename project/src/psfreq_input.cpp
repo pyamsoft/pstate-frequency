@@ -449,6 +449,9 @@ static unsigned int handleOptionResult(const Cpu &cpu,
 				return PARSE_EXIT_BAD;
 			}
 		}
+        case '2':
+		cpuValues.dontSleep();
+		return PARSE_EXIT_NORMAL;
         case '1':
 		Color::setEnabled();
 		return PARSE_EXIT_NORMAL;

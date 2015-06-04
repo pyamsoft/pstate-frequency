@@ -47,6 +47,18 @@ const int Values::TURBO_INSANE = -1;
 const int Values::MIN_POSSIBLE_FREQ = 0;
 const int Values::MAX_POSSIBLE_FREQ = 100;
 const int Values::UNINITIALIZED = -1;
+const bool Values::SLEEP = true;
+const bool Values::NO_SLEEP = false;
+
+bool Values::shouldSleep() const
+{
+	return doSleep;
+}
+
+void Values::dontSleep()
+{
+	doSleep = NO_SLEEP;
+}
 
 bool Values::isInitialized() const
 {
@@ -95,7 +107,6 @@ bool Values::setGovernor(const std::string& newGovernor)
 		return false;
 	}
 }
-
 
 void Values::setAction(const int newAction)
 {

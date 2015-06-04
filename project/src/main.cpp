@@ -137,7 +137,9 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 			std::cout << "[Debug] Sleep for two seconds"
 				  << std::endl;
 		}
-		sleep(2);
+		if (cpuValues.shouldSleep()) {
+			sleep(2);
+		}
 
 		/*
 		 * If the new maximum frequency that is requested
@@ -219,6 +221,7 @@ int main(int argc, char** argv)
                 {"version",       no_argument,        NULL,           'V'},
                 {"quiet",         no_argument,        NULL,           'q'},
                 {"all-quiet",     no_argument,        NULL,           'a'},
+                {"no-sleep",      no_argument,        NULL,           '2'},
                 {"debug",         no_argument,        NULL,           'd'},
                 {"get",           no_argument,        NULL,           'G'},
                 {"set",           no_argument,        NULL,           'S'},

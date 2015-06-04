@@ -253,7 +253,9 @@ void printHelp()
 			<< "    -n | --min       Modify current CPU min "
 			<< "frequency" << std::endl
 			<< "    -t | --turbo     Modify curent CPU turbo "
-			<< "boost state" << std::endl;
+			<< "boost state" << std::endl
+			<< "    --no-sleep       Don't sleep after setting "
+			<< "CPU frequencies" << std::endl;
 		std::cout << oss.str();
 	}
 }
