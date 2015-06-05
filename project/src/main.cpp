@@ -49,7 +49,7 @@ static void setCpuGovernor(const psfreq::Cpu &cpu,
 		const psfreq::Values &cpuValues,
 		const std::string cpuGovernor);
 static void setCpuFrequencies(const psfreq::Cpu &cpu, const int newMax,
-		const int newMin, const int cpuMinPstate);
+		const int newMin);
 static void sleepCpu(const psfreq::Values &cpuValues);
 
 static void sleepCpu(const psfreq::Values &cpuValues)
@@ -64,7 +64,7 @@ static void sleepCpu(const psfreq::Values &cpuValues)
 }
 
 static void setCpuFrequencies(const psfreq::Cpu &cpu, const int newMax,
-		const int newMin, const int cpuMinPstate)
+		const int newMin)
 {
 	/*
 	 * If the new maximum frequency that is requested
@@ -72,25 +72,14 @@ static void setCpuFrequencies(const psfreq::Cpu &cpu, const int newMax,
 	 * modify the minimum first before we can actually
 	 * change the max frequency
 	 */
-	if (cpuMinPstate > newMax) {
-		if (psfreq::Log::isDebug()) {
-			std::cout << "[Debug] Current min is higher "
-				<< "than the new max, set the min "
-				<< "first before adjusting max"
-				<< std::endl;
-		}
-		cpu.setScalingMin(newMin);
-		cpu.setScalingMax(newMax);
-	} else {
-		if (psfreq::Log::isDebug()) {
-			std::cout << "[Debug] Current min is lower "
-				<< "than the new max, can safely "
-				<< "adjust the new max"
-				<< std::endl;
-		}
-		cpu.setScalingMax(newMax);
-		cpu.setScalingMin(newMin);
+	if (psfreq::Log::isDebug()) {
+		std::cout << "[Debug] Current min is lower "
+			<< "than the new max, can safely "
+			<< "adjust the new max"
+			<< std::endl;
 	}
+	cpu.setScalingMax(newMax);
+	cpu.setScalingMin(newMin);
 }
 
 
@@ -251,7 +240,7 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
 
 		setSaneValues(cpu, cpuInfoMin, cpuInfoMax);
 		sleepCpu(cpuValues);
-		setCpuFrequencies(cpu, newMax, newMin, cpuMinPstate);
+		setCpuFrequencies(cpu, newMax, newMin);
 		setCpuTurbo(cpu, cpuValues);
 		setCpuGovernor(cpu, cpuValues, cpuGovernor);
 		return true;
