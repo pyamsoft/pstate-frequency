@@ -26,7 +26,7 @@ _options()
 	elif [ "$words[$index]" = "-G" ] || [ "$words[$index]" = "--get" ]; then
 		_alternative \
 			"unprivilaged-options:unprivilaged options:_unprivilaged_options"
-	elif [ "$words[$index]" = "-o" ] || [ "$words[$index]" = "--gov" ] || [ "$words[$index]" = "--governor" ]; then
+	elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--governor" ]; then
 		_alternative \
 			":cpu governor name:"
 	elif [ "$words[$index]" = "-m" ] || [ "$words[$index]" = "--max" ]; then
@@ -68,7 +68,8 @@ _privilaged_options()
 		"-m:Set the CPU max"
 		"-n:Set the CPU min"
 		"-t:Set the CPU turbo"
-		"-o:Set the CPU governor"
+		"-g:Set the CPU governor"
+		"--no-sleep:No sleep before setting"
 	)
 	_describe -t privilaged-options "privilaged options" options "$@"
 }
