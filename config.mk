@@ -21,13 +21,13 @@ STD:=-std=c++11
 # Include a bash completion file
 # 0 NO / 1 YES
 ##
-INCLUDE_BASH_COMPLETION:=1
+INCLUDE_BASH_COMPLETION?=1
 
 ##
 # Include a zsh completion file
 # 0 NO / 1 YES
 ##
-INCLUDE_ZSH_COMPLETION:=1
+INCLUDE_ZSH_COMPLETION?=1
 
 ##
 # Include a systemd unit
@@ -37,14 +37,14 @@ INCLUDE_ZSH_COMPLETION:=1
 # unit will issue calls to the automatic power plan, which is only enabled
 # when compiled with the udev rule.
 ##
-INCLUDE_SYSTEMD_UNIT:=1
+INCLUDE_SYSTEMD_UNIT?=1
 
 ##
 # Include a udev rule which will set the pstate to powersave on battery and
 # performance on AC power
 # 0 NO / 1 YES
 ##
-INCLUDE_UDEV_RULE:=1
+INCLUDE_UDEV_RULE?=1
 
 ##
 # C++ Compiler to use
@@ -63,27 +63,25 @@ PREFIX?=/usr/local
 ##
 # Permissions
 ##
-BIN_PERMISSION=755
+BIN_PERMISSION:=755
 
 ##
 # Linker Flags
 ##
-LDFLAGS?= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all
+LDFLAGS:= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
+	 $(LDFLAGS)
 
 ##
 # Compiler flags
 ##
-CXXFLAGS?= -O2 \
+CXXFLAGS:= $(STD) -I. -O2 \
 	-march=native -mtune=generic -pipe \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
-	-Wunreachable-code
-
-# Add STD and includes
-CXXFLAGS+= ${STD} -I.
+	-Wunreachable-code $(CXXFLAGS)
 
 ifdef VERSION
-	CXXFLAGS+= -DVERSION=\"${VERSION}[${CXX}]\"
+	CXXFLAGS+= -DVERSION=\"$(VERSION)[$(CXX)]\"
 endif
 ifeq ($(INCLUDE_UDEV_RULE), 1)
-	CXXFLAGS+= -DINCLUDE_UDEV_RULE=${INCLUDE_UDEV_RULE}
+	CXXFLAGS+= -DINCLUDE_UDEV_RULE=$(INCLUDE_UDEV_RULE)
 endif
