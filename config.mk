@@ -73,7 +73,7 @@ LDFLAGS:= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all
 ##
 # Compiler flags
 ##
-CXXFLAGS:= ${STD} -I. -O3 \
+CXXFLAGS:= ${STD} -I. -O2 \
 	-march=native -mtune=generic -pipe \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
 	-Wunreachable-code
