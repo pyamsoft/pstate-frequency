@@ -85,3 +85,8 @@ endif
 ifeq ($(INCLUDE_UDEV_RULE), 1)
 	CXXFLAGS+= -DINCLUDE_UDEV_RULE=$(INCLUDE_UDEV_RULE)
 endif
+
+##
+# Make Flags
+##
+MAKEFLAGS:= $(MAKEFLAGS)
