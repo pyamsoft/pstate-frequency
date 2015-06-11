@@ -68,7 +68,7 @@ BIN_PERMISSION:=755
 ##
 # Linker Flags
 ##
-LDFLAGS:= -Wl,-O3,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
+LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
 	 $(LDFLAGS)
 
 ##
