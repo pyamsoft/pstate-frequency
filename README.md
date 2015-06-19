@@ -169,6 +169,12 @@ will run at is decided solely by the hardware itself.
 pstate-frequency is only able to offer "suggestions" as to what  
 frequency should be run, not make strict rules.
 
+Additional control may be achieved through the use of the  
+x86_energy_perf_policy or equivalent binaries. Setting the  
+x86_energy_perf_policy to the 'normal' mode can help pstate-frequency  
+maintain stricter control of CPU frequencies, and this can sometimes  
+help in keeping frequencies under control after system suspend and resume.
+
 ### Additional Notes
 
 If you are attempting to use the udev rule but pstate-frequency fails to  
@@ -183,7 +189,7 @@ as any output you get when running **udevadm monitor** would be of great help.
 ## Questions
 
 Questions or issues should be either posted in the issue section of this  
-repository, or directed by email to pyamsoft @ pyam.soft@gmail.com
+repository, or directed by email to pyamsoft @ pyam(dot)soft(at)gmail(dot)com
 
 ## Issues
 
