@@ -26,3 +26,5 @@ install: all
 uninstall:
 	@$(MAKE) -C project uninstall
 	@$(MAKE) -C assets uninstall
+	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/README.md"
+	@rm -rf $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)
