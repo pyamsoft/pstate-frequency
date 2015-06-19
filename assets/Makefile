@@ -64,5 +64,7 @@ endif
 ifeq ($(INCLUDE_SYSTEMD_UNIT), 1)
 	@echo "  UNINSTALL  $(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD)"
 	@rm -f $(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD)
+	@echo "  UNINSTALL  $(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD_SLEEP)"
+	@rm -f $(DESTDIR)/usr/lib/systemd/system/$(SYSTEMD_SLEEP)
 endif
 
