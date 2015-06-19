@@ -32,7 +32,7 @@ clean:
 install: all
 	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(TARGET)"
 	@install -d $(DESTDIR)$(PREFIX)/bin
-	@install -m $(BIN_PERMISSION) $(TARGET) $(DESTDIR)$(PREFIX)/bin
+	@install -m 755 $(TARGET) $(DESTDIR)$(PREFIX)/bin
 
 uninstall:
 	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/bin/$(EXEC_NAME)"
