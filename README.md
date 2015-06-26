@@ -28,6 +28,15 @@ support for any kind of customization that deviates from the shipped
 configuration file will not be supported.
 
 
+### Optional Dependencies
+
++ x86_energy_perf_policy
+This is used by the pstate-frequency-sleep systemd service to set the CPU to  
+normal performance policy upon suspend and resume. It can help fix issues  
+where upon resume of the system, the CPU runs at frequencies higher than  
+that which is advertised to be available.
+
+
 ### Installation
 
 The installation process follows the basic *make, make install* process.  
