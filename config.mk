@@ -57,6 +57,13 @@ CXX?=g++
 
 ##
 # Prefix of install
+#
+# Understand that this prefix will only affect the destination of the
+# installed pstate-frequency binary and the installed documentation
+#
+# The bash-completion, zsh-completion, udev rule, and systemd unit files
+# expect to be installed into the /usr directory, and may not work if they
+# are installed anywhere other than the /usr, or /etc directories
 ##
 PREFIX?=/usr/local
 
