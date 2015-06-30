@@ -18,7 +18,7 @@ ifeq ($(INCLUDE_BASH_COMPLETION), 1)
 endif
 ifeq ($(INCLUDE_ZSH_COMPLETION), 1)
 	@echo -n "  INSTALL  "
-	@echo "$(DESTDIR)$/usr/share/zsh/site-functions/_$(EXEC_NAME)"
+	@echo "$(DESTDIR)/usr/share/zsh/site-functions/_$(EXEC_NAME)"
 	@install -d $(DESTDIR)/usr/share/zsh/site-functions
 	@install -m 644 shell/zsh/zsh_completion \
 		$(DESTDIR)/usr/share/zsh/site-functions/_$(EXEC_NAME)
