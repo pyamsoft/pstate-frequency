@@ -47,6 +47,18 @@ INCLUDE_SYSTEMD_UNIT?=1
 INCLUDE_UDEV_RULE?=1
 
 ##
+# Installs a copy of the README.md file to
+# $(PREFIX)/share/doc/pstate-frequency/README.md
+##
+INCLUDE_DOC?=1
+
+##
+# Installs a copy of the C++ related source code to
+# $(PREFIX)/share/doc/pstate-frequency/project
+##
+INCLUDE_SRC?=1
+
+##
 # C++ Compiler to use
 # This will default to the GNU C++ compiler, g++
 # The project has been tested against g++ and clang++
