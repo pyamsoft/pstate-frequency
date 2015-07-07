@@ -46,6 +46,8 @@ change:
 + Install zsh completion (defaults to Yes)  
 + Install systemd related unit files (defaults to Yes)  
 + Install udev rules for automatic frequency setting (defaults to Yes)  
++ Install this README as documentation (defaults to Yes)  
++ Install a copy of the source code as documentation (defaults to Yes)  
 
 
 #### Distribution Specific Installations
