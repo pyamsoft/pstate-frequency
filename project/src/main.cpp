@@ -51,6 +51,87 @@ static void setCpuGovernor(const psfreq::Cpu &cpu,
 static void setCpuFrequencies(const psfreq::Cpu &cpu, const int newMax,
 		const int newMin);
 static void sleepCpu(const psfreq::Values &cpuValues);
+static unsigned int initializeCpu(psfreq::Cpu &cpu);
+static unsigned int nullAction(void);
+static unsigned int getAction(const psfreq::Cpu &cpu,
+		const psfreq::Values &cpuValues);
+static unsigned int setActionRoot(const psfreq::Cpu &cpu,
+		const psfreq::Values &cpuValues);
+static unsigned int setActionOther();
+
+static unsigned int setActionRoot(const psfreq::Cpu &cpu,
+		const psfreq::Values &cpuValues)
+{
+	if (!cpuValues.isInitialized()) {
+		if (!psfreq::Log::isAllQuiet()) {
+			std::cerr << psfreq::Color::boldRed()
+				<< "[Error] No Requests."
+				<< psfreq::Color::reset()
+				<< std::endl;
+		}
+		return EXIT_FAILURE;
+	}
+	if (!setCpuValues(cpu, cpuValues)) {
+		if (!psfreq::Log::isAllQuiet()) {
+			std::cerr
+				<< psfreq::Color::boldRed()
+				<< "[Error] Environment was"
+				<< " not sane. Could"
+				<< " not set any"
+				<< " values"
+				<< psfreq::Color::reset()
+				<< std::endl;
+		}
+		return EXIT_FAILURE;
+	}
+	psfreq::printCpuValues(cpu);
+	return EXIT_SUCCESS;
+}
+
+static unsigned int setActionOther()
+{
+	if (!psfreq::Log::isAllQuiet()) {
+		std::cerr << psfreq::Color::boldRed()
+			<< "[Error] Insufficient Permissions."
+			<< psfreq::Color::reset() << std::endl;
+	}
+	return EXIT_FAILURE;
+}
+
+static unsigned int getAction(const psfreq::Cpu &cpu,
+		const psfreq::Values &cpuValues)
+{
+	if (cpuValues.getRequested() == psfreq::Values::REQUESTED_CURRENT) {
+		psfreq::printCpuValues(cpu);
+	} else {
+		psfreq::printRealtimeFrequency(cpu);
+	}
+	return EXIT_SUCCESS;
+
+}
+
+static unsigned int nullAction()
+{
+	psfreq::printGPL();
+	psfreq::printHelp();
+	return EXIT_SUCCESS;
+}
+
+/*
+ * Initialize the cpu so that it may now act on sysfs values.
+ */
+static unsigned int initializeCpu(psfreq::Cpu &cpu)
+{
+	if (!cpu.init()) {
+		if (!psfreq::Log::isAllQuiet()) {
+			std::cerr << psfreq::Color::boldRed()
+				  << "[Error] Could not init CPU"
+				  << psfreq::Color::reset() << std::endl;
+		}
+		return EXIT_FAILURE;
+	}
+	return EXIT_SUCCESS;
+}
 
 static void sleepCpu(const psfreq::Values &cpuValues)
 {
@@ -283,15 +364,7 @@ int main(int argc, char** argv)
 		{0,		  0,                  0,              0}
                 };
 
-	/*
-	 * Initialize the cpu so that it may now act on sysfs values.
-	 */
-	if (!cpu.init()) {
-		if (!psfreq::Log::isAllQuiet()) {
-			std::cerr << psfreq::Color::boldRed()
-				  << "[Error] Could not init CPU"
-				  << psfreq::Color::reset() << std::endl;
-		}
+	if (initializeCpu(cpu) == EXIT_FAILURE) {
 		return EXIT_FAILURE;
 	}
 
@@ -308,53 +381,20 @@ int main(int argc, char** argv)
 	}
 
 	if (cpuValues.isActionNull()) {
-		psfreq::printGPL();
-		psfreq::printHelp();
-		return EXIT_SUCCESS;
+		return nullAction();
 	} else if (cpuValues.isActionGet()) {
-		if (cpuValues.getRequested() ==
-				psfreq::Values::REQUESTED_CURRENT) {
-			psfreq::printCpuValues(cpu);
-		} else {
-			psfreq::printRealtimeFrequency(cpu);
-		}
+		return getAction(cpu, cpuValues);
 	} else {
 		/*
 		 * User must have root privilages to set
 		 * values here.
 		 */
 		if (geteuid() == psfreq::UID_ROOT) {
-			if (!cpuValues.isInitialized()) {
-				if (!psfreq::Log::isAllQuiet()) {
-					std::cerr << psfreq::Color::boldRed()
-						<< "[Error] No Requests."
-						<< psfreq::Color::reset()
-						<< std::endl;
-				}
-				return EXIT_FAILURE;
-			}
-			if (!setCpuValues(cpu, cpuValues)) {
-				if (!psfreq::Log::isAllQuiet()) {
-					std::cerr
-						<< psfreq::Color::boldRed()
-						<< "[Error] Environment was"
-						<< " not sane. Could"
-						<< " not set any"
-						<< " values"
-						<< psfreq::Color::reset()
-						<< std::endl;
-				}
-				return EXIT_FAILURE;
-			}
-			psfreq::printCpuValues(cpu);
+			return setActionRoot(cpu, cpuValues);
 		} else {
-			if (!psfreq::Log::isAllQuiet()) {
-				std::cerr << psfreq::Color::boldRed()
-					<< "[Error] Insufficient Permissions."
-					<< psfreq::Color::reset() << std::endl;
-			}
-			return EXIT_FAILURE;
+			return setActionOther();
 		}
 	}
+
 	return EXIT_SUCCESS;
 }
