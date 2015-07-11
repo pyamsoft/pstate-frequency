@@ -450,7 +450,7 @@ static unsigned int handleOptionResult(const Cpu &cpu,
 			}
 		}
         case '2':
-		cpuValues.dontSleep();
+		cpuValues.sleep();
 		return PARSE_EXIT_NORMAL;
         case '1':
 		Color::setEnabled();

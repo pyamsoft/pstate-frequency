@@ -254,7 +254,7 @@ void printHelp()
 			<< "frequency" << std::endl
 			<< "    -t | --turbo     Modify curent CPU turbo "
 			<< "boost state" << std::endl
-			<< "    --no-sleep       Don't sleep after setting "
+			<< "    --sleep          Sleep before setting "
 			<< "CPU frequencies" << std::endl;
 		std::cout << oss.str();
 	}

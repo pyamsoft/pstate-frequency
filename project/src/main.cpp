@@ -349,7 +349,7 @@ int main(int argc, char** argv)
                 {"version",       no_argument,        NULL,           'V'},
                 {"quiet",         no_argument,        NULL,           'q'},
                 {"all-quiet",     no_argument,        NULL,           'a'},
-                {"no-sleep",      no_argument,        NULL,           '2'},
+                {"sleep",         no_argument,        NULL,           '2'},
                 {"debug",         no_argument,        NULL,           'd'},
                 {"get",           no_argument,        NULL,           'G'},
                 {"set",           no_argument,        NULL,           'S'},
