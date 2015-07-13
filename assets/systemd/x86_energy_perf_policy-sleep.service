@@ -1,0 +1,14 @@
+[Unit]
+Description=Run x86_energy_perf_policy on sleep/resume
+Before=sleep.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=x86_energy_perf_policy -v normal
+ExecStop=x86_energy_perf_policy -v normal
+
+[Install]
+WantedBy=sleep.target
+

@@ -27,8 +27,9 @@ file: config.mk.
 ### Optional Dependencies
 
 + x86_energy_perf_policy  
-This is used by the pstate-frequency-sleep systemd service to set the CPU to  
-normal performance policy upon suspend and resume. It can help fix issues  
+This is used to set the CPU to normal performance policy upon suspend and 
+resume. It is used to currently work around an assumed bug whereby on resume  
+the system is set to performance policy on one core. It can help fix issues  
 where upon resume of the system, the CPU runs at frequencies higher than  
 that which is advertised to be available.
 
@@ -39,8 +40,8 @@ The installation process follows the basic *make, make install* process.
 
 While building, there are a couple of options that one may configure or  
 change:  
-+ The C++ compiler used (defaults to g++, though clang++ is recommended)  
-+ The C++ compiling standard (defaults to C++11, though none can be used)  
++ The C++ compiler used (defaults to g++)  
++ The C++ compiling standard (defaults to C++11)  
 + The directory to install to (defaults to /usr/local)  
 + Install bash completion (defaults to Yes)  
 + Install zsh completion (defaults to Yes)  
@@ -48,6 +49,10 @@ change:
 + Install udev rules for automatic frequency setting (defaults to Yes)  
 + Install this README as documentation (defaults to Yes)  
 + Install a copy of the source code as documentation (defaults to Yes)  
+
+Also note that the config.mk file specifies by default the option  
+*-march=native* which can only be used by newer version of clang and  
+gcc version including and above 4.9
 
 
 #### Distribution Specific Installations
@@ -199,7 +204,10 @@ Additional control may be achieved through the use of the
 x86_energy_perf_policy or equivalent binaries. Setting the  
 x86_energy_perf_policy to the 'normal' mode can help pstate-frequency  
 maintain stricter control of CPU frequencies, and this can sometimes  
-help in keeping frequencies under control after system suspend and resume.
+help in keeping frequencies under control after system suspend and resume.  
+There is a systemd unit included with pstate-frequency by default called  
+x86_energy_perf_policy-sleep.service which will set the policy to normal  
+upon system suspend/resume.
 
 
 ### Additional Notes
