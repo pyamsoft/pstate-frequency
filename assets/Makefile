@@ -4,7 +4,7 @@ PROJECT_ROOT=project
 EXEC_NAME=pstate-frequency
 UDEV=99-$(EXEC_NAME).rules
 SYSTEMD=$(EXEC_NAME).service
-SYSTEMD_SLEEP=$(EXEC_NAME)-sleep.service
+SYSTEMD_SLEEP=x86_energy_perf_policy-sleep.service
 SYSTEM_PREFIX=/usr
 
 .PHONY: install install-bash install-zsh install-udev \
