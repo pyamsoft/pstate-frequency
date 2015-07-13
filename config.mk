@@ -27,7 +27,7 @@ INCLUDE_BASH_COMPLETION?=1
 # Include a zsh completion file
 # 0 NO / 1 YES
 ##
-INCLUDE_ZSH_COMPLETION?=1
+INCLUDE_ZSH_COMPLETION?=0
 
 ##
 # Include a systemd unit
@@ -44,7 +44,7 @@ INCLUDE_SYSTEMD_UNIT?=1
 # performance on AC power
 # 0 NO / 1 YES
 ##
-INCLUDE_UDEV_RULE?=1
+INCLUDE_UDEV_RULE?=0
 
 ##
 # Installs a copy of the README.md file to
