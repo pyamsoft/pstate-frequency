@@ -4,6 +4,7 @@ PROJECT_ROOT=project
 EXEC_NAME=pstate-frequency
 UDEV=99-$(EXEC_NAME).rules
 SYSTEMD=$(EXEC_NAME).service
+X86_NAME=x86_energy_perf_policy
 SYSTEMD_SLEEP=x86_energy_perf_policy-sleep.service
 SYSTEM_PREFIX=/usr
 
@@ -56,7 +57,7 @@ install-systemd:
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/lib/systemd/system/$(SYSTEMD_SLEEP)"
 	@install -m 644 systemd/$(SYSTEMD_SLEEP) \
 		$(DESTDIR)$(SYSTEM_PREFIX)/lib/systemd/system/$(SYSTEMD_SLEEP)
-	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
+	@sed -i "s#$(X86_NAME)#$(PREFIX)/bin/$(X86_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/lib/systemd/system/$(SYSTEMD_SLEEP)
 
 uninstall:
