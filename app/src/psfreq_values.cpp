@@ -21,9 +21,9 @@
 #include <iostream>
 #include <sstream>
 
-#include "include/psfreq_color.h"
-#include "include/psfreq_log.h"
-#include "include/psfreq_values.h"
+#include "psfreq_color.h"
+#include "psfreq_log.h"
+#include "psfreq_values.h"
 
 namespace psfreq {
 

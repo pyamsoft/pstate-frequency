@@ -18,7 +18,7 @@
  * For questions please contact pyamsoft at pyam(dot)soft(at)gmail(dot)com
  */
 
-#include "include/psfreq_log.h"
+#include "psfreq_log.h"
 
 namespace psfreq {
 

@@ -22,7 +22,7 @@
 #define C_PSFREQ_OUTPUT_H_
 
 
-#include "include/psfreq_cpu.h"
+#include "psfreq_cpu.h"
 
 namespace psfreq {
 

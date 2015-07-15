@@ -21,10 +21,10 @@
 #include <iostream>
 #include <sstream>
 
-#include "include/psfreq_color.h"
-#include "include/psfreq_cpu.h"
-#include "include/psfreq_log.h"
-#include "include/psfreq_util.h"
+#include "psfreq_color.h"
+#include "psfreq_cpu.h"
+#include "psfreq_log.h"
+#include "psfreq_util.h"
 
 namespace psfreq {
 

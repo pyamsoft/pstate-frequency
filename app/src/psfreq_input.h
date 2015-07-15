@@ -21,8 +21,8 @@
 #ifndef C_PSFREQ_INPUT_H_
 #define C_PSFREQ_INPUT_H_
 
-#include "include/psfreq_cpu.h"
-#include "include/psfreq_values.h"
+#include "psfreq_cpu.h"
+#include "psfreq_values.h"
 
 namespace psfreq {
 
