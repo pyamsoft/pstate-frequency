@@ -35,8 +35,8 @@ source=("${_gitname}::git+${url}#branch=dev")
 # _CXX="g++"
 # _PREFIX="/usr/local"
 # _INCLUDE_BASH_COMPLETION=1
-# _INCLUDE_ZSH_COMPLETION=1
-# _INCLUDE_UDEV_RULE=1
+# _INCLUDE_ZSH_COMPLETION=0
+# _INCLUDE_UDEV_RULE=0
 # _INCLUDE_SYSTEMD_UNIT=1
 ##
 
