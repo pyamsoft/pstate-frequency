@@ -44,9 +44,9 @@ change:
 + The C++ compiling standard (defaults to C++11)  
 + The directory to install to (defaults to /usr/local)  
 + Install bash completion (defaults to Yes)  
-+ Install zsh completion (defaults to Yes)  
++ Install zsh completion (defaults to No)  
 + Install systemd related unit files (defaults to Yes)  
-+ Install udev rules for automatic frequency setting (defaults to Yes)  
++ Install udev rules for automatic frequency setting (defaults to No)  
 + Install this README as documentation (defaults to Yes)  
 + Install a copy of the source code as documentation (defaults to Yes)  
 
