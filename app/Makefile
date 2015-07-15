@@ -51,7 +51,6 @@ install-app: all
 uninstall-app:
 	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/bin/$(EXEC_NAME)"
 	@rm -f $(DESTDIR)$(PREFIX)/bin/$(EXEC_NAME)
-	@echo "DONE"
 
 install-res:
 ifeq ($(INCLUDE_BASH_COMPLETION), 1)
