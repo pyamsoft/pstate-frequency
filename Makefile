@@ -2,7 +2,7 @@ include config.mk
 
 EXEC_NAME=pstate-frequency
 PROJECT_DIR=app
-DOC_DIR=$(DOC_DIR)
+DOC_DIR=share/doc
 
 .PHONY: all clean install install-src install-doc uninstall uninstall-src \
 	uninstall-doc options
@@ -35,9 +35,9 @@ install-doc:
 	@install -m 644 README.md $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
 
 install-src:
-	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)"
+	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src"
 	@install -d $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)
-	@cp -r --no-preserve=mode $(PROJECT_DIR)/src $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)
+	@cp -r --no-preserve=mode $(PROJECT_DIR)/src $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src
 
 uninstall:
 	@$(MAKE) -C $(PROJECT_DIR) uninstall-app
@@ -55,7 +55,7 @@ uninstall-doc:
 	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
 
 uninstall-src:
-	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)"
-	@rm -rf $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)
+	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src"
+	@rm -rf $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src
 	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
 
