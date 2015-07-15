@@ -69,7 +69,7 @@ _privilaged_options()
 		"-n:Set the CPU min"
 		"-t:Set the CPU turbo"
 		"-g:Set the CPU governor"
-		"--no-sleep:No sleep before setting"
+		"--sleep:No sleep before setting"
 	)
 	_describe -t privilaged-options "privilaged options" options "$@"
 }
