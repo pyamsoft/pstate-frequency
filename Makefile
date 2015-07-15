@@ -1,11 +1,14 @@
 include config.mk
 
 EXEC_NAME=pstate-frequency
+PROJECT_DIR=app
+DOC_DIR=$(DOC_DIR)
 
-.PHONY: all clean install install-doc uninstall uninstall-doc options
+.PHONY: all clean install install-src install-doc uninstall uninstall-src \
+	uninstall-doc options
 
 all:
-	@$(MAKE) -C project
+	@$(MAKE) -C $(PROJECT_DIR)
 
 options:
 	@echo "CXXFLAGS  = " $(CXXFLAGS)
@@ -14,11 +17,11 @@ options:
 	@echo "CXX       = " $(CXX)
 
 clean:
-	@$(MAKE) -C project clean
+	@$(MAKE) -C $(PROJECT_DIR) clean
 
 install: all
-	@$(MAKE) -C project install
-	@$(MAKE) -C assets install
+	@$(MAKE) -C $(PROJECT_DIR) install-app
+	@$(MAKE) -C $(PROJECT_DIR) install-res
 ifeq ($(INCLUDE_SRC), 1)
 	@$(MAKE) install-src
 endif
@@ -27,19 +30,18 @@ ifeq ($(INCLUDE_DOC), 1)
 endif
 
 install-doc:
-	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/README.md"
-	@install -d $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)
-	@install -m 644 README.md $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)
+	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md"
+	@install -d $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
+	@install -m 644 README.md $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
 
 install-src:
-	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/project"
-	@install -d $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/project
-	@cp -r --no-preserve=mode project/include $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/project
-	@cp -r --no-preserve=mode project/src $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/project
+	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)"
+	@install -d $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)
+	@cp -r --no-preserve=mode $(PROJECT_DIR)/src $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)
 
 uninstall:
-	@$(MAKE) -C project uninstall
-	@$(MAKE) -C assets uninstall
+	@$(MAKE) -C $(PROJECT_DIR) uninstall-app
+	@$(MAKE) -C $(PROJECT_DIR) uninstall-res
 ifeq ($(INCLUDE_SRC), 1)
 	@$(MAKE) uninstall-src
 endif
@@ -48,12 +50,12 @@ ifeq ($(INCLUDE_DOC), 1)
 endif
 
 uninstall-doc:
-	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/README.md"
-	@rm -f $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/README.md
-	@rmdir $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME) --ignore-fail-on-non-empty
+	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md"
+	@rm -f $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md
+	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
 
 uninstall-src:
-	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/project"
-	@rm -rf $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME)/project
-	@rmdir $(DESTDIR)$(PREFIX)/share/doc/$(EXEC_NAME) --ignore-fail-on-non-empty
+	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)"
+	@rm -rf $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/$(PROJECT_DIR)
+	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
 
