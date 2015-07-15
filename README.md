@@ -215,7 +215,7 @@ upon system suspend/resume.
 If you are attempting to use the udev rule but pstate-frequency fails to  
 change the frequencies when the power state has changed, udev may be failing  
 to notice your change of power source. Please read and understand the udev  
-rule included in the assets directory, before attempting to create a work  
+rule included in the res directory, before attempting to create a work  
 around rule for your particular system. Should you succeed in creating a  
 working udev rule for your system, please feel free to submit it to the  
 main project as a pull request on GitHub.
