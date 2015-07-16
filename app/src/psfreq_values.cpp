@@ -228,8 +228,6 @@ bool Values::runPlan()
 		}
 		setPlanMaxPerformance();
 		break;
-#ifdef INCLUDE_UDEV_RULE
-#if INCLUDE_UDEV_RULE == 1
 	case POWER_PLAN_AUTO:
 		if (Log::isDebug()) {
 			std::cout << "[Debug] power plan: auto"
@@ -260,8 +258,6 @@ bool Values::runPlan()
 			setPlanPerformance();
 		}
 		break;
-#endif
-#endif
 	default:
 		result = false;
 	}

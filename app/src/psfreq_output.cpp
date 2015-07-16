@@ -49,12 +49,8 @@ void printPlanHelp()
 	    << Color::boldWhite() << std::endl
 	    << "(3) " << Color::boldRed() << "max-performance"
 	    << Color::boldWhite() << std::endl
-#ifdef INCLUDE_UDEV_RULE
-#if INCLUDE_UDEV_RULE == 1
 	    << "(0) " << Color::boldRed() << "auto"
 	    << Color::boldWhite() << std::endl
-#endif
-#endif
 	    << Color::reset() << std::endl;
 	std::cerr << oss.str();
 }

@@ -73,8 +73,6 @@ static int planFromOptArg(char *const arg)
 				<< std::endl;
 		}
 		plan = Values::POWER_PLAN_MAX_PERFORMANCE;
-#ifdef INCLUDE_UDEV_RULE
-#if INCLUDE_UDEV_RULE == 1
 	} else if (convertedArg.compare("0") == 0
 		|| stringStartsWith("auto", convertedArg)) {
 		if (Log::isDebug()) {
@@ -82,8 +80,6 @@ static int planFromOptArg(char *const arg)
 				<< std::endl;
 		}
 		plan = Values::POWER_PLAN_AUTO;
-#endif
-#endif
 	} else {
 		if (!Log::isAllQuiet()) {
 			printPlanHelp();
