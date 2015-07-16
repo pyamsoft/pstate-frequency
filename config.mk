@@ -41,10 +41,10 @@ INCLUDE_SYSTEMD_UNIT?=1
 
 ##
 # Modify the x86_energy_perf_policy systemd rule to set the policy to
-# powersave instead of normal
-# 0 NO / 1 YES
+# a given preset
+# 0 powersave / 1 normal / 2 performance
 ##
-X86_PERF_POLICY_POWERSAVE?=0
+X86_ENERGY_PERF_POLICY?=1
 
 ##
 # Include a udev rule which will set the pstate to powersave on battery and
