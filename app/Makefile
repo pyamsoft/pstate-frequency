@@ -100,6 +100,10 @@ install-systemd:
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
 	@sed -i "s#$(X86_NAME)#$(PREFIX)/bin/$(X86_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
+ifeq ($(X86_PERF_POLICY_POWERSAVE, 1)
+	@sed -i "s#-v normal#-v powersave#g" \
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
+endif
 
 uninstall-res:
 ifeq ($(INCLUDE_BASH_COMPLETION), 1)
