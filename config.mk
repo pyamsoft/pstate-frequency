@@ -40,6 +40,13 @@ INCLUDE_ZSH_COMPLETION?=0
 INCLUDE_SYSTEMD_UNIT?=1
 
 ##
+# Modify the x86_energy_perf_policy systemd rule to set the policy to
+# powersave instead of normal
+# 0 NO / 1 YES
+##
+X86_PERF_POLICY_POWERSAVE?=0
+
+##
 # Include a udev rule which will set the pstate to powersave on battery and
 # performance on AC power
 # 0 NO / 1 YES
