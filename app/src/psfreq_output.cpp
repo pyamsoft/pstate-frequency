@@ -43,13 +43,13 @@ void printPlanHelp()
 #endif
 	oss << Color::boldRed() << "Error "
 	    << Color::boldWhite() << "Available Power Plans:" << std::endl
+	    << "(0) " << Color::boldRed() << "auto"
+	    << Color::boldWhite() << std::endl
 	    << "(1) " << Color::boldRed() << "powersave"
 	    << Color::boldWhite() << std::endl
 	    << "(2) " << Color::boldRed() << "performance"
 	    << Color::boldWhite() << std::endl
 	    << "(3) " << Color::boldRed() << "max-performance"
-	    << Color::boldWhite() << std::endl
-	    << "(0) " << Color::boldRed() << "auto"
 	    << Color::boldWhite() << std::endl
 	    << Color::reset() << std::endl;
 	std::cerr << oss.str();
