@@ -28,7 +28,7 @@ _pstate-frequency()
 	long_actions="--quiet --version --help --set --get --quiet --all-quiet --color"
 	short_set_options="-m -n -t -p -g"
 	short_get_options="-c -r"
-	long_set_options="--max --min --turbo --plan --governor --sleep"
+	long_set_options="--max --min --turbo --plan --governor --no-sleep"
 	long_get_options="--current --real"
 	plans="powersave performance max-performance"
 	governors="$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors)"
