@@ -59,7 +59,7 @@ public:
 		max(UNINITIALIZED),
 		min(UNINITIALIZED),
 		turbo(TURBO_INSANE),
-		doSleep(NO_SLEEP),
+		doSleep(SLEEP),
 		governor(UNINITIALIZED_STR),
 		requested(REQUESTED_CURRENT)
 	{
@@ -76,7 +76,7 @@ public:
 	void setRequested(const int newRequest);
 	bool setPlan(const int powerPlan);
 	bool setGovernor(const std::string& newGovernor);
-	void sleep();
+	void noSleep();
 
 	int getAction() const;
 	int getMax() const;

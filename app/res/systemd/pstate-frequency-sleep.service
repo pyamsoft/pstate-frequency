@@ -1,0 +1,14 @@
+[Unit]
+Description=Run pstate-frequency on sleep/resume
+Before=sleep.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=pstate-frequency -S -p 0
+ExecStop=pstate-frequency -S -p 0
+
+[Install]
+WantedBy=sleep.target
+

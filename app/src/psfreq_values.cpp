@@ -55,9 +55,9 @@ bool Values::shouldSleep() const
 	return doSleep;
 }
 
-void Values::sleep()
+void Values::noSleep()
 {
-	doSleep = SLEEP;
+	doSleep = NO_SLEEP;
 }
 
 bool Values::isInitialized() const

@@ -13,8 +13,9 @@ UDEV_RULES_DIR=lib/udev/rules.d
 
 UDEV=99-$(EXEC_NAME).rules
 SYSTEMD=$(EXEC_NAME).service
+SYSTEMD_SLEEP=$(EXEC_NAME)-sleep.service
 X86_NAME=x86_energy_perf_policy
-SYSTEMD_SLEEP=x86_energy_perf_policy-sleep.service
+X86_SLEEP=x86_energy_perf_policy-sleep.service
 
 .PHONY: all dirs clean install-app uninstall-app install-res install-bash \
 	install-zsh install-udev install-systemd uninstall-res uninstall-bash \
@@ -98,14 +99,19 @@ install-systemd:
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)"
 	@install -m 644 $(RES_DIR)/systemd/$(SYSTEMD_SLEEP) \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
-	@sed -i "s#$(X86_NAME)#$(PREFIX)/bin/$(X86_NAME)#g" \
+	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
+	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)"
+	@install -m 644 $(RES_DIR)/systemd/$(X86_SLEEP) \
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
+	@sed -i "s#$(X86_NAME)#$(PREFIX)/bin/$(X86_NAME)#g" \
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
 ifeq ($(X86_ENERGY_PERF_POLICY), 0)
 	@sed -i "s#-v normal#-v powersave#g" \
-		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
 else ifeq ($(X86_ENERGY_PERF_POLICY), 2)
 	@sed -i "s#-v normal#-v performance#g" \
-		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
 
 endif
 
