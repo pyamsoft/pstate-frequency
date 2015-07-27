@@ -1,8 +1,14 @@
 include ../config.mk
 
 EXEC_NAME=pstate-frequency
-OBJECTS=$(patsubst src/%.cpp,obj/%.o,$(wildcard src/*.cpp))
-TARGET=bin/$(EXEC_NAME)
+
+# Change this to 'build' if you wish to build into the app directory
+# Otherwise this will build on the tmpfs mounted at /tmp by default
+BUILD_DIR=/tmp/$(EXEC_NAME)
+# BUILD_DIR=build
+
+OBJECTS=$(patsubst src/%.cpp,$(BUILD_DIR)/obj/%.o,$(wildcard src/*.cpp))
+TARGET=$(BUILD_DIR)/bin/$(EXEC_NAME)
 
 RES_DIR=res
 SYSTEM_PREFIX=/usr
@@ -23,12 +29,12 @@ X86_SLEEP=x86_energy_perf_policy-sleep.service
 
 all: $(TARGET)
 
-$(OBJECTS): | obj
+$(OBJECTS): | $(BUILD_DIR)/obj
 
-obj:
+$(BUILD_DIR)/obj:
 	@mkdir -p $@
 
-obj/%.o : src/%.cpp
+$(BUILD_DIR)/obj/%.o: src/%.cpp
 	@echo "  CXX  $@"
 	@$(CXX) -c $< -o $@ $(CXXFLAGS)
 
@@ -37,11 +43,11 @@ $(TARGET): dirs $(OBJECTS)
 	@$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
 
 dirs:
-	@mkdir -p obj
-	@mkdir -p bin
+	@mkdir -p $(BUILD_DIR)/obj
+	@mkdir -p $(BUILD_DIR)/bin
 
 clean:
-	@rm -rf $(TARGET) $(OBJECTS) obj bin
+	@rm -rf $(TARGET) $(OBJECTS) $(BUILD_DIR)/obj $(BUILD_DIR)/bin $(BUILD_DIR)
 	@echo "  CLEAN PROJECT"
 
 install-app: all
