@@ -130,9 +130,9 @@ public:
 	static const double SCALING_FREQUENCY_INSANE;
 	static const int PSTATE_VALUE_INSANE;
 	static const int TURBO_BOOST_INSANE;
-	static const int POWER_SOURCE_AC;
-	static const int POWER_SOURCE_BAT;
-	static const int POWER_SOURCE_NONE;
+	static const unsigned int POWER_SOURCE_AC;
+	static const unsigned int POWER_SOURCE_BAT;
+	static const unsigned int POWER_SOURCE_NONE;
 	static const unsigned int NO_CPUS;
 	static const unsigned int NO_FREQ;
 };

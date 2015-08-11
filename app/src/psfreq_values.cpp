@@ -244,7 +244,7 @@ bool Values::runPlan()
 			}
 			result = false;
 			break;
-		} else if (autoPlan == POWER_PLAN_POWERSAVE) {
+		} else if (autoPlan == Cpu::POWER_SOURCE_BAT) {
 			if (Log::isDebug()) {
 				std::cout << "[Debug] power plan: powersave "
 					<< "from auto" << std::endl;
