@@ -70,6 +70,17 @@ X86_ENERGY_PERF_POLICY?=1
 INCLUDE_UDEV_RULE?=0
 
 ##
+# Runs the specified power plans on AC and BAT
+#
+# POWER_PLAN_AC
+#    1 powersave | [2 performance] | 3 max-performance
+# POWER_PLAN_BAT
+#    [1 powersave] | 2 performance | 3 max-performance
+##
+POWER_PLAN_AC=performance
+POWER_PLAN_BAT=powersave
+
+##
 # Install README.md
 #
 # Installs a copy of the README.md file to
@@ -139,6 +150,20 @@ CXXFLAGS:= $(STD) -O2 \
 ##
 ifdef VERSION
 	CXXFLAGS+= -DVERSION=\"$(VERSION)[$(CXX)]\"
+endif
+
+##
+# Add the POWER_PLAN_AC to the CXXFLAGS if it is defined
+##
+ifdef POWER_PLAN_AC
+	CXXFLAGS+= -DPOWER_PLAN_AC=\"$(POWER_PLAN_AC)\"
+endif
+
+##
+# Add the POWER_PLAN_BAT to the CXXFLAGS if it is defined
+##
+ifdef POWER_PLAN_BAT
+	CXXFLAGS+= -DPOWER_PLAN_BAT=\"$(POWER_PLAN_BAT)\"
 endif
 
 ##

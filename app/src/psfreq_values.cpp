@@ -245,17 +245,9 @@ bool Values::runPlan()
 			result = false;
 			break;
 		} else if (autoPlan == Cpu::POWER_SOURCE_BAT) {
-			if (Log::isDebug()) {
-				std::cout << "[Debug] power plan: powersave "
-					<< "from auto" << std::endl;
-			}
-			setPlanPowersave();
+			setPlanAutoBat();
 		} else {
-			if (Log::isDebug()) {
-				std::cout << "[Debug] power plan: performance "
-					<< "from auto" << std::endl;
-			}
-			setPlanPerformance();
+			setPlanAutoAC();
 		}
 		break;
 	default:
@@ -265,6 +257,63 @@ bool Values::runPlan()
 		std::cout << "[Debug] autoPlan unused" << std::endl;
 	}
 	return result;
+}
+
+void Values::setPlanAutoAC()
+{
+#ifdef POWER_PLAN_AC
+	if (stringStartsWith(POWER_PLAN_AC, "powersave")
+			|| stringStartsWith(POWER_PLAN_AC, "0")) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] AC power plan: powersave "
+				<< "from auto" << std::endl;
+		}
+		setPlanPowersave();
+	} else if (stringStartsWith(POWER_PLAN_AC, "performance")
+			|| stringStartsWith(POWER_PLAN_AC, "1")) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] AC power plan: performance "
+				<< "from auto" << std::endl;
+		}
+		setPlanPerformance();
+	} else if (stringStartsWith(POWER_PLAN_AC, "max-performance")
+			|| stringStartsWith(POWER_PLAN_AC, "2")) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] AC power plan: max-performance "
+				<< "from auto" << std::endl;
+		}
+		setPlanMaxPerformance();
+	}
+#endif
+
+}
+
+void Values::setPlanAutoBat()
+{
+#ifdef POWER_PLAN_BAT
+	if (stringStartsWith(POWER_PLAN_BAT, "powersave")
+			|| stringStartsWith(POWER_PLAN_BAT, "0")) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] BAT power plan: powersave "
+				<< "from auto" << std::endl;
+		}
+		setPlanPowersave();
+	} else if (stringStartsWith(POWER_PLAN_BAT, "performance")
+			|| stringStartsWith(POWER_PLAN_BAT, "1")) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] BAT power plan: performance "
+				<< "from auto" << std::endl;
+		}
+		setPlanPerformance();
+	} else if (stringStartsWith(POWER_PLAN_BAT, "max-performance")
+			|| stringStartsWith(POWER_PLAN_BAT, "2")) {
+		if (Log::isDebug()) {
+			std::cout << "[Debug] BAT power plan: max-performance "
+				<< "from auto" << std::endl;
+		}
+		setPlanMaxPerformance();
+	}
+#endif
 }
 
 void Values::setPlanPowersave()
