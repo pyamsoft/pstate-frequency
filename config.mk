@@ -180,4 +180,4 @@ endif
 #
 # Do NOT modify these unless you know what you are doing
 ##
-MAKEFLAGS:= $(MAKEFLAGS)
+MAKEFLAGS:= $(MAKEFLAGS) --no-print-directory
