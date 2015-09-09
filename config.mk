@@ -76,9 +76,24 @@ INCLUDE_UDEV_RULE?=0
 #    1 powersave | [2 performance] | 3 max-performance
 # POWER_PLAN_BAT
 #    [1 powersave] | 2 performance | 3 max-performance
+#
+# Custom plans are also accepted, in the following format:
+#
+#	cpu_max cpu_min cpu_turbo cpu_governor
+#
+# cpu_max: Number between 0 and 100
+# cpu_min: Number between 0 and 100
+# cpu_turbo: IF using intel_pstate, 1 (OFF) or 0 (ON).
+#	     IF using acpi-cpufreq, 0 (OFF) or 1 (ON).
+# cpu_governor: Name of governor.
+#
+# Example:
+#   POWER_PLAN_AC="80 50 1 powersave"
+#   POWER_PLAN_BAT="20 10 1 powersave"
+#
 ##
-POWER_PLAN_AC=performance
-POWER_PLAN_BAT=powersave
+POWER_PLAN_AC="performance"
+POWER_PLAN_BAT="powersave"
 
 ##
 # Install README.md

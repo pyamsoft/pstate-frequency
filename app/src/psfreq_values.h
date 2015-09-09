@@ -44,6 +44,8 @@ private:
 	void setPlanPowersave();
 	void setPlanPerformance();
 	void setPlanMaxPerformance();
+	void setPlanCustom(const std::vector<std::string> &ac,
+			const unsigned int items);
 	unsigned int setPlanAuto();
 	unsigned int getPowerSourceDirectory(DIR *const directory,
 		const char *const dirName);
@@ -121,6 +123,7 @@ public:
 	static const int UNINITIALIZED;
 	static const bool NO_SLEEP;
 	static const bool SLEEP;
+	static const unsigned int CUSTOM_NUMBER;
 
 };
 

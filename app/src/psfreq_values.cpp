@@ -49,6 +49,7 @@ const int Values::MAX_POSSIBLE_FREQ = 100;
 const int Values::UNINITIALIZED = -1;
 const bool Values::SLEEP = true;
 const bool Values::NO_SLEEP = false;
+const unsigned int Values::CUSTOM_NUMBER = 4;
 
 bool Values::shouldSleep() const
 {
@@ -262,56 +263,111 @@ bool Values::runPlan()
 void Values::setPlanAutoAC()
 {
 #ifdef POWER_PLAN_AC
-	if (stringStartsWith(POWER_PLAN_AC, "powersave")
-			|| stringStartsWith(POWER_PLAN_AC, "0")) {
+	const std::string acString = POWER_PLAN_AC;
+	const std::vector<std::string> ac = splitString(acString, ' ');
+	const unsigned int items = ac.size();
+	if (items != CUSTOM_NUMBER && (stringStartsWith(acString, "powersave")
+			|| stringStartsWith(acString, "0"))) {
 		if (Log::isDebug()) {
 			std::cout << "[Debug] AC power plan: powersave "
 				<< "from auto" << std::endl;
 		}
 		setPlanPowersave();
-	} else if (stringStartsWith(POWER_PLAN_AC, "performance")
-			|| stringStartsWith(POWER_PLAN_AC, "1")) {
+	} else if (items != CUSTOM_NUMBER && (stringStartsWith(acString, "performance")
+			|| stringStartsWith(acString, "1"))) {
 		if (Log::isDebug()) {
 			std::cout << "[Debug] AC power plan: performance "
 				<< "from auto" << std::endl;
 		}
 		setPlanPerformance();
-	} else if (stringStartsWith(POWER_PLAN_AC, "max-performance")
-			|| stringStartsWith(POWER_PLAN_AC, "2")) {
+	} else if (items != CUSTOM_NUMBER && (stringStartsWith(acString, "max-performance")
+			|| stringStartsWith(acString, "2"))) {
 		if (Log::isDebug()) {
 			std::cout << "[Debug] AC power plan: max-performance "
 				<< "from auto" << std::endl;
 		}
 		setPlanMaxPerformance();
+	} else {
+		// Add support for reading in a string of 3 values seperated by
+		// spaces into cpu_max, cpu_min, cpu_turbo, and cpu_gov
+		// ex:   100 30 1 powersave         or   60 40 0 performance
+		if (Log::isDebug()) {
+			std::cout << "[Debug] AC power plan: custom "
+				<< "from auto: " << acString << std::endl;
+		}
+		setPlanCustom(ac, items);
 	}
 #endif
 
 }
 
+void Values::setPlanCustom(const std::vector<std::string> &ac,
+			const unsigned int items)
+{
+	if (items != CUSTOM_NUMBER) {
+		if (!Log::isAllQuiet()) {
+			std::cout << "[Debug] power plan: custom "
+				<< "incorrect size. Excepted "
+				<< CUSTOM_NUMBER << ", got "
+				<< items << std::endl;
+			return;
+		}
+	}
+
+	// assign the values
+	const unsigned int newMax = stringToNumber(ac.at(0));
+	const unsigned int newMin = stringToNumber(ac.at(1));
+	const unsigned int newTurbo = stringToNumber(ac.at(2));
+	const std::string newGov = ac.at(3);
+	if (Log::isDebug()) {
+		std::cout << "[Debug] power plan: custom " << std::endl
+			<< "new max: " << newMax << std::endl
+			<< "new min: " << newMin << std::endl
+			<< "new turbo: " << newTurbo << std::endl
+			<< "new gov: " << newGov << std::endl;
+	}
+	setMax(newMax);
+	setMin(newMin);
+	setTurbo(newTurbo);
+	setGovernor(newGov);
+}
+
 void Values::setPlanAutoBat()
 {
 #ifdef POWER_PLAN_BAT
-	if (stringStartsWith(POWER_PLAN_BAT, "powersave")
-			|| stringStartsWith(POWER_PLAN_BAT, "0")) {
+	const std::string acString = POWER_PLAN_BAT;
+	const std::vector<std::string> ac = splitString(acString, ' ');
+	const unsigned int items = ac.size();
+	if (items != CUSTOM_NUMBER && (stringStartsWith(acString, "powersave")
+			|| stringStartsWith(acString, "0"))) {
 		if (Log::isDebug()) {
 			std::cout << "[Debug] BAT power plan: powersave "
 				<< "from auto" << std::endl;
 		}
 		setPlanPowersave();
-	} else if (stringStartsWith(POWER_PLAN_BAT, "performance")
-			|| stringStartsWith(POWER_PLAN_BAT, "1")) {
+	} else if (items != CUSTOM_NUMBER && (stringStartsWith(acString, "performance")
+			|| stringStartsWith(acString, "1"))) {
 		if (Log::isDebug()) {
 			std::cout << "[Debug] BAT power plan: performance "
 				<< "from auto" << std::endl;
 		}
 		setPlanPerformance();
-	} else if (stringStartsWith(POWER_PLAN_BAT, "max-performance")
-			|| stringStartsWith(POWER_PLAN_BAT, "2")) {
+	} else if (items != CUSTOM_NUMBER && (stringStartsWith(acString, "max-performance")
+			|| stringStartsWith(acString, "2"))) {
 		if (Log::isDebug()) {
 			std::cout << "[Debug] BAT power plan: max-performance "
 				<< "from auto" << std::endl;
 		}
 		setPlanMaxPerformance();
+	} else {
+		// Add support for reading in a string of 3 values seperated by
+		// spaces into cpu_max, cpu_min, cpu_turbo, and cpu_gov
+		// ex:   100 30 1 powersave         or   60 40 0 performance
+		if (Log::isDebug()) {
+			std::cout << "[Debug] BAT power plan: custom "
+				<< "from auto: " << acString << std::endl;
+		}
+		setPlanCustom(ac, items);
 	}
 #endif
 }

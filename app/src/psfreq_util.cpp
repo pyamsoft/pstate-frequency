@@ -21,6 +21,7 @@
 #include <cctype>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 #include "psfreq_color.h"
 #include "psfreq_log.h"
@@ -102,6 +103,24 @@ bool stringStartsWith(const std::string &control, const std::string &value)
 			<< "'" << std::endl;
 	}
 	return control.compare(0, value.length(), value) == 0;
+}
+
+const std::vector<std::string> &splitString(const std::string &s, char delim,
+	std::vector<std::string> &elems)
+{
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+const std::vector<std::string> splitString(const std::string &s, char delim)
+{
+    std::vector<std::string> elems;
+    splitString(s, delim, elems);
+    return elems;
 }
 
 }

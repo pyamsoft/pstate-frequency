@@ -22,6 +22,7 @@
 #define CPP_PSFREQ_UTIL_H
 
 #include <string>
+#include <vector>
 
 #define BAD_NUMBER -1
 
@@ -32,8 +33,11 @@ const std::string UNINITIALIZED_STR = std::string();
 double stringToNumber(const std::string &line);
 const std::string numberToString(const unsigned int number);
 int boundValue(const int value, const int minBound,
-		const int maxBound);
+	const int maxBound);
 bool stringStartsWith(const std::string &control, const std::string &value);
+const std::vector<std::string> &splitString(const std::string &s, char delim,
+	std::vector<std::string> &elems);
+const std::vector<std::string> splitString(const std::string &s, char delim);
 
 }
 
