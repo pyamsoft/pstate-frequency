@@ -70,30 +70,35 @@ X86_ENERGY_PERF_POLICY?=1
 INCLUDE_UDEV_RULE?=0
 
 ##
-# Runs the specified power plans on AC and BAT
-#
-# POWER_PLAN_AC
-#    1 powersave | [2 performance] | 3 max-performance
-# POWER_PLAN_BAT
-#    [1 powersave] | 2 performance | 3 max-performance
-#
-# Custom plans are also accepted, in the following format:
+# Preset power plan values
 #
 #	cpu_max cpu_min cpu_turbo cpu_governor
 #
-# cpu_max: Number between 0 and 100
-# cpu_min: Number between 0 and 100
+# cpu_max: Number between 0 (min) and 100 (max)
+# cpu_min: Number between 0 (min) and 100 (max)
 # cpu_turbo: IF using intel_pstate, 1 (OFF) or 0 (ON).
 #	     IF using acpi-cpufreq, 0 (OFF) or 1 (ON).
 # cpu_governor: Name of governor.
 #
 # Example:
-#   POWER_PLAN_AC="80 50 1 powersave"
-#   POWER_PLAN_BAT="20 10 1 powersave"
+#   PRESET_POWER_PLAN_MAX_PERFORMANCE="100 100 0 performance"
+#   PRESET_POWER_PLAN_PERFORMANCE="100 0 1 powersave"
+#   PRESET_POWER_PLAN_POWERSAVE="0 0 1 powersave"
 #
+PRESET_POWER_PLAN_MAX_PERFORMANCE="100 100 0 performance"
+PRESET_POWER_PLAN_PERFORMANCE="100 0 1 powersave"
+PRESET_POWER_PLAN_POWERSAVE="0 0 1 powersave"
+
 ##
-POWER_PLAN_AC="performance"
-POWER_PLAN_BAT="powersave"
+# Runs the specified power plans on AC and BAT
+#
+# AUTO_POWER_PLAN_AC
+#    1 powersave | [2 performance] | 3 max-performance
+# AUTO_POWER_PLAN_BAT
+#    [1 powersave] | 2 performance | 3 max-performance
+##
+AUTO_POWER_PLAN_AC="performance"
+AUTO_POWER_PLAN_BAT="powersave"
 
 ##
 # Install README.md
@@ -168,17 +173,38 @@ ifdef VERSION
 endif
 
 ##
-# Add the POWER_PLAN_AC to the CXXFLAGS if it is defined
+# Add the AUTO_POWER_PLAN_AC to the CXXFLAGS if it is defined
 ##
-ifdef POWER_PLAN_AC
-	CXXFLAGS+= -DPOWER_PLAN_AC=\"$(POWER_PLAN_AC)\"
+ifdef AUTO_POWER_PLAN_AC
+	CXXFLAGS+= -DAUTO_POWER_PLAN_AC=\"$(AUTO_POWER_PLAN_AC)\"
 endif
 
 ##
-# Add the POWER_PLAN_BAT to the CXXFLAGS if it is defined
+# Add the AUTO_POWER_PLAN_BAT to the CXXFLAGS if it is defined
 ##
-ifdef POWER_PLAN_BAT
-	CXXFLAGS+= -DPOWER_PLAN_BAT=\"$(POWER_PLAN_BAT)\"
+ifdef AUTO_POWER_PLAN_BAT
+	CXXFLAGS+= -DAUTO_POWER_PLAN_BAT=\"$(AUTO_POWER_PLAN_BAT)\"
+endif
+
+##
+# Add the PRESET_POWER_PLAN_MAX_PERFORMANCE to the CXXFLAGS if it is defined
+##
+ifdef PRESET_POWER_PLAN_MAX_PERFORMANCE
+	CXXFLAGS+= -DPRESET_POWER_PLAN_MAX_PERFORMANCE=\"$(PRESET_POWER_PLAN_MAX_PERFORMANCE)\"
+endif
+
+##
+# Add the PRESET_POWER_PLAN_PERFORMANCE to the CXXFLAGS if it is defined
+##
+ifdef PRESET_POWER_PLAN_PERFORMANCE
+	CXXFLAGS+= -DPRESET_POWER_PLAN_PERFORMANCE=\"$(PRESET_POWER_PLAN_PERFORMANCE)\"
+endif
+
+##
+# Add the PRESET_POWER_PLAN_POWERSAVE to the CXXFLAGS if it is defined
+##
+ifdef PRESET_POWER_PLAN_POWERSAVE
+	CXXFLAGS+= -DPRESET_POWER_PLAN_POWERSAVE=\"$(PRESET_POWER_PLAN_POWERSAVE)\"
 endif
 
 ##

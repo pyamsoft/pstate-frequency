@@ -44,8 +44,7 @@ private:
 	void setPlanPowersave();
 	void setPlanPerformance();
 	void setPlanMaxPerformance();
-	void setPlanCustom(const std::vector<std::string> &ac,
-			const unsigned int items);
+	void setPlanCustom(const std::vector<std::string> &ac);
 	unsigned int setPlanAuto();
 	unsigned int getPowerSourceDirectory(DIR *const directory,
 		const char *const dirName);
