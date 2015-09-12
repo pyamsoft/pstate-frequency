@@ -4,8 +4,8 @@ EXEC_NAME=pstate-frequency
 PROJECT_DIR=app
 DOC_DIR=share/doc
 
-.PHONY: all clean install install-src install-doc uninstall uninstall-src \
-	uninstall-doc options
+.PHONY: all clean install install-src install-doc install-license uninstall \
+	uninstall-src uninstall-doc uninstall-license options
 
 all:
 	@$(MAKE) -C $(PROJECT_DIR)
@@ -29,10 +29,17 @@ ifeq ($(INCLUDE_DOC), 1)
 	@$(MAKE) install-doc
 endif
 
+ifeq ($(INCLUDE_LICENSE), 1)
+	@$(MAKE) install-license
+endif
+
 install-doc:
 	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md"
-	@install -d $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
-	@install -m 644 README.md $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
+	@install -Dm 644 README.md $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
+
+install-license:
+	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/LICENSE"
+	@install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
 
 install-src:
 	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src"
@@ -48,10 +55,18 @@ endif
 ifeq ($(INCLUDE_DOC), 1)
 	@$(MAKE) uninstall-doc
 endif
+ifeq ($(INCLUDE_LICENSE), 1)
+	@$(MAKE) uninstall-license
+endif
 
 uninstall-doc:
 	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md"
 	@rm -f $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md
+	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
+
+uninstall-license:
+	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/LICENSE"
+	@rm -f $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/LICENSE
 	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
 
 uninstall-src:

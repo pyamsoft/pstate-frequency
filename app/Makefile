@@ -51,9 +51,8 @@ clean:
 	@echo "  CLEAN PROJECT"
 
 install-app: all
-	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(TARGET)"
-	@install -d $(DESTDIR)$(PREFIX)/bin
-	@install -m 755 $(TARGET) $(DESTDIR)$(PREFIX)/bin
+	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/bin/$(EXEC_NAME)"
+	@install -Dm 755 $(TARGET) $(DESTDIR)$(PREFIX)/bin/$(EXEC_NAME)
 
 uninstall-app:
 	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/bin/$(EXEC_NAME)"
@@ -76,39 +75,35 @@ endif
 install-bash:
 	@echo -n "  INSTALL  "
 	@echo "$(DESTDIR)$(SYSTEM_PREFIX)/$(BASH_COMP_DIR)/$(EXEC_NAME)"
-	@install -d $(DESTDIR)$(SYSTEM_PREFIX)/$(BASH_COMP_DIR)
-	@install -m 644 $(RES_DIR)/shell/bash/bash_completion \
+	@install -Dm 644 $(RES_DIR)/shell/bash/bash_completion \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(BASH_COMP_DIR)/$(EXEC_NAME)
 
 install-zsh:
 	@echo -n "  INSTALL  "
 	@echo "$(DESTDIR)$(SYSTEM_PREFIX)/$(ZSH_COMP_DIR)/_$(EXEC_NAME)"
-	@install -d $(DESTDIR)$(SYSTEM_PREFIX)/$(ZSH_COMP_DIR)
-	@install -m 644 $(RES_DIR)/shell/zsh/zsh_completion \
+	@install -Dm 644 $(RES_DIR)/shell/zsh/zsh_completion \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(ZSH_COMP_DIR)/_$(EXEC_NAME)
 
 install-udev:
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(UDEV_RULES_DIR)/$(UDEV)"
-	@install -d $(DESTDIR)$(SYSTEM_PREFIX)/$(UDEV_RULES_DIR)
-	@install -m 644 $(RES_DIR)/udev/$(UDEV) \
+	@install -Dm 644 $(RES_DIR)/udev/$(UDEV) \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(UDEV_RULES_DIR)/$(UDEV)
 	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(UDEV_RULES_DIR)/$(UDEV)
 
 install-systemd:
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD)"
-	@install -d $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)
-	@install -m 644 $(RES_DIR)/systemd/$(SYSTEMD) \
+	@install -Dm 644 $(RES_DIR)/systemd/$(SYSTEMD) \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD)
 	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD)
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)"
-	@install -m 644 $(RES_DIR)/systemd/$(SYSTEMD_SLEEP) \
+	@install -Dm 644 $(RES_DIR)/systemd/$(SYSTEMD_SLEEP) \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
 	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)"
-	@install -m 644 $(RES_DIR)/systemd/$(X86_SLEEP) \
+	@install -Dm 644 $(RES_DIR)/systemd/$(X86_SLEEP) \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
 	@sed -i "s#$(X86_NAME)#$(PREFIX)/bin/$(X86_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)

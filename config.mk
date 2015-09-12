@@ -121,6 +121,16 @@ INCLUDE_DOC?=1
 INCLUDE_SRC?=1
 
 ##
+# Install copy of the GPLv2 License
+#
+# Installs a copy of the GPLv2 License
+# $(PREFIX)/share/doc/pstate-frequency/project
+#
+# 0 NO | [1 YES]
+##
+INCLUDE_LICENSE?=1
+
+##
 # C++ Compiler
 #
 # This will default to the GNU C++ compiler, g++
