@@ -31,82 +31,82 @@ namespace psfreq {
 
 double stringToNumber(const std::string &line)
 {
-	const unsigned int length = line.length();
-	for (unsigned int i = 0; i < length; ++i) {
-		const char check = line[i];
-		if (!std::isdigit(check) && !std::iscntrl(check)) {
-			if (!Log::isAllQuiet()) {
-				std::cerr << Color::boldRed()
-					<< "[Error] string: '" << line
-					<< "' is non digit at [" << i << "]"
-					<< Color::reset()
-					<< std::endl;
-			}
-			return BAD_NUMBER;
-		}
-	}
+        const unsigned int length = line.length();
+        for (unsigned int i = 0; i < length; ++i) {
+                const char check = line[i];
+                if (!std::isdigit(check) && !std::iscntrl(check)) {
+                        if (!Log::isAllQuiet()) {
+                                std::cerr << Color::boldRed()
+                                        << "[Error] string: '" << line
+                                        << "' is non digit at [" << i << "]"
+                                        << Color::reset()
+                                        << std::endl;
+                        }
+                        return BAD_NUMBER;
+                }
+        }
         std::istringstream iss(line);
-	int result;
-	iss >> result;
-	if (Log::isDebug()) {
-		std::cout << "[Debug] string: '" << line
-			<< "' to number: '" << result << "'"
-			<< std::endl;
-	}
-	return result;
+        int result;
+        iss >> result;
+        if (Log::isDebug()) {
+                std::cout << "[Debug] string: '" << line
+                        << "' to number: '" << result << "'"
+                        << std::endl;
+        }
+        return result;
 }
 
 const std::string numberToString(const unsigned int number)
 {
         std::ostringstream oss;
-	oss << number;
-	const std::string s = oss.str();
-	if (Log::isDebug()) {
-		std::cout << "[Debug] number: '" << number
-			<< "' to string: '" << s << "'"
-			<< std::endl;
-	}
-	return s;
+        oss << number;
+        const std::string s = oss.str();
+        if (Log::isDebug()) {
+                std::cout << "[Debug] number: '" << number
+                        << "' to string: '" << s << "'"
+                        << std::endl;
+        }
+        return s;
 }
 
 int boundValue(const int value, const int minBound,
-		const int maxBound)
+                const int maxBound)
 {
-	if (value < minBound) {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] value: '" << value
-				<< "' bound to min: '" << minBound << "'"
-				<< std::endl;
-		}
-		return minBound;
-	} else if (value > maxBound) {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] value: '" << value
-				<< "' bound to max: '" << maxBound << "'"
-				<< std::endl;
-		}
-		return maxBound;
-	} else {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] value: '" << value
-				<< "' not bound" << std::endl;
-		}
-		return value;
-	}
+        if (value < minBound) {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] value: '" << value
+                                << "' bound to min: '" << minBound << "'"
+                                << std::endl;
+                }
+                return minBound;
+        } else if (value > maxBound) {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] value: '" << value
+                                << "' bound to max: '" << maxBound << "'"
+                                << std::endl;
+                }
+                return maxBound;
+        } else {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] value: '" << value
+                                << "' not bound" << std::endl;
+                }
+                return value;
+        }
 }
 
 bool stringStartsWith(const std::string &control, const std::string &value)
 {
-	if (Log::isDebug()) {
-		std::cout << "[Debug] compare control string: '" << control
-			<< "' starts with string '" << value
-			<< "'" << std::endl;
-	}
-	return control.compare(0, value.length(), value) == 0;
+        if (Log::isDebug()) {
+                std::cout << "[Debug] compare control string: '" << control
+                        << "' starts with string '" << value
+                        << "'" << std::endl;
+        }
+        return control.compare(0, value.length(), value) == 0;
 }
 
 const std::vector<std::string> &splitString(const std::string &s, char delim,
-	std::vector<std::string> &elems)
+        std::vector<std::string> &elems)
 {
     std::stringstream ss(s);
     std::string item;

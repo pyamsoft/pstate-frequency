@@ -50,55 +50,55 @@ _POWER_PLAN_AC=performance
 _POWER_PLAN_BAT=powersave
 
 prepare() {
-	cd "$srcdir/${pkgname}-${pkgver}"
-	make \
-		DESTDIR="$pkgdir" \
-		CXX="${_CXX}" \
-		PREFIX="${_PREFIX}" \
-		X86_ENERGY_PERF_POLICY=${_X86_ENERGY_PERF_POLICY} \
-		INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
-		INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
-		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
-		INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
-		INCLUDE_DOC=${_INCLUDE_DOC} \
-		INCLUDE_SRC=${_INCLUDE_SRC} \
-		POWER_PLAN_AC=${_POWER_PLAN_AC} \
-		POWER_PLAN_BAT=${_POWER_PLAN_BAT} \
-		options
+        cd "$srcdir/${pkgname}-${pkgver}"
+        make \
+                DESTDIR="$pkgdir" \
+                CXX="${_CXX}" \
+                PREFIX="${_PREFIX}" \
+                X86_ENERGY_PERF_POLICY=${_X86_ENERGY_PERF_POLICY} \
+                INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
+                INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
+                INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
+                INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
+                INCLUDE_DOC=${_INCLUDE_DOC} \
+                INCLUDE_SRC=${_INCLUDE_SRC} \
+                POWER_PLAN_AC=${_POWER_PLAN_AC} \
+                POWER_PLAN_BAT=${_POWER_PLAN_BAT} \
+                options
 }
 
 build() {
-	cd "$srcdir/${pkgname}-${pkgver}"
-	make \
-		DESTDIR="$pkgdir" \
-		CXX="${_CXX}" \
-		PREFIX="${_PREFIX}" \
-		X86_ENERGY_PERF_POLICY=${_X86_ENERGY_PERF_POLICY} \
-		INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
-		INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
-		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
-		INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
-		INCLUDE_DOC=${_INCLUDE_DOC} \
-		INCLUDE_SRC=${_INCLUDE_SRC} \
-		POWER_PLAN_AC=${_POWER_PLAN_AC} \
-		POWER_PLAN_BAT=${_POWER_PLAN_BAT}
+        cd "$srcdir/${pkgname}-${pkgver}"
+        make \
+                DESTDIR="$pkgdir" \
+                CXX="${_CXX}" \
+                PREFIX="${_PREFIX}" \
+                X86_ENERGY_PERF_POLICY=${_X86_ENERGY_PERF_POLICY} \
+                INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
+                INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
+                INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
+                INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
+                INCLUDE_DOC=${_INCLUDE_DOC} \
+                INCLUDE_SRC=${_INCLUDE_SRC} \
+                POWER_PLAN_AC=${_POWER_PLAN_AC} \
+                POWER_PLAN_BAT=${_POWER_PLAN_BAT}
 }
 
 package() {
-	cd "$srcdir/${pkgname}-${pkgver}"
-	make \
-		DESTDIR="$pkgdir" \
-		CXX="${_CXX}" \
-		PREFIX="${_PREFIX}" \
-		X86_ENERGY_PERF_POLICY=${_X86_ENERGY_PERF_POLICY} \
-		INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
-		INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
-		INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
-		INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
-		INCLUDE_DOC=${_INCLUDE_DOC} \
-		INCLUDE_SRC=${_INCLUDE_SRC} \
-		POWER_PLAN_AC=${_POWER_PLAN_AC} \
-		POWER_PLAN_BAT=${_POWER_PLAN_BAT} \
-		install
+        cd "$srcdir/${pkgname}-${pkgver}"
+        make \
+                DESTDIR="$pkgdir" \
+                CXX="${_CXX}" \
+                PREFIX="${_PREFIX}" \
+                X86_ENERGY_PERF_POLICY=${_X86_ENERGY_PERF_POLICY} \
+                INCLUDE_BASH_COMPLETION=${_INCLUDE_BASH_COMPLETION} \
+                INCLUDE_ZSH_COMPLETION=${_INCLUDE_ZSH_COMPLETION} \
+                INCLUDE_UDEV_RULE=${_INCLUDE_UDEV_RULE} \
+                INCLUDE_SYSTEMD_UNIT=${_INCLUDE_SYSTEMD_UNIT} \
+                INCLUDE_DOC=${_INCLUDE_DOC} \
+                INCLUDE_SRC=${_INCLUDE_SRC} \
+                POWER_PLAN_AC=${_POWER_PLAN_AC} \
+                POWER_PLAN_BAT=${_POWER_PLAN_BAT} \
+                install
 }
 

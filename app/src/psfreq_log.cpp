@@ -26,48 +26,48 @@ unsigned int Log::verbosity = PSFREQ_LOG_NORMAL;
 
 bool Log::isAllQuiet()
 {
-	return verbosity == PSFREQ_LOG_ALL_QUIET;
+        return verbosity == PSFREQ_LOG_ALL_QUIET;
 }
 
 bool Log::isQuiet()
 {
-	return verbosity == PSFREQ_LOG_QUIET;
+        return verbosity == PSFREQ_LOG_QUIET;
 }
 
 bool Log::isNormal()
 {
-	return verbosity == PSFREQ_LOG_NORMAL;
+        return verbosity == PSFREQ_LOG_NORMAL;
 }
 
 bool Log::isDebug()
 {
-	return verbosity == PSFREQ_LOG_DEBUG;
+        return verbosity == PSFREQ_LOG_DEBUG;
 }
 
 bool Log::isOutputCapable()
 {
-	return (verbosity == PSFREQ_LOG_DEBUG
-			|| verbosity == PSFREQ_LOG_NORMAL);
+        return (verbosity == PSFREQ_LOG_DEBUG
+                        || verbosity == PSFREQ_LOG_NORMAL);
 }
 
 void Log::setAllQuiet()
 {
-	verbosity = PSFREQ_LOG_ALL_QUIET;
+        verbosity = PSFREQ_LOG_ALL_QUIET;
 }
 
 void Log::setQuiet()
 {
-	verbosity = PSFREQ_LOG_QUIET;
+        verbosity = PSFREQ_LOG_QUIET;
 }
 
 void Log::setNormal()
 {
-	verbosity = PSFREQ_LOG_NORMAL;
+        verbosity = PSFREQ_LOG_NORMAL;
 }
 
 void Log::setDebug()
 {
-	verbosity = PSFREQ_LOG_DEBUG;
+        verbosity = PSFREQ_LOG_DEBUG;
 }
 
 }

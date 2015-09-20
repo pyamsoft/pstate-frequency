@@ -79,7 +79,7 @@ this time.
 ### Versioning
 
 The versioning is rather arbitrary. The scheme is as follows:  
-	X.Y.Z
+        X.Y.Z
 
 X is the major version number, it will only be updated when the program is  
 significantly updated. Y is the minor version number, it will be updated when  

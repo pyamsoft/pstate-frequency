@@ -53,45 +53,45 @@ const unsigned int Values::CUSTOM_NUMBER = 4;
 
 bool Values::shouldSleep() const
 {
-	return doSleep;
+        return doSleep;
 }
 
 void Values::noSleep()
 {
-	doSleep = NO_SLEEP;
+        doSleep = NO_SLEEP;
 }
 
 bool Values::isInitialized() const
 {
-	return hasAction() && (max != ACTION_NULL
-			|| min != ACTION_NULL
-			|| turbo != ACTION_NULL
-			|| governor != BAD_READ);
+        return hasAction() && (max != ACTION_NULL
+                        || min != ACTION_NULL
+                        || turbo != ACTION_NULL
+                        || governor != BAD_READ);
 }
 
 bool Values::hasAction() const
 {
-	return action != ACTION_NULL;
+        return action != ACTION_NULL;
 }
 
 bool Values::hasPlan() const
 {
-	return plan != POWER_PLAN_NONE;
+        return plan != POWER_PLAN_NONE;
 }
 
 bool Values::isActionNull() const
 {
-	return action == ACTION_NULL;
+        return action == ACTION_NULL;
 }
 
 bool Values::isActionGet() const
 {
-	return action == ACTION_GET;
+        return action == ACTION_GET;
 }
 
 bool Values::isActionSet() const
 {
-	return action == ACTION_SET;
+        return action == ACTION_SET;
 }
 
 /*
@@ -101,82 +101,82 @@ bool Values::isActionSet() const
  */
 bool Values::setGovernor(const std::string& newGovernor)
 {
-	if (newGovernor != BAD_READ) {
-		governor = newGovernor;
-		return true;
-	} else {
-		return false;
-	}
+        if (newGovernor != BAD_READ) {
+                governor = newGovernor;
+                return true;
+        } else {
+                return false;
+        }
 }
 
 void Values::setAction(const int newAction)
 {
-	action = newAction;
+        action = newAction;
 }
 
 bool Values::setMax(const int newMax)
 {
-	if (newMax != BAD_NUMBER) {
-		max = newMax;
-		return true;
-	} else {
-		return false;
-	}
+        if (newMax != BAD_NUMBER) {
+                max = newMax;
+                return true;
+        } else {
+                return false;
+        }
 }
 
 bool Values::setMin(const int newMin)
 {
-	if (newMin != BAD_NUMBER) {
-		min = newMin;
-		return true;
-	} else {
-		return false;
-	}
+        if (newMin != BAD_NUMBER) {
+                min = newMin;
+                return true;
+        } else {
+                return false;
+        }
 }
 
 bool Values::setTurbo(const int newTurbo)
 {
-	if (newTurbo != TURBO_INSANE) {
-		turbo = newTurbo;
-		return true;
-	} else {
-		return false;
-	}
+        if (newTurbo != TURBO_INSANE) {
+                turbo = newTurbo;
+                return true;
+        } else {
+                return false;
+        }
 }
 
 void Values::setRequested(const int newRequest)
 {
-	requested = newRequest;
+        requested = newRequest;
 }
 
 const std::string Values::getGovernor() const
 {
-	return governor;
+        return governor;
 }
 
 int Values::getAction() const
 {
-	return action;
+        return action;
 }
 
 int Values::getMax() const
 {
-	return max;
+        return max;
 }
 
 int Values::getMin() const
 {
-	return min;
+        return min;
 }
 
 int Values::getTurbo() const
 {
-	return turbo;
+        return turbo;
 }
 
 int Values::getRequested() const
 {
-	return requested;
+        return requested;
 }
 
 /*
@@ -185,12 +185,12 @@ int Values::getRequested() const
  * exit the program from main.
  */
 bool Values::setPlan(const int powerPlan) {
-	if (powerPlan != POWER_PLAN_NONE) {
-		plan = powerPlan;
-		return true;
-	} else {
-		return false;
-	}
+        if (powerPlan != POWER_PLAN_NONE) {
+                plan = powerPlan;
+                return true;
+        } else {
+                return false;
+        }
 }
 
 /*
@@ -200,206 +200,206 @@ bool Values::setPlan(const int powerPlan) {
  */
 bool Values::runPlan()
 {
-	bool result = true;
-	unsigned int autoPlan = AUTO_NONE;
-	switch(plan) {
-	case POWER_PLAN_NONE:
-		if (Log::isDebug()) {
-			std::cout << "[Debug] no power plan" << std::endl;
-		}
-		break;
-	case POWER_PLAN_POWERSAVE:
-		if (Log::isDebug()) {
-			std::cout << "[Debug] power plan: powersave"
-				<< std::endl;
-		}
-		setPlanPowersave();
-		break;
-	case POWER_PLAN_PERFORMANCE:
-		if (Log::isDebug()) {
-			std::cout << "[Debug] power plan: performance"
-				<< std::endl;
-		}
-		setPlanPerformance();
-		break;
-	case POWER_PLAN_MAX_PERFORMANCE:
-		if (Log::isDebug()) {
-			std::cout << "[Debug] power plan: max-performance"
-				<< std::endl;
-		}
-		setPlanMaxPerformance();
-		break;
-	case POWER_PLAN_AUTO:
-		if (Log::isDebug()) {
-			std::cout << "[Debug] power plan: auto"
-				<< std::endl;
-		}
-		autoPlan = setPlanAuto();
-		if (autoPlan == AUTO_NONE) {
-			if (!Log::isAllQuiet()) {
-				std::cerr << Color::boldRed()
-					<< "[Error] Failed to decide an "
-					<< "automatic plan."
-					<< Color::reset()
-					<< std::endl;
-			}
-			result = false;
-			break;
-		} else if (autoPlan == Cpu::POWER_SOURCE_BAT) {
-			setPlanAutoBat();
-		} else {
-			setPlanAutoAC();
-		}
-		break;
-	default:
-		result = false;
-	}
-	if (Log::isDebug() && autoPlan == AUTO_NONE) {
-		std::cout << "[Debug] autoPlan unused" << std::endl;
-	}
-	return result;
+        bool result = true;
+        unsigned int autoPlan = AUTO_NONE;
+        switch(plan) {
+        case POWER_PLAN_NONE:
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] no power plan" << std::endl;
+                }
+                break;
+        case POWER_PLAN_POWERSAVE:
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] power plan: powersave"
+                                << std::endl;
+                }
+                setPlanPowersave();
+                break;
+        case POWER_PLAN_PERFORMANCE:
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] power plan: performance"
+                                << std::endl;
+                }
+                setPlanPerformance();
+                break;
+        case POWER_PLAN_MAX_PERFORMANCE:
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] power plan: max-performance"
+                                << std::endl;
+                }
+                setPlanMaxPerformance();
+                break;
+        case POWER_PLAN_AUTO:
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] power plan: auto"
+                                << std::endl;
+                }
+                autoPlan = setPlanAuto();
+                if (autoPlan == AUTO_NONE) {
+                        if (!Log::isAllQuiet()) {
+                                std::cerr << Color::boldRed()
+                                        << "[Error] Failed to decide an "
+                                        << "automatic plan."
+                                        << Color::reset()
+                                        << std::endl;
+                        }
+                        result = false;
+                        break;
+                } else if (autoPlan == Cpu::POWER_SOURCE_BAT) {
+                        setPlanAutoBat();
+                } else {
+                        setPlanAutoAC();
+                }
+                break;
+        default:
+                result = false;
+        }
+        if (Log::isDebug() && autoPlan == AUTO_NONE) {
+                std::cout << "[Debug] autoPlan unused" << std::endl;
+        }
+        return result;
 }
 
 void Values::setPlanAutoAC()
 {
 #ifdef AUTO_POWER_PLAN_AC
-	const std::string acString = std::string(AUTO_POWER_PLAN_AC);
-	if (stringStartsWith(acString, "powersave")
-			|| stringStartsWith(acString, "0")) {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] AC power plan: powersave "
-				<< "from auto" << std::endl;
-		}
-		setPlanPowersave();
-	} else if (stringStartsWith(acString, "performance")
-			|| stringStartsWith(acString, "1")) {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] AC power plan: performance "
-				<< "from auto" << std::endl;
-		}
-		setPlanPerformance();
-	} else if (stringStartsWith(acString, "max-performance")
-			|| stringStartsWith(acString, "2")) {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] AC power plan: max-performance "
-				<< "from auto" << std::endl;
-		}
-		setPlanMaxPerformance();
-	}
+        const std::string acString = std::string(AUTO_POWER_PLAN_AC);
+        if (stringStartsWith(acString, "powersave")
+                        || stringStartsWith(acString, "0")) {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] AC power plan: powersave "
+                                << "from auto" << std::endl;
+                }
+                setPlanPowersave();
+        } else if (stringStartsWith(acString, "performance")
+                        || stringStartsWith(acString, "1")) {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] AC power plan: performance "
+                                << "from auto" << std::endl;
+                }
+                setPlanPerformance();
+        } else if (stringStartsWith(acString, "max-performance")
+                        || stringStartsWith(acString, "2")) {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] AC power plan: max-performance "
+                                << "from auto" << std::endl;
+                }
+                setPlanMaxPerformance();
+        }
 #else
-	if (Log::isDebug()) {
-		std::cout << "[Debug] AC power plan: default performance "
-			<< "from auto" << std::endl;
-	}
-	setPlanPerformance();
+        if (Log::isDebug()) {
+                std::cout << "[Debug] AC power plan: default performance "
+                        << "from auto" << std::endl;
+        }
+        setPlanPerformance();
 #endif
 }
 
 void Values::setPlanCustom(const std::vector<std::string> &ac)
 {
-	const unsigned int items = ac.size();
-	if (items != CUSTOM_NUMBER) {
-		if (!Log::isAllQuiet()) {
-			std::cout << "[Debug] power plan: custom "
-				<< "incorrect size. Excepted "
-				<< CUSTOM_NUMBER << ", got "
-				<< items << std::endl;
-			return;
-		}
-	}
+        const unsigned int items = ac.size();
+        if (items != CUSTOM_NUMBER) {
+                if (!Log::isAllQuiet()) {
+                        std::cout << "[Debug] power plan: custom "
+                                << "incorrect size. Excepted "
+                                << CUSTOM_NUMBER << ", got "
+                                << items << std::endl;
+                        return;
+                }
+        }
 
-	// assign the values
-	const unsigned int newMax = stringToNumber(ac.at(0));
-	const unsigned int newMin = stringToNumber(ac.at(1));
-	const unsigned int newTurbo = stringToNumber(ac.at(2));
-	const std::string newGov = ac.at(3);
-	if (Log::isDebug()) {
-		std::cout << "[Debug] power plan: custom " << std::endl
-			<< "new max: " << newMax << std::endl
-			<< "new min: " << newMin << std::endl
-			<< "new turbo: " << newTurbo << std::endl
-			<< "new gov: " << newGov << std::endl;
-	}
-	setMax(newMax);
-	setMin(newMin);
-	setTurbo(newTurbo);
-	setGovernor(newGov);
+        // assign the values
+        const unsigned int newMax = stringToNumber(ac.at(0));
+        const unsigned int newMin = stringToNumber(ac.at(1));
+        const unsigned int newTurbo = stringToNumber(ac.at(2));
+        const std::string newGov = ac.at(3);
+        if (Log::isDebug()) {
+                std::cout << "[Debug] power plan: custom " << std::endl
+                        << "new max: " << newMax << std::endl
+                        << "new min: " << newMin << std::endl
+                        << "new turbo: " << newTurbo << std::endl
+                        << "new gov: " << newGov << std::endl;
+        }
+        setMax(newMax);
+        setMin(newMin);
+        setTurbo(newTurbo);
+        setGovernor(newGov);
 }
 
 void Values::setPlanAutoBat()
 {
 #ifdef AUTO_POWER_PLAN_BAT
-	const std::string acString = std::string(AUTO_POWER_PLAN_BAT);
-	if (stringStartsWith(acString, "powersave")
-			|| stringStartsWith(acString, "0")) {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] BAT power plan: powersave "
-				<< "from auto" << std::endl;
-		}
-		setPlanPowersave();
-	} else if (stringStartsWith(acString, "performance")
-			|| stringStartsWith(acString, "1")) {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] BAT power plan: performance "
-				<< "from auto" << std::endl;
-		}
-		setPlanPerformance();
-	} else if (stringStartsWith(acString, "max-performance")
-			|| stringStartsWith(acString, "2")) {
-		if (Log::isDebug()) {
-			std::cout << "[Debug] BAT power plan: max-performance "
-				<< "from auto" << std::endl;
-		}
-		setPlanMaxPerformance();
-	}
+        const std::string acString = std::string(AUTO_POWER_PLAN_BAT);
+        if (stringStartsWith(acString, "powersave")
+                        || stringStartsWith(acString, "0")) {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] BAT power plan: powersave "
+                                << "from auto" << std::endl;
+                }
+                setPlanPowersave();
+        } else if (stringStartsWith(acString, "performance")
+                        || stringStartsWith(acString, "1")) {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] BAT power plan: performance "
+                                << "from auto" << std::endl;
+                }
+                setPlanPerformance();
+        } else if (stringStartsWith(acString, "max-performance")
+                        || stringStartsWith(acString, "2")) {
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] BAT power plan: max-performance "
+                                << "from auto" << std::endl;
+                }
+                setPlanMaxPerformance();
+        }
 #else
-	if (Log::isDebug()) {
-		std::cout << "[Debug] BAT power plan: default powersave "
-			<< "from auto" << std::endl;
-	}
-	setPlanPowersave();
+        if (Log::isDebug()) {
+                std::cout << "[Debug] BAT power plan: default powersave "
+                        << "from auto" << std::endl;
+        }
+        setPlanPowersave();
 #endif
 }
 
 void Values::setPlanPowersave()
 {
 #ifdef PRESET_POWER_PLAN_POWERSAVE
-	const std::string preset = std::string(PRESET_POWER_PLAN_POWERSAVE);
-	const std::vector<std::string> ac = splitString(preset, ' ');
-	setPlanCustom(ac);
+        const std::string preset = std::string(PRESET_POWER_PLAN_POWERSAVE);
+        const std::vector<std::string> ac = splitString(preset, ' ');
+        setPlanCustom(ac);
 #else
-	max = MIN_POSSIBLE_FREQ;
-	min = MIN_POSSIBLE_FREQ;
-	turbo = cpu.hasPstate() ? PSTATE_NO_TURBO : CPUFREQ_NO_TURBO;
-	governor = "powersave";
+        max = MIN_POSSIBLE_FREQ;
+        min = MIN_POSSIBLE_FREQ;
+        turbo = cpu.hasPstate() ? PSTATE_NO_TURBO : CPUFREQ_NO_TURBO;
+        governor = "powersave";
 #endif
 }
 
 void Values::setPlanPerformance()
 {
 #ifdef PRESET_POWER_PLAN_PERFORMANCE
-	const std::string preset = std::string(PRESET_POWER_PLAN_PERFORMANCE);
-	const std::vector<std::string> ac = splitString(preset, ' ');
-	setPlanCustom(ac);
+        const std::string preset = std::string(PRESET_POWER_PLAN_PERFORMANCE);
+        const std::vector<std::string> ac = splitString(preset, ' ');
+        setPlanCustom(ac);
 #else
-	max = MAX_POSSIBLE_FREQ;
-	min = MIN_POSSIBLE_FREQ;
-	turbo = cpu.hasPstate() ? PSTATE_NO_TURBO : CPUFREQ_NO_TURBO;
-	governor = cpu.hasPstate() ? "powersave" : "ondemand";
+        max = MAX_POSSIBLE_FREQ;
+        min = MIN_POSSIBLE_FREQ;
+        turbo = cpu.hasPstate() ? PSTATE_NO_TURBO : CPUFREQ_NO_TURBO;
+        governor = cpu.hasPstate() ? "powersave" : "ondemand";
 #endif
 }
 
 void Values::setPlanMaxPerformance()
 {
 #ifdef PRESET_POWER_PLAN_MAX_PERFORMANCE
-	const std::string preset = std::string(PRESET_POWER_PLAN_MAX_PERFORMANCE);
-	const std::vector<std::string> ac = splitString(preset, ' ');
-	setPlanCustom(ac);
+        const std::string preset = std::string(PRESET_POWER_PLAN_MAX_PERFORMANCE);
+        const std::vector<std::string> ac = splitString(preset, ' ');
+        setPlanCustom(ac);
 #else
-	max = MAX_POSSIBLE_FREQ;
-	min = MAX_POSSIBLE_FREQ;
-	turbo = cpu.hasPstate() ? PSTATE_TURBO : CPUFREQ_TURBO;
-	governor = "performance";
+        max = MAX_POSSIBLE_FREQ;
+        min = MAX_POSSIBLE_FREQ;
+        turbo = cpu.hasPstate() ? PSTATE_TURBO : CPUFREQ_TURBO;
+        governor = "performance";
 #endif
 }
 
@@ -411,92 +411,92 @@ void Values::setPlanMaxPerformance()
  */
 unsigned int Values::setPlanAuto()
 {
-	const char *const dirName = "/sys/class/power_supply/";
-	DIR *const directory = opendir(dirName);
-	if (Log::isDebug()) {
-		std::cout << "[Debug] open dir: " << dirName << std::endl;
-	}
-	if (!directory) {
-		if (!Log::isAllQuiet()) {
-			std::cerr << Color::boldRed()
-				<< "[Error] Could not open directory: "
-				<< dirName << Color::reset()
-				<< std::endl;
-		}
-		return AUTO_NONE;
-	} else {
-		unsigned int result = getPowerSourceDirectory(directory,
-							      dirName);
-		if (closedir(directory)) {
-			if (!Log::isAllQuiet()) {
-				std::cerr << Color::boldRed()
-					<< "[Error] Failed to close "
-					<< "directory: " << dirName
-					<< Color::reset()
-					<< std::endl;
-			}
-			return AUTO_NONE;
-		} else {
-			return result;
-		}
-	}
+        const char *const dirName = "/sys/class/power_supply/";
+        DIR *const directory = opendir(dirName);
+        if (Log::isDebug()) {
+                std::cout << "[Debug] open dir: " << dirName << std::endl;
+        }
+        if (!directory) {
+                if (!Log::isAllQuiet()) {
+                        std::cerr << Color::boldRed()
+                                << "[Error] Could not open directory: "
+                                << dirName << Color::reset()
+                                << std::endl;
+                }
+                return AUTO_NONE;
+        } else {
+                unsigned int result = getPowerSourceDirectory(directory,
+                                                              dirName);
+                if (closedir(directory)) {
+                        if (!Log::isAllQuiet()) {
+                                std::cerr << Color::boldRed()
+                                        << "[Error] Failed to close "
+                                        << "directory: " << dirName
+                                        << Color::reset()
+                                        << std::endl;
+                        }
+                        return AUTO_NONE;
+                } else {
+                        return result;
+                }
+        }
 }
 
 unsigned int Values::getPowerSourceDirectory(DIR *const directory,
-		const char *const dirName)
+                const char *const dirName)
 {
-	struct dirent *entry =  readdir(directory);
-	unsigned int result = AUTO_NONE;
-	while(entry) {
-		const std::string entryName = entry->d_name;
-		if (!hideDirectory(entryName)) {
-			std::ostringstream oss;
-			oss << dirName << entryName << "/";
-			const std::string fullPath = oss.str();
-			if (Log::isDebug()) {
-				std::cout << "[Debug] power supply "
-					<< "path: '" << fullPath
-					<< "'" << std::endl;
-			}
-			if (fullPath.length() < fullPath.max_size()) {
-				result = cpu.getPowerSupply(fullPath);
-				if (Log::isDebug()) {
-					std::cout << "[Debug] power supply "
-						<< "result: '" << result
-						<< "'" << std::endl;
-				}
-				if (result > AUTO_NONE) {
-					if (Log::isDebug()) {
-						std::cout << "[Debug] power "
-							<< "supply result is "
-							<< "valid. Break."
-							<< std::endl;
-					}
-					break;
-				}
-			} else {
-				if (!Log::isAllQuiet()) {
-					std::cerr << Color::boldRed()
-						<< "[Error] Path is larger "
-						<< "than max allowed."
-						<< Color::reset()
-						<< std::endl;
-				}
-				/*
-				 * Breaking here is safe, as the result should
-				 * still be equivalent to AUTO_NONE, meaning
-				 * that the final return will still work
-				 */
-				break;
-			}
-		}
-		if (Log::isDebug()) {
-			std::cout << "[Debug] read the next dir in directory"
-				<< std::endl;
-		}
-		entry = readdir(directory);
-	}
-	return result;
+        struct dirent *entry =  readdir(directory);
+        unsigned int result = AUTO_NONE;
+        while(entry) {
+                const std::string entryName = entry->d_name;
+                if (!hideDirectory(entryName)) {
+                        std::ostringstream oss;
+                        oss << dirName << entryName << "/";
+                        const std::string fullPath = oss.str();
+                        if (Log::isDebug()) {
+                                std::cout << "[Debug] power supply "
+                                        << "path: '" << fullPath
+                                        << "'" << std::endl;
+                        }
+                        if (fullPath.length() < fullPath.max_size()) {
+                                result = cpu.getPowerSupply(fullPath);
+                                if (Log::isDebug()) {
+                                        std::cout << "[Debug] power supply "
+                                                << "result: '" << result
+                                                << "'" << std::endl;
+                                }
+                                if (result > AUTO_NONE) {
+                                        if (Log::isDebug()) {
+                                                std::cout << "[Debug] power "
+                                                        << "supply result is "
+                                                        << "valid. Break."
+                                                        << std::endl;
+                                        }
+                                        break;
+                                }
+                        } else {
+                                if (!Log::isAllQuiet()) {
+                                        std::cerr << Color::boldRed()
+                                                << "[Error] Path is larger "
+                                                << "than max allowed."
+                                                << Color::reset()
+                                                << std::endl;
+                                }
+                                /*
+                                 * Breaking here is safe, as the result should
+                                 * still be equivalent to AUTO_NONE, meaning
+                                 * that the final return will still work
+                                 */
+                                break;
+                        }
+                }
+                if (Log::isDebug()) {
+                        std::cout << "[Debug] read the next dir in directory"
+                                << std::endl;
+                }
+                entry = readdir(directory);
+        }
+        return result;
 }
 
 
@@ -506,11 +506,11 @@ unsigned int Values::getPowerSourceDirectory(DIR *const directory,
  */
 bool Values::hideDirectory(const std::string &entryName)
 {
-	if (Log::isDebug()) {
-		std::cout << "[Debug] entryName: '" << entryName
-			<< "'" << std::endl;
-	}
-	return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
+        if (Log::isDebug()) {
+                std::cout << "[Debug] entryName: '" << entryName
+                        << "'" << std::endl;
+        }
+        return (entryName.compare("..") == 0 || entryName.compare(".") == 0);
 }
 
 }

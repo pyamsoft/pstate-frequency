@@ -34,42 +34,42 @@ const char *const Color::NO_COLOR = "";
 
 void Color::setEnabled()
 {
-	enabled = true;
+        enabled = true;
 }
 
 const char *Color::reset()
 {
-	return enabled ? COLOR_RESET : NO_COLOR;
+        return enabled ? COLOR_RESET : NO_COLOR;
 }
 
 const char *Color::boldRed()
 {
-	return enabled ? BOLD_RED : NO_COLOR;
+        return enabled ? BOLD_RED : NO_COLOR;
 }
 
 const char *Color::boldGreen()
 {
-	return enabled ? BOLD_GREEN : NO_COLOR;
+        return enabled ? BOLD_GREEN : NO_COLOR;
 }
 
 const char *Color::boldBlue()
 {
-	return enabled ? BOLD_BLUE : NO_COLOR;
+        return enabled ? BOLD_BLUE : NO_COLOR;
 }
 
 const char *Color::boldMagenta()
 {
-	return enabled ? BOLD_MAGENTA : NO_COLOR;
+        return enabled ? BOLD_MAGENTA : NO_COLOR;
 }
 
 const char *Color::boldCyan()
 {
-	return enabled ? BOLD_CYAN : NO_COLOR;
+        return enabled ? BOLD_CYAN : NO_COLOR;
 }
 
 const char *Color::boldWhite()
 {
-	return enabled ? BOLD_WHITE : NO_COLOR;
+        return enabled ? BOLD_WHITE : NO_COLOR;
 }
 
 }

@@ -26,24 +26,24 @@ namespace psfreq {
 class Color
 {
 private:
-	static bool enabled;
-	static const char *const COLOR_RESET;
-	static const char *const BOLD_RED;
-	static const char *const BOLD_GREEN;
-	static const char *const BOLD_BLUE;
-	static const char *const BOLD_MAGENTA;
-	static const char *const BOLD_CYAN;
-	static const char *const BOLD_WHITE;
-	static const char *const NO_COLOR;
+        static bool enabled;
+        static const char *const COLOR_RESET;
+        static const char *const BOLD_RED;
+        static const char *const BOLD_GREEN;
+        static const char *const BOLD_BLUE;
+        static const char *const BOLD_MAGENTA;
+        static const char *const BOLD_CYAN;
+        static const char *const BOLD_WHITE;
+        static const char *const NO_COLOR;
 public:
-	static void setEnabled();
-	static const char *reset();
-	static const char *boldRed();
-	static const char *boldGreen();
-	static const char *boldBlue();
-	static const char *boldMagenta();
-	static const char *boldCyan();
-	static const char *boldWhite();
+        static void setEnabled();
+        static const char *reset();
+        static const char *boldRed();
+        static const char *boldGreen();
+        static const char *boldBlue();
+        static const char *boldMagenta();
+        static const char *boldCyan();
+        static const char *boldWhite();
 };
 
 }

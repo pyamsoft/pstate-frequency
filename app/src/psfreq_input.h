@@ -32,9 +32,9 @@ const unsigned int PARSE_EXIT_NORMAL = 0;
 const unsigned int UID_ROOT = 0;
 
 unsigned int parseOptions(const int argc, char **const argv,
- 		const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
- 		const char *const shortOptions,
- 		const struct option longOptions[]);
+                const psfreq::Cpu &cpu, psfreq::Values &cpuValues,
+                const char *const shortOptions,
+                const struct option longOptions[]);
 
 }
 
