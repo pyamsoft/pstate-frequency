@@ -33,8 +33,7 @@
 #include "psfreq_util.h"
 #include "psfreq_values.h"
 
-static bool setCpuValues(const psfreq::Cpu &cpu,
-                const psfreq::Values &cpuValues);
+static bool setCpuValues(const psfreq::Cpu &cpu, psfreq::Values &cpuValues);
 static void setSaneValues(const psfreq::Cpu &cpu,
                 const int cpuInfoMin,
                 const int cpuInfoMax);
@@ -43,8 +42,7 @@ static bool isSystemInsane(const int cpuInfoMin, const int cpuInfoMax,
                 const std::string &cpuGovernor);
 static int sanitizeVal(const int requested, const int cpuPstate,
                 const int cpuInfoMin, const int cpuInfoMax);
-static void setCpuTurbo(const psfreq::Cpu &cpu,
-                const psfreq::Values &cpuValues);
+static void setCpuTurbo(const psfreq::Cpu &cpu, const int turbo);
 static void setCpuGovernor(const psfreq::Cpu &cpu,
                 const psfreq::Values &cpuValues,
                 const std::string cpuGovernor);
@@ -56,11 +54,12 @@ static unsigned int nullAction(void);
 static unsigned int getAction(const psfreq::Cpu &cpu,
                 const psfreq::Values &cpuValues);
 static unsigned int setActionRoot(const psfreq::Cpu &cpu,
-                const psfreq::Values &cpuValues);
-static unsigned int setActionOther();
+                psfreq::Values &cpuValues);
+static unsigned int setActionOther(void);
+static void fillEmptyValues(const psfreq::Cpu &cpu, psfreq::Values &cpuValues);
 
 static unsigned int setActionRoot(const psfreq::Cpu &cpu,
-                const psfreq::Values &cpuValues)
+                psfreq::Values &cpuValues)
 {
         if (!cpuValues.isInitialized()) {
                 if (!psfreq::Log::isAllQuiet()) {
@@ -147,18 +146,6 @@ static void sleepCpu(const psfreq::Values &cpuValues)
 static void setCpuFrequencies(const psfreq::Cpu &cpu, const int newMax,
                 const int newMin)
 {
-        /*
-         * If the new maximum frequency that is requested
-         * is less than the current minimum, we must
-         * modify the minimum first before we can actually
-         * change the max frequency
-         */
-        if (psfreq::Log::isDebug()) {
-                std::cout << "[Debug] Current min is lower "
-                        << "than the new max, can safely "
-                        << "adjust the new max"
-                        << std::endl;
-        }
         cpu.setScalingMax(newMax);
         cpu.setScalingMin(newMin);
 }
@@ -183,8 +170,7 @@ static void setCpuGovernor(const psfreq::Cpu &cpu,
         cpu.setGovernor(newGovernor);
 }
 
-static void setCpuTurbo(const psfreq::Cpu &cpu,
-                const psfreq::Values &cpuValues)
+static void setCpuTurbo(const psfreq::Cpu &cpu, const int turbo)
 {
         /*
          * If the system supports a Turbo Boost
@@ -194,10 +180,10 @@ static void setCpuTurbo(const psfreq::Cpu &cpu,
         const int cpuTurbo = cpu.getTurboBoost();
         if (cpuTurbo != psfreq::Cpu::TURBO_BOOST_INSANE) {
                 if (psfreq::Log::isDebug()) {
-                        std::cout << "[Debug] Turbo is available"
+                        std::cout << "[Debug] Turbo is available: "
+                                << cpuTurbo
                                 << std::endl;
                 }
-                const int turbo = cpuValues.getTurbo();
                 int newTurbo = (turbo != -1 ? turbo : cpuTurbo);
                 newTurbo = psfreq::boundValue(newTurbo, 0, 1);
                 cpu.setTurboBoost(newTurbo);
@@ -253,9 +239,6 @@ static void setSaneValues(const psfreq::Cpu &cpu,
         }
         int saneMin = 0;
         int saneMax = 100;
-        int saneTurbo = cpu.getTurboBoost() == psfreq::Values::PSTATE_TURBO
-                ? psfreq::Values::PSTATE_NO_TURBO
-                : psfreq::Values::PSTATE_TURBO;
         saneMin = psfreq::boundValue(saneMin, cpuInfoMin,
                         cpuInfoMax - 1);
         saneMax = psfreq::boundValue(saneMax, cpuInfoMin + 1,
@@ -263,15 +246,16 @@ static void setSaneValues(const psfreq::Cpu &cpu,
         saneMin = (saneMin >= saneMax
                         ? saneMax - 1
                         : saneMin);
+        const int saneTurbo = cpu.hasPstate()
+                ? psfreq::Values::PSTATE_TURBO
+                : psfreq::Values::PSTATE_NO_TURBO;
         if (psfreq::Log::isDebug()) {
                 std::cout << "[Debug] Sane Max: " << saneMax
                                 << " Sane Min: " << saneMin
-                                << " Sane Turbo: " << saneTurbo
                                 << std::endl;
         }
-        cpu.setScalingMin(saneMin);
-        cpu.setScalingMax(saneMax);
-        cpu.setTurboBoost(saneTurbo);
+        setCpuFrequencies(cpu, saneMax, saneMin);
+        setCpuTurbo(cpu, saneTurbo);
 }
 
 /*
@@ -280,7 +264,7 @@ static void setSaneValues(const psfreq::Cpu &cpu,
  * user.
  */
 static bool setCpuValues(const psfreq::Cpu &cpu,
-                const psfreq::Values &cpuValues)
+                psfreq::Values &cpuValues)
 {
         /*
          * Retrieve the system constant values including the
@@ -319,12 +303,51 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
                                 ? newMax - 1
                                 : newMin);
 
+                /*
+                 * Set the value as the current system value if no such has
+                 * been requested up to this point.
+                 */
+                fillEmptyValues(cpu, cpuValues);
                 setSaneValues(cpu, cpuInfoMin, cpuInfoMax);
                 sleepCpu(cpuValues);
                 setCpuFrequencies(cpu, newMax, newMin);
-                setCpuTurbo(cpu, cpuValues);
+                setCpuTurbo(cpu, cpuValues.getTurbo());
                 setCpuGovernor(cpu, cpuValues, cpuGovernor);
                 return true;
+        }
+}
+
+static void fillEmptyValues(const psfreq::Cpu &cpu,
+                psfreq::Values &cpuValues)
+{
+        if (cpuValues.getMax() == psfreq::Values::UNINITIALIZED) {
+                const int currentMax = cpu.getMaxValue();
+                if (psfreq::Log::isDebug()) {
+                        std::cout << "[Debug] Fill the empty cpu max "
+                                << "with the current: " << currentMax
+                                << std::endl;
+                }
+                cpuValues.setMax(currentMax);
+        }
+
+        if (cpuValues.getMin() == psfreq::Values::UNINITIALIZED) {
+                const int currentMin = cpu.getMinValue();
+                if (psfreq::Log::isDebug()) {
+                        std::cout << "[Debug] Fill the empty cpu min "
+                                << "with the current: " << currentMin
+                                << std::endl;
+                }
+                cpuValues.setMax(currentMin);
+        }
+
+        if (cpuValues.getTurbo() == psfreq::Values::TURBO_INSANE) {
+                const int currentTurbo = cpu.getTurboBoost();
+                if (psfreq::Log::isDebug()) {
+                        std::cout << "[Debug] Fill the empty cpu turbo "
+                                << "with the current: " << currentTurbo
+                                << std::endl;
+                }
+                cpuValues.setTurbo(currentTurbo);
         }
 }
 
