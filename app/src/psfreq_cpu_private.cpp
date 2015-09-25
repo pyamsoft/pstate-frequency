@@ -30,6 +30,7 @@ namespace psfreq {
 
 const unsigned int Cpu::NO_CPUS = 0;
 const unsigned int Cpu::NO_FREQ = 0;
+const double Cpu::INFO_FREQUENCY_INSANE = 1.0;
 
 unsigned int Cpu::getNumber() const
 {
