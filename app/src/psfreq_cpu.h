@@ -60,6 +60,8 @@ private:
                                 const std::string &file) const;
                 const std::vector<std::string> readPipe(const char* command,
                                 const unsigned int number) const;
+
+                static const int BAD_PIPE_READ;
         };
 
         const Sysfs sysfs;
@@ -81,6 +83,8 @@ private:
         bool findPstate() const;
         double findInfoMinFrequency() const;
         double findInfoMaxFrequency() const;
+
+        static const int BAD_FILE_ACCESS;
 
 public:
         Cpu() :
@@ -120,8 +124,6 @@ public:
         void setScalingMin(const int min) const;
         void setTurboBoost(const int turbo) const;
         void setGovernor(const std::string &governor) const;
-
-        bool hideDirectory(const std::string &entryName) const;
 
         static const std::string BAD_READ;
         static const std::string GOVERNOR_INSANE;

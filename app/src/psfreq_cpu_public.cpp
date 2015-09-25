@@ -35,6 +35,7 @@ const std::string Cpu::BAD_READ = UNINITIALIZED_STR;
 const std::string Cpu::GOVERNOR_INSANE = UNINITIALIZED_STR;
 const int Cpu::PSTATE_VALUE_INSANE = 0;
 const double Cpu::SCALING_FREQUENCY_INSANE = 0.0;
+const int Cpu::BAD_FILE_ACCESS = -1;
 const int Cpu::TURBO_BOOST_INSANE = -2;
 const unsigned int Cpu::POWER_SOURCE_NONE = 0;
 const unsigned int Cpu::POWER_SOURCE_BAT = 1;
@@ -141,7 +142,7 @@ unsigned int Cpu::getPowerSupply(const std::string &fullPath) const
                 std::cout << "[Debug] getting power supply from path: '"
                           << typePath << "'" << std::endl;
         }
-        if (access(type, F_OK) != -1) {
+        if (access(type, F_OK) != BAD_FILE_ACCESS) {
                 const std::string powerType = sysfs.read(fullPath, "type");
                 if (Log::isDebug()) {
                         std::cout << "[Debug] power type: '"

@@ -29,6 +29,8 @@
 
 namespace psfreq {
 
+const int Cpu::Sysfs::BAD_PIPE_READ = -1;
+
 bool Cpu::Sysfs::write(const std::string &path, const std::string &file,
                 const std::string &buffer) const
 {
@@ -177,7 +179,7 @@ const std::vector<std::string> Cpu::Sysfs::readPipe(const char* command,
                 std::vector<std::string> lines = std::vector<std::string>();
                 for (unsigned int i = 0; i < number; ++i) {
                         char *line = NULL;
-                        if (getline(&line, &n, pipe) == -1) {
+                        if (getline(&line, &n, pipe) == BAD_PIPE_READ) {
                                 if (!Log::isAllQuiet()) {
                                         std::cerr << Color::boldRed()
                                                 << "[Error] Failed to read "
