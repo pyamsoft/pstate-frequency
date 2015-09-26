@@ -155,7 +155,7 @@ static void setCpuFrequencies(const psfreq::Cpu &cpu, const int newMax,
                         std::cout << "[Debug] Set the cpu min"
                                         << std::endl;
                 }
-                cpu.setScalingMax(newMin);
+                cpu.setScalingMin(newMin);
         }
 }
 
@@ -287,6 +287,8 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
                 }
                 return false;
         } else {
+                /* Fill before any processing */
+                fillEmptyValues(cpu, cpuValues);
                 if (psfreq::Log::isDebug()) {
                         std::cout << "[Debug] bound the CPU min" << std::endl;
                 }
@@ -309,7 +311,6 @@ static bool setCpuValues(const psfreq::Cpu &cpu,
                  * Set the value as the current system value if no such has
                  * been requested up to this point.
                  */
-                fillEmptyValues(cpu, cpuValues);
                 setSaneValues(cpu, cpuInfoMin, cpuInfoMax);
                 sleepCpu(cpuValues.shouldSleep());
                 setCpuFrequencies(cpu, newMax, newMin);
