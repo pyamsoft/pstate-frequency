@@ -1,5 +1,8 @@
-/*
- * pstate-frequency Easier control of the Intel p-state driver
+/**
+ * @file psfreq_color.h
+ * @author pyamsoft <pyam(dot)soft(at)gmail(dot)com>
+ *
+ * @section LICENSE
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +18,21 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * For questions please contact pyamsoft at pyam(dot)soft(at)gmail(dot)com
+ * @section DESCRIPTION
+ * Constants for defining various color related arguments
  */
 
-#ifndef PSFREQ_COLOR_H_
-#define PSFREQ_COLOR_H_
+#ifndef PSFREQ_COLOR_H
+#define PSFREQ_COLOR_H
 
-#define COLOR_RESET             "\033[0m"
-#define COLOR_BOLD_RED          "\033[1;31m"
-#define COLOR_BOLD_GREEN        "\033[1;32m"
-#define COLOR_BOLD_BLUE         "\033[1;34m"
-#define COLOR_BOLD_MAGENTA      "\033[1;35m"
-#define COLOR_BOLD_CYAN         "\033[1;36m"
-#define COLOR_BOLD_WHITE        "\033[1;37m"
-#define COLOR_NONE              ""
+#define PSFREQ_COLOR_RESET             "\033[0m"
+#define PSFREQ_COLOR_BOLD_RED          "\033[1;31m"
+#define PSFREQ_COLOR_BOLD_GREEN        "\033[1;32m"
+#define PSFREQ_COLOR_BOLD_BLUE         "\033[1;34m"
+#define PSFREQ_COLOR_BOLD_MAGENTA      "\033[1;35m"
+#define PSFREQ_COLOR_BOLD_CYAN         "\033[1;36m"
+#define PSFREQ_COLOR_BOLD_WHITE        "\033[1;37m"
+#define PSFREQ_COLOR_NONE              ""
 
 #endif
 
