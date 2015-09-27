@@ -1,5 +1,8 @@
-/*
- * pstate-frequency Easier control of the Intel p-state driver
+/**
+ * @file psfreq_log.h
+ * @author pyamsoft <pyam(dot)soft(at)gmail(dot)com>
+ *
+ * @section LICENSE
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,34 +18,24 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * For questions please contact pyamsoft at pyam(dot)soft(at)gmail(dot)com
+ * @section DESCRIPTION
+ * A convenience class which allows for easy logging of messages that are
+ * sorted by levels: debugging, normal messages, quiet messages, and
+ * entirely silenced output using the all_quiet mode.
  */
 
-#ifndef CPP_PSFREQ_LOG_H
-#define CPP_PSFREQ_LOG_H
+#ifndef PSFREQ_LOG_H
+#define PSFREQ_LOG_H
 
-#define PSFREQ_LOG_ALL_QUIET 0
-#define PSFREQ_LOG_QUIET 1
-#define PSFREQ_LOG_NORMAL 2
-#define PSFREQ_LOG_DEBUG 3
+#include <stdarg.h>
 
-namespace psfreq {
+#define PSFREQ_LOG_DEBUG        1
+#define PSFREQ_LOG_NORMAL       1 << 1
+#define PSFREQ_LOG_QUIET        1 << 2
+#define PSFREQ_LOG_ALL_QUIET    1 << 3
 
-class Log {
-private:
-        static unsigned int verbosity;
-public:
-        static bool isAllQuiet();
-        static bool isQuiet();
-        static bool isNormal();
-        static bool isDebug();
-        static bool isOutputCapable();
-        static void setAllQuiet();
-        static void setQuiet();
-        static void setNormal();
-        static void setDebug();
-};
-
-}
+void psfreq_log_normal(const char *const fmt, ...);
+void psfreq_log_debug(const char *const fmt, ...);
+void psfreq_log_error(const char *const fmt, ...);
 
 #endif
