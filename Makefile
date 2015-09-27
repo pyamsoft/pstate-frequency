@@ -11,10 +11,10 @@ all:
 	@$(MAKE) -C $(PROJECT_DIR)
 
 options:
-	@echo "CXXFLAGS  = " $(CXXFLAGS)
+	@echo "CCFLAGS  = " $(CCFLAGS)
 	@echo "LDFLAGS   = " $(LDFLAGS)
 	@echo "MAKEFLAGS = " $(MAKEFLAGS)
-	@echo "CXX       = " $(CXX)
+	@echo "CC       = " $(CC)
 
 clean:
 	@$(MAKE) -C $(PROJECT_DIR) clean

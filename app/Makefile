@@ -7,7 +7,7 @@ EXEC_NAME=pstate-frequency
 BUILD_DIR=/tmp/$(EXEC_NAME)
 # BUILD_DIR=build
 
-OBJECTS=$(patsubst src/%.cpp,$(BUILD_DIR)/obj/%.o,$(wildcard src/*.cpp))
+OBJECTS=$(patsubst src/%.c,$(BUILD_DIR)/obj/%.o,$(wildcard src/*.c))
 TARGET=$(BUILD_DIR)/bin/$(EXEC_NAME)
 
 RES_DIR=res
@@ -34,13 +34,13 @@ $(OBJECTS): | $(BUILD_DIR)/obj
 $(BUILD_DIR)/obj:
 	@mkdir -p $@
 
-$(BUILD_DIR)/obj/%.o: src/%.cpp
-	@echo "  CXX  $@"
-	@$(CXX) -c $< -o $@ $(CXXFLAGS)
+$(BUILD_DIR)/obj/%.o: src/%.c
+	@echo "  CC  $@"
+	@$(CC) -c $< -o $@ $(CCFLAGS)
 
 $(TARGET): dirs $(OBJECTS)
 	@echo "  LD   $@"
-	@$(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+	@$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 
 dirs:
 	@mkdir -p $(BUILD_DIR)/obj
