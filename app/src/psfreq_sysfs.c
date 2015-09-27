@@ -173,3 +173,4 @@ char *psfreq_sysfs_read(const struct psfreq_sysfs_type *sysfs,
         fclose(f);
         return line;
 }
+
