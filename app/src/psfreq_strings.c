@@ -66,11 +66,6 @@ double psfreq_strings_to_double(const char *const s)
         psfreq_log_debug("psfreq_strings_to_double",
                         "Convert string '%s' to double value", s);
         const double v = strtol(s, NULL, RADIX_DECIMAL);
-        if (v == 0) {
-                psfreq_log_error("psfreq_strings_to_double",
-                        "strtol returned a 0, indicating a failure trying\n"
-                        "to convert string '%s' to a numeric value", s);
-        }
         return v;
 }
 
