@@ -80,3 +80,23 @@ void psfreq_log_error(const char *const name, const char *const fmt, ...)
                 fprintf(stdout, "\n");
         }
 }
+
+void psfreq_log_set_debug(void)
+{
+        psfreq_log_state = PSFREQ_LOG_DEBUG;
+}
+
+void psfreq_log_set_normal(void)
+{
+        psfreq_log_state = PSFREQ_LOG_NORMAL;
+}
+
+void psfreq_log_set_quiet(void)
+{
+        psfreq_log_state = PSFREQ_LOG_QUIET;
+}
+
+void psfreq_log_set_all_quiet(void)
+{
+        psfreq_log_state = PSFREQ_LOG_ALL_QUIET;
+}
