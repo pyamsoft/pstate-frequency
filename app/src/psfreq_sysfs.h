@@ -32,26 +32,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-struct psfreq_sysfs_type {
+typedef struct psfreq_sysfs_type {
         const char *base_path;
-};
+} psfreq_sysfs_type;
 
-void psfreq_sysfs_init(struct psfreq_sysfs_type *sysfs);
+void psfreq_sysfs_init(psfreq_sysfs_type *sysfs);
 
-bool psfreq_sysfs_write(const struct psfreq_sysfs_type *sysfs,
+bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf);
-bool psfreq_sysfs_write_num(const struct psfreq_sysfs_type *sysfs,
+bool psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
                 const char *file, const int32_t *num);
-char *psfreq_sysfs_read(const struct psfreq_sysfs_type *sysfs,
+char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
                 const char *file);
-/* const std::string read(const std::string &path, */
-/*                 const std::string &file) const; */
-/* const std::vector<std::string> readAll( */
-/*                 const std::string &file) const; */
-/* const std::vector<std::string> readAll(const std::string &path, */
-/*                 const std::string &file) const; */
-/* const std::vector<std::string> readPipe(const char* command, */
-/*                 const unsigned int number) const; */
 
 #endif
 

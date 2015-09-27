@@ -35,16 +35,16 @@
 
 static uint8_t psfreq_cpu_init_find_number_cpus(void);
 static bool psfreq_cpu_init_system_has_pstate(
-                const struct psfreq_sysfs_type *sysfs);
+                const psfreq_sysfs_type *sysfs);
 static uint32_t psfreq_cpu_init_system_max_freq(
-                const struct psfreq_sysfs_type *sysfs);
+                const psfreq_sysfs_type *sysfs);
 static uint32_t psfreq_cpu_init_system_min_freq(
-                const struct psfreq_sysfs_type *sysfs);
-static char **psfreq_cpu_init_vector(const struct psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs);
+static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
 
-void psfreq_cpu_init(struct psfreq_cpu_type *cpu,
-                const struct psfreq_sysfs_type *sysfs)
+void psfreq_cpu_init(psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs)
 {
         cpu->cpu_num = psfreq_cpu_init_find_number_cpus();
         cpu->has_pstate = psfreq_cpu_init_system_has_pstate(sysfs);
@@ -55,7 +55,7 @@ void psfreq_cpu_init(struct psfreq_cpu_type *cpu,
         cpu->vector_scaling_governor = psfreq_cpu_init_vector(cpu, "governor");
 }
 
-void psfreq_cpu_destroy(struct psfreq_cpu_type *cpu)
+void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
 {
                 psfreq_log_debug("psfreq_cpu_destroy",
                                 "Free all allocated memory");
@@ -113,7 +113,7 @@ static uint8_t psfreq_cpu_init_find_number_cpus(void)
 }
 
 static bool psfreq_cpu_init_system_has_pstate(
-                const struct psfreq_sysfs_type *sysfs)
+                const psfreq_sysfs_type *sysfs)
 {
         char *driver = psfreq_sysfs_read(sysfs,
                         "cpu0/cpufreq/scaling_driver");
@@ -132,7 +132,7 @@ static bool psfreq_cpu_init_system_has_pstate(
 }
 
 static uint32_t psfreq_cpu_init_system_max_freq(
-                const struct psfreq_sysfs_type *sysfs)
+                const psfreq_sysfs_type *sysfs)
 {
         char *line = psfreq_sysfs_read(sysfs, "cpu0/cpufreq/cpuinfo_max_freq");
         if (line == NULL) {
@@ -152,7 +152,7 @@ static uint32_t psfreq_cpu_init_system_max_freq(
 }
 
 static uint32_t psfreq_cpu_init_system_min_freq(
-                const struct psfreq_sysfs_type *sysfs)
+                const psfreq_sysfs_type *sysfs)
 {
         char *line = psfreq_sysfs_read(sysfs, "cpu0/cpufreq/cpuinfo_min_freq");
         if (line == NULL) {
@@ -171,7 +171,7 @@ static uint32_t psfreq_cpu_init_system_min_freq(
         return result;
 }
 
-static char **psfreq_cpu_init_vector(const struct psfreq_cpu_type *cpu,
+static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what)
 {
         psfreq_log_debug("psfreq_cpu_init_vector", "Check for non-zero size");

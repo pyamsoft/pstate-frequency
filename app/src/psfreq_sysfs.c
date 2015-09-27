@@ -41,7 +41,7 @@
  *
  * @return A new instance of psfreq_sysfs_type using the default base path
  */
-void psfreq_sysfs_init(struct psfreq_sysfs_type *sysfs)
+void psfreq_sysfs_init(psfreq_sysfs_type *sysfs)
 {
         psfreq_log_debug("psfreq_sysfs_init",
                         "Initialize a new psfreq_sysfs_type instance.");
@@ -57,7 +57,7 @@ void psfreq_sysfs_init(struct psfreq_sysfs_type *sysfs)
  * @return Boolean value, true if writing to the file was successfully
  *         performed, false otherwise
  */
-bool psfreq_sysfs_write(const struct psfreq_sysfs_type *sysfs,
+bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf)
 {
         psfreq_log_debug("psfreq_sysfs_write",
@@ -112,7 +112,7 @@ bool psfreq_sysfs_write(const struct psfreq_sysfs_type *sysfs,
         return true;
 }
 
-bool psfreq_sysfs_write_num(const struct psfreq_sysfs_type *sysfs,
+bool psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
                 const char *file, const int32_t *num)
 {
         char *s = psfreq_strings_from_int(num);
@@ -121,7 +121,7 @@ bool psfreq_sysfs_write_num(const struct psfreq_sysfs_type *sysfs,
         return r;
 }
 
-char *psfreq_sysfs_read(const struct psfreq_sysfs_type *sysfs,
+char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
                 const char *file)
 {
         const char *const path = sysfs->base_path;

@@ -31,7 +31,7 @@
 
 #include "psfreq_sysfs.h"
 
-struct psfreq_cpu_type {
+typedef struct psfreq_cpu_type {
         bool has_pstate;
         uint8_t cpu_num;
         uint32_t cpuinfo_min_freq;
@@ -39,11 +39,14 @@ struct psfreq_cpu_type {
         char **vector_scaling_max_freq;
         char **vector_scaling_min_freq;
         char **vector_scaling_governor;
-};
+} psfreq_cpu_type;
 
-void psfreq_cpu_init(struct psfreq_cpu_type *cpu,
-                const struct psfreq_sysfs_type *sysfs);
+void psfreq_cpu_init(psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs);
 
-void psfreq_cpu_destroy(struct psfreq_cpu_type *cpu);
+void psfreq_cpu_destroy(psfreq_cpu_type *cpu);
+
+uint32_t psfreq_cpu_get_min(const psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs);
 
 #endif
