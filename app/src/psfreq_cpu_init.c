@@ -25,7 +25,6 @@ void psfreq_cpu_init(struct psfreq_cpu_type *cpu,
         cpu->has_pstate = psfreq_cpu_init_system_has_pstate(sysfs);
         cpu->cpuinfo_max_freq = psfreq_cpu_init_system_max_freq(sysfs);
         cpu->cpuinfo_min_freq = psfreq_cpu_init_system_min_freq(sysfs);
-
         cpu->vector_scaling_min_freq = psfreq_cpu_init_vector(cpu, "min_freq");
         cpu->vector_scaling_max_freq = psfreq_cpu_init_vector(cpu, "max_freq");
         cpu->vector_scaling_governor = psfreq_cpu_init_vector(cpu, "governor");
@@ -119,19 +118,19 @@ static uint32_t psfreq_cpu_init_system_min_freq(
 static char **psfreq_cpu_init_vector(const struct psfreq_cpu_type *cpu,
                 const char *const what)
 {
-        psfreq_log_debug("psfreq_cpu_initvector", "Check for non-zero size");
+        psfreq_log_debug("psfreq_cpu_init_vector", "Check for non-zero size");
         const uint8_t num = cpu->cpu_num;
         if (num == 0) {
-                psfreq_log_error("psfreq_cpu_initvector",
+                psfreq_log_error("psfreq_cpu_init_vector",
                                 "Size is 0, failed to find cpu number");
                 return NULL;
         }
 
-        psfreq_log_debug("psfreq_cpu_initvector",
+        psfreq_log_debug("psfreq_cpu_init_vector",
                         "malloc for vector");
         char **vector = malloc(num * sizeof(char *));
         if (vector == NULL) {
-                psfreq_log_error("psfreq_cpu_initvector",
+                psfreq_log_error("psfreq_cpu_init_vector",
                                 "Failed to malloc for vector");
                 return NULL;
         }
@@ -139,14 +138,14 @@ static char **psfreq_cpu_init_vector(const struct psfreq_cpu_type *cpu,
         for (uint8_t i = 0; i < num; ++i) {
                 char *buf = NULL;
                 if (asprintf(&buf, "cpu%u/cpufreq_scaling_%s", i, what) < 0) {
-                        psfreq_log_error("psfreq_cpu_initvector",
+                        psfreq_log_error("psfreq_cpu_init_vector",
                                 "asprintf returned a -1, indicating a failure "
                                 "during\n either memory allocation or some "
                                 "other error.");
                         return NULL;
                 }
 
-                psfreq_log_debug("psfreq_cpu_initvector",
+                psfreq_log_debug("psfreq_cpu_init_vector",
                                 "assign '%s' to vector index %d", buf, i);
                 vector[i] = buf;
         }
