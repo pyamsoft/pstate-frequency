@@ -16,9 +16,9 @@ VERSION:=1.3.1
 # able to compile successfully without needing to declare a C++ standard version
 # at all.
 #
-# [c++11] | [NONE] | OTHER
+# [gnu89] | [NONE] | OTHER
 ##
-STD:=-std=c++11
+STD:=-std=gnu89
 
 ##
 # bash-completion
