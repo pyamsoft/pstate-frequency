@@ -1,3 +1,28 @@
+/**
+ * @file psfreq_cpu_init.c
+ * @author pyamsoft <pyam(dot)soft(at)gmail(dot)com>
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * @section DESCRIPTION
+ * Part of the implementation for the psfreq_cpu_type. This module
+ * handles the essential setup when a new psfreq_cpu_type is initialized.
+ */
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +53,37 @@ void psfreq_cpu_init(struct psfreq_cpu_type *cpu,
         cpu->vector_scaling_min_freq = psfreq_cpu_init_vector(cpu, "min_freq");
         cpu->vector_scaling_max_freq = psfreq_cpu_init_vector(cpu, "max_freq");
         cpu->vector_scaling_governor = psfreq_cpu_init_vector(cpu, "governor");
+}
+
+void psfreq_cpu_destroy(struct psfreq_cpu_type *cpu)
+{
+                psfreq_log_debug("psfreq_cpu_destroy",
+                                "Free all allocated memory");
+        for (uint8_t i = 0; i < cpu->cpu_num; ++i) {
+                psfreq_log_debug("psfreq_cpu_destroy",
+                                "free vector_scaling_min_freq[%u]", i);
+                free(cpu->vector_scaling_min_freq[i]);
+
+                psfreq_log_debug("psfreq_cpu_destroy",
+                                "free vector_scaling_max_freq[%u]", i);
+                free(cpu->vector_scaling_max_freq[i]);
+
+                psfreq_log_debug("psfreq_cpu_destroy",
+                                "free vector_scaling_governor[%u]", i);
+                free(cpu->vector_scaling_governor[i]);
+        }
+
+        psfreq_log_debug("psfreq_cpu_destroy",
+                        "free vector_scaling_min_freq");
+        free(cpu->vector_scaling_min_freq);
+
+        psfreq_log_debug("psfreq_cpu_destroy",
+                        "free vector_scaling_max_freq");
+        free(cpu->vector_scaling_max_freq);
+
+        psfreq_log_debug("psfreq_cpu_destroy",
+                        "free vector_scaling_governor");
+        free(cpu->vector_scaling_governor);
 }
 
 /*
