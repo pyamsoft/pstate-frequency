@@ -25,7 +25,19 @@
 #ifndef PSFREQ_STRINGS_H
 #define PSFREQ_STRINGS_H
 
-char *psfreq_strings_concat(const char *s1, const char *s2);
+#include <stdbool.h>
+#include <stdint.h>
+
+#define RADIX_DECIMAL   10
+
+char *psfreq_strings_concat(const char *const s1, const char *const s2);
+bool psfreq_strings_starts_with(const char *s, const char *p);
+double psfreq_strings_to_double(const char *const s);
+int32_t psfreq_strings_to_int(const char *const s);
+uint32_t psfreq_strings_to_uint(const char *const s);
+char *psfreq_strings_from_double(const double *const d);
+char *psfreq_strings_from_int(const int32_t *const i);
+char *psfreq_strings_from_uint(const uint32_t *const u);
 
 #endif
 
