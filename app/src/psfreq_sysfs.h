@@ -29,24 +29,21 @@
 #ifndef PSFREQ_SYSFS_H
 #define PSFREQ_SYSFS_H
 
+#include <stdint.h>
 #include <stdbool.h>
 
 struct psfreq_sysfs_type {
         const char *base_path;
 };
 
-struct psfreq_sysfs_type psfreq_sysfs_init(void);
+void psfreq_sysfs_init(struct psfreq_sysfs_type *sysfs);
 
 bool psfreq_sysfs_write(const struct psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf);
+bool psfreq_sysfs_write_num(const struct psfreq_sysfs_type *sysfs,
+                const char *file, const int32_t *num);
 char *psfreq_sysfs_read(const struct psfreq_sysfs_type *sysfs,
                 const char *file);
-/* bool write(const std::string &path, const std::string &file, */
-/*                 const int number) const; */
-/* bool write(const std::string &file, */
-/*                 const std::string &buffer) const; */
-/* bool write(const std::string &file, const int number) const; */
-/* const std::string read(const std::string &file) const; */
 /* const std::string read(const std::string &path, */
 /*                 const std::string &file) const; */
 /* const std::vector<std::string> readAll( */

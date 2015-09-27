@@ -41,13 +41,11 @@
  *
  * @return A new instance of psfreq_sysfs_type using the default base path
  */
-struct psfreq_sysfs_type psfreq_sysfs_init(void)
+void psfreq_sysfs_init(struct psfreq_sysfs_type *sysfs)
 {
         psfreq_log_debug("psfreq_sysfs_init",
-                        "Create a new psfreq_sysfs_type instance.");
-        struct psfreq_sysfs_type sysfs;
-        sysfs.base_path = "/sys/devices/system/cpu/";
-        return sysfs;
+                        "Initialize a new psfreq_sysfs_type instance.");
+        sysfs->base_path = "/sys/devices/system/cpu/";
 }
 
 /**
@@ -62,6 +60,13 @@ struct psfreq_sysfs_type psfreq_sysfs_init(void)
 bool psfreq_sysfs_write(const struct psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf)
 {
+        psfreq_log_debug("psfreq_sysfs_write",
+                        "Check that buf is not NULL");
+        if (buf == NULL) {
+                psfreq_log_error("psfreq_sysfs_write",
+                                "buf is NULL, exit.");
+                return false;
+        }
         const char *const path = sysfs->base_path;
         psfreq_log_debug("psfreq_sysfs_write",
                         "Concat strings: '%s' and '%s'",
@@ -105,6 +110,15 @@ bool psfreq_sysfs_write(const struct psfreq_sysfs_type *sysfs,
         free(abs_path);
         fclose(f);
         return true;
+}
+
+bool psfreq_sysfs_write_num(const struct psfreq_sysfs_type *sysfs,
+                const char *file, const int32_t *num)
+{
+        char *s = psfreq_strings_from_int(num);
+        const bool r = psfreq_sysfs_write(sysfs, file, s);
+        free(s);
+        return r;
 }
 
 char *psfreq_sysfs_read(const struct psfreq_sysfs_type *sysfs,
