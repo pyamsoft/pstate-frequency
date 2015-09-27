@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "psfreq_color.h"
 #include "psfreq_log.h"
 
 typedef int8_t psfreq_log_level;
@@ -41,13 +42,17 @@ static bool psfreq_log_should_display(uint8_t log_level)
         return (psfreq_log_state < log_level);
 }
 
-void psfreq_log_debug(const char *const fmt, ...)
+void psfreq_log_debug(const char *const name, const char *const fmt, ...)
 {
         if (psfreq_log_should_display(PSFREQ_LOG_NORMAL)) {
+                fprintf(stdout, "%s[D] %s%s\n\n",
+                                PSFREQ_COLOR_BOLD_BLUE, name,
+                                PSFREQ_COLOR_RESET);
                 va_list arg;
                 va_start(arg, fmt);
                 vfprintf(stdout, fmt, arg);
                 va_end(arg);
+                fprintf(stdout, "\n");
         }
 }
 
@@ -58,15 +63,20 @@ void psfreq_log_normal(const char *const fmt, ...)
                 va_start(arg, fmt);
                 vfprintf(stdout, fmt, arg);
                 va_end(arg);
+                fprintf(stdout, "\n");
         }
 }
 
-void psfreq_log_error(const char *const fmt, ...)
+void psfreq_log_error(const char *const name, const char *const fmt, ...)
 {
         if (psfreq_log_should_display(PSFREQ_LOG_ALL_QUIET)) {
+                fprintf(stderr, "%s[E] %s%s\n\n",
+                                PSFREQ_COLOR_BOLD_RED, name,
+                                PSFREQ_COLOR_RESET);
                 va_list arg;
                 va_start(arg, fmt);
                 vfprintf(stderr, fmt, arg);
                 va_end(arg);
+                fprintf(stdout, "\n");
         }
 }
