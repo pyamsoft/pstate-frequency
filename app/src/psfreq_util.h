@@ -1,5 +1,8 @@
-/*
- * pstate-frequency Easier control of the Intel p-state driver
+/**
+ * @file psfreq_util.h
+ * @author pyamsoft <pyam(dot)soft(at)gmail(dot)com>
+ *
+ * @section LICENSE
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,30 +18,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * For questions please contact pyamsoft at pyam(dot)soft(at)gmail(dot)com
+ * @section DESCRIPTION
+ * Utility functions file to help with things like reading from command
+ * pipes.
  */
 
-#ifndef CPP_PSFREQ_UTIL_H
-#define CPP_PSFREQ_UTIL_H
+#ifndef PSFREQ_UTIL_H
+#define PSFREQ_UTIL_H
 
-#include <string>
-#include <vector>
+#include <stdint.h>
 
-#define BAD_NUMBER -1
-
-namespace psfreq {
-
-const std::string UNINITIALIZED_STR = std::string();
-
-double stringToNumber(const std::string &line);
-const std::string numberToString(const unsigned int number);
-int boundValue(const int value, const int minBound,
-        const int maxBound);
-bool stringStartsWith(const std::string &control, const std::string &value);
-const std::vector<std::string> &splitString(const std::string &s, char delim,
-        std::vector<std::string> &elems);
-const std::vector<std::string> splitString(const std::string &s, char delim);
-
-}
+void psfreq_read_pipe(char** lines, const char *const cmd,
+                const uint8_t *size);
 
 #endif
