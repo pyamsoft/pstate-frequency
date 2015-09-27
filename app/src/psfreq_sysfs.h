@@ -39,6 +39,8 @@ struct psfreq_sysfs_type psfreq_sysfs_init(void);
 
 bool psfreq_sysfs_write(const struct psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf);
+char *psfreq_sysfs_read(const struct psfreq_sysfs_type *sysfs,
+                const char *file);
 /* bool write(const std::string &path, const std::string &file, */
 /*                 const int number) const; */
 /* bool write(const std::string &file, */

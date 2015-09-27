@@ -27,8 +27,10 @@
  * which is usually located at /sys/devices/system/cpu
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
@@ -44,8 +46,8 @@ struct psfreq_sysfs_type psfreq_sysfs_init(void)
         psfreq_log_debug("psfreq_sysfs_init",
                         "Create a new psfreq_sysfs_type instance.");
         struct psfreq_sysfs_type sysfs;
-        sysfs.base_path = "/sys/devices/system/cpu/";
-        /* sysfs.base_path = "/home/peter/"; */
+        /* sysfs.base_path = "/sys/devices/system/cpu/"; */
+        sysfs.base_path = "/home/peter/";
         return sysfs;
 }
 
@@ -104,4 +106,57 @@ bool psfreq_sysfs_write(const struct psfreq_sysfs_type *sysfs,
         free(abs_path);
         fclose(f);
         return true;
+}
+
+char *psfreq_sysfs_read(const struct psfreq_sysfs_type *sysfs,
+                const char *file)
+{
+        const char *const path = sysfs->base_path;
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Concat strings: '%s' and '%s'",
+                        path, file);
+        char *const abs_path = psfreq_strings_concat(path, file);
+        if (abs_path == NULL) {
+                psfreq_log_error("psfreq_sysfs_read",
+                                "Concat strings: '%s' and '%s' has failed.\n"
+                                "Function will return false.",
+                                path, file);
+                return NULL;
+        }
+
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Attempt to open file: '%s'",
+                        abs_path);
+        FILE *const f = fopen(abs_path, "r");
+        if (f == NULL) {
+                psfreq_log_error("psfreq_sysfs_read",
+                                "File '%s' failed to open for reading.",
+                                abs_path);
+                free(abs_path);
+                return NULL;
+        }
+
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Attempt to read buffer from file: '%s'",
+                        abs_path);
+        char *line = NULL;
+        size_t n = 0;
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Getting a line from file %s\n", abs_path);
+        if (getline(&line, &n, f) < 0) {
+                psfreq_log_error("psfreq_sysfs_read",
+                                "Failed to read buffer from file '%s'.",
+                                abs_path);
+                free(line);
+                free(abs_path);
+                fclose(f);
+                return NULL;
+        }
+
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Close file: '%s'",
+                        abs_path);
+        free(abs_path);
+        fclose(f);
+        return line;
 }
