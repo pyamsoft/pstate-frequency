@@ -18,35 +18,17 @@
  * For questions please contact pyamsoft at pyam(dot)soft(at)gmail(dot)com
  */
 
-#ifndef C_PSFREQ_COLORS_H_
-#define C_PSFREQ_COLORS_H_
+#ifndef PSFREQ_COLOR_H_
+#define PSFREQ_COLOR_H_
 
-namespace psfreq {
-
-class Color
-{
-private:
-        static bool enabled;
-        static const char *const COLOR_RESET;
-        static const char *const BOLD_RED;
-        static const char *const BOLD_GREEN;
-        static const char *const BOLD_BLUE;
-        static const char *const BOLD_MAGENTA;
-        static const char *const BOLD_CYAN;
-        static const char *const BOLD_WHITE;
-        static const char *const NO_COLOR;
-public:
-        static void setEnabled();
-        static const char *reset();
-        static const char *boldRed();
-        static const char *boldGreen();
-        static const char *boldBlue();
-        static const char *boldMagenta();
-        static const char *boldCyan();
-        static const char *boldWhite();
-};
-
-}
+#define COLOR_RESET             "\033[0m"
+#define COLOR_BOLD_RED          "\033[1;31m"
+#define COLOR_BOLD_GREEN        "\033[1;32m"
+#define COLOR_BOLD_BLUE         "\033[1;34m"
+#define COLOR_BOLD_MAGENTA      "\033[1;35m"
+#define COLOR_BOLD_CYAN         "\033[1;36m"
+#define COLOR_BOLD_WHITE        "\033[1;37m"
+#define COLOR_NONE              ""
 
 #endif
 
