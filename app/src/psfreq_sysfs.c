@@ -46,8 +46,7 @@ struct psfreq_sysfs_type psfreq_sysfs_init(void)
         psfreq_log_debug("psfreq_sysfs_init",
                         "Create a new psfreq_sysfs_type instance.");
         struct psfreq_sysfs_type sysfs;
-        /* sysfs.base_path = "/sys/devices/system/cpu/"; */
-        sysfs.base_path = "/home/peter/";
+        sysfs.base_path = "/sys/devices/system/cpu/";
         return sysfs;
 }
 

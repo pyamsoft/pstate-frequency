@@ -45,7 +45,7 @@ static bool psfreq_log_should_display(uint8_t log_level)
 void psfreq_log_debug(const char *const name, const char *const fmt, ...)
 {
         if (psfreq_log_should_display(PSFREQ_LOG_NORMAL)) {
-                fprintf(stdout, "%s[D] %s%s\n\n",
+                fprintf(stdout, "%s[D] %s %s",
                                 PSFREQ_COLOR_BOLD_BLUE, name,
                                 PSFREQ_COLOR_RESET);
                 va_list arg;
@@ -70,14 +70,14 @@ void psfreq_log_normal(const char *const fmt, ...)
 void psfreq_log_error(const char *const name, const char *const fmt, ...)
 {
         if (psfreq_log_should_display(PSFREQ_LOG_ALL_QUIET)) {
-                fprintf(stderr, "%s[E] %s%s\n\n",
+                fprintf(stderr, "%s[E] %s %s",
                                 PSFREQ_COLOR_BOLD_RED, name,
                                 PSFREQ_COLOR_RESET);
                 va_list arg;
                 va_start(arg, fmt);
                 vfprintf(stderr, fmt, arg);
                 va_end(arg);
-                fprintf(stdout, "\n");
+                fprintf(stderr, "\n");
         }
 }
 
