@@ -30,7 +30,7 @@
 #include "psfreq_log.h"
 #include "psfreq_util.h"
 
-void psfreq_read_pipe(char** lines, const char *const cmd,
+void psfreq_util_read_pipe(char ***lines, const char *const cmd,
                 const uint8_t *size)
 {
         psfreq_log_debug("psfreq_read_pipe", "Check for non-zero size");
@@ -39,6 +39,16 @@ void psfreq_read_pipe(char** lines, const char *const cmd,
                                 "Size is 0, which would"
                                 " result in empty array");
                 return NULL;
+        }
+
+        if (*lines == NULL) {
+                psfreq_log_debug("psfreq_read_pipe", "malloc for lines");
+                *lines = malloc(*size * sizeof(char *));
+                if (*lines == NULL) {
+                        psfreq_log_error("psfreq_read_pipe",
+                                        "Failed to malloc for lines");
+                        return NULL;
+                }
         }
 
         psfreq_log_debug("psfreq_read_pipe",
@@ -64,7 +74,7 @@ void psfreq_read_pipe(char** lines, const char *const cmd,
                         psfreq_log_debug("psfreq_read_pipe",
                                         "Assign line '%s' to array %d",
                                         line, i);
-                        lines[i] = line;
+                        *lines[i] = line;
                 }
         }
         psfreq_log_debug("psfreq_read_pipe", "Close pipe");
