@@ -28,7 +28,6 @@
 
 #include <stdint.h>
 
-void psfreq_util_read_pipe(char ***lines, const char *const cmd,
-                const uint8_t *size);
+char **psfreq_util_read_pipe(const char *const cmd, const uint8_t *size);
 
 #endif
