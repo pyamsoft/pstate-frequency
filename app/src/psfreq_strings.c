@@ -40,11 +40,12 @@
  */
 char *psfreq_strings_concat(const char *const s1, const char *const s2)
 {
-        char *result;
+        char *result = NULL;
         if (asprintf(&result, "%s%s", s1, s2) < 0) {
                 psfreq_log_error("psfreq_strings_concat",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
+                return NULL;
         }
         return result;
 }
@@ -81,33 +82,36 @@ uint32_t psfreq_strings_to_uint(const char *const s)
 
 char *psfreq_strings_from_double(const double *const d)
 {
-        char *buf;
+        char *buf = NULL;
         if (asprintf(&buf, "%f", *d) < 0) {
                 psfreq_log_error("psfreq_strings_from_double",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
+                return NULL;
         }
         return buf;
 }
 
 char *psfreq_strings_from_int(const int32_t *const i)
 {
-        char *buf;
+        char *buf = NULL;
         if (asprintf(&buf, "%d", *i) < 0) {
                 psfreq_log_error("psfreq_strings_from_int",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
+                return NULL;
         }
         return buf;
 }
 
 char *psfreq_strings_from_uint(const uint32_t *const u)
 {
-        char *buf;
+        char *buf = NULL;
         if (asprintf(&buf, "%u", *u) < 0) {
                 psfreq_log_error("psfreq_strings_from_int",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
+                return NULL;
         }
         return buf;
 }
