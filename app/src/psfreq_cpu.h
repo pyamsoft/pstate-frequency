@@ -31,14 +31,12 @@ struct psfreq_cpu_type {
         uint8_t cpu_num;
         uint32_t cpuinfo_min_freq;
         uint32_t cpuinfo_max_freq;
-        char **scaling_max_freq_files;
-        char **scaling_min_freq_files;
-        char **scaling_governor_files;
+        char **vector_scaling_max_freq;
+        char **vector_scaling_min_freq;
+        char **vector_scaling_governor;
 };
 
 void psfreq_cpu_init(struct psfreq_cpu_type *cpu,
                 const struct psfreq_sysfs_type *sysfs);
-uint8_t psfreq_cpu_init_find_number_cpus(void);
-bool psfreq_cpu_init_system_has_pstate(const struct psfreq_sysfs_type *sysfs);
 
 #endif
