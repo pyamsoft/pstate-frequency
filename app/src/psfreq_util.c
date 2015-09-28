@@ -32,6 +32,16 @@
 
 char **psfreq_util_read_pipe(const char *const cmd, const uint8_t *size)
 {
+        char **lines;
+        FILE *pipe;
+        size_t n;
+        uint8_t i;
+        psfreq_log_debug("psfreq_read_pipe", "Check for non-NULL cmd");
+        if (cmd == NULL) {
+                psfreq_log_error("psfreq_read_pipe",
+                                "cmd is NULL");
+                return NULL;
+        }
         psfreq_log_debug("psfreq_read_pipe", "Check for non-zero size");
         if (*size == 0) {
                 psfreq_log_error("psfreq_read_pipe",
@@ -41,7 +51,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const uint8_t *size)
         }
 
         psfreq_log_debug("psfreq_read_pipe", "malloc for lines");
-        char **lines = malloc(*size * sizeof(char *));
+        lines = malloc(*size * sizeof(char *));
         if (lines == NULL) {
                 psfreq_log_error("psfreq_read_pipe",
                                 "Failed to malloc for lines");
@@ -50,14 +60,14 @@ char **psfreq_util_read_pipe(const char *const cmd, const uint8_t *size)
 
         psfreq_log_debug("psfreq_read_pipe",
                         "Attempt to open pipe '%s'", cmd);
-        FILE *const pipe = popen(cmd, "r");
+        pipe = popen(cmd, "r");
         if (pipe == NULL) {
                 psfreq_log_error("psfreq_read_pipe",
                                 "Failed to open pipe '%s'", cmd);
                 return NULL;
         }
-        size_t n = 0;
-        for (uint8_t i = 0; i < *size; ++i) {
+        n = 0;
+        for (i = 0; i < *size; ++i) {
                 char *line = NULL;
                 psfreq_log_debug("psfreq_read_pipe",
                                 "Attempt to getline from pipe");

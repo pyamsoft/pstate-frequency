@@ -16,7 +16,7 @@ VERSION:=1.3.1
 # able to compile successfully without needing to declare a C++ standard version
 # at all.
 #
-# [gnu89] | [NONE] | OTHER
+# [gnu89]
 ##
 STD:=-std=gnu89
 
@@ -140,7 +140,7 @@ INCLUDE_LICENSE?=1
 #
 # [g++] | clang++ | OTHER
 ##
-CXX?=g++
+CC?=gcc
 
 ##
 # Install prefix
@@ -169,61 +169,61 @@ LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
 #
 # Do NOT modify these unless you know what you are doing
 ##
-CXXFLAGS:= $(STD) -O2 \
+CCFLAGS:= $(STD) -O2 \
 	-march=native -pipe \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
-	-Wunreachable-code $(CXXFLAGS)
+	-Wunreachable-code $(CCFLAGS)
 
 ##
-# Add the VERSION to the CXXFLAGS if it is defined
+# Add the VERSION to the CCFLAGS if it is defined
 # (NOTE) VERSION should be defined for a sane build!
 ##
 ifdef VERSION
-	CXXFLAGS+= -DVERSION=\"$(VERSION)[$(CXX)]\"
+	CCFLAGS+= -DVERSION=\"$(VERSION)[$(CC)]\"
 endif
 
 ##
-# Add the AUTO_POWER_PLAN_AC to the CXXFLAGS if it is defined
+# Add the AUTO_POWER_PLAN_AC to the CCFLAGS if it is defined
 ##
 ifdef AUTO_POWER_PLAN_AC
-	CXXFLAGS+= -DAUTO_POWER_PLAN_AC=\"$(AUTO_POWER_PLAN_AC)\"
+	CCFLAGS+= -DAUTO_POWER_PLAN_AC=\"$(AUTO_POWER_PLAN_AC)\"
 endif
 
 ##
-# Add the AUTO_POWER_PLAN_BAT to the CXXFLAGS if it is defined
+# Add the AUTO_POWER_PLAN_BAT to the CCFLAGS if it is defined
 ##
 ifdef AUTO_POWER_PLAN_BAT
-	CXXFLAGS+= -DAUTO_POWER_PLAN_BAT=\"$(AUTO_POWER_PLAN_BAT)\"
+	CCFLAGS+= -DAUTO_POWER_PLAN_BAT=\"$(AUTO_POWER_PLAN_BAT)\"
 endif
 
 ##
-# Add the PRESET_POWER_PLAN_MAX_PERFORMANCE to the CXXFLAGS if it is defined
+# Add the PRESET_POWER_PLAN_MAX_PERFORMANCE to the CCFLAGS if it is defined
 ##
 ifdef PRESET_POWER_PLAN_MAX_PERFORMANCE
-	CXXFLAGS+= -DPRESET_POWER_PLAN_MAX_PERFORMANCE=\"$(PRESET_POWER_PLAN_MAX_PERFORMANCE)\"
+	CCFLAGS+= -DPRESET_POWER_PLAN_MAX_PERFORMANCE=\"$(PRESET_POWER_PLAN_MAX_PERFORMANCE)\"
 endif
 
 ##
-# Add the PRESET_POWER_PLAN_PERFORMANCE to the CXXFLAGS if it is defined
+# Add the PRESET_POWER_PLAN_PERFORMANCE to the CCFLAGS if it is defined
 ##
 ifdef PRESET_POWER_PLAN_PERFORMANCE
-	CXXFLAGS+= -DPRESET_POWER_PLAN_PERFORMANCE=\"$(PRESET_POWER_PLAN_PERFORMANCE)\"
+	CCFLAGS+= -DPRESET_POWER_PLAN_PERFORMANCE=\"$(PRESET_POWER_PLAN_PERFORMANCE)\"
 endif
 
 ##
-# Add the PRESET_POWER_PLAN_POWERSAVE to the CXXFLAGS if it is defined
+# Add the PRESET_POWER_PLAN_POWERSAVE to the CCFLAGS if it is defined
 ##
 ifdef PRESET_POWER_PLAN_POWERSAVE
-	CXXFLAGS+= -DPRESET_POWER_PLAN_POWERSAVE=\"$(PRESET_POWER_PLAN_POWERSAVE)\"
+	CCFLAGS+= -DPRESET_POWER_PLAN_POWERSAVE=\"$(PRESET_POWER_PLAN_POWERSAVE)\"
 endif
 
 ##
-# Add the INCLUDE_UDEV_RULE to the CXXFLAGS if it is defined
+# Add the INCLUDE_UDEV_RULE to the CCFLAGS if it is defined
 # (NOTE) As of version 1.2.10, the INCLUDE_UDEV_RULE does NOT
 # affect the ability of pstate-frequency to use the automatic power plan.
 ##
 ifeq ($(INCLUDE_UDEV_RULE), 1)
-	CXXFLAGS+= -DINCLUDE_UDEV_RULE=$(INCLUDE_UDEV_RULE)
+	CCFLAGS+= -DINCLUDE_UDEV_RULE=$(INCLUDE_UDEV_RULE)
 endif
 
 ##

@@ -64,9 +64,9 @@ bool psfreq_strings_starts_with(const char *s, const char *p)
 
 double psfreq_strings_to_double(const char *const s)
 {
+        const double v = strtol(s, NULL, RADIX_DECIMAL);
         psfreq_log_debug("psfreq_strings_to_double",
                         "Convert string '%s' to double value", s);
-        const double v = strtol(s, NULL, RADIX_DECIMAL);
         return v;
 }
 
