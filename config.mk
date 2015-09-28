@@ -4,21 +4,13 @@
 VERSION:=1.3.1
 
 ##
-# C++ Standard
+# C Standard
 #
-# The standard has been decided as C++11 for a couple of reasons. The kernel
-# required for using the intel_pstate driver is (atleast) kernel 3.9 C++11 came
-# out before kernel 3.9, meaning that if you are able to run kernel 3.9, you
-# should hopefully be on a distribution which sports a C++ compiler that
-# supports the new C++11 standard.
-#
-# This being said, the project has been updated to the point that you should be
-# able to compile successfully without needing to declare a C++ standard version
-# at all.
-#
-# [gnu89]
+# The standard is implicitly set to C11 in the newest GCC 5. To have support
+# for the widest range of machines, we compile with the same standard as
+# Linux, explicitly setting to gnu89. Due to the current nature of the project
+# the standard is no longer a configurable value.
 ##
-STD:=-std=gnu89
 
 ##
 # bash-completion
@@ -169,7 +161,7 @@ LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
 #
 # Do NOT modify these unless you know what you are doing
 ##
-CCFLAGS:= $(STD) -O2 \
+CCFLAGS:= -std=gnu89 -O2 \
 	-march=native -pipe \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
 	-Wunreachable-code $(CCFLAGS)
