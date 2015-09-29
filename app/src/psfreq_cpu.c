@@ -33,12 +33,8 @@
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
-static unsigned char psfreq_cpu_init_find_number_cpus(void);
-static unsigned char psfreq_cpu_init_system_has_pstate(
-                const psfreq_sysfs_type *sysfs);
-static unsigned int psfreq_cpu_init_system_max_freq(
-                const psfreq_sysfs_type *sysfs);
-static unsigned int psfreq_cpu_init_system_min_freq(
+static unsigned char psfreq_cpu_init_number_cpus(void);
+static unsigned char psfreq_cpu_init_has_pstate(
                 const psfreq_sysfs_type *sysfs);
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
@@ -46,13 +42,21 @@ static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
 void psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
-        cpu->cpu_num = psfreq_cpu_init_find_number_cpus();
-        cpu->has_pstate = psfreq_cpu_init_system_has_pstate(sysfs);
-        cpu->cpuinfo_max_freq = psfreq_cpu_init_system_max_freq(sysfs);
-        cpu->cpuinfo_min_freq = psfreq_cpu_init_system_min_freq(sysfs);
+        cpu->cpu_num = psfreq_cpu_init_number_cpus();
+        cpu->has_pstate = psfreq_cpu_init_has_pstate(sysfs);
         cpu->vector_scaling_min_freq = psfreq_cpu_init_vector(cpu, "min_freq");
         cpu->vector_scaling_max_freq = psfreq_cpu_init_vector(cpu, "max_freq");
         cpu->vector_scaling_governor = psfreq_cpu_init_vector(cpu, "governor");
+        cpu->cpuinfo_max_freq = psfreq_cpu_init_freq(sysfs, "cpuinfo",
+                                                        "max");
+        cpu->cpuinfo_min_freq = psfreq_cpu_init_freq(sysfs, "cpuinfo",
+                                                        "min");
+        cpu->scaling_max_freq = psfreq_cpu_init_freq(sysfs, "scaling",
+                                                        "max");
+        cpu->scaling_min_freq = psfreq_cpu_init_freq(sysfs, "scaling",
+                                                        "min");
+        cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
+
 }
 
 void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
@@ -85,13 +89,17 @@ void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
         psfreq_log_debug("psfreq_cpu_destroy",
                         "free vector_scaling_governor");
         free(cpu->vector_scaling_governor);
+
+        psfreq_log_debug("psfreq_cpu_destroy",
+                        "free scaling_governor");
+        free(cpu->scaling_governor);
 }
 
 /*
  * Find the total number of CPUS (logical and physical) that exist on the
  * system.
  */
-static unsigned char psfreq_cpu_init_find_number_cpus(void)
+static unsigned char psfreq_cpu_init_number_cpus(void)
 {
         const char *const cmd = "grep processor /proc/cpuinfo | wc -l";
         const unsigned char size = 1;
@@ -99,22 +107,22 @@ static unsigned char psfreq_cpu_init_find_number_cpus(void)
         unsigned int n;
 
         if (res == NULL) {
-                psfreq_log_error("psfreq_cpu_init_find_number_cpus",
+                psfreq_log_error("psfreq_cpu_init_number_cpus",
                                 "Failed to find number of cpus");
                 return 0;
         }
 
         n = psfreq_strings_to_uint(res[0]);
-        psfreq_log_debug("psfreq_cpu_init_find_number_cpus",
+        psfreq_log_debug("psfreq_cpu_init_number_cpus",
                         "Free memory held by res");
         free(res[0]);
         free(res);
-        psfreq_log_debug("psfreq_cpu_init_find_number_cpus",
+        psfreq_log_debug("psfreq_cpu_init_number_cpus",
                         "Number of cpus: %u", n);
         return n;
 }
 
-static unsigned char psfreq_cpu_init_system_has_pstate(
+static unsigned char psfreq_cpu_init_has_pstate(
                 const psfreq_sysfs_type *sysfs)
 {
         char *driver;
@@ -122,74 +130,58 @@ static unsigned char psfreq_cpu_init_system_has_pstate(
         unsigned char r;
 
         if (sysfs == NULL) {
-                psfreq_log_error("psfreq_cpu_init_system_has_pstate",
+                psfreq_log_error("psfreq_cpu_init_has_pstate",
                                 "sysfs is NULL");
                 return 0;
         }
         driver = psfreq_sysfs_read(sysfs,
                         "cpu0/cpufreq/scaling_driver");
         if (driver == NULL) {
-                psfreq_log_error("psfreq_cpu_init_system_has_pstate",
+                psfreq_log_error("psfreq_cpu_init_has_pstate",
                                 "Unable to check for intel_pstate driver");
                 return 0;
         }
 
-        cmp = "intel_pstate\n";
-        psfreq_log_debug("psfreq_cpu_init_system_has_pstate",
+        cmp = "intel_pstate";
+        psfreq_log_debug("psfreq_cpu_init_has_pstate",
                         "Compare driver '%s' with '%s'", driver, cmp);
         r = (strcmp(driver, cmp) == 0);
         free(driver);
         return r;
 }
 
-static unsigned int psfreq_cpu_init_system_max_freq(
-                const psfreq_sysfs_type *sysfs)
+unsigned int psfreq_cpu_init_freq(
+                const psfreq_sysfs_type *sysfs,
+                const char *const type,
+                const char *const what)
 {
         char *line;
-        unsigned char result;
-        if (sysfs == NULL) {
-                psfreq_log_error("psfreq_cpu_init_system_max_freq",
-                                "sysfs is NULL");
-                return 0;
-        }
-        line = psfreq_sysfs_read(sysfs, "cpu0/cpufreq/cpuinfo_max_freq");
-        if (line == NULL) {
-                psfreq_log_error("psfreq_cpu_init_system_max_freq",
-                                "Unable to read for cpuinfo_max_freq");
-                return 0;
-        }
-        result = psfreq_strings_to_uint(line);
-        if (result == 0) {
-                psfreq_log_error("psfreq_cpu_init_system_max_freq",
-                                "Unable to convert string '%s' to unit32_t",
-                                line);
-        }
-
-        free(line);
-        return result;
-}
-
-static unsigned int psfreq_cpu_init_system_min_freq(
-                const psfreq_sysfs_type *sysfs)
-{
-        char *line;
+        char *f;
         unsigned int result;
-
         if (sysfs == NULL) {
-                psfreq_log_error("psfreq_cpu_init_system_min_freq",
+                psfreq_log_error("psfreq_cpu_init_freq",
                                 "sysfs is NULL");
                 return 0;
         }
-        line = psfreq_sysfs_read(sysfs, "cpu0/cpufreq/cpuinfo_min_freq");
+
+        if (asprintf(&f, "cpu0/cpufreq/%s_%s_freq", type, what) < 0) {
+                psfreq_log_error("psfreq_cpu_init_freq",
+                        "asprintf returned a -1, indicating a failure during\n"
+                        "either memory allocation or some other error.");
+                return 0;
+        }
+
+        line = psfreq_sysfs_read(sysfs, f);
+        free(f);
         if (line == NULL) {
-                psfreq_log_error("psfreq_cpu_init_system_min_freq",
-                                "Unable to read for cpuinfo_min_freq");
+                psfreq_log_error("psfreq_cpu_init_freq",
+                                "Unable to read for %s_%s_freq", type, what);
                 return 0;
         }
         result = psfreq_strings_to_uint(line);
         if (result == 0) {
-                psfreq_log_error("psfreq_cpu_init_system_min_freq",
-                                "Unable to convert string '%s' to unit32_t",
+                psfreq_log_error("psfreq_cpu_init_freq",
+                                "Unable to convert string '%s' to uint",
                                 line);
         }
 
@@ -229,7 +221,7 @@ static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
 
         for (i = 0; i < num; ++i) {
                 char *buf = NULL;
-                if (asprintf(&buf, "cpu%u/cpufreq_scaling_%s", i, what) < 0) {
+                if (asprintf(&buf, "cpu%u/cpufreq/scaling_%s", i, what) < 0) {
                         psfreq_log_error("psfreq_cpu_init_vector",
                                 "asprintf returned a -1, indicating a failure "
                                 "during\n either memory allocation or some "
@@ -243,3 +235,76 @@ static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
         }
         return vector;
 }
+
+unsigned int psfreq_cpu_get_cpuinfo_min(const psfreq_cpu_type *cpu)
+{
+        unsigned int min;
+        unsigned int max;
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_cpu_get_cpuinfo_min",
+                                "cpu is NULL");
+        }
+        min = cpu->cpuinfo_min_freq;
+        max = cpu->cpuinfo_max_freq;
+        return ((double) min / max) * 100;
+}
+
+unsigned int psfreq_cpu_get_cpuinfo_max(void)
+{
+        /* Hardcoded to 100 */
+        return 100;
+}
+
+unsigned int psfreq_cpu_get_scaling_min(const psfreq_cpu_type *cpu)
+{
+        unsigned int min;
+        unsigned int max;
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_cpu_get_scaling_min",
+                                "cpu is NULL");
+        }
+        min = cpu->scaling_min_freq;
+        max = cpu->cpuinfo_max_freq;
+        return ((double) min / max) * 100;
+}
+
+unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu)
+{
+        unsigned int min;
+        unsigned int max;
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_cpu_get_scaling_max",
+                                "cpu is NULL");
+        }
+        min = cpu->scaling_max_freq;
+        max = cpu->cpuinfo_max_freq;
+        return ((double) min / max) * 100;
+}
+
+char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
+                                const psfreq_sysfs_type *sysfs)
+{
+        const char* f;
+        char *gov;
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_cpu_init_governor",
+                                "cpu is NULL");
+                return NULL;
+        }
+        if (cpu->vector_scaling_governor == NULL) {
+                psfreq_log_error("psfreq_cpu_init_governor",
+                                "cpu->vector_scaling_governor is NULL");
+                return NULL;
+        }
+        f = cpu->vector_scaling_governor[0];
+        gov = psfreq_sysfs_read(sysfs, f);
+        gov = psfreq_strings_strip_end(gov);
+        return gov;
+}
+
+/* char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu, */
+/*                                 const psfreq_sysfs_type *sysfs) */
+/* { */
+
+/* } */
+
