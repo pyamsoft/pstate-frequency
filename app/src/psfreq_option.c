@@ -70,6 +70,8 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                         options->cpu_get_type = CPU_GET_TYPE_CURRENT;
                         return OPTION_RETURNCODE_CONTINUE;
                 } else {
+			psfreq_log_error("psfreq_option_parse",
+				"The switch -c|--current is only available when acting with -G|--get");
                         return OPTION_RETURNCODE_STOP_FAILURE;
                 }
         case 'r':
@@ -77,8 +79,14 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                  * The --real option is only valid when using
                  * pstate-frequency to get CPU values
                  */
-                options->cpu_get_type = CPU_GET_TYPE_REAL;
-                return OPTION_RETURNCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_CPU_GET) {
+                        options->cpu_get_type = CPU_GET_TYPE_REAL;
+                        return OPTION_RETURNCODE_CONTINUE;
+                } else {
+			psfreq_log_error("psfreq_option_parse",
+				"The switch -r|--real is only available when acting with -G|--get");
+                        return OPTION_RETURNCODE_STOP_FAILURE;
+                }
         case 'd':
                 /* enable debugging */
                 psfreq_log_set_debug();
