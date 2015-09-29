@@ -59,8 +59,14 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                 return OPTION_RETURNCODE_CONTINUE;
         case 'H':
                 /* Help */
-                options->action = ACTION_TYPE_HELP;
-                return OPTION_RETURNCODE_STOP_SUCCESS;
+                if (options->action == ACTION_TYPE_UNDEFINED) {
+			options->action = ACTION_TYPE_HELP;
+			return OPTION_RETURNCODE_STOP_SUCCESS;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"Cannot define multiple actions");
+			return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case 'c':
                 /*
                  * The --current option is only valid when using
@@ -96,51 +102,99 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                 return OPTION_RETURNCODE_CONTINUE;
         case 'V':
                 /* Version */
-                options->action = ACTION_TYPE_VERSION;
-                return OPTION_RETURNCODE_STOP_SUCCESS;
+                if (options->action == ACTION_TYPE_UNDEFINED) {
+			options->action = ACTION_TYPE_VERSION;
+			return OPTION_RETURNCODE_STOP_SUCCESS;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"Cannot define multiple actions");
+			return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case 'S':
                 /* ACTION: Set */
-                options->action = ACTION_TYPE_CPU_SET;
-                return OPTION_RETURNCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_UNDEFINED) {
+			options->action = ACTION_TYPE_CPU_SET;
+			return OPTION_RETURNCODE_CONTINUE;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"Cannot define multiple actions");
+			return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case 'G':
                 /* ACTION: Get */
-                options->action = ACTION_TYPE_CPU_GET;
-                return OPTION_RETURNCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_UNDEFINED) {
+			options->action = ACTION_TYPE_CPU_GET;
+			return OPTION_RETURNCODE_CONTINUE;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"Cannot define multiple actions");
+			return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case 'p':
                 /*
                  * The --plan option is only valid when using pstate-frequency
                  * to set CPU values
                  */
-                options->cpu_plan = optarg;
-                return OPTION_RETURNCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_CPU_SET) {
+			options->cpu_plan = optarg;
+			return OPTION_RETURNCODE_CONTINUE;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"The switch -p|--plan is only available when acting with -S|--set");
+                        return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case 'm':
                 /*
                  * The --max option is only valid when using pstate-frequency
                  * to set CPU values
                  */
-                options->cpu_max = optarg;
-                return OPTION_RETURNCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_CPU_SET) {
+			options->cpu_max = optarg;
+			return OPTION_RETURNCODE_CONTINUE;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"The switch -m|--max is only available when acting with -S|--set");
+                        return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case 'g':
                 /*
                  * The --governor option is only valid when using
                  * pstate-frequency to set CPU values
                  */
-                options->cpu_governor = optarg;
-                return OPTION_RETURNCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_CPU_SET) {
+			options->cpu_governor = optarg;
+			return OPTION_RETURNCODE_CONTINUE;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"The switch -g|--governor is only available when acting with -S|--set");
+                        return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case 'n':
                 /*
                  * The --min option is only valid when using
                  * pstate-frequency to set CPU values
                  */
-                options->cpu_min = optarg;
-                return OPTION_RETURNCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_CPU_SET) {
+			options->cpu_min = optarg;
+			return OPTION_RETURNCODE_CONTINUE;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"The switch -n|--min is only available when acting with -S|--set");
+                        return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case 't':
                 /*
                  * The --turbo option is only valid when using
                  * pstate-frequency to set CPU values
                  */
-                options->cpu_turbo = optarg;
-                return OPTION_RETURNCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_CPU_SET) {
+			options->cpu_turbo = optarg;
+			return OPTION_RETURNCODE_CONTINUE;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"The switch -t|--turbo is only available when acting with -S|--set");
+                        return OPTION_RETURNCODE_STOP_FAILURE;
+		}
         case '2':
                 /* Do not sleep for 2 seconds */
                 options->cpu_sleep = NO_SLEEP;
