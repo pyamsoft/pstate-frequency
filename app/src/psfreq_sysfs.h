@@ -29,19 +29,16 @@
 #ifndef PSFREQ_SYSFS_H
 #define PSFREQ_SYSFS_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 typedef struct psfreq_sysfs_type {
         const char *base_path;
 } psfreq_sysfs_type;
 
 void psfreq_sysfs_init(psfreq_sysfs_type *sysfs);
 
-bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
+unsigned char psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf);
-bool psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
-                const char *file, const int32_t *num);
+unsigned char psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
+                const char *file, const int *num);
 char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
                 const char *file);
 

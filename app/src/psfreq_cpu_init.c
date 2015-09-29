@@ -33,12 +33,12 @@
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
-static uint8_t psfreq_cpu_init_find_number_cpus(void);
-static bool psfreq_cpu_init_system_has_pstate(
+static unsigned char psfreq_cpu_init_find_number_cpus(void);
+static unsigned char psfreq_cpu_init_system_has_pstate(
                 const psfreq_sysfs_type *sysfs);
-static uint32_t psfreq_cpu_init_system_max_freq(
+static unsigned int psfreq_cpu_init_system_max_freq(
                 const psfreq_sysfs_type *sysfs);
-static uint32_t psfreq_cpu_init_system_min_freq(
+static unsigned int psfreq_cpu_init_system_min_freq(
                 const psfreq_sysfs_type *sysfs);
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
@@ -57,7 +57,7 @@ void psfreq_cpu_init(psfreq_cpu_type *cpu,
 
 void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
 {
-        uint8_t i;
+        unsigned char i;
         psfreq_log_debug("psfreq_cpu_destroy",
                         "Free all allocated memory");
         for (i = 0; i < cpu->cpu_num; ++i) {
@@ -91,12 +91,12 @@ void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
  * Find the total number of CPUS (logical and physical) that exist on the
  * system.
  */
-static uint8_t psfreq_cpu_init_find_number_cpus(void)
+static unsigned char psfreq_cpu_init_find_number_cpus(void)
 {
         const char *const cmd = "grep processor /proc/cpuinfo | wc -l";
-        const uint8_t size = 1;
+        const unsigned char size = 1;
         char **res = psfreq_util_read_pipe(cmd, &size);
-        uint32_t n;
+        unsigned int n;
 
         if (res == NULL) {
                 psfreq_log_error("psfreq_cpu_init_find_number_cpus",
@@ -114,24 +114,24 @@ static uint8_t psfreq_cpu_init_find_number_cpus(void)
         return n;
 }
 
-static bool psfreq_cpu_init_system_has_pstate(
+static unsigned char psfreq_cpu_init_system_has_pstate(
                 const psfreq_sysfs_type *sysfs)
 {
         char *driver;
         char *cmp;
-        bool r;
+        unsigned char r;
 
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_cpu_init_system_has_pstate",
                                 "sysfs is NULL");
-                return false;
+                return 0;
         }
         driver = psfreq_sysfs_read(sysfs,
                         "cpu0/cpufreq/scaling_driver");
         if (driver == NULL) {
                 psfreq_log_error("psfreq_cpu_init_system_has_pstate",
                                 "Unable to check for intel_pstate driver");
-                return false;
+                return 0;
         }
 
         cmp = "intel_pstate\n";
@@ -142,15 +142,15 @@ static bool psfreq_cpu_init_system_has_pstate(
         return r;
 }
 
-static uint32_t psfreq_cpu_init_system_max_freq(
+static unsigned int psfreq_cpu_init_system_max_freq(
                 const psfreq_sysfs_type *sysfs)
 {
         char *line;
-        uint32_t result;
+        unsigned char result;
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_cpu_init_system_max_freq",
                                 "sysfs is NULL");
-                return false;
+                return 0;
         }
         line = psfreq_sysfs_read(sysfs, "cpu0/cpufreq/cpuinfo_max_freq");
         if (line == NULL) {
@@ -169,11 +169,11 @@ static uint32_t psfreq_cpu_init_system_max_freq(
         return result;
 }
 
-static uint32_t psfreq_cpu_init_system_min_freq(
+static unsigned int psfreq_cpu_init_system_min_freq(
                 const psfreq_sysfs_type *sysfs)
 {
         char *line;
-        uint32_t result;
+        unsigned int result;
 
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_cpu_init_system_min_freq",
@@ -200,8 +200,8 @@ static uint32_t psfreq_cpu_init_system_min_freq(
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what)
 {
-        uint8_t num;
-        uint8_t i;
+        unsigned char num;
+        unsigned char i;
         char **vector;
 
         psfreq_log_debug("psfreq_cpu_init_vector", "Check for non-NULL cpu");

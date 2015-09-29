@@ -57,7 +57,7 @@ void psfreq_sysfs_init(psfreq_sysfs_type *sysfs)
  * @return Boolean value, true if writing to the file was successfully
  *         performed, false otherwise
  */
-bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
+unsigned char psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf)
 {
         const char *path;
@@ -68,7 +68,7 @@ bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_sysfs_write",
                                 "sysfs is NULL, exit.");
-                return false;
+                return 0;
         }
         path = sysfs->base_path;
         psfreq_log_debug("psfreq_sysfs_write",
@@ -76,7 +76,7 @@ bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
         if (buf == NULL) {
                 psfreq_log_error("psfreq_sysfs_write",
                                 "buf is NULL, exit.");
-                return false;
+                return 0;
         }
         psfreq_log_debug("psfreq_sysfs_write",
                         "Concat strings: '%s' and '%s'",
@@ -87,7 +87,7 @@ bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                                 "Concat strings: '%s' and '%s' has failed.\n"
                                 "Function will return false.",
                                 path, file);
-                return false;
+                return 0;
         }
 
         psfreq_log_debug("psfreq_sysfs_write",
@@ -99,7 +99,7 @@ bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                                 "File '%s' failed to open for writing.",
                                 abs_path);
                 free(abs_path);
-                return false;
+                return 0;
         }
 
         psfreq_log_debug("psfreq_sysfs_write",
@@ -111,7 +111,7 @@ bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                                 buf, abs_path);
                 free(abs_path);
                 fclose(f);
-                return false;
+                return 0;
         }
 
         psfreq_log_debug("psfreq_sysfs_write",
@@ -119,14 +119,14 @@ bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                         abs_path);
         free(abs_path);
         fclose(f);
-        return true;
+        return 1;
 }
 
-bool psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
+unsigned char psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
                 const char *file, const int32_t *num)
 {
         char *s = psfreq_strings_from_int(num);
-        const bool r = psfreq_sysfs_write(sysfs, file, s);
+        const unsigned char r = psfreq_sysfs_write(sysfs, file, s);
         free(s);
         return r;
 }
@@ -144,7 +144,7 @@ char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_sysfs_write",
                                 "sysfs is NULL, exit.");
-                return false;
+                return NULL;
         }
         path = sysfs->base_path;
         psfreq_log_debug("psfreq_sysfs_read",

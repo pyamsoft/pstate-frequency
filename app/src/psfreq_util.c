@@ -30,12 +30,12 @@
 #include "psfreq_log.h"
 #include "psfreq_util.h"
 
-char **psfreq_util_read_pipe(const char *const cmd, const uint8_t *size)
+char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
 {
         char **lines;
         FILE *pipe;
         size_t n;
-        uint8_t i;
+        unsigned char i;
         psfreq_log_debug("psfreq_read_pipe", "Check for non-NULL cmd");
         if (cmd == NULL) {
                 psfreq_log_error("psfreq_read_pipe",

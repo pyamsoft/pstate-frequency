@@ -26,8 +26,6 @@
 #ifndef PSFREQ_UTIL_H
 #define PSFREQ_UTIL_H
 
-#include <stdint.h>
-
-char **psfreq_util_read_pipe(const char *const cmd, const uint8_t *size);
+char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size);
 
 #endif

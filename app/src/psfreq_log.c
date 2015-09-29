@@ -24,20 +24,18 @@
  * entirely silenced output using the all_quiet mode.
  */
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 
 #include "psfreq_color.h"
 #include "psfreq_log.h"
 
-typedef int8_t psfreq_log_level;
+typedef unsigned char psfreq_log_level;
 
 static psfreq_log_level psfreq_log_state = PSFREQ_LOG_NORMAL;
 
-static bool psfreq_log_should_display(uint8_t log_level);
+static unsigned char psfreq_log_should_display(unsigned char log_level);
 
-static bool psfreq_log_should_display(uint8_t log_level)
+static unsigned char psfreq_log_should_display(unsigned char log_level)
 {
         return (psfreq_log_state < log_level);
 }

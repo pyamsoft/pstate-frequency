@@ -50,16 +50,16 @@ char *psfreq_strings_concat(const char *const s1, const char *const s2)
         return result;
 }
 
-bool psfreq_strings_starts_with(const char *s, const char *p)
+unsigned char psfreq_strings_starts_with(const char *s, const char *p)
 {
         psfreq_log_debug("psfreq_strings_starts_with",
                         "Check if string '%s' starts with '%s'", s, p);
         while (*p) {
                 if (*p++ != *s++) {
-                        return false;
+                        return 0;
                 }
         }
-        return true;
+        return 1;
 }
 
 double psfreq_strings_to_double(const char *const s)
@@ -70,14 +70,14 @@ double psfreq_strings_to_double(const char *const s)
         return v;
 }
 
-int32_t psfreq_strings_to_int(const char *const s)
+int psfreq_strings_to_int(const char *const s)
 {
-        return (int32_t) psfreq_strings_to_double(s);
+        return (int) psfreq_strings_to_double(s);
 }
 
-uint32_t psfreq_strings_to_uint(const char *const s)
+unsigned int psfreq_strings_to_uint(const char *const s)
 {
-        return (uint32_t) psfreq_strings_to_double(s);
+        return (unsigned int) psfreq_strings_to_double(s);
 }
 
 char *psfreq_strings_from_double(const double *const d)
@@ -92,7 +92,7 @@ char *psfreq_strings_from_double(const double *const d)
         return buf;
 }
 
-char *psfreq_strings_from_int(const int32_t *const i)
+char *psfreq_strings_from_int(const int *const i)
 {
         char *buf = NULL;
         if (asprintf(&buf, "%d", *i) < 0) {
@@ -104,7 +104,7 @@ char *psfreq_strings_from_int(const int32_t *const i)
         return buf;
 }
 
-char *psfreq_strings_from_uint(const uint32_t *const u)
+char *psfreq_strings_from_uint(const unsigned int *const u)
 {
         char *buf = NULL;
         if (asprintf(&buf, "%u", *u) < 0) {
