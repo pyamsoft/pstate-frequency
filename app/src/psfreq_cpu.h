@@ -42,7 +42,7 @@ typedef struct psfreq_cpu_type {
         char *scaling_governor;
 } psfreq_cpu_type;
 
-void psfreq_cpu_init(psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs);
 
 void psfreq_cpu_destroy(psfreq_cpu_type *cpu);

@@ -39,11 +39,16 @@ static unsigned char psfreq_cpu_init_has_pstate(
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
 
-void psfreq_cpu_init(psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
-        cpu->cpu_num = psfreq_cpu_init_number_cpus();
         cpu->has_pstate = psfreq_cpu_init_has_pstate(sysfs);
+        if (cpu->has_pstate == 0) {
+                psfreq_log_error("psfreq_cpu_init",
+                                "System does not have intel_pstate and is unsupported");
+                return 0;
+        }
+        cpu->cpu_num = psfreq_cpu_init_number_cpus();
         cpu->vector_scaling_min_freq = psfreq_cpu_init_vector(cpu, "min_freq");
         cpu->vector_scaling_max_freq = psfreq_cpu_init_vector(cpu, "max_freq");
         cpu->vector_scaling_governor = psfreq_cpu_init_vector(cpu, "governor");
@@ -57,7 +62,7 @@ void psfreq_cpu_init(psfreq_cpu_type *cpu,
                                                         "min");
         cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
         cpu->turbo_boost = psfreq_cpu_init_turbo_boost(cpu, sysfs);
-
+        return 1;
 }
 
 void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
@@ -325,6 +330,12 @@ char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu,
                 return NULL;
         }
         line = psfreq_sysfs_read(sysfs, "intel_pstate/no_turbo");
+        if (line == NULL) {
+                psfreq_log_error("psfreq_cpu_init_turbo_boost",
+                                "Could not discover turbo_boost value");
+                return -1;
+        }
+
         line = psfreq_strings_strip_end(line);
         turbo = psfreq_strings_to_int(line);
         free(line);
