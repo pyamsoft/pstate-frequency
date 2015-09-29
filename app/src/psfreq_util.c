@@ -65,6 +65,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
         if (pipe == NULL) {
                 psfreq_log_error("psfreq_read_pipe",
                                 "Failed to open pipe '%s'", cmd);
+                free(lines);
                 return NULL;
         }
         n = 0;
@@ -75,6 +76,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
                 if (getline(&line, &n, pipe) < 0) {
                         psfreq_log_error("psfreq_read_pipe",
                                         "Failed to read from pipe");
+                        free(lines);
                         free(line);
                         pclose(pipe);
                         return NULL;

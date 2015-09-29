@@ -254,6 +254,7 @@ static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                                 "asprintf returned a -1, indicating a failure "
                                 "during\n either memory allocation or some "
                                 "other error.");
+                        free(vector);
                         return NULL;
                 }
 
@@ -271,6 +272,7 @@ unsigned int psfreq_cpu_get_cpuinfo_min(const psfreq_cpu_type *cpu)
         if (cpu == NULL) {
                 psfreq_log_error("psfreq_cpu_get_cpuinfo_min",
                                 "cpu is NULL");
+                return 0;
         }
         min = cpu->cpuinfo_min_freq;
         max = cpu->cpuinfo_max_freq;
@@ -290,6 +292,7 @@ unsigned int psfreq_cpu_get_scaling_min(const psfreq_cpu_type *cpu)
         if (cpu == NULL) {
                 psfreq_log_error("psfreq_cpu_get_scaling_min",
                                 "cpu is NULL");
+                return 0;
         }
         min = cpu->scaling_min_freq;
         max = cpu->cpuinfo_max_freq;
@@ -303,6 +306,7 @@ unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu)
         if (cpu == NULL) {
                 psfreq_log_error("psfreq_cpu_get_scaling_max",
                                 "cpu is NULL");
+                return 0;
         }
         min = cpu->scaling_max_freq;
         max = cpu->cpuinfo_max_freq;
