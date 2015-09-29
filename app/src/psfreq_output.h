@@ -18,23 +18,9 @@
  * For questions please contact pyamsoft at pyam(dot)soft(at)gmail(dot)com
  */
 
-#ifndef C_PSFREQ_OUTPUT_H_
-#define C_PSFREQ_OUTPUT_H_
+#ifndef PSFREQ_OUTPUT_H
+#define PSFREQ_OUTPUT_H
 
-
-#include "psfreq_cpu.h"
-
-namespace psfreq {
-
-void printCpuValues(const psfreq::Cpu &cpu);
-void printRealtimeFrequency(const psfreq::Cpu &cpu);
-void printGPL();
-void printVersion();
-void printHelp();
-void printPlanHelp();
-void printGovernorHelp(const std::vector<std::string> &availableGovernors);
-
-}
 
 #endif
 
