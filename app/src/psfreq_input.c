@@ -31,12 +31,11 @@
 
 unsigned char psfreq_input_parse(const int argc, char **const argv)
 {
-        const char *const shortOptions = ":SGHVcrdaqp:m:n:t:g:";
+        const char *const shortOptions = ":SGHVcrdqp:m:n:t:g:";
         const struct option longOptions[] = {
                 {"help",          no_argument,        NULL,           'H'},
                 {"version",       no_argument,        NULL,           'V'},
                 {"quiet",         no_argument,        NULL,           'q'},
-                {"all-quiet",     no_argument,        NULL,           'a'},
                 {"no-sleep",      no_argument,        NULL,           '2'},
                 {"debug",         no_argument,        NULL,           'd'},
                 {"get",           no_argument,        NULL,           'G'},

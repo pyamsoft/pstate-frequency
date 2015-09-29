@@ -33,9 +33,9 @@ typedef unsigned char psfreq_log_level;
 
 static psfreq_log_level psfreq_log_state = PSFREQ_LOG_NORMAL;
 
-static unsigned char psfreq_log_should_display(unsigned char log_level);
+static unsigned char psfreq_log_level_more_verbose(unsigned char log_level);
 
-static unsigned char psfreq_log_should_display(unsigned char log_level)
+static unsigned char psfreq_log_level_more_verbose(unsigned char log_level)
 {
         return (psfreq_log_state < log_level);
 }
@@ -43,10 +43,12 @@ static unsigned char psfreq_log_should_display(unsigned char log_level)
 void psfreq_log_debug(const char *const name, const char *const fmt, ...)
 {
         va_list arg;
-        if (psfreq_log_should_display(PSFREQ_LOG_NORMAL)) {
+        if (psfreq_log_level_more_verbose(PSFREQ_LOG_DEBUG)) {
                 fprintf(stdout, "%s[D] %s %s",
                                 PSFREQ_COLOR_BOLD_BLUE, name,
                                 PSFREQ_COLOR_RESET);
+        }
+        if (psfreq_log_level_more_verbose(PSFREQ_LOG_NORMAL)) {
                 va_start(arg, fmt);
                 vfprintf(stdout, fmt, arg);
                 va_end(arg);
@@ -54,10 +56,10 @@ void psfreq_log_debug(const char *const name, const char *const fmt, ...)
         }
 }
 
-void psfreq_log_normal(const char *const fmt, ...)
+void psfreq_log(const char *const fmt, ...)
 {
         va_list arg;
-        if (psfreq_log_should_display(PSFREQ_LOG_QUIET)) {
+        if (psfreq_log_level_more_verbose(PSFREQ_LOG_QUIET)) {
                 va_start(arg, fmt);
                 vfprintf(stdout, fmt, arg);
                 va_end(arg);
@@ -68,10 +70,12 @@ void psfreq_log_normal(const char *const fmt, ...)
 void psfreq_log_error(const char *const name, const char *const fmt, ...)
 {
         va_list arg;
-        if (psfreq_log_should_display(PSFREQ_LOG_ALL_QUIET)) {
+        if (psfreq_log_level_more_verbose(PSFREQ_LOG_DEBUG)) {
                 fprintf(stderr, "%s[E] %s %s",
                                 PSFREQ_COLOR_BOLD_RED, name,
                                 PSFREQ_COLOR_RESET);
+        }
+        if (psfreq_log_level_more_verbose(PSFREQ_LOG_ALL_QUIET)) {
                 va_start(arg, fmt);
                 vfprintf(stderr, fmt, arg);
                 va_end(arg);
@@ -81,20 +85,16 @@ void psfreq_log_error(const char *const name, const char *const fmt, ...)
 
 void psfreq_log_set_debug(void)
 {
-        psfreq_log_state = PSFREQ_LOG_DEBUG;
-}
-
-void psfreq_log_set_normal(void)
-{
-        psfreq_log_state = PSFREQ_LOG_NORMAL;
+        unsigned char v = PSFREQ_LOG_EXTRA_DEBUG;
+        if (psfreq_log_state > v) {
+                psfreq_log_state >>= 1;
+        }
 }
 
 void psfreq_log_set_quiet(void)
 {
-        psfreq_log_state = PSFREQ_LOG_QUIET;
-}
-
-void psfreq_log_set_all_quiet(void)
-{
-        psfreq_log_state = PSFREQ_LOG_ALL_QUIET;
+        unsigned char v = PSFREQ_LOG_ALL_QUIET;
+        if (psfreq_log_state < v) {
+                psfreq_log_state <<= 1;
+        }
 }

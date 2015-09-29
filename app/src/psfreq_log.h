@@ -29,18 +29,17 @@
 
 #include <stdarg.h>
 
-#define PSFREQ_LOG_DEBUG        1
-#define PSFREQ_LOG_NORMAL       1 << 1
-#define PSFREQ_LOG_QUIET        1 << 2
-#define PSFREQ_LOG_ALL_QUIET    1 << 3
+#define PSFREQ_LOG_EXTRA_DEBUG  1
+#define PSFREQ_LOG_DEBUG        1 << 1
+#define PSFREQ_LOG_NORMAL       1 << 2
+#define PSFREQ_LOG_QUIET        1 << 3
+#define PSFREQ_LOG_ALL_QUIET    1 << 4
 
-void psfreq_log_normal(const char *const fmt, ...);
+void psfreq_log(const char *const fmt, ...);
 void psfreq_log_debug(const char *const name, const char *const fmt, ...);
 void psfreq_log_error(const char *const name, const char *const fmt, ...);
 
 void psfreq_log_set_debug(void);
-void psfreq_log_set_normal(void);
 void psfreq_log_set_quiet(void);
-void psfreq_log_set_all_quiet(void);
 
 #endif

@@ -53,9 +53,6 @@ int psfreq_option_parse(const int opt)
         case 'q':
                 psfreq_log_set_quiet();
                 return OPTION_PARSE_EXITCODE_CONTINUE;
-        case 'a':
-                psfreq_log_set_all_quiet();
-                return OPTION_PARSE_EXITCODE_CONTINUE;
         case 'V':
                 /* Version */
                 return OPTION_PARSE_EXITCODE_STOP_SUCCESS;
