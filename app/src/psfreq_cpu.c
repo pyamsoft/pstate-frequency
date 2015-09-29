@@ -38,6 +38,14 @@ static unsigned char psfreq_cpu_init_number_cpus(void);
 static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu);
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
+static char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
+                                const psfreq_sysfs_type *sysfs);
+static char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu,
+                                const psfreq_sysfs_type *sysfs);
+static unsigned int psfreq_cpu_init_freq(
+                const psfreq_sysfs_type *sysfs,
+                const char *const type,
+                const char *const what);
 
 unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
@@ -57,6 +65,12 @@ unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                                                         "max");
         cpu->cpuinfo_min_freq = psfreq_cpu_init_freq(sysfs, "cpuinfo",
                                                         "min");
+        return psfreq_cpu_reinit(cpu, sysfs);
+}
+
+unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs)
+{
         cpu->scaling_max_freq = psfreq_cpu_init_freq(sysfs, "scaling",
                                                         "max");
         cpu->scaling_min_freq = psfreq_cpu_init_freq(sysfs, "scaling",
@@ -164,7 +178,7 @@ static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu)
         return r;
 }
 
-unsigned int psfreq_cpu_init_freq(
+static unsigned int psfreq_cpu_init_freq(
                 const psfreq_sysfs_type *sysfs,
                 const char *const type,
                 const char *const what)
@@ -295,7 +309,7 @@ unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu)
         return ((double) min / max) * 100;
 }
 
-char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
+static char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
                                 const psfreq_sysfs_type *sysfs)
 {
         const char* f;
@@ -322,7 +336,7 @@ char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
         return gov;
 }
 
-char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu,
+static char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu,
                                 const psfreq_sysfs_type *sysfs)
 {
         char turbo;
