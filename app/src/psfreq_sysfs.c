@@ -188,6 +188,8 @@ char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
                 return NULL;
         }
 
+        line = psfreq_strings_strip_end(line);
+
         psfreq_log_debug("psfreq_sysfs_read",
                         "Close file: '%s'",
                         abs_path);

@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 #include "psfreq_log.h"
+#include "psfreq_strings.h"
 #include "psfreq_util.h"
 
 char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
@@ -81,6 +82,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
                         psfreq_log_debug("psfreq_read_pipe",
                                         "Assign line '%s' to array %d",
                                         line, i);
+                        line = psfreq_strings_strip_end(line);
                         lines[i] = line;
                 }
         }

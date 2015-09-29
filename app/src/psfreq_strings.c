@@ -24,8 +24,10 @@
  */
 
 #define _GNU_SOURCE
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "psfreq_color.h"
 #include "psfreq_log.h"
@@ -114,5 +116,21 @@ char *psfreq_strings_from_uint(const unsigned int *const u)
                 return NULL;
         }
         return buf;
+}
+
+char *psfreq_strings_strip_end(char *s)
+{
+        unsigned int i;
+        psfreq_log_debug("psfreq_strings_strip_end",
+                        "Strip newline from string: '%s'", s);
+        if (s == NULL) {
+                psfreq_log_error("psfreq_strings_strip_end",
+                                "String is NULL");
+                return NULL;
+        }
+        i = strlen(s) - 1;
+        if ((i > 0) && (s[i] == '\n'))
+                s[i] = '\0';
+        return s;
 }
 
