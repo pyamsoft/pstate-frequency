@@ -56,6 +56,7 @@ void psfreq_cpu_init(psfreq_cpu_type *cpu,
         cpu->scaling_min_freq = psfreq_cpu_init_freq(sysfs, "scaling",
                                                         "min");
         cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
+        cpu->turbo_boost = psfreq_cpu_init_turbo_boost(cpu, sysfs);
 
 }
 
@@ -296,15 +297,37 @@ char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
                                 "cpu->vector_scaling_governor is NULL");
                 return NULL;
         }
+
+        if (sysfs == NULL) {
+                psfreq_log_error("psfreq_cpu_init_governor",
+                                "sysfs is NULL");
+                return NULL;
+        }
         f = cpu->vector_scaling_governor[0];
         gov = psfreq_sysfs_read(sysfs, f);
         gov = psfreq_strings_strip_end(gov);
         return gov;
 }
 
-/* char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu, */
-/*                                 const psfreq_sysfs_type *sysfs) */
-/* { */
-
-/* } */
+char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu,
+                                const psfreq_sysfs_type *sysfs)
+{
+        char turbo;
+        char *line;
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_cpu_init_turbo_boost",
+                                "cpu is NULL");
+                return NULL;
+        }
+        if (sysfs == NULL) {
+                psfreq_log_error("psfreq_cpu_init_turbo_boost",
+                                "sysfs is NULL");
+                return NULL;
+        }
+        line = psfreq_sysfs_read(sysfs, "intel_pstate/no_turbo");
+        line = psfreq_strings_strip_end(line);
+        turbo = psfreq_strings_to_int(line);
+        free(line);
+        return turbo;
+}
 
