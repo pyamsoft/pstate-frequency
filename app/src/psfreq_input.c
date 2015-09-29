@@ -60,9 +60,9 @@ char psfreq_input_parse(psfreq_option_type *const options,
                         break;
                 } else {
                         int r;
+                        r = psfreq_option_parse(options, opt);
                         psfreq_log_debug("psfreq_input_parse",
                                         "found an option.");
-                        r = psfreq_option_parse(options, opt);
                         if (r == OPTION_RETURNCODE_STOP_FAILURE) {
                                 psfreq_log_debug("psfreq_input_parse",
                                         "Input was not handled properly");
