@@ -40,6 +40,7 @@ typedef struct psfreq_cpu_type {
         unsigned int scaling_max_freq;
         char turbo_boost;
         char *scaling_governor;
+        char *scaling_driver;
 } psfreq_cpu_type;
 
 unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,

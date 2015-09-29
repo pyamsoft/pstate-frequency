@@ -33,16 +33,17 @@
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
+static char* psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs);
 static unsigned char psfreq_cpu_init_number_cpus(void);
-static unsigned char psfreq_cpu_init_has_pstate(
-                const psfreq_sysfs_type *sysfs);
+static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu);
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
 
 unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
-        cpu->has_pstate = psfreq_cpu_init_has_pstate(sysfs);
+        cpu->scaling_driver = psfreq_cpu_init_driver(sysfs);
+        cpu->has_pstate = psfreq_cpu_init_has_pstate(cpu);
         if (cpu->has_pstate == 0) {
                 psfreq_log_error("psfreq_cpu_init",
                                 "System does not have intel_pstate and is unsupported");
@@ -99,6 +100,10 @@ void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
         psfreq_log_debug("psfreq_cpu_destroy",
                         "free scaling_governor");
         free(cpu->scaling_governor);
+
+        psfreq_log_debug("psfreq_cpu_destroy",
+                        "free scaling_driver");
+        free(cpu->scaling_driver);
 }
 
 /*
@@ -128,31 +133,34 @@ static unsigned char psfreq_cpu_init_number_cpus(void)
         return n;
 }
 
-static unsigned char psfreq_cpu_init_has_pstate(
-                const psfreq_sysfs_type *sysfs)
+static char* psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs)
 {
         char *driver;
-        char *cmp;
-        unsigned char r;
 
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_cpu_init_has_pstate",
                                 "sysfs is NULL");
                 return 0;
         }
-        driver = psfreq_sysfs_read(sysfs,
-                        "cpu0/cpufreq/scaling_driver");
+        driver = psfreq_sysfs_read(sysfs, "cpu0/cpufreq/scaling_driver");
         if (driver == NULL) {
                 psfreq_log_error("psfreq_cpu_init_has_pstate",
                                 "Unable to check for intel_pstate driver");
                 return 0;
         }
 
-        cmp = "intel_pstate";
+        return driver;
+}
+
+static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu)
+{
+
+        const char *const cmp = "intel_pstate";
+        unsigned char r;
+        const char *driver = cpu->scaling_driver;
         psfreq_log_debug("psfreq_cpu_init_has_pstate",
                         "Compare driver '%s' with '%s'", driver, cmp);
         r = (strcmp(driver, cmp) == 0);
-        free(driver);
         return r;
 }
 
