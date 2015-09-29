@@ -39,7 +39,7 @@ $(BUILD_DIR)/obj/%.o: src/%.c
 	@$(CC) -c $< -o $@ $(CCFLAGS)
 
 $(TARGET): dirs $(OBJECTS)
-	@echo "  LD   $@"
+	@echo "  LD  $@"
 	@$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 
 dirs:
