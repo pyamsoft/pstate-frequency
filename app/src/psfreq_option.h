@@ -25,11 +25,50 @@
 #ifndef PSFREQ_OPTION_H
 #define PSFREQ_OPTION_H
 
-#define OPTION_PARSE_EXITCODE_STOP_FAILURE -1
-#define OPTION_PARSE_EXITCODE_CONTINUE 0
-#define OPTION_PARSE_EXITCODE_STOP_SUCCESS 1
+#include <stdlib.h>
 
-int psfreq_option_parse(const int opt);
+#define OPTION_RETURNCODE_STOP_FAILURE -1
+#define OPTION_RETURNCODE_CONTINUE      0
+#define OPTION_RETURNCODE_STOP_SUCCESS  1
+
+#define ACTION_TYPE_UNDEFINED   -1
+#define ACTION_TYPE_HELP        0
+#define ACTION_TYPE_VERSION     1
+#define ACTION_TYPE_CPU_GET     2
+#define ACTION_TYPE_CPU_SET     3
+
+#define PLAN_UNDEFINED  NULL
+
+#define CPU_UNDEFINED   NULL
+
+#define TURBO_UNDEFINED NULL
+
+#define GOVERNOR_UNDEFINED      NULL
+
+#define CPU_GET_TYPE_CURRENT    0
+#define CPU_GET_TYPE_REAL       1
+
+#define SLEEP           0
+#define NO_SLEEP        1
+
+#define NO_COLOR        0
+#define COLOR           1
+
+typedef struct psfreq_option_type {
+        char action;
+        char *cpu_turbo;
+        char *cpu_max;
+        char *cpu_min;
+        char *cpu_governor;
+        char *cpu_plan;
+        unsigned char cpu_get_type;
+        unsigned char cpu_sleep;
+        unsigned char color_enabled;
+} psfreq_option_type;
+
+void psfreq_option_init(psfreq_option_type *options);
+
+int psfreq_option_parse(psfreq_option_type *options, const int opt);
 
 #endif
 

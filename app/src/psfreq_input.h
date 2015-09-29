@@ -25,7 +25,10 @@
 #ifndef PSFREQ_INPUT_H
 #define PSFREQ_INPUT_H
 
-unsigned char psfreq_input_parse(const int argc, char **const argv);
+#include "psfreq_option.h"
+
+char psfreq_input_parse(psfreq_option_type *const options,
+                const int argc, char **const argv);
 
 #endif
 

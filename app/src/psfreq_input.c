@@ -27,9 +27,9 @@
 
 #include "psfreq_input.h"
 #include "psfreq_log.h"
-#include "psfreq_option.h"
 
-unsigned char psfreq_input_parse(const int argc, char **const argv)
+char psfreq_input_parse(psfreq_option_type *const options,
+                const int argc, char **const argv)
 {
         const char *const shortOptions = ":SGHVcrdqp:m:n:t:g:";
         const struct option longOptions[] = {
@@ -50,6 +50,7 @@ unsigned char psfreq_input_parse(const int argc, char **const argv)
                 {"turbo",         required_argument,  NULL,           't'},
                 {0,               0,                  0,              0}
         };
+
         for (;;) {
                 const int opt = getopt_long(argc, argv, shortOptions,
                                 longOptions, NULL);
@@ -61,18 +62,18 @@ unsigned char psfreq_input_parse(const int argc, char **const argv)
                         int r;
                         psfreq_log_debug("psfreq_input_parse",
                                         "found an option.");
-                        r = psfreq_option_parse(opt);
-                        if (r == OPTION_PARSE_EXITCODE_STOP_FAILURE) {
+                        r = psfreq_option_parse(options, opt);
+                        if (r == OPTION_RETURNCODE_STOP_FAILURE) {
                                 psfreq_log_debug("psfreq_input_parse",
                                         "Input was not handled properly");
                                 return r;
-                        } else if (r == OPTION_PARSE_EXITCODE_STOP_SUCCESS) {
+                        } else if (r == OPTION_RETURNCODE_STOP_SUCCESS) {
                                 psfreq_log_debug("psfreq_input_parse",
                                         "Input hit a stop option");
                                 return r;
                         }
                 }
         }
-        return OPTION_PARSE_EXITCODE_CONTINUE;
+        return OPTION_RETURNCODE_CONTINUE;
 }
 

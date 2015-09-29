@@ -22,95 +22,138 @@
  * Helper functions for processing and handling getopt output
  */
 
+#include <getopt.h>
+
 #include "psfreq_log.h"
 #include "psfreq_option.h"
 
-int psfreq_option_parse(const int opt)
+void psfreq_option_init(psfreq_option_type *options)
+{
+        options->action = ACTION_TYPE_UNDEFINED;
+
+        /* options->cpu_turbo = malloc(sizeof(char *)); */
+        options->cpu_turbo = TURBO_UNDEFINED;
+
+        /* options->cpu_max = malloc(sizeof(char *)); */
+        options->cpu_max = CPU_UNDEFINED;
+
+        /* options->cpu_min = malloc(sizeof(char *)); */
+        options->cpu_min = CPU_UNDEFINED;
+
+        /* options->cpu_governor = malloc(sizeof(char *)); */
+        options->cpu_governor = GOVERNOR_UNDEFINED;
+
+        /* options->cpu_plan = malloc(sizeof(char *)); */
+        options->cpu_plan = PLAN_UNDEFINED;
+
+        options->cpu_get_type = CPU_GET_TYPE_CURRENT;
+        options->cpu_sleep = SLEEP;
+        options->color_enabled = NO_COLOR;
+}
+
+int psfreq_option_parse(psfreq_option_type *options, const int opt)
 {
         switch(opt) {
         case 0:
                 /* end of options */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'H':
                 /* Help */
-                return OPTION_PARSE_EXITCODE_STOP_SUCCESS;
+                options->action = ACTION_TYPE_HELP;
+                return OPTION_RETURNCODE_STOP_SUCCESS;
         case 'c':
                 /*
                  * The --current option is only valid when using
                  * pstate-frequency to get CPU values
                  */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                if (options->action == ACTION_TYPE_CPU_GET) {
+                        options->cpu_get_type = CPU_GET_TYPE_CURRENT;
+                        return OPTION_RETURNCODE_CONTINUE;
+                } else {
+                        return OPTION_RETURNCODE_STOP_FAILURE;
+                }
         case 'r':
                 /*
                  * The --real option is only valid when using
                  * pstate-frequency to get CPU values
                  */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->cpu_get_type = CPU_GET_TYPE_REAL;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'd':
                 /* enable debugging */
                 psfreq_log_set_debug();
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'q':
                 psfreq_log_set_quiet();
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'V':
                 /* Version */
-                return OPTION_PARSE_EXITCODE_STOP_SUCCESS;
+                options->action = ACTION_TYPE_VERSION;
+                return OPTION_RETURNCODE_STOP_SUCCESS;
         case 'S':
                 /* ACTION: Set */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->action = ACTION_TYPE_CPU_SET;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'G':
                 /* ACTION: Get */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->action = ACTION_TYPE_CPU_GET;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'p':
                 /*
                  * The --plan option is only valid when using pstate-frequency
                  * to set CPU values
                  */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->cpu_plan = optarg;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'm':
                 /*
                  * The --max option is only valid when using pstate-frequency
                  * to set CPU values
                  */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->cpu_max = optarg;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'g':
                 /*
                  * The --governor option is only valid when using
                  * pstate-frequency to set CPU values
                  */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->cpu_governor = optarg;
+                return OPTION_RETURNCODE_CONTINUE;
         case 'n':
                 /*
                  * The --min option is only valid when using
                  * pstate-frequency to set CPU values
                  */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->cpu_min = optarg;
+                return OPTION_RETURNCODE_CONTINUE;
         case 't':
                 /*
                  * The --turbo option is only valid when using
                  * pstate-frequency to set CPU values
                  */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->cpu_turbo = optarg;
+                return OPTION_RETURNCODE_CONTINUE;
         case '2':
                 /* Do not sleep for 2 seconds */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->cpu_sleep = NO_SLEEP;
+                return OPTION_RETURNCODE_CONTINUE;
         case '1':
                 /* Enable color messages */
-                return OPTION_PARSE_EXITCODE_CONTINUE;
+                options->color_enabled = COLOR;
+                return OPTION_RETURNCODE_CONTINUE;
         case ':':
                 /* Missing arguments */
                 psfreq_log_error("psfreq_option_parse",
                                 "Missing option arguments");
-                return OPTION_PARSE_EXITCODE_STOP_FAILURE;
+                return OPTION_RETURNCODE_STOP_FAILURE;
         case '?':
                 /* Invalid option */
                 psfreq_log_error("psfreq_option_parse", "Invalid option");
-                return OPTION_PARSE_EXITCODE_STOP_FAILURE;
+                return OPTION_RETURNCODE_STOP_FAILURE;
         default:
                 psfreq_log_error("psfreq_option_parse",
                                 "End of options, no matching option supported");
-                return OPTION_PARSE_EXITCODE_STOP_FAILURE;
+                return OPTION_RETURNCODE_STOP_FAILURE;
         }
 }
 
