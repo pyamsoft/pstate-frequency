@@ -2,6 +2,7 @@
 #include "psfreq_input.h"
 #include "psfreq_log.h"
 #include "psfreq_option.h"
+#include "psfreq_output.h"
 #include "psfreq_sysfs.h"
 
 int main(int argc, char **argv)
@@ -23,12 +24,7 @@ int main(int argc, char **argv)
 	if (!psfreq_cpu_init(&cpu, &sysfs)) {
 		return 2;
 	}
-
-#ifdef VERSION
-	psfreq_log("pstate-frequency %s", VERSION);
-#else
-	psfreq_log("pstate-frequency");
-#endif
+        psfreq_out_get_cpu(&cpu);
 	psfreq_cpu_destroy(&cpu);
 	return 0;
 }

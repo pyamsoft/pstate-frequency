@@ -1,5 +1,5 @@
 /**
- * @file psfreq_output.h
+ * @file psfreq_output.c
  * @author pyamsoft <pyam(dot)soft(at)gmail(dot)com>
  *
  * @section LICENSE
@@ -22,12 +22,23 @@
  * Helper functions for presenting formatted output
  */
 
-#ifndef PSFREQ_OUTPUT_H
-#define PSFREQ_OUTPUT_H
+#include "psfreq_log.h"
+#include "psfreq_output.h"
 
-#include "psfreq_cpu.h"
-
-void psfreq_out_get_cpu(const psfreq_cpu_type *cpu);
-
+void psfreq_out_get_cpu(const psfreq_cpu_type *cpu)
+{
+#ifdef VERSION
+	psfreq_log("pstate-frequency %s", VERSION);
+#else
+	psfreq_log("pstate-frequency");
 #endif
+        psfreq_log("    pstate::CPU_DRIVER      -> %s", cpu->scaling_driver);
+        psfreq_log("    pstate::CPU_GOVERNOR    -> %s", cpu->scaling_governor);
+        psfreq_log("    pstate::NO_TURBO        -> %d : %s", cpu->turbo_boost,
+                        (cpu->turbo_boost ? "OFF" : "ON"));
+        psfreq_log("    pstate::CPU_MIN         -> %u%% : %uKHz",
+                        psfreq_cpu_get_scaling_min(cpu), cpu->scaling_min_freq);
+        psfreq_log("    pstate::CPU_MAX         -> %u%% : %uKHz",
+                        psfreq_cpu_get_scaling_max(cpu), cpu->scaling_max_freq);
+}
 
