@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "psfreq_cpu.h"
 #include "psfreq_input.h"
 #include "psfreq_log.h"
@@ -10,21 +12,59 @@ int main(int argc, char **argv)
 	psfreq_cpu_type cpu;
 	psfreq_sysfs_type sysfs;
 	psfreq_option_type options;
-	char res;
 
 	psfreq_option_init(&options);
-	res = psfreq_input_parse(&options, argc, argv);
-	if (res == OPTION_RETURNCODE_STOP_SUCCESS) {
-		return 0;
-	} else if (res == OPTION_RETURNCODE_STOP_FAILURE) {
-		return 1;
-	}
+	if (psfreq_input_parse(&options, argc, argv) > 0) {
+                return EXIT_FAILURE;
+        }
 
-	psfreq_sysfs_init(&sysfs);
-	if (!psfreq_cpu_init(&cpu, &sysfs)) {
-		return 2;
-	}
+        psfreq_log("%d", options.action);
+        psfreq_log("%s", options.cpu_turbo);
+        psfreq_log("%s", options.cpu_max);
+        psfreq_log("%s", options.cpu_min);
+        psfreq_log("%s", options.cpu_governor);
+        psfreq_log("%s", options.cpu_plan);
+        psfreq_log("%u", options.cpu_get_type);
+        psfreq_log("%u", options.cpu_sleep);
+        psfreq_log("%u", options.color_enabled);
+
+        if (options.action == ACTION_TYPE_HELP) {
+                /* Print Help */
+                return EXIT_SUCCESS;
+        } else if (options.action == ACTION_TYPE_VERSION) {
+                /* Print Version */
+                return EXIT_SUCCESS;
+        }
+
+        if (options.action == ACTION_TYPE_CPU_SET) {
+                if (geteuid() == 0) {
+                        /* KLUDGE
+                         * Making this section into a function with pointers
+                         * causes memory leaks
+                         */
+                        psfreq_sysfs_init(&sysfs);
+                        if (!psfreq_cpu_init(&cpu, &sysfs)) {
+                                return EXIT_FAILURE;
+                        }
+                        /* Set cpu */
+
+                        /* After setting the cpu, re-init the changed areas */
+                        psfreq_cpu_reinit(&cpu, &sysfs);
+                } else {
+                        psfreq_log_error("main", "You must be root.");
+                        return EXIT_FAILURE;
+                }
+        } else if (options.action == ACTION_TYPE_CPU_GET) {
+                /* KLUDGE
+                 * Making this section into a function with pointers
+                 * causes memory leaks
+                 */
+                psfreq_sysfs_init(&sysfs);
+                if (!psfreq_cpu_init(&cpu, &sysfs)) {
+                        return EXIT_FAILURE;
+                }
+        }
         psfreq_out_get_cpu(&cpu);
 	psfreq_cpu_destroy(&cpu);
-	return 0;
+	return EXIT_SUCCESS;
 }
