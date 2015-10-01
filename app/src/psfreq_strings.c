@@ -64,6 +64,15 @@ unsigned char psfreq_strings_starts_with(const char *s, const char *p)
         return 1;
 }
 
+unsigned char psfreq_strings_equals(const char *s, const char *p)
+{
+        const size_t size = strlen(s);
+        psfreq_log_debug("psfreq_strings_is",
+                        "Check if string '%s' is with '%s'", s, p);
+
+        return (strncmp(s, p, size) == 0);
+}
+
 double psfreq_strings_to_double(const char *const s)
 {
         const double v = strtol(s, NULL, RADIX_DECIMAL);

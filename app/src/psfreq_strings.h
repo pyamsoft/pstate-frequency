@@ -29,6 +29,7 @@
 
 char *psfreq_strings_concat(const char *const s1, const char *const s2);
 unsigned char psfreq_strings_starts_with(const char *s, const char *p);
+unsigned char psfreq_strings_equals(const char *s, const char *p);
 double psfreq_strings_to_double(const char *const s);
 int psfreq_strings_to_int(const char *const s);
 unsigned int psfreq_strings_to_uint(const char *const s);
