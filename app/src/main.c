@@ -7,6 +7,19 @@
 #include "psfreq_output.h"
 #include "psfreq_sysfs.h"
 
+unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
+                psfreq_sysfs_type *sysfs);
+
+unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
+                psfreq_sysfs_type *sysfs)
+{
+        psfreq_sysfs_init(sysfs);
+        if (!psfreq_cpu_init(cpu, sysfs)) {
+                return 0;
+        }
+        return 1;
+}
+
 int main(int argc, char **argv)
 {
 	psfreq_cpu_type cpu;
@@ -42,8 +55,7 @@ int main(int argc, char **argv)
                          * Making this section into a function with pointers
                          * causes memory leaks
                          */
-                        psfreq_sysfs_init(&sysfs);
-                        if (!psfreq_cpu_init(&cpu, &sysfs)) {
+                        if (!init_cpu_and_sysfs(&cpu, &sysfs)) {
                                 return EXIT_FAILURE;
                         }
                         /* Set cpu */
@@ -59,8 +71,7 @@ int main(int argc, char **argv)
                  * Making this section into a function with pointers
                  * causes memory leaks
                  */
-                psfreq_sysfs_init(&sysfs);
-                if (!psfreq_cpu_init(&cpu, &sysfs)) {
+                if (!init_cpu_and_sysfs(&cpu, &sysfs)) {
                         return EXIT_FAILURE;
                 }
         }

@@ -46,6 +46,8 @@ static unsigned int psfreq_cpu_init_freq(
                 const psfreq_sysfs_type *sysfs,
                 const char *const type,
                 const char *const what);
+static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs);
 
 unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
@@ -65,10 +67,10 @@ unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                                                         "max");
         cpu->cpuinfo_min_freq = psfreq_cpu_init_freq(sysfs, "cpuinfo",
                                                         "min");
-        return psfreq_cpu_reinit(cpu, sysfs);
+        return psfreq_cpu_init_dynamic(cpu, sysfs);
 }
 
-unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
+static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
         cpu->scaling_max_freq = psfreq_cpu_init_freq(sysfs, "scaling",
@@ -78,6 +80,16 @@ unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
         cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
         cpu->turbo_boost = psfreq_cpu_init_turbo_boost(cpu, sysfs);
         return 1;
+}
+
+unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs)
+{
+        /*
+         * Need to free scaling governor before re-mallocing
+         */
+        free(cpu->scaling_governor);
+        return psfreq_cpu_init_dynamic(cpu, sysfs);
 }
 
 void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
