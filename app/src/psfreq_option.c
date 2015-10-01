@@ -51,21 +51,41 @@ void psfreq_option_init(psfreq_option_type *options)
         options->color_enabled = NO_COLOR;
 }
 
-int psfreq_option_parse(psfreq_option_type *options, const int opt)
+unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
 {
         switch(opt) {
         case 0:
                 /* end of options */
-                return OPTION_RETURNCODE_CONTINUE;
+                return EXIT_SUCCESS;
         case 'H':
                 /* Help */
                 if (options->action == ACTION_TYPE_UNDEFINED) {
 			options->action = ACTION_TYPE_HELP;
-			return OPTION_RETURNCODE_STOP_SUCCESS;
+			return EXIT_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"Cannot define multiple actions");
-			return OPTION_RETURNCODE_STOP_FAILURE;
+			return EXIT_FAILURE;
+		}
+        case 'V':
+                /* Version */
+                if (options->action == ACTION_TYPE_UNDEFINED) {
+			options->action = ACTION_TYPE_VERSION;
+			return EXIT_SUCCESS;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"Cannot define multiple actions");
+			return EXIT_FAILURE;
+		}
+        case 'G':
+                /* ACTION: Get */
+                if (options->action == ACTION_TYPE_UNDEFINED) {
+			options->action = ACTION_TYPE_CPU_GET;
+			return EXIT_SUCCESS;
+		} else {
+			psfreq_log_error("psfreq_option_parse",
+				"Cannot define multiple actions");
+			return EXIT_FAILURE;
 		}
         case 'c':
                 /*
@@ -74,11 +94,11 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_GET) {
                         options->cpu_get_type = CPU_GET_TYPE_CURRENT;
-                        return OPTION_RETURNCODE_CONTINUE;
+                        return EXIT_SUCCESS;
                 } else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -c|--current is only available when acting with -G|--get");
-                        return OPTION_RETURNCODE_STOP_FAILURE;
+                        return EXIT_FAILURE;
                 }
         case 'r':
                 /*
@@ -87,48 +107,21 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_GET) {
                         options->cpu_get_type = CPU_GET_TYPE_REAL;
-                        return OPTION_RETURNCODE_CONTINUE;
+                        return EXIT_SUCCESS;
                 } else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -r|--real is only available when acting with -G|--get");
-                        return OPTION_RETURNCODE_STOP_FAILURE;
+                        return EXIT_FAILURE;
                 }
-        case 'd':
-                /* enable debugging */
-                psfreq_log_set_debug();
-                return OPTION_RETURNCODE_CONTINUE;
-        case 'q':
-                psfreq_log_set_quiet();
-                return OPTION_RETURNCODE_CONTINUE;
-        case 'V':
-                /* Version */
-                if (options->action == ACTION_TYPE_UNDEFINED) {
-			options->action = ACTION_TYPE_VERSION;
-			return OPTION_RETURNCODE_STOP_SUCCESS;
-		} else {
-			psfreq_log_error("psfreq_option_parse",
-				"Cannot define multiple actions");
-			return OPTION_RETURNCODE_STOP_FAILURE;
-		}
         case 'S':
                 /* ACTION: Set */
                 if (options->action == ACTION_TYPE_UNDEFINED) {
 			options->action = ACTION_TYPE_CPU_SET;
-			return OPTION_RETURNCODE_CONTINUE;
+			return EXIT_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"Cannot define multiple actions");
-			return OPTION_RETURNCODE_STOP_FAILURE;
-		}
-        case 'G':
-                /* ACTION: Get */
-                if (options->action == ACTION_TYPE_UNDEFINED) {
-			options->action = ACTION_TYPE_CPU_GET;
-			return OPTION_RETURNCODE_CONTINUE;
-		} else {
-			psfreq_log_error("psfreq_option_parse",
-				"Cannot define multiple actions");
-			return OPTION_RETURNCODE_STOP_FAILURE;
+			return EXIT_FAILURE;
 		}
         case 'p':
                 /*
@@ -137,11 +130,11 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_plan = optarg;
-			return OPTION_RETURNCODE_CONTINUE;
+			return EXIT_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -p|--plan is only available when acting with -S|--set");
-                        return OPTION_RETURNCODE_STOP_FAILURE;
+                        return EXIT_FAILURE;
 		}
         case 'm':
                 /*
@@ -150,11 +143,11 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_max = optarg;
-			return OPTION_RETURNCODE_CONTINUE;
+			return EXIT_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -m|--max is only available when acting with -S|--set");
-                        return OPTION_RETURNCODE_STOP_FAILURE;
+                        return EXIT_FAILURE;
 		}
         case 'g':
                 /*
@@ -163,11 +156,11 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_governor = optarg;
-			return OPTION_RETURNCODE_CONTINUE;
+			return EXIT_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -g|--governor is only available when acting with -S|--set");
-                        return OPTION_RETURNCODE_STOP_FAILURE;
+                        return EXIT_FAILURE;
 		}
         case 'n':
                 /*
@@ -176,11 +169,11 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_min = optarg;
-			return OPTION_RETURNCODE_CONTINUE;
+			return EXIT_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -n|--min is only available when acting with -S|--set");
-                        return OPTION_RETURNCODE_STOP_FAILURE;
+                        return EXIT_FAILURE;
 		}
         case 't':
                 /*
@@ -189,33 +182,40 @@ int psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_turbo = optarg;
-			return OPTION_RETURNCODE_CONTINUE;
+			return EXIT_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -t|--turbo is only available when acting with -S|--set");
-                        return OPTION_RETURNCODE_STOP_FAILURE;
+                        return EXIT_FAILURE;
 		}
+        case 'd':
+                /* enable debugging */
+                psfreq_log_set_debug();
+                return EXIT_SUCCESS;
+        case 'q':
+                psfreq_log_set_quiet();
+                return EXIT_SUCCESS;
         case '2':
                 /* Do not sleep for 2 seconds */
                 options->cpu_sleep = NO_SLEEP;
-                return OPTION_RETURNCODE_CONTINUE;
+                return EXIT_SUCCESS;
         case '1':
                 /* Enable color messages */
                 options->color_enabled = COLOR;
-                return OPTION_RETURNCODE_CONTINUE;
+                return EXIT_SUCCESS;
         case ':':
                 /* Missing arguments */
                 psfreq_log_error("psfreq_option_parse",
                                 "Missing option arguments");
-                return OPTION_RETURNCODE_STOP_FAILURE;
+                return EXIT_FAILURE;
         case '?':
                 /* Invalid option */
                 psfreq_log_error("psfreq_option_parse", "Invalid option");
-                return OPTION_RETURNCODE_STOP_FAILURE;
+                return EXIT_FAILURE;
         default:
                 psfreq_log_error("psfreq_option_parse",
                                 "End of options, no matching option supported");
-                return OPTION_RETURNCODE_STOP_FAILURE;
+                return EXIT_FAILURE;
         }
 }
 

@@ -27,10 +27,6 @@
 
 #include <stdlib.h>
 
-#define OPTION_RETURNCODE_STOP_FAILURE -1
-#define OPTION_RETURNCODE_CONTINUE      0
-#define OPTION_RETURNCODE_STOP_SUCCESS  1
-
 #define ACTION_TYPE_UNDEFINED   -1
 #define ACTION_TYPE_HELP        0
 #define ACTION_TYPE_VERSION     1
@@ -68,7 +64,7 @@ typedef struct psfreq_option_type {
 
 void psfreq_option_init(psfreq_option_type *options);
 
-int psfreq_option_parse(psfreq_option_type *options, const int opt);
+unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt);
 
 #endif
 
