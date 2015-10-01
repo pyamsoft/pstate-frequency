@@ -51,10 +51,6 @@ int main(int argc, char **argv)
 
         if (options.action == ACTION_TYPE_CPU_SET) {
                 if (geteuid() == 0) {
-                        /* KLUDGE
-                         * Making this section into a function with pointers
-                         * causes memory leaks
-                         */
                         if (!init_cpu_and_sysfs(&cpu, &sysfs)) {
                                 return EXIT_FAILURE;
                         }
@@ -67,10 +63,6 @@ int main(int argc, char **argv)
                         return EXIT_FAILURE;
                 }
         } else if (options.action == ACTION_TYPE_CPU_GET) {
-                /* KLUDGE
-                 * Making this section into a function with pointers
-                 * causes memory leaks
-                 */
                 if (!init_cpu_and_sysfs(&cpu, &sysfs)) {
                         return EXIT_FAILURE;
                 }
