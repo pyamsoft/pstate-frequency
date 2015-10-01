@@ -28,7 +28,7 @@
 #include "psfreq_input.h"
 #include "psfreq_log.h"
 
-char psfreq_input_parse(psfreq_option_type *const options,
+unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv)
 {
         const char *const shortOptions = ":SGHVcrdqp:m:n:t:g:";
@@ -59,21 +59,15 @@ char psfreq_input_parse(psfreq_option_type *const options,
                                         "end of options reached.");
                         break;
                 } else {
-                        int r;
-                        r = psfreq_option_parse(options, opt);
                         psfreq_log_debug("psfreq_input_parse",
                                         "found an option.");
-                        if (r == OPTION_RETURNCODE_STOP_FAILURE) {
+                        if (psfreq_option_parse(options, opt) > 0) {
                                 psfreq_log_debug("psfreq_input_parse",
                                         "Input was not handled properly");
-                                return r;
-                        } else if (r == OPTION_RETURNCODE_STOP_SUCCESS) {
-                                psfreq_log_debug("psfreq_input_parse",
-                                        "Input hit a stop option");
-                                return r;
+                                return EXIT_FAILURE;
                         }
                 }
         }
-        return OPTION_RETURNCODE_CONTINUE;
+        return EXIT_SUCCESS;
 }
 

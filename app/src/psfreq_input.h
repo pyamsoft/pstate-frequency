@@ -27,7 +27,7 @@
 
 #include "psfreq_option.h"
 
-char psfreq_input_parse(psfreq_option_type *const options,
+unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv);
 
 #endif
