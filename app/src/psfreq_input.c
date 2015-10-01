@@ -27,6 +27,7 @@
 
 #include "psfreq_input.h"
 #include "psfreq_log.h"
+#include "psfreq_strings.h"
 
 unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv)
@@ -69,5 +70,83 @@ unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 }
         }
         return EXIT_SUCCESS;
+}
+
+char psfreq_input_plan_from_optarg(const char *const p)
+{
+        char plan;
+        const char *const automatic = "auto";
+        const char *const powersave = "powersave";
+        const char *const performance = "performance";
+        const char *const max_performance = "max-performance";
+
+        if (psfreq_strings_starts_with(powersave, p)
+                || psfreq_strings_equals(INPUT_PLAN_STR_POWERSAVE, p)) {
+                plan = INPUT_PLAN_POWERSAVE;
+        } else if (psfreq_strings_starts_with(performance, p)
+                || psfreq_strings_equals(INPUT_PLAN_STR_PERFORMANCE, p)) {
+                plan = INPUT_PLAN_PERFORMANCE;
+        } else if (psfreq_strings_starts_with(max_performance, p)
+                || psfreq_strings_equals(INPUT_PLAN_STR_MAX_PERFORMANCE, p)) {
+                plan = INPUT_PLAN_MAX_PERFORMANCE;
+        } else if (psfreq_strings_starts_with(automatic, p)
+                || psfreq_strings_equals(INPUT_PLAN_STR_AUTO, p)) {
+                plan = INPUT_PLAN_AUTO;
+        } else {
+                plan = INPUT_PLAN_UNDEFINED;
+        }
+        return plan;
+}
+
+char psfreq_input_turbo_from_optarg(const char *const t)
+{
+        char turbo;
+        const char *const turbo_off = "off";
+        const char *const turbo_on = "on";
+        if (psfreq_strings_starts_with(turbo_off, t)
+                || psfreq_strings_equals(INPUT_TURBO_STR_OFF, t)) {
+                turbo = INPUT_TURBO_OFF;
+        } else if (psfreq_strings_starts_with(turbo_on, t)
+                || psfreq_strings_equals(INPUT_TURBO_STR_ON, t)) {
+                turbo = INPUT_TURBO_ON;
+        } else {
+                turbo = INPUT_TURBO_UNDEFINED;
+        }
+        return turbo;
+}
+
+char psfreq_input_max_from_optarg(const char *const m)
+{
+        unsigned int max = psfreq_strings_to_uint(m);
+        if (max > 100) {
+                max = 100;
+        }
+        return max;
+}
+
+char psfreq_input_min_from_optarg(const char *const m)
+{
+        unsigned int min = psfreq_strings_to_uint(m);
+        if (min > 100) {
+                min = 100;
+        }
+        return min;
+}
+
+char *psfreq_input_gov_from_optarg(const char *const g)
+{
+        char* gov;
+        const char *const powersave = "powersave";
+        const char *const performance = "performance";
+        if (psfreq_strings_starts_with(powersave, g)
+                || psfreq_strings_equals(INPUT_GOV_STR_POWERSAVE, g)) {
+                gov = INPUT_GOV_POWERSAVE;
+        } else if (psfreq_strings_starts_with(performance, g)
+                || psfreq_strings_equals(INPUT_GOV_STR_PERFORMANCE, g)) {
+                gov = INPUT_GOV_PERFORMANCE;
+        } else {
+                gov = INPUT_GOV_UNDEFINED;
+        }
+        return gov;
 }
 

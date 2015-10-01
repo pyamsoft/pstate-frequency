@@ -25,10 +25,46 @@
 #ifndef PSFREQ_INPUT_H
 #define PSFREQ_INPUT_H
 
+#define INPUT_PLAN_UNDEFINED            -1
+#define INPUT_PLAN_AUTO                 0
+#define INPUT_PLAN_POWERSAVE            1
+#define INPUT_PLAN_PERFORMANCE          2
+#define INPUT_PLAN_MAX_PERFORMANCE      3
+
+#define INPUT_PLAN_STR_AUTO                 "0"
+#define INPUT_PLAN_STR_POWERSAVE            "1"
+#define INPUT_PLAN_STR_PERFORMANCE          "2"
+#define INPUT_PLAN_STR_MAX_PERFORMANCE      "3"
+
+#define INPUT_TURBO_UNDEFINED   -1
+#define INPUT_TURBO_ON          0
+#define INPUT_TURBO_OFF         1
+
+#define INPUT_TURBO_STR_ON        "0"
+#define INPUT_TURBO_STR_OFF       "1"
+
+#define INPUT_GOV_UNDEFINED       NULL
+#define INPUT_GOV_POWERSAVE       "powersave"
+#define INPUT_GOV_PERFORMANCE     "performance"
+
+#define INPUT_GOV_STR_POWERSAVE       "0"
+#define INPUT_GOV_STR_PERFORMANCE     "1"
+
 #include "psfreq_option.h"
+
 
 unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv);
+
+char psfreq_input_plan_from_optarg(const char *const p);
+
+char psfreq_input_turbo_from_optarg(const char *const t);
+
+char psfreq_input_max_from_optarg(const char *const m);
+
+char psfreq_input_min_from_optarg(const char *const m);
+
+char *psfreq_input_gov_from_optarg(const char *const g);
 
 #endif
 
