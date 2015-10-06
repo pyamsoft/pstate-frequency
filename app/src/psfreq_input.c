@@ -93,6 +93,8 @@ char psfreq_input_plan_from_optarg(const char *const p)
                 || psfreq_strings_equals(INPUT_PLAN_STR_AUTO, p)) {
                 plan = INPUT_PLAN_AUTO;
         } else {
+                psfreq_log_error("psfreq_input_plan_from_optarg",
+                        "User input: '%s' is not valid for cpu_plan", p);
                 plan = INPUT_PLAN_UNDEFINED;
         }
         return plan;
@@ -110,32 +112,38 @@ char psfreq_input_turbo_from_optarg(const char *const t)
                 || psfreq_strings_equals(INPUT_TURBO_STR_ON, t)) {
                 turbo = INPUT_TURBO_ON;
         } else {
+                psfreq_log_error("psfreq_input_max_from_optarg",
+                        "User input: '%s' is not valid for cpu_turbo", t);
                 turbo = INPUT_TURBO_UNDEFINED;
         }
         return turbo;
 }
 
-char psfreq_input_max_from_optarg(const char *const m)
+int psfreq_input_max_from_optarg(const char *const m)
 {
-        unsigned int max = psfreq_strings_to_uint(m);
-        if (max > 100) {
-                max = 100;
+        if (!psfreq_strings_isdigits(m)) {
+                psfreq_log_error("psfreq_input_max_from_optarg",
+                        "User input: '%s' is not valid for cpu_max", m);
+                return -1;
+        } else {
+                return psfreq_strings_to_int(m);
         }
-        return max;
 }
 
-char psfreq_input_min_from_optarg(const char *const m)
+int psfreq_input_min_from_optarg(const char *const m)
 {
-        unsigned int min = psfreq_strings_to_uint(m);
-        if (min > 100) {
-                min = 100;
+        if (!psfreq_strings_isdigits(m)) {
+                psfreq_log_error("psfreq_input_min_from_optarg",
+                        "User input: '%s' is not valid for cpu_min", m);
+                return -1;
+        } else {
+                return psfreq_strings_to_int(m);
         }
-        return min;
 }
 
 char *psfreq_input_gov_from_optarg(const char *const g)
 {
-        char* gov;
+        char *gov;
         const char *const powersave = "powersave";
         const char *const performance = "performance";
         if (psfreq_strings_starts_with(powersave, g)
@@ -145,6 +153,8 @@ char *psfreq_input_gov_from_optarg(const char *const g)
                 || psfreq_strings_equals(INPUT_GOV_STR_PERFORMANCE, g)) {
                 gov = INPUT_GOV_PERFORMANCE;
         } else {
+                psfreq_log_error("psfreq_input_gov_from_optarg",
+                        "User input: '%s' is not valid for scaling_governor", g);
                 gov = INPUT_GOV_UNDEFINED;
         }
         return gov;

@@ -60,9 +60,9 @@ char psfreq_input_plan_from_optarg(const char *const p);
 
 char psfreq_input_turbo_from_optarg(const char *const t);
 
-char psfreq_input_max_from_optarg(const char *const m);
+int psfreq_input_max_from_optarg(const char *const m);
 
-char psfreq_input_min_from_optarg(const char *const m);
+int psfreq_input_min_from_optarg(const char *const m);
 
 char *psfreq_input_gov_from_optarg(const char *const g);
 
