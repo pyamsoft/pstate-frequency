@@ -38,7 +38,9 @@ typedef struct psfreq_cpu_type {
         unsigned int cpuinfo_max_freq;
         unsigned int scaling_min_freq;
         unsigned int scaling_max_freq;
-        char turbo_boost;
+        char pst_turbo;
+        char pst_max;
+        char pst_min;
         char *scaling_governor;
         char *scaling_driver;
 } psfreq_cpu_type;
@@ -58,6 +60,21 @@ unsigned int psfreq_cpu_get_cpuinfo_max(void);
 unsigned int psfreq_cpu_get_scaling_min(const psfreq_cpu_type *cpu);
 
 unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu);
+
+unsigned char psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const int *const m);
+
+unsigned char psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const int *const m);
+
+unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const char *const m);
+
+unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
+                                   const int *const m);
 
 #endif
 

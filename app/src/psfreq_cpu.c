@@ -40,8 +40,7 @@ static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
 static char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
                                 const psfreq_sysfs_type *sysfs);
-static char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu,
-                                const psfreq_sysfs_type *sysfs);
+static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs);
 static unsigned int psfreq_cpu_init_freq(
                 const psfreq_sysfs_type *sysfs,
                 const char *const type,
@@ -52,6 +51,7 @@ static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
 unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
+        char *m;
         cpu->scaling_driver = psfreq_cpu_init_driver(sysfs);
         cpu->has_pstate = psfreq_cpu_init_has_pstate(cpu);
         if (cpu->has_pstate == 0) {
@@ -67,6 +67,14 @@ unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                                                         "max");
         cpu->cpuinfo_min_freq = psfreq_cpu_init_freq(sysfs, "cpuinfo",
                                                         "min");
+        m = psfreq_sysfs_read(sysfs, "intel_pstate/max_perf_pct");
+        cpu->pst_max = psfreq_strings_to_int(m);
+        free(m);
+
+        m = psfreq_sysfs_read(sysfs, "intel_pstate/min_perf_pct");
+        cpu->pst_min = psfreq_strings_to_int(m);
+        free(m);
+
         return psfreq_cpu_init_dynamic(cpu, sysfs);
 }
 
@@ -78,7 +86,7 @@ static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
         cpu->scaling_min_freq = psfreq_cpu_init_freq(sysfs, "scaling",
                                                         "min");
         cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
-        cpu->turbo_boost = psfreq_cpu_init_turbo_boost(cpu, sysfs);
+        cpu->pst_turbo = psfreq_cpu_init_turbo_boost(sysfs);
         return 1;
 }
 
@@ -352,16 +360,10 @@ static char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
         return gov;
 }
 
-static char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu,
-                                const psfreq_sysfs_type *sysfs)
+static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs)
 {
         char turbo;
         char *line;
-        if (cpu == NULL) {
-                psfreq_log_error("psfreq_cpu_init_turbo_boost",
-                                "cpu is NULL");
-                return NULL;
-        }
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_cpu_init_turbo_boost",
                                 "sysfs is NULL");
@@ -378,5 +380,158 @@ static char psfreq_cpu_init_turbo_boost(const psfreq_cpu_type *cpu,
         turbo = psfreq_strings_to_int(line);
         free(line);
         return turbo;
+}
+
+unsigned char psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const int *const m)
+{
+        unsigned char i;
+        int freq;
+        int n;
+        if (*m >= 100) {
+                n = psfreq_cpu_get_cpuinfo_max();
+        } else if (*m <= 0) {
+                n = psfreq_cpu_get_cpuinfo_min(cpu) + 1;
+        } else {
+                n = *m;
+        }
+        freq = cpu->cpuinfo_max_freq * ((double) n / 100);
+        if (sysfs == NULL) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "sysfs is NULL");
+                return 0;
+        }
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "cpu is NULL");
+                return 0;
+        }
+        if (cpu->cpu_num == 0) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "cpu->cpu_num is 0");
+                return 0;
+        }
+        if (cpu->vector_scaling_max_freq == NULL) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "cpu->vector_scaling_max_freq is NULL");
+                return 0;
+        }
+        if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/max_perf_pct", &n)) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "write failed");
+                return 0;
+        }
+        for (i = 0; i < cpu->cpu_num; ++i) {
+                if (!psfreq_sysfs_write_num(sysfs,
+                                        cpu->vector_scaling_max_freq[i], &freq)) {
+                        psfreq_log_error("psfreq_cpu_set_max",
+                                        "cpu->vector_scaling_max_freq[i] is NULL");
+                        return 0;
+                }
+        }
+        return 1;
+}
+
+unsigned char psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const int *const m)
+{
+        unsigned char i;
+        int freq;
+        int n;
+        if (*m >= 100) {
+                n = psfreq_cpu_get_cpuinfo_max() - 1;
+        } else if (*m <= 0) {
+                n = psfreq_cpu_get_cpuinfo_min(cpu);
+        } else {
+                n = *m;
+        }
+        freq = cpu->cpuinfo_max_freq * ((double) n / 100);
+        if (sysfs == NULL) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "sysfs is NULL");
+                return 0;
+        }
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "cpu is NULL");
+                return 0;
+        }
+        if (cpu->cpu_num == 0) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "cpu->cpu_num is 0");
+                return 0;
+        }
+        if (cpu->vector_scaling_min_freq == NULL) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "cpu->vector_scaling_min_freq is NULL");
+                return 0;
+        }
+        if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/min_perf_pct", &n)) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "write failed");
+                return 0;
+        }
+        for (i = 0; i < cpu->cpu_num; ++i) {
+                if (!psfreq_sysfs_write_num(sysfs,
+                                        cpu->vector_scaling_min_freq[i], &freq)) {
+                        psfreq_log_error("psfreq_cpu_set_min",
+                                        "cpu->vector_scaling_min_freq[i] is NULL");
+                        return 0;
+                }
+        }
+        return 1;
+}
+
+unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const char *const m)
+{
+        unsigned char i;
+        if (sysfs == NULL) {
+                psfreq_log_error("psfreq_cpu_set_gov",
+                                "sysfs is NULL");
+                return 0;
+        }
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_cpu_set_gov",
+                                "cpu is NULL");
+                return 0;
+        }
+        if (cpu->cpu_num == 0) {
+                psfreq_log_error("psfreq_cpu_set_gov",
+                                "cpu->cpu_num is 0");
+                return 0;
+        }
+        if (cpu->vector_scaling_governor == NULL) {
+                psfreq_log_error("psfreq_cpu_set_gov",
+                                "cpu->vector_scaling_governor is NULL");
+                return 0;
+        }
+        for (i = 0; i < cpu->cpu_num; ++i) {
+                if (!psfreq_sysfs_write(sysfs,
+                                        cpu->vector_scaling_governor[i], m)) {
+                        psfreq_log_error("psfreq_cpu_set_gov",
+                                        "cpu->vector_scaling_governor[i] is NULL");
+                        return 0;
+                }
+        }
+        return 1;
+
+}
+
+unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
+                                   const int *const m)
+{
+        if (sysfs == NULL) {
+                psfreq_log_error("psfreq_cpu_set_turbo",
+                                "sysfs is NULL");
+                return 0;
+        }
+        if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/no_turbo", m)) {
+                return 0;
+        }
+        return 1;
 }
 
