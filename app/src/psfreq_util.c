@@ -25,7 +25,6 @@
 
 #define _GNU_SOURCE
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
@@ -93,3 +92,141 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
         return lines;
 }
 
+char *psfreq_util_read2(const char *base, const char *file)
+{
+        char *r;
+        char *abs_path;
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Concat strings: '%s' and '%s'",
+                        base, file);
+        abs_path = psfreq_strings_concat(base, file);
+        if (abs_path == NULL) {
+                psfreq_log_error("psfreq_sysfs_read",
+                                "Concat strings: '%s' and '%s' has failed.\n"
+                                "Function will return false.",
+                                base, file);
+                return NULL;
+        }
+        r = psfreq_util_read(abs_path);
+        free(abs_path);
+        return r;
+}
+
+char *psfreq_util_read(const char *abs_path)
+{
+        FILE *f;
+        char *line;
+        size_t n;
+
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Attempt to open file: '%s'",
+                        abs_path);
+        f = fopen(abs_path, "r");
+        if (f == NULL) {
+                psfreq_log_error("psfreq_sysfs_read",
+                                "File '%s' failed to open for reading.",
+                                abs_path);
+                return NULL;
+        }
+
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Attempt to read buffer from file: '%s'",
+                        abs_path);
+        line = NULL;
+        n = 0;
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Getting a line from file %s\n", abs_path);
+        if (getline(&line, &n, f) < 0) {
+                psfreq_log_error("psfreq_sysfs_read",
+                                "Failed to read buffer from file '%s'.",
+                                abs_path);
+                free(line);
+                fclose(f);
+                return NULL;
+        }
+
+        line = psfreq_strings_strip_end(line);
+
+        psfreq_log_debug("psfreq_sysfs_read",
+                        "Close file: '%s'",
+                        abs_path);
+        fclose(f);
+        return line;
+}
+
+unsigned char psfreq_util_write(const char *abs_path, const char *buf)
+{
+        FILE *f;
+        psfreq_log_debug("psfreq_sysfs_write",
+                        "Check that buf is not NULL");
+        if (buf == NULL) {
+                psfreq_log_error("psfreq_sysfs_write",
+                                "buf is NULL, exit.");
+                return 0;
+        }
+        psfreq_log_debug("psfreq_sysfs_write",
+                        "Attempt to open file: '%s'",
+                        abs_path);
+        f = fopen(abs_path, "w");
+        if (f == NULL) {
+                psfreq_log_error("psfreq_sysfs_write",
+                                "File '%s' failed to open for writing.",
+                                abs_path);
+                return 0;
+        }
+
+        psfreq_log_debug("psfreq_sysfs_write",
+                        "Attempt to write buffer '%s' to file: '%s'",
+                        buf, abs_path);
+        if (fprintf(f, "%s\n", buf) < 0) {
+                psfreq_log_error("psfreq_sysfs_write",
+                                "Failed to write buffer: %s to file '%s'.",
+                                buf, abs_path);
+                fclose(f);
+                return 0;
+        }
+
+        psfreq_log_debug("psfreq_sysfs_write",
+                        "Close file: '%s'",
+                        abs_path);
+        fclose(f);
+        return 1;
+}
+
+unsigned char psfreq_util_write2(const char *base, const char *file,
+                                                   const char *buf)
+{
+	char *abs_path;
+	unsigned char r;
+        psfreq_log_debug("psfreq_sysfs_write",
+                        "Concat strings: '%s' and '%s'",
+                        base, file);
+        abs_path = psfreq_strings_concat(base, file);
+        if (abs_path == NULL) {
+                psfreq_log_error("psfreq_sysfs_write",
+                                "Concat strings: '%s' and '%s' has failed.\n"
+                                "Function will return false.",
+                                base, file);
+                return 0;
+        }
+
+	r = psfreq_util_write(abs_path, buf);
+	free(abs_path);
+	return r;
+}
+
+unsigned char psfreq_util_write_num(const char *abs_path, const int *num)
+{
+        char *s = psfreq_strings_from_int(num);
+        const unsigned char r = psfreq_util_write(abs_path, s);
+        free(s);
+        return r;
+}
+unsigned char psfreq_util_write_num2(const char *base, const char *file,
+                                                   const int *num)
+{
+        char *s = psfreq_strings_from_int(num);
+        const unsigned char r = psfreq_util_write2(base, file, s);
+        free(s);
+        return r;
+}
