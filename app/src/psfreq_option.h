@@ -44,8 +44,8 @@
 #define CPU_GET_TYPE_CURRENT    0
 #define CPU_GET_TYPE_REAL       1
 
-#define SLEEP           0
-#define NO_SLEEP        1
+#define SLEEP           1
+#define NO_SLEEP        0
 
 #define NO_COLOR        0
 #define COLOR           1
