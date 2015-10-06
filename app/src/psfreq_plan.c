@@ -189,7 +189,7 @@ unsigned char psfreq_plan_get_power_source(DIR *const dir,
 		}
 		psfreq_log_debug("psfreq_plan_get_power_source",
 			"Power supply path: %s", full_path);
-		result = psfreq_plan_check_power_is_mains(full_path);
+                result = psfreq_plan_check_power_is_mains(full_path);
 		free(path);
 		free(full_path);
 		if (result > 0) {
@@ -205,41 +205,69 @@ unsigned char psfreq_plan_get_power_source(DIR *const dir,
 static unsigned char psfreq_plan_check_power_is_mains(char *const p)
 {
         char r;
-	char *const type = psfreq_strings_concat(p, "/type");
+	char *type;
+        char *stat;
+        char status;
+        char *power;
+        if (p == NULL) {
+                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                                "p is NULL");
+                return 0;
+        }
+
+        type = psfreq_strings_concat(p, "/type");
         if (type == NULL) {
+                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                                "type is NULL");
                 return 0;
         }
 	psfreq_log_debug("psfreq_plan_check_power_is_mains",
 		"Get type from path %s", type);
-        if (access(type, F_OK) == 0) {
-                char *stat;
-                char status;
-                char *const power = psfreq_util_read(type);
+        if (access(type, F_OK) < 0) {
+                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                                "Couldn't open file %s", type);
                 free(type);
-                if (power == NULL) {
-                        return 0;
-                }
-                psfreq_log_debug("psfreq_plan_check_power_is_mains",
-                                "Power type: %s", power);
-                if (!psfreq_strings_equals("Mains", power)) {
-                        return 0;
-                }
-                stat = psfreq_util_read2(p, "/online");
-                if (stat == NULL) {
-                        return 0;
-                }
-                status = psfreq_strings_to_int(stat);
-                if (status < 0) {
-                        r = 0;
-                } else if (status) {
-                        r = 1;
-                } else {
-                        r = 2;
-                }
-                free(stat);
-                return r;
+                return 0;
         }
-        return 0;
+        power = psfreq_util_read(type);
+        free(type);
+        if (power == NULL) {
+                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                                "power is NULL");
+                return 0;
+        }
+        psfreq_log_debug("psfreq_plan_check_power_is_mains",
+                        "Power type: %s", power);
+        if (!psfreq_strings_equals("Mains", power)) {
+                psfreq_log_debug("psfreq_plan_check_power_is_mains",
+                                "power source not Mains");
+                free(power);
+                return 0;
+        }
+        stat = psfreq_util_read2(p, "/online");
+        if (stat == NULL) {
+                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                                "stat is NULL");
+                free(power);
+                return 0;
+        }
+        status = psfreq_strings_to_int(stat);
+        if (status < 0) {
+                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                                "stat is 0");
+                r = 0;
+        } else if (status) {
+                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                                "stat is performance");
+                r = 1;
+        } else {
+                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                                "stat is powersave");
+                r = 2;
+        }
+        free(stat);
+        free(power);
+        return r;
 }
 
 unsigned char psfreq_plan_hide_directory(const char *const e)
