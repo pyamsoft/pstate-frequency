@@ -64,11 +64,27 @@ unsigned char psfreq_strings_starts_with(const char *s, const char *p)
         return 1;
 }
 
+unsigned char psfreq_strings_isdigits(const char *s)
+{
+        while (*s) {
+                if (isdigit(*s++) == 0) {
+                        return 0;
+                }
+        }
+        return 1;
+}
+
 unsigned char psfreq_strings_equals(const char *s, const char *p)
 {
         const size_t size = strlen(s);
-        psfreq_log_debug("psfreq_strings_is",
-                        "Check if string '%s' is with '%s'", s, p);
+        const size_t ssize = strlen(p);
+        if (size != ssize) {
+                psfreq_log_debug("psfreq_strings_equals",
+                                "Different size strings");
+                return 0;
+        }
+        psfreq_log_debug("psfreq_strings_equals",
+                        "Check if string '%s' is '%s'", s, p);
 
         return (strncmp(s, p, size) == 0);
 }
@@ -141,5 +157,24 @@ char *psfreq_strings_strip_end(char *s)
         if ((i > 0) && (s[i] == '\n'))
                 s[i] = '\0';
         return s;
+}
+
+char **psfreq_strings_strtok(char *s, const size_t num)
+{
+        char** arr = malloc(num * sizeof(char *));
+        size_t i = 0;
+        const char *const del = " ,.-";
+        char *tok;
+        psfreq_log_debug("psfreq_strings_strtok",
+                        "Split string '%s' by delims '%s'", s, del);
+        tok = strtok(s, del);
+        psfreq_log_debug("psfreq_strings_strtok", "First tok success");
+        while (tok != NULL) {
+                psfreq_log_debug("psfreq_strings_strok",
+                                "assign '%s' to arr[%d]", tok, i);
+                arr[i++] = tok;
+                tok = strtok(NULL, del);
+        }
+        return arr;
 }
 

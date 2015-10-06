@@ -27,9 +27,12 @@
 
 #define RADIX_DECIMAL   10
 
+#include <string.h>
+
 char *psfreq_strings_concat(const char *const s1, const char *const s2);
 unsigned char psfreq_strings_starts_with(const char *s, const char *p);
 unsigned char psfreq_strings_equals(const char *s, const char *p);
+unsigned char psfreq_strings_isdigits(const char *s);
 double psfreq_strings_to_double(const char *const s);
 int psfreq_strings_to_int(const char *const s);
 unsigned int psfreq_strings_to_uint(const char *const s);
@@ -37,6 +40,7 @@ char *psfreq_strings_from_double(const double *const d);
 char *psfreq_strings_from_int(const int *const i);
 char *psfreq_strings_from_uint(const unsigned int *const u);
 char *psfreq_strings_strip_end(char *s);
+char **psfreq_strings_strtok(char *s, const size_t num);
 
 #endif
 
