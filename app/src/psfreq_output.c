@@ -34,8 +34,8 @@ void psfreq_out_get_cpu(const psfreq_cpu_type *cpu)
 #endif
         psfreq_log("    pstate::CPU_DRIVER      -> %s", cpu->scaling_driver);
         psfreq_log("    pstate::CPU_GOVERNOR    -> %s", cpu->scaling_governor);
-        psfreq_log("    pstate::NO_TURBO        -> %d : %s", cpu->turbo_boost,
-                        (cpu->turbo_boost ? "OFF" : "ON"));
+        psfreq_log("    pstate::NO_TURBO        -> %d : %s", cpu->pst_turbo,
+                        (cpu->pst_turbo ? "OFF" : "ON"));
         psfreq_log("    pstate::CPU_MIN         -> %u%% : %uKHz",
                         psfreq_cpu_get_scaling_min(cpu), cpu->scaling_min_freq);
         psfreq_log("    pstate::CPU_MAX         -> %u%% : %uKHz",
