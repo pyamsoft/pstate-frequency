@@ -1,7 +1,7 @@
 ##
 # Version Number
 ##
-VERSION:=1.3.1
+VERSION:=2.0.0
 
 ##
 # C Standard
@@ -161,61 +161,61 @@ LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
 #
 # Do NOT modify these unless you know what you are doing
 ##
-CCFLAGS:= -std=c90 -O2 \
+CFLAGS:= -std=c90 -O2 \
 	-march=native -pipe \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
-	-Wunreachable-code $(CCFLAGS)
+	-Wunreachable-code $(CFLAGS)
 
 ##
-# Add the VERSION to the CCFLAGS if it is defined
+# Add the VERSION to the CFLAGS if it is defined
 # (NOTE) VERSION should be defined for a sane build!
 ##
 ifdef VERSION
-	CCFLAGS+= -DVERSION=\"$(VERSION)[$(CC)]\"
+	CFLAGS+= -DVERSION=\"$(VERSION)[$(CC)]\"
 endif
 
 ##
-# Add the AUTO_POWER_PLAN_AC to the CCFLAGS if it is defined
+# Add the AUTO_POWER_PLAN_AC to the CFLAGS if it is defined
 ##
 ifdef AUTO_POWER_PLAN_AC
-	CCFLAGS+= -DAUTO_POWER_PLAN_AC=\"$(AUTO_POWER_PLAN_AC)\"
+	CFLAGS+= -DAUTO_POWER_PLAN_AC=\"$(AUTO_POWER_PLAN_AC)\"
 endif
 
 ##
-# Add the AUTO_POWER_PLAN_BAT to the CCFLAGS if it is defined
+# Add the AUTO_POWER_PLAN_BAT to the CFLAGS if it is defined
 ##
 ifdef AUTO_POWER_PLAN_BAT
-	CCFLAGS+= -DAUTO_POWER_PLAN_BAT=\"$(AUTO_POWER_PLAN_BAT)\"
+	CFLAGS+= -DAUTO_POWER_PLAN_BAT=\"$(AUTO_POWER_PLAN_BAT)\"
 endif
 
 ##
-# Add the PRESET_POWER_PLAN_MAX_PERFORMANCE to the CCFLAGS if it is defined
+# Add the PRESET_POWER_PLAN_MAX_PERFORMANCE to the CFLAGS if it is defined
 ##
 ifdef PRESET_POWER_PLAN_MAX_PERFORMANCE
-	CCFLAGS+= -DPRESET_POWER_PLAN_MAX_PERFORMANCE=\"$(PRESET_POWER_PLAN_MAX_PERFORMANCE)\"
+	CFLAGS+= -DPRESET_POWER_PLAN_MAX_PERFORMANCE=\"$(PRESET_POWER_PLAN_MAX_PERFORMANCE)\"
 endif
 
 ##
-# Add the PRESET_POWER_PLAN_PERFORMANCE to the CCFLAGS if it is defined
+# Add the PRESET_POWER_PLAN_PERFORMANCE to the CFLAGS if it is defined
 ##
 ifdef PRESET_POWER_PLAN_PERFORMANCE
-	CCFLAGS+= -DPRESET_POWER_PLAN_PERFORMANCE=\"$(PRESET_POWER_PLAN_PERFORMANCE)\"
+	CFLAGS+= -DPRESET_POWER_PLAN_PERFORMANCE=\"$(PRESET_POWER_PLAN_PERFORMANCE)\"
 endif
 
 ##
-# Add the PRESET_POWER_PLAN_POWERSAVE to the CCFLAGS if it is defined
+# Add the PRESET_POWER_PLAN_POWERSAVE to the CFLAGS if it is defined
 ##
 ifdef PRESET_POWER_PLAN_POWERSAVE
-	CCFLAGS+= -DPRESET_POWER_PLAN_POWERSAVE=\"$(PRESET_POWER_PLAN_POWERSAVE)\"
+	CFLAGS+= -DPRESET_POWER_PLAN_POWERSAVE=\"$(PRESET_POWER_PLAN_POWERSAVE)\"
 endif
 
 ##
-# Add the INCLUDE_UDEV_RULE to the CCFLAGS if it is defined
+# Add the INCLUDE_UDEV_RULE to the CFLAGS if it is defined
 # (NOTE) As of version 1.2.10, the INCLUDE_UDEV_RULE does NOT
 # affect the ability of pstate-frequency to use the automatic power plan.
 ##
 ifeq ($(INCLUDE_UDEV_RULE), 1)
-	CCFLAGS+= -DINCLUDE_UDEV_RULE=$(INCLUDE_UDEV_RULE)
+	CFLAGS+= -DINCLUDE_UDEV_RULE=$(INCLUDE_UDEV_RULE)
 endif
 
 ##
