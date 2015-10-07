@@ -39,6 +39,10 @@ static unsigned char psfreq_plan_set(const char *const p,
                 int *const max, int *const min,
                 int *const turbo, char **const gov);
 
+static unsigned char psfreq_plan_auto_exec(const char *const plan,
+                int *const max, int *const min,
+                int *const turbo, char **const gov);
+
 static unsigned char psfreq_plan_set(const char *const p,
                 int *const max, int *const min,
                 int *const turbo, char **const gov)
@@ -66,6 +70,27 @@ static unsigned char psfreq_plan_set(const char *const p,
         }
         free(pp);
         free(arr);
+        return 1;
+}
+
+static unsigned char psfreq_plan_auto_exec(const char *const plan,
+                int *const max, int *const min,
+                int *const turbo, char **const gov)
+{
+        if (psfreq_strings_starts_with(plan, "powersave")
+            || psfreq_strings_equals(plan, "1")) {
+                psfreq_plan_powersave(max, min, turbo, gov);
+        } else if (psfreq_strings_starts_with(plan, "performance")
+                   || psfreq_strings_equals(plan, "2")) {
+                psfreq_plan_performance(max, min, turbo, gov);
+        } else if (psfreq_strings_starts_with(plan, "max-performance")
+                   || psfreq_strings_equals(plan, "3")) {
+                psfreq_plan_max_performance(max, min, turbo, gov);
+        } else {
+                psfreq_log_error("psfreq_plan_auto_ac",
+                                 "Invalid plan specified");
+                return 0;
+        }
         return 1;
 }
 
@@ -152,14 +177,23 @@ unsigned char psfreq_plan_auto(int *const max, int *const min,
 	}
 	/* Set plan here */
 	if (r == 1) {
+#ifdef AUTO_POWER_PLAN_AC
+		return psfreq_plan_auto_exec(AUTO_POWER_PLAN_AC,
+                                max, min, turbo, gov);
+#else
 		return psfreq_plan_performance(max, min, turbo, gov);
+#endif
 	} else if (r == 2) {
+#ifdef AUTO_POWER_PLAN_BAT
+		return psfreq_plan_auto_exec(AUTO_POWER_PLAN_BAT,
+                                max, min, turbo, gov);
+#else
 		return psfreq_plan_powersave(max, min, turbo, gov);
+#endif
 	} else {
                 return 0;
         }
 }
-
 
 unsigned char psfreq_plan_get_power_source(DIR *const dir,
                 const char *const name)
@@ -258,11 +292,11 @@ static unsigned char psfreq_plan_check_power_is_mains(char *const p)
                 r = 0;
         } else if (status) {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
-                                "stat is performance");
+                                "stat is AC");
                 r = 1;
         } else {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
-                                "stat is powersave");
+                                "stat is BAT");
                 r = 2;
         }
         free(stat);
