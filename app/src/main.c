@@ -253,7 +253,9 @@ int main(int argc, char **argv)
                         return EXIT_FAILURE;
                 }
         }
-        psfreq_output_get_cpu(&cpu, &options);
+        if (!psfreq_output_get_cpu(&cpu, &options)) {
+                psfreq_log_error("main", "options->cpu_get_type was invalid.");
+        }
 	psfreq_cpu_destroy(&cpu);
 	return EXIT_SUCCESS;
 }
