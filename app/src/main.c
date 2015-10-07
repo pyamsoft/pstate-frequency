@@ -182,10 +182,10 @@ int main(int argc, char **argv)
 
         if (options.action == ACTION_TYPE_HELP ||
                         options.action == ACTION_TYPE_UNDEFINED) {
-                /* Print Help */
+                psfreq_output_usage();
                 return EXIT_SUCCESS;
         } else if (options.action == ACTION_TYPE_VERSION) {
-                /* Print Version */
+                psfreq_output_version();
                 return EXIT_SUCCESS;
         }
 
