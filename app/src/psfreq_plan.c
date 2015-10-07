@@ -291,11 +291,11 @@ static unsigned char psfreq_plan_check_power_is_mains(char *const p)
                                 "stat is 0");
                 r = 0;
         } else if (status) {
-                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                psfreq_log_debug("psfreq_plan_check_power_is_mains",
                                 "stat is AC");
                 r = 1;
         } else {
-                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                psfreq_log_debug("psfreq_plan_check_power_is_mains",
                                 "stat is BAT");
                 r = 2;
         }
