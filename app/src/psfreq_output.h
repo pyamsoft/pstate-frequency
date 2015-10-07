@@ -26,8 +26,10 @@
 #define PSFREQ_OUTPUT_H
 
 #include "psfreq_cpu.h"
+#include "psfreq_option.h"
 
-void psfreq_out_get_cpu(const psfreq_cpu_type *cpu);
+unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
+                           const psfreq_option_type *const options);
 
 #endif
 

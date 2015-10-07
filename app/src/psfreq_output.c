@@ -23,15 +23,18 @@
  */
 
 #include "psfreq_log.h"
+#include "psfreq_option.h"
 #include "psfreq_output.h"
 
-void psfreq_out_get_cpu(const psfreq_cpu_type *cpu)
+unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
+                           const psfreq_option_type *const options)
 {
 #ifdef VERSION
 	psfreq_log("pstate-frequency %s", VERSION);
 #else
 	psfreq_log("pstate-frequency");
 #endif
+        if (options->cpu_get_type == CPU_GET_TYPE_CURRENT) {
         psfreq_log("    pstate::CPU_DRIVER      -> %s", cpu->scaling_driver);
         psfreq_log("    pstate::CPU_GOVERNOR    -> %s", cpu->scaling_governor);
         psfreq_log("    pstate::NO_TURBO        -> %d : %s", cpu->pst_turbo,
@@ -40,5 +43,19 @@ void psfreq_out_get_cpu(const psfreq_cpu_type *cpu)
                         psfreq_cpu_get_scaling_min(cpu), cpu->scaling_min_freq);
         psfreq_log("    pstate::CPU_MAX         -> %u%% : %uKHz",
                         psfreq_cpu_get_scaling_max(cpu), cpu->scaling_max_freq);
+        } else if (options->cpu_get_type == CPU_GET_TYPE_REAL) {
+                unsigned char i;
+                char **frequencies = psfreq_cpu_get_real_freqs(cpu);
+                for (i = 0; i < cpu->cpu_num; ++i) {
+                        psfreq_log("    pstate::CPU[%d]   -> %s",
+                                        i, frequencies[i]);
+                        free(frequencies[i]);
+                }
+
+                free(frequencies);
+        } else {
+                return 0;
+        }
+        return 1;
 }
 
