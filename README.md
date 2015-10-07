@@ -10,8 +10,9 @@ minimum and maximum scaling frequencies and the state of turbo boost.
 
 + Intel P-State driver (included in kernel 3.9 and upwards).  
 Enable it by adding **intel_pstate=enable** to the boot command line.  
-If the p-state driver is not present in your system, the application will  
-still work using the default **acpi-cpufreq** driver.
+Starting with version 2.0.0, only intel_pstate will be suported. There  
+are plenty of other tools that can support acpi-cpufreq and other CPU  
+drivers.
 
 + coreutils  
 The standard GNU tools for things like cat, wc, grep, and cut. These are  
@@ -27,7 +28,7 @@ file: config.mk.
 ### Optional Dependencies
 
 + x86_energy_perf_policy  
-This is used to set the CPU to normal performance policy upon suspend and 
+This is used to set the CPU to normal performance policy upon suspend and
 resume. It is used to currently work around an assumed bug whereby on resume  
 the system is set to performance policy on one core. It can help fix issues  
 where upon resume of the system, the CPU runs at frequencies higher than  
@@ -40,8 +41,7 @@ The installation process follows the basic *make, make install* process.
 
 While building, there are a couple of options that one may configure or  
 change:  
-+ The C++ compiler used (defaults to g++)  
-+ The C++ compiling standard (defaults to C++11)  
++ The C compiler used (defaults to gcc)  
 + The directory to install to (defaults to /usr/local)  
 + Install bash completion (defaults to Yes)  
 + Install zsh completion (defaults to No)  
@@ -136,12 +136,10 @@ non-turbo frequency and disables Turbo Boost.
 3. **max-performance (3)** Sets the minimum and maximum scaling frequencies  
 to the highest available frequency taking into account Turbo Boost  
 frequencies, and enables Turbo Boost.  
-
-There is also a power plan meant to be used with the udev rule for  
-machines which alternate between a portable battery power source and an  
-AC adapter power source:  
 4. **auto (0)** If the computer's main powersource is online, then the  
+power plan defined by the user configurable *AUTO_POWER_PLAN_AC* or the  
 *performance* plan is set. If the main powersource is offline, then the  
+power plan defined by the user configurable *AUTO_POWER_PLAN_BAT* or the  
 *powersave* plan is set.  
 
 
@@ -220,6 +218,12 @@ around rule for your particular system. Should you succeed in creating a
 working udev rule for your system, please feel free to submit it to the  
 main project as a pull request on GitHub.
 
+At this time, pstate-frequency does not make use of any of the new files  
+added to the pstate-driver in kernels 4 and up. The pstate-frequency program  
+will only make use of the following sys files:  
++ /sys/devices/system/cpu/intel_pstate/max_perf_pct  
++ /sys/devices/system/cpu/intel_pstate/min_perf_pct  
++ /sys/devices/system/cpu/intel_pstate/no_turbo  
 
 ## Questions
 
