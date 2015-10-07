@@ -11,7 +11,7 @@ all:
 	@$(MAKE) -C $(PROJECT_DIR)
 
 options:
-	@echo "CCFLAGS  = " $(CCFLAGS)
+	@echo "CFLAGS  = " $(CFLAGS)
 	@echo "LDFLAGS   = " $(LDFLAGS)
 	@echo "MAKEFLAGS = " $(MAKEFLAGS)
 	@echo "CC       = " $(CC)
