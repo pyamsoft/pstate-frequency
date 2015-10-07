@@ -535,3 +535,23 @@ unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
         return 1;
 }
 
+char **psfreq_cpu_get_real_freqs(const psfreq_cpu_type *cpu)
+{
+        const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
+        const unsigned char size = cpu->cpu_num;
+        char **res;
+        if (size == 0) {
+                psfreq_log_error("psfreq_cpu_get_real_freqs",
+                                "Failed to find number of cpus");
+                return NULL;
+        }
+        res = psfreq_util_read_pipe(cmd, &size);
+
+        if (res == NULL) {
+                psfreq_log_error("psfreq_cpu_get_real_freqs",
+                                "Failed to get realtime frequencies");
+                return NULL;
+        }
+        return res;
+}
+

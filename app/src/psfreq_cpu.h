@@ -76,5 +76,7 @@ unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
 unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
                                    const int *const m);
 
+char **psfreq_cpu_get_real_freqs(const psfreq_cpu_type *cpu);
+
 #endif
 
