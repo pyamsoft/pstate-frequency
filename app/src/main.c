@@ -8,21 +8,39 @@
 #include "psfreq_plan.h"
 #include "psfreq_sysfs.h"
 
-unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
+static unsigned char has_reqeusted_options(const psfreq_option_type *options);
+static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
                 psfreq_sysfs_type *sysfs);
-int get_cpu_max(const psfreq_cpu_type *cpu, const psfreq_option_type *options);
-int get_cpu_min(const psfreq_cpu_type *cpu, const psfreq_option_type *options);
-char get_cpu_turbo(const psfreq_cpu_type *cpu, const psfreq_option_type *options);
-unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
+static int get_cpu_max(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options);
+static int get_cpu_min(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options);
+static char get_cpu_turbo(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options);
+static unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
                 const psfreq_option_type *options, int *const max,
                 int *const min, int *const turbo, char **const gov);
-char *get_cpu_gov(const psfreq_cpu_type *cpu, const psfreq_option_type *options);
-unsigned char set_cpu(const psfreq_cpu_type *cpu, const psfreq_sysfs_type *sysfs,
+static char *get_cpu_gov(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options);
+static unsigned char set_cpu(const psfreq_cpu_type *cpu,
+                      const psfreq_sysfs_type *sysfs,
                       const int max, const int min,
                       const int turbo, const char* const gov,
                       const unsigned char do_sleep);
 
-unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
+static unsigned char has_reqeusted_options(const psfreq_option_type *options)
+{
+        if (options->cpu_max == CPU_UNDEFINED
+            && options->cpu_min == CPU_UNDEFINED
+            && options->cpu_turbo == TURBO_UNDEFINED
+            && options->cpu_governor == GOVERNOR_UNDEFINED
+            && options->cpu_plan == PLAN_UNDEFINED) {
+                return 0;
+        }
+        return 1;
+}
+
+static unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
                 const psfreq_option_type *options, int *const max,
                 int *const min, int *const turbo, char **const gov)
 {
@@ -53,7 +71,8 @@ unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
         return 1;
 }
 
-int get_cpu_max(const psfreq_cpu_type *cpu, const psfreq_option_type *options)
+static int get_cpu_max(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options)
 {
         int max;
         if (options->cpu_max != CPU_UNDEFINED) {
@@ -64,7 +83,8 @@ int get_cpu_max(const psfreq_cpu_type *cpu, const psfreq_option_type *options)
         return max;
 }
 
-int get_cpu_min(const psfreq_cpu_type *cpu, const psfreq_option_type *options)
+static int get_cpu_min(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options)
 {
         int min;
         if (options->cpu_min != CPU_UNDEFINED) {
@@ -75,7 +95,8 @@ int get_cpu_min(const psfreq_cpu_type *cpu, const psfreq_option_type *options)
         return min;
 }
 
-char get_cpu_turbo(const psfreq_cpu_type *cpu, const psfreq_option_type *options)
+static char get_cpu_turbo(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options)
 {
         char turbo;
         if (options->cpu_turbo != TURBO_UNDEFINED) {
@@ -86,7 +107,8 @@ char get_cpu_turbo(const psfreq_cpu_type *cpu, const psfreq_option_type *options
         return turbo;
 }
 
-char *get_cpu_gov(const psfreq_cpu_type *cpu, const psfreq_option_type *options)
+static char *get_cpu_gov(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options)
 {
         char *gov;
         if (options->cpu_governor != GOVERNOR_UNDEFINED) {
@@ -97,7 +119,7 @@ char *get_cpu_gov(const psfreq_cpu_type *cpu, const psfreq_option_type *options)
         return gov;
 }
 
-unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
+static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
                 psfreq_sysfs_type *sysfs)
 {
         psfreq_sysfs_init(sysfs);
@@ -107,7 +129,8 @@ unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
         return 1;
 }
 
-unsigned char set_cpu(const psfreq_cpu_type *cpu, const psfreq_sysfs_type *sysfs,
+static unsigned char set_cpu(const psfreq_cpu_type *cpu,
+                      const psfreq_sysfs_type *sysfs,
                       const int max, const int min,
                       const int turbo, const char* const gov,
                       const unsigned char do_sleep)
@@ -175,6 +198,11 @@ int main(int argc, char **argv)
                         psfreq_log_error("main", "You must be root.");
                         return EXIT_FAILURE;
                 }
+                if (!has_reqeusted_options(&options)) {
+                        psfreq_log_error("main",
+                                        "An operation must be specified");
+                        return EXIT_FAILURE;
+                }
                 if (!init_cpu_and_sysfs(&cpu, &sysfs)) {
                         return EXIT_FAILURE;
                 }
@@ -225,7 +253,7 @@ int main(int argc, char **argv)
                         return EXIT_FAILURE;
                 }
         }
-        psfreq_out_get_cpu(&cpu);
+        psfreq_output_get_cpu(&cpu, &options);
 	psfreq_cpu_destroy(&cpu);
 	return EXIT_SUCCESS;
 }
