@@ -31,5 +31,8 @@
 unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                            const psfreq_option_type *const options);
 
+void psfreq_output_usage(void);
+void psfreq_output_version(void);
+
 #endif
 

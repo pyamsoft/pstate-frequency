@@ -22,9 +22,9 @@
  * Helper functions for presenting formatted output
  */
 
-#include "psfreq_log.h"
-#include "psfreq_option.h"
-#include "psfreq_output.h"
+#include"psfreq_log.h"
+#include"psfreq_option.h"
+#include"psfreq_output.h"
 
 unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                            const psfreq_option_type *const options)
@@ -38,7 +38,7 @@ unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
         psfreq_log("    pstate::CPU_DRIVER      -> %s", cpu->scaling_driver);
         psfreq_log("    pstate::CPU_GOVERNOR    -> %s", cpu->scaling_governor);
         psfreq_log("    pstate::NO_TURBO        -> %d : %s", cpu->pst_turbo,
-                        (cpu->pst_turbo ? "OFF" : "ON"));
+                        (cpu->pst_turbo ?"OFF" :"ON"));
         psfreq_log("    pstate::CPU_MIN         -> %u%% : %uKHz",
                         psfreq_cpu_get_scaling_min(cpu), cpu->scaling_min_freq);
         psfreq_log("    pstate::CPU_MAX         -> %u%% : %uKHz",
@@ -57,5 +57,61 @@ unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                 return 0;
         }
         return 1;
+}
+
+void psfreq_output_usage(void)
+{
+	psfreq_log(
+"pstate-frequency comes with ABSOLUTELY NO WARRANTY. \n"
+"This is free software, and you are welcome to redistribute it \n"
+"under certain conditions. \n"
+"Please see the README for details. \n");
+	psfreq_log(
+"\n"
+"usage: \n"
+"pstate-frequency [verbose] [ACTION] [option(s)] \n"
+" \n"
+"verbose: \n"
+"    unprivilaged: \n"
+"    -d | --debug     Print debugging messages to stdout (multiple) \n"
+"    -q | --quiet     Supress all non-error output (multiple) \n"
+"    --color          Colorize output \n");
+	psfreq_log(
+" \n"
+"actions: \n"
+"    unprivilaged: \n"
+"    -H | --help      Display this help and exit \n"
+"    -V | --version   Display application version and exit \n"
+"    -G | --get       Access current CPU values \n"
+"    privilaged: \n"
+"    -S | --set       Modify current CPU values \n");
+	psfreq_log(
+" \n"
+"options: \n"
+"    unprivilaged: \n"
+"    -c | --current   Display the current user set CPU values \n"
+"    -r | --real      Display the real time CPU frequencies \n"
+"    privilaged: \n"
+"    -p | --plan      Set a predefined power plan \n"
+"    -m | --max       Modify current CPU max frequency \n"
+"    -g | --governor  Set the cpufreq governor \n"
+"    -n | --min       Modify current CPU min frequency \n"
+"    -t | --turbo     Modify curent CPU turbo boost state \n"
+"    --no-sleep       Do not sleep before setting CPU frequencies \n");
+}
+
+void psfreq_output_version(void)
+{
+	psfreq_log(
+"pstate-frequency comes with ABSOLUTELY NO WARRANTY. \n"
+"This is free software, and you are welcome to redistribute it \n"
+"under certain conditions. \n"
+"Please see the README for details.\n");
+#ifdef VERSION
+	psfreq_log("pstate-frequency %s", VERSION);
+#else
+	psfreq_log_error("psfreq_output_version",
+		"pstate-frequency version is UNDEFINED");
+#endif
 }
 
