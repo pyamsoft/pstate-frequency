@@ -57,9 +57,9 @@ X86_ENERGY_PERF_POLICY?=1
 # Include a udev rule which will set the pstate to powersave on battery and
 # performance on AC power
 #
-# [0 NO] | 1 YES
+# 0 NO | [1 YES]
 ##
-INCLUDE_UDEV_RULE?=0
+INCLUDE_UDEV_RULE?=1
 
 ##
 # Preset power plan values
