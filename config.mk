@@ -123,14 +123,14 @@ INCLUDE_SRC?=1
 INCLUDE_LICENSE?=1
 
 ##
-# C++ Compiler
+# C Compiler
 #
-# This will default to the GNU C++ compiler, g++
-# The project has been tested against g++ and clang++
+# This will default to the GNU C compiler, gcc
+# The project has been tested against gcc and clang
 # both successfully build on all levels of optimizations, though
 # -O2 is the default for the balance between speed and stability
 #
-# [g++] | clang++ | OTHER
+# [gcc] | clang | OTHER
 ##
 CC?=gcc
 
