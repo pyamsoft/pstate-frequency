@@ -84,7 +84,6 @@ _unprivilaged_actions()
                 "-V:Print the current version"
                 "-G:Access the current CPU values"
                 "-q:Supress non-error output"
-                "-a:Supress all output"
                 "-d:Enable debugging mode"
                 "--color:Colorize output"
         )

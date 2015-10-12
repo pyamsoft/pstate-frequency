@@ -24,8 +24,8 @@ _pstate-frequency()
         COMPREPLY=()
         cur="${COMP_WORDS[COMP_CWORD]}"
         prev="${COMP_WORDS[COMP_CWORD-1]}"
-        short_actions="-V -H -S -G -d -q -a"
-        long_actions="--quiet --version --help --set --get --quiet --all-quiet --color"
+        short_actions="-V -H -S -G -d -q"
+        long_actions="--quiet --version --help --set --get --quiet --color"
         short_set_options="-m -n -t -p -g"
         short_get_options="-c -r"
         long_set_options="--max --min --turbo --plan --governor --no-sleep"
