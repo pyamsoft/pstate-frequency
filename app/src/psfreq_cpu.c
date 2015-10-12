@@ -367,7 +367,7 @@ static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs)
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_cpu_init_turbo_boost",
                                 "sysfs is NULL");
-                return NULL;
+                return -1;
         }
         line = psfreq_sysfs_read(sysfs, "intel_pstate/no_turbo");
         if (line == NULL) {
