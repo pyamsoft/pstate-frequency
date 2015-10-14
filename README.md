@@ -37,7 +37,11 @@ that which is advertised to be available.
 
 ### Installation
 
-The installation process follows the basic *make, make install* process.  
+The installation follows a basic process:  
+```
+# make bin
+# make install
+```
 
 While building, there are a couple of options that one may configure or  
 change:  
