@@ -5,9 +5,21 @@ PROJECT_DIR=app
 DOC_DIR=share/doc
 
 .PHONY: all clean install install-src install-doc install-license uninstall \
-	uninstall-src uninstall-doc uninstall-license options
+	uninstall-src uninstall-doc uninstall-license options bin
 
 all:
+	@echo " -- Makefile targets --"
+	@echo
+	@echo "  bin       - Build the program using options specified in the"
+	@echo "              Makefile"
+	@echo "  options   - List the build environment options including flags"
+	@echo "  clean     - Clean the build to start from scratch"
+	@echo "  install   - Install the program using options specified in the"
+	@echo "              Makefile"
+	@echo "  uninstall - Uninstall the program using options specified in the"
+	@echo "              Makefile"
+
+bin:
 	@$(MAKE) -C $(PROJECT_DIR)
 
 options:
