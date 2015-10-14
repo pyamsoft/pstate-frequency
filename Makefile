@@ -31,7 +31,7 @@ options:
 clean:
 	@$(MAKE) -C $(PROJECT_DIR) clean
 
-install: all
+install: bin
 	@$(MAKE) -C $(PROJECT_DIR) install-app
 	@$(MAKE) -C $(PROJECT_DIR) install-res
 ifeq ($(INCLUDE_SRC), 1)
