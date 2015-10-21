@@ -25,14 +25,14 @@
 #ifndef PSFREQ_COLOR_H
 #define PSFREQ_COLOR_H
 
-#define PSFREQ_COLOR_RESET             "\033[0m"
-#define PSFREQ_COLOR_BOLD_RED          "\033[1;31m"
-#define PSFREQ_COLOR_BOLD_GREEN        "\033[1;32m"
-#define PSFREQ_COLOR_BOLD_BLUE         "\033[1;34m"
-#define PSFREQ_COLOR_BOLD_MAGENTA      "\033[1;35m"
-#define PSFREQ_COLOR_BOLD_CYAN         "\033[1;36m"
-#define PSFREQ_COLOR_BOLD_WHITE        "\033[1;37m"
-#define PSFREQ_COLOR_NONE              ""
+void psfreq_color_enable(void);
+char *psfreq_color_reset(void);
+char *psfreq_color_red(void);
+char *psfreq_color_green(void);
+char *psfreq_color_blue(void);
+char *psfreq_color_magenta(void);
+char *psfreq_color_cyan(void);
+char *psfreq_color_white(void);
 
 #endif
 
