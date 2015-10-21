@@ -47,9 +47,6 @@
 #define SLEEP           1
 #define NO_SLEEP        0
 
-#define NO_COLOR        0
-#define COLOR           1
-
 typedef struct psfreq_option_type {
         char action;
         char *cpu_turbo;
@@ -59,7 +56,6 @@ typedef struct psfreq_option_type {
         char *cpu_plan;
         unsigned char cpu_get_type;
         unsigned char cpu_sleep;
-        unsigned char color_enabled;
 } psfreq_option_type;
 
 void psfreq_option_init(psfreq_option_type *options);

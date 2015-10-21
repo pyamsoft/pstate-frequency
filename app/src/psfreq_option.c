@@ -24,6 +24,7 @@
 
 #include <getopt.h>
 
+#include "psfreq_color.h"
 #include "psfreq_log.h"
 #include "psfreq_option.h"
 
@@ -48,7 +49,6 @@ void psfreq_option_init(psfreq_option_type *options)
 
         options->cpu_get_type = CPU_GET_TYPE_CURRENT;
         options->cpu_sleep = SLEEP;
-        options->color_enabled = NO_COLOR;
 }
 
 unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
@@ -201,7 +201,7 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
                 return EXIT_SUCCESS;
         case '1':
                 /* Enable color messages */
-                options->color_enabled = COLOR;
+                psfreq_color_enable();
                 return EXIT_SUCCESS;
         case ':':
                 /* Missing arguments */
