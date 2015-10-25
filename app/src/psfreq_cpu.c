@@ -57,6 +57,7 @@ unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
         if (cpu->has_pstate == 0) {
                 psfreq_log_error("psfreq_cpu_init",
                                 "System does not have intel_pstate and is unsupported");
+                free(cpu->scaling_driver);
                 return 0;
         }
         cpu->cpu_num = psfreq_cpu_init_number_cpus();
@@ -337,7 +338,6 @@ static char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
                                 const psfreq_sysfs_type *sysfs)
 {
         const char* f;
-        char *gov;
         if (cpu == NULL) {
                 psfreq_log_error("psfreq_cpu_init_governor",
                                 "cpu is NULL");
@@ -355,9 +355,7 @@ static char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
                 return NULL;
         }
         f = cpu->vector_scaling_governor[0];
-        gov = psfreq_sysfs_read(sysfs, f);
-        gov = psfreq_strings_strip_end(gov);
-        return gov;
+        return psfreq_sysfs_read(sysfs, f);
 }
 
 static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs)
@@ -376,7 +374,6 @@ static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs)
                 return -1;
         }
 
-        line = psfreq_strings_strip_end(line);
         turbo = psfreq_strings_to_int(line);
         free(line);
         return turbo;
