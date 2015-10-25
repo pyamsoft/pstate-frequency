@@ -34,60 +34,60 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
 {
         char **lines;
         FILE *pipe;
-        size_t n;
         unsigned char i;
-        psfreq_log_debug("psfreq_read_pipe", "Check for non-NULL cmd");
+        size_t n = 16;
+        psfreq_log_debug("psfreq_util_read_pipe", "Check for non-NULL cmd");
         if (cmd == NULL) {
-                psfreq_log_error("psfreq_read_pipe",
+                psfreq_log_error("psfreq_util_read_pipe",
                                 "cmd is NULL");
                 return NULL;
         }
-        psfreq_log_debug("psfreq_read_pipe", "Check for non-zero size");
+        psfreq_log_debug("psfreq_util_read_pipe", "Check for non-zero size");
         if (*size == 0) {
-                psfreq_log_error("psfreq_read_pipe",
+                psfreq_log_error("psfreq_util_read_pipe",
                                 "Size is 0, which would"
                                 " result in empty array");
                 return NULL;
         }
 
-        psfreq_log_debug("psfreq_read_pipe", "malloc for lines");
+        psfreq_log_debug("psfreq_util_read_pipe", "malloc for lines");
         lines = malloc(*size * sizeof(char *));
         if (lines == NULL) {
-                psfreq_log_error("psfreq_read_pipe",
+                psfreq_log_error("psfreq_util_read_pipe",
                                 "Failed to malloc for lines");
                 return NULL;
         }
 
-        psfreq_log_debug("psfreq_read_pipe",
+        psfreq_log_debug("psfreq_util_read_pipe",
                         "Attempt to open pipe '%s'", cmd);
         pipe = popen(cmd, "r");
         if (pipe == NULL) {
-                psfreq_log_error("psfreq_read_pipe",
+                psfreq_log_error("psfreq_util_read_pipe",
                                 "Failed to open pipe '%s'", cmd);
                 free(lines);
                 return NULL;
         }
-        n = 0;
         for (i = 0; i < *size; ++i) {
-                char *line = NULL;
-                psfreq_log_debug("psfreq_read_pipe",
-                                "Attempt to getline from pipe");
-                if (getline(&line, &n, pipe) < 0) {
-                        psfreq_log_error("psfreq_read_pipe",
+                char line[n];
+                char *stripped;
+                psfreq_log_debug("psfreq_util_read_pipe",
+                                "Attempt to fgets from pipe");
+                /* if (getline(&line, &n, pipe) < 0) { */
+                if (fgets(line, n, pipe) == NULL) {
+                        psfreq_log_error("psfreq_util_read_pipe",
                                         "Failed to read from pipe");
                         free(lines);
-                        free(line);
                         pclose(pipe);
                         return NULL;
                 } else {
-                        psfreq_log_debug("psfreq_read_pipe",
+                        psfreq_log_debug("psfreq_util_read_pipe",
                                         "Assign line '%s' to array %d",
                                         line, i);
-                        line = psfreq_strings_strip_end(line);
-                        lines[i] = line;
+                        stripped = psfreq_strings_strip_end(line);
+                        lines[i] = stripped;
                 }
         }
-        psfreq_log_debug("psfreq_read_pipe", "Close pipe");
+        psfreq_log_debug("psfreq_util_read_pipe", "Close pipe");
         pclose(pipe);
         return lines;
 }
@@ -96,12 +96,12 @@ char *psfreq_util_read2(const char *base, const char *file)
 {
         char *r;
         char *abs_path;
-        psfreq_log_debug("psfreq_sysfs_read",
+        psfreq_log_debug("psfreq_util_read",
                         "Concat strings: '%s' and '%s'",
                         base, file);
         abs_path = psfreq_strings_concat(base, file);
         if (abs_path == NULL) {
-                psfreq_log_error("psfreq_sysfs_read",
+                psfreq_log_error("psfreq_util_read",
                                 "Concat strings: '%s' and '%s' has failed.\n"
                                 "Function will return false.",
                                 base, file);
@@ -115,78 +115,74 @@ char *psfreq_util_read2(const char *base, const char *file)
 char *psfreq_util_read(const char *abs_path)
 {
         FILE *f;
-        char *line;
-        size_t n;
+        size_t n = 16;
+        char line[n];
 
-        psfreq_log_debug("psfreq_sysfs_read",
+        psfreq_log_debug("psfreq_util_read",
                         "Attempt to open file: '%s'",
                         abs_path);
         f = fopen(abs_path, "r");
         if (f == NULL) {
-                psfreq_log_error("psfreq_sysfs_read",
+                psfreq_log_error("psfreq_util_read",
                                 "File '%s' failed to open for reading.",
                                 abs_path);
                 return NULL;
         }
 
-        psfreq_log_debug("psfreq_sysfs_read",
+        psfreq_log_debug("psfreq_util_read",
                         "Attempt to read buffer from file: '%s'",
                         abs_path);
-        line = NULL;
-        n = 0;
-        psfreq_log_debug("psfreq_sysfs_read",
+        psfreq_log_debug("psfreq_util_read",
                         "Getting a line from file %s\n", abs_path);
-        if (getline(&line, &n, f) < 0) {
-                psfreq_log_error("psfreq_sysfs_read",
+        /* if (getline(&line, &n, f) < 0) { */
+        if (fgets(line, n, f) == NULL) {
+                psfreq_log_error("psfreq_util_read",
                                 "Failed to read buffer from file '%s'.",
                                 abs_path);
-                free(line);
                 fclose(f);
                 return NULL;
         }
 
-        line = psfreq_strings_strip_end(line);
-
-        psfreq_log_debug("psfreq_sysfs_read",
+        psfreq_log_debug("psfreq_util_read",
                         "Close file: '%s'",
                         abs_path);
         fclose(f);
-        return line;
+        return psfreq_strings_strip_end(line);
 }
 
 unsigned char psfreq_util_write(const char *abs_path, const char *buf)
 {
         FILE *f;
-        psfreq_log_debug("psfreq_sysfs_write",
+        psfreq_log_debug("psfreq_util_write",
                         "Check that buf is not NULL");
         if (buf == NULL) {
-                psfreq_log_error("psfreq_sysfs_write",
+                psfreq_log_error("psfreq_util_write",
                                 "buf is NULL, exit.");
                 return 0;
         }
-        psfreq_log_debug("psfreq_sysfs_write",
+        psfreq_log_debug("psfreq_util_write",
                         "Attempt to open file: '%s'",
                         abs_path);
         f = fopen(abs_path, "w");
         if (f == NULL) {
-                psfreq_log_error("psfreq_sysfs_write",
+                psfreq_log_error("psfreq_util_write",
                                 "File '%s' failed to open for writing.",
                                 abs_path);
                 return 0;
         }
 
-        psfreq_log_debug("psfreq_sysfs_write",
+        psfreq_log_debug("psfreq_util_write",
                         "Attempt to write buffer '%s' to file: '%s'",
                         buf, abs_path);
         if (fprintf(f, "%s\n", buf) < 0) {
-                psfreq_log_error("psfreq_sysfs_write",
+                psfreq_log_error("psfreq_util_write",
                                 "Failed to write buffer: %s to file '%s'.",
                                 buf, abs_path);
                 fclose(f);
                 return 0;
         }
 
-        psfreq_log_debug("psfreq_sysfs_write",
+        psfreq_log_debug("psfreq_util_write",
                         "Close file: '%s'",
                         abs_path);
         fclose(f);
@@ -198,12 +194,12 @@ unsigned char psfreq_util_write2(const char *base, const char *file,
 {
 	char *abs_path;
 	unsigned char r;
-        psfreq_log_debug("psfreq_sysfs_write",
+        psfreq_log_debug("psfreq_util_write2",
                         "Concat strings: '%s' and '%s'",
                         base, file);
         abs_path = psfreq_strings_concat(base, file);
         if (abs_path == NULL) {
-                psfreq_log_error("psfreq_sysfs_write",
+                psfreq_log_error("psfreq_util_write2",
                                 "Concat strings: '%s' and '%s' has failed.\n"
                                 "Function will return false.",
                                 base, file);
