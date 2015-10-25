@@ -37,7 +37,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
         char **lines;
         FILE *pipe;
         unsigned char i;
-        size_t n = 16;
+        size_t n = 0;
         psfreq_log_debug("psfreq_util_read_pipe", "Check for non-NULL cmd");
         if (cmd == NULL) {
                 psfreq_log_error("psfreq_util_read_pipe",
@@ -70,23 +70,21 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
                 return NULL;
         }
         for (i = 0; i < *size; ++i) {
-                char line[n];
-                char *stripped;
+                char *line = NULL;
                 psfreq_log_debug("psfreq_util_read_pipe",
                                 "Attempt to fgets from pipe");
-                /* if (getline(&line, &n, pipe) < 0) { */
-                if (fgets(line, n, pipe) == NULL) {
+                if (getline(&line, &n, pipe) < 0) {
                         psfreq_log_error("psfreq_util_read_pipe",
                                         "Failed to read from pipe");
                         free(lines);
+                        free(line);
                         pclose(pipe);
                         return NULL;
                 } else {
                         psfreq_log_debug("psfreq_util_read_pipe",
                                         "Assign line '%s' to array %d",
                                         line, i);
-                        stripped = psfreq_util_strip_string_end(line);
-                        lines[i] = stripped;
+                        lines[i] = psfreq_util_strip_string_end(line);
                 }
         }
         psfreq_log_debug("psfreq_util_read_pipe", "Close pipe");
@@ -117,8 +115,8 @@ char *psfreq_util_read2(const char *base, const char *file)
 char *psfreq_util_read(const char *abs_path)
 {
         FILE *f;
-        size_t n = 16;
-        char line[n];
+        size_t n = 0;
+        char *line = NULL;
 
         psfreq_log_debug("psfreq_util_read",
                         "Attempt to open file: '%s'",
@@ -136,11 +134,11 @@ char *psfreq_util_read(const char *abs_path)
                         abs_path);
         psfreq_log_debug("psfreq_util_read",
                         "Getting a line from file %s\n", abs_path);
-        /* if (getline(&line, &n, f) < 0) { */
-        if (fgets(line, n, f) == NULL) {
+        if (getline(&line, &n, f) < 0) {
                 psfreq_log_error("psfreq_util_read",
                                 "Failed to read buffer from file '%s'.",
                                 abs_path);
+                free(line);
                 fclose(f);
                 return NULL;
         }
@@ -232,7 +230,6 @@ unsigned char psfreq_util_write_num2(const char *base, const char *file,
 
 static char *psfreq_util_strip_string_end(char *s)
 {
-        char *ns = NULL;
         unsigned int i;
         psfreq_log_debug("psfreq_util_strip_string_end",
                         "Strip newline from string: '%s'", s);
@@ -245,13 +242,5 @@ static char *psfreq_util_strip_string_end(char *s)
         if ((i > 0) && (s[i] == '\n')) {
                 s[i] = '\0';
         }
-        psfreq_log_debug("psfreq_util_strip_string_end",
-                        "Stripped string is: '%s'", s);
-        if (asprintf(&ns, "%s", s) < 0) {
-                psfreq_log_error("psfreq_util_strip_string_end",
-                        "asprintf returned a -1, indicating a failure during\n"
-                        "either memory allocation or some other error.");
-                return NULL;
-        }
-        return ns;
+        return s;
 }
