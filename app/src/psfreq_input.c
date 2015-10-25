@@ -29,6 +29,8 @@
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
 
+static unsigned char psfreq_input_string_isdigits(const char *s);
+
 unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv)
 {
@@ -121,7 +123,7 @@ char psfreq_input_turbo_from_optarg(const char *const t)
 
 int psfreq_input_max_from_optarg(const char *const m)
 {
-        if (!psfreq_strings_isdigits(m)) {
+        if (!psfreq_input_string_isdigits(m)) {
                 psfreq_log_error("psfreq_input_max_from_optarg",
                         "User input: '%s' is not valid for cpu_max", m);
                 return -1;
@@ -132,7 +134,7 @@ int psfreq_input_max_from_optarg(const char *const m)
 
 int psfreq_input_min_from_optarg(const char *const m)
 {
-        if (!psfreq_strings_isdigits(m)) {
+        if (!psfreq_input_string_isdigits(m)) {
                 psfreq_log_error("psfreq_input_min_from_optarg",
                         "User input: '%s' is not valid for cpu_min", m);
                 return -1;
@@ -158,5 +160,15 @@ char *psfreq_input_gov_from_optarg(const char *const g)
                 gov = INPUT_GOV_UNDEFINED;
         }
         return gov;
+}
+
+static unsigned char psfreq_input_string_isdigits(const char *s)
+{
+        while (*s) {
+                if (isdigit(*s++) == 0) {
+                        return 0;
+                }
+        }
+        return 1;
 }
 
