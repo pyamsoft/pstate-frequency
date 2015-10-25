@@ -24,7 +24,6 @@
  */
 
 #define _GNU_SOURCE
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +31,8 @@
 #include "psfreq_color.h"
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
+
+static double psfreq_strings_to_double(const char *const s);
 
 /**
  * Concatinate two strings together
@@ -64,16 +65,6 @@ unsigned char psfreq_strings_starts_with(const char *s, const char *p)
         return 1;
 }
 
-unsigned char psfreq_strings_isdigits(const char *s)
-{
-        while (*s) {
-                if (isdigit(*s++) == 0) {
-                        return 0;
-                }
-        }
-        return 1;
-}
-
 unsigned char psfreq_strings_equals(const char *s, const char *p)
 {
         const size_t size = strlen(s);
@@ -89,14 +80,6 @@ unsigned char psfreq_strings_equals(const char *s, const char *p)
         return (strncmp(s, p, size) == 0);
 }
 
-double psfreq_strings_to_double(const char *const s)
-{
-        const double v = strtol(s, NULL, RADIX_DECIMAL);
-        psfreq_log_debug("psfreq_strings_to_double",
-                        "Convert string '%s' to double value", s);
-        return v;
-}
-
 int psfreq_strings_to_int(const char *const s)
 {
         return (int) psfreq_strings_to_double(s);
@@ -105,18 +88,6 @@ int psfreq_strings_to_int(const char *const s)
 unsigned int psfreq_strings_to_uint(const char *const s)
 {
         return (unsigned int) psfreq_strings_to_double(s);
-}
-
-char *psfreq_strings_from_double(const double *const d)
-{
-        char *buf = NULL;
-        if (asprintf(&buf, "%f", *d) < 0) {
-                psfreq_log_error("psfreq_strings_from_double",
-                        "asprintf returned a -1, indicating a failure during\n"
-                        "either memory allocation or some other error.");
-                return NULL;
-        }
-        return buf;
 }
 
 char *psfreq_strings_from_int(const int *const i)
@@ -131,16 +102,11 @@ char *psfreq_strings_from_int(const int *const i)
         return buf;
 }
 
-char *psfreq_strings_from_uint(const unsigned int *const u)
+static double psfreq_strings_to_double(const char *const s)
 {
-        char *buf = NULL;
-        if (asprintf(&buf, "%u", *u) < 0) {
-                psfreq_log_error("psfreq_strings_from_int",
-                        "asprintf returned a -1, indicating a failure during\n"
-                        "either memory allocation or some other error.");
-                return NULL;
-        }
-        return buf;
+        const double v = strtol(s, NULL, RADIX_DECIMAL);
+        psfreq_log_debug("psfreq_strings_to_double",
+                        "Convert string '%s' to double value", s);
+        return v;
 }
-
 
