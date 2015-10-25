@@ -161,7 +161,7 @@ LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
 #
 # Do NOT modify these unless you know what you are doing
 ##
-CFLAGS:= -std=c90 -O2 \
+CFLAGS:= -std=c99 -O2 \
 	-march=native -pipe \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
 	-Wunreachable-code $(CFLAGS)
