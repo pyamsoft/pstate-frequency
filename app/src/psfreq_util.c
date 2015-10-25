@@ -30,6 +30,8 @@
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
+static char *psfreq_util_strip_string_end(char *s);
+
 char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
 {
         char **lines;
@@ -83,7 +85,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
                         psfreq_log_debug("psfreq_util_read_pipe",
                                         "Assign line '%s' to array %d",
                                         line, i);
-                        stripped = psfreq_strings_strip_end(line);
+                        stripped = psfreq_util_strip_string_end(line);
                         lines[i] = stripped;
                 }
         }
@@ -147,7 +149,7 @@ char *psfreq_util_read(const char *abs_path)
                         "Close file: '%s'",
                         abs_path);
         fclose(f);
-        return psfreq_strings_strip_end(line);
+        return psfreq_util_strip_string_end(line);
 }
 
 unsigned char psfreq_util_write(const char *abs_path, const char *buf)
@@ -225,4 +227,31 @@ unsigned char psfreq_util_write_num2(const char *base, const char *file,
         const unsigned char r = psfreq_util_write2(base, file, s);
         free(s);
         return r;
+}
+
+
+static char *psfreq_util_strip_string_end(char *s)
+{
+        char *ns = NULL;
+        unsigned int i;
+        psfreq_log_debug("psfreq_util_strip_string_end",
+                        "Strip newline from string: '%s'", s);
+        if (s == NULL) {
+                psfreq_log_error("psfreq_util_strip_string_end",
+                                "String is NULL");
+                return NULL;
+        }
+        i = strlen(s) - 1;
+        if ((i > 0) && (s[i] == '\n')) {
+                s[i] = '\0';
+        }
+        psfreq_log_debug("psfreq_util_strip_string_end",
+                        "Stripped string is: '%s'", s);
+        if (asprintf(&ns, "%s", s) < 0) {
+                psfreq_log_error("psfreq_util_strip_string_end",
+                        "asprintf returned a -1, indicating a failure during\n"
+                        "either memory allocation or some other error.");
+                return NULL;
+        }
+        return ns;
 }

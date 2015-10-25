@@ -143,49 +143,4 @@ char *psfreq_strings_from_uint(const unsigned int *const u)
         return buf;
 }
 
-char *psfreq_strings_strip_end(char *s)
-{
-        char *ns = NULL;
-        unsigned int i;
-        psfreq_log_debug("psfreq_strings_strip_end",
-                        "Strip newline from string: '%s'", s);
-        if (s == NULL) {
-                psfreq_log_error("psfreq_strings_strip_end",
-                                "String is NULL");
-                return NULL;
-        }
-        i = strlen(s) - 1;
-        if ((i > 0) && (s[i] == '\n')) {
-                s[i] = '\0';
-        }
-        psfreq_log_debug("psfreq_strings_strip_end",
-                        "Stripped string is: '%s'", s);
-        if (asprintf(&ns, "%s", s) < 0) {
-                psfreq_log_error("psfreq_strings_strip_end",
-                        "asprintf returned a -1, indicating a failure during\n"
-                        "either memory allocation or some other error.");
-                return NULL;
-        }
-        return ns;
-}
-
-char **psfreq_strings_strtok(char *s, const size_t num)
-{
-        char** arr = malloc(num * sizeof(char *));
-        size_t i = 0;
-        const char *const del = " ,.-";
-        char *tok;
-        char *saveptr;
-        psfreq_log_debug("psfreq_strings_strtok",
-                        "Split string '%s' by delims '%s'", s, del);
-        tok = strtok_r(s, del, &saveptr);
-        psfreq_log_debug("psfreq_strings_strtok", "First tok success");
-        while (tok != NULL) {
-                psfreq_log_debug("psfreq_strings_strok",
-                                "assign '%s' to arr[%d]", tok, i);
-                arr[i++] = tok;
-                tok = strtok_r(NULL, del, &saveptr);
-        }
-        return arr;
-}
 

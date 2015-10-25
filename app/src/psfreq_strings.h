@@ -39,8 +39,6 @@ unsigned int psfreq_strings_to_uint(const char *const s);
 char *psfreq_strings_from_double(const double *const d);
 char *psfreq_strings_from_int(const int *const i);
 char *psfreq_strings_from_uint(const unsigned int *const u);
-char *psfreq_strings_strip_end(char *s);
-char **psfreq_strings_strtok(char *s, const size_t num);
 
 #endif
 

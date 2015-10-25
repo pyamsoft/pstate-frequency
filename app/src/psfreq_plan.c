@@ -34,6 +34,7 @@
 #include "psfreq_util.h"
 
 static unsigned char psfreq_plan_check_power_is_mains(char *const p);
+static char **psfreq_plan_strtok(char *s, const size_t num);
 
 static unsigned char psfreq_plan_set(const char *const p,
                 int *const max, int *const min,
@@ -55,7 +56,7 @@ static unsigned char psfreq_plan_set(const char *const p,
                         "either memory allocation or some other error.");
                 return 0;
         }
-        arr = psfreq_strings_strtok(pp, POWER_PLAN_ITEMS);
+        arr = psfreq_plan_strtok(pp, POWER_PLAN_ITEMS);
 
         *max = psfreq_strings_to_int(arr[0]);
         *min = psfreq_strings_to_int(arr[1]);
@@ -311,3 +312,22 @@ unsigned char psfreq_plan_hide_directory(const char *const e)
         return (psfreq_strings_equals(".", e) || psfreq_strings_equals("..", e));
 }
 
+static char **psfreq_plan_strtok(char *s, const size_t num)
+{
+        char** arr = malloc(num * sizeof(char *));
+        size_t i = 0;
+        const char *const del = " ,.-";
+        char *tok;
+        char *saveptr;
+        psfreq_log_debug("psfreq_plan_strtok",
+                        "Split string '%s' by delims '%s'", s, del);
+        tok = strtok_r(s, del, &saveptr);
+        psfreq_log_debug("psfreq_plan_strtok", "First tok success");
+        while (tok != NULL) {
+                psfreq_log_debug("psfreq_strings_strok",
+                                "assign '%s' to arr[%d]", tok, i);
+                arr[i++] = tok;
+                tok = strtok_r(NULL, del, &saveptr);
+        }
+        return arr;
+}
