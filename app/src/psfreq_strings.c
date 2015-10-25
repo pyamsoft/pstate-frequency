@@ -186,7 +186,6 @@ char **psfreq_strings_strtok(char *s, const size_t num)
                 arr[i++] = tok;
                 tok = strtok_r(NULL, del, &saveptr);
         }
-        free(saveptr);
         return arr;
 }
 
