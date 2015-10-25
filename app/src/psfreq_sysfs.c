@@ -83,10 +83,10 @@ unsigned char psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
 char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
                 const char *file)
 {
-        psfreq_log_debug("psfreq_sysfs_write",
+        psfreq_log_debug("psfreq_sysfs_read",
                         "Check that sysfs is not NULL");
         if (sysfs == NULL) {
-                psfreq_log_error("psfreq_sysfs_write",
+                psfreq_log_error("psfreq_sysfs_read",
                                 "sysfs is NULL, exit.");
                 return NULL;
         }
