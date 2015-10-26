@@ -26,16 +26,17 @@
 #ifndef PSFREQ_UTIL_H
 #define PSFREQ_UTIL_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 
-char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size);
+char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size);
 char *psfreq_util_read(const char *abs_path);
 char *psfreq_util_read2(const char *base, const char *file);
-unsigned char psfreq_util_write(const char *abs_path, const char *buf);
-unsigned char psfreq_util_write2(const char *base, const char *file,
-                                                   const char *buf);
-unsigned char psfreq_util_write_num(const char *abs_path, const int *num);
-unsigned char psfreq_util_write_num2(const char *base, const char *file,
-                                                   const int *num);
+bool psfreq_util_write(const char *abs_path, const char *buf);
+bool psfreq_util_write2(const char *base, const char *file,
+                const char *buf);
+bool psfreq_util_write_num(const char *abs_path, const int *num);
+bool psfreq_util_write_num2(const char *base, const char *file,
+                const int *num);
 
 #endif
