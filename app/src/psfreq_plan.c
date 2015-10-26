@@ -21,7 +21,7 @@
  * @section DESCRIPTION
  * Helper functions for managing power plans on the system
  */
-
+#define _POSIX_C_SOURCE 2
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,18 +32,22 @@
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
-static unsigned char psfreq_plan_check_power_is_mains(char *const p);
+static const unsigned int POWER_PLAN_ITEMS = 4;
+static unsigned int psfreq_plan_get_power_source(DIR *const dir,
+                const char *const name);
+static bool psfreq_plan_hide_directory(const char *const e);
+static unsigned int psfreq_plan_check_power_is_mains(char *const p);
 static char **psfreq_plan_strtok(char *s, const size_t num);
 
-static unsigned char psfreq_plan_set(const char *const p,
+static bool psfreq_plan_set(const char *const p,
                 int *const max, int *const min,
                 int *const turbo, char **const gov);
 
-static unsigned char psfreq_plan_auto_exec(const char *const plan,
+static bool psfreq_plan_auto_exec(const char *const plan,
                 int *const max, int *const min,
                 int *const turbo, char **const gov);
 
-static unsigned char psfreq_plan_set(const char *const p,
+static bool psfreq_plan_set(const char *const p,
                 int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
@@ -53,7 +57,7 @@ static unsigned char psfreq_plan_set(const char *const p,
                 psfreq_log_error("psfreq_plan_set",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
-                return 0;
+                return false;
         }
         arr = psfreq_plan_strtok(pp, POWER_PLAN_ITEMS);
 
@@ -66,14 +70,14 @@ static unsigned char psfreq_plan_set(const char *const p,
                         "either memory allocation or some other error.");
                 free(pp);
                 free(arr);
-                return 0;
+                return false;
         }
         free(pp);
         free(arr);
-        return 1;
+        return true;
 }
 
-static unsigned char psfreq_plan_auto_exec(const char *const plan,
+static bool psfreq_plan_auto_exec(const char *const plan,
                 int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
@@ -89,15 +93,15 @@ static unsigned char psfreq_plan_auto_exec(const char *const plan,
         } else {
                 psfreq_log_error("psfreq_plan_auto_ac",
                                  "Invalid plan specified");
-                return 0;
+                return false;
         }
-        return 1;
+        return true;
 }
 
-unsigned char psfreq_plan_set_cpu(const char *const plan, int *const max,
+bool psfreq_plan_set_cpu(const char *const plan, int *const max,
                 int *const min, int *const turbo, char **const gov)
 {
-        unsigned char r;
+        bool r;
         if (*plan == INPUT_PLAN_AUTO) {
                 r = psfreq_plan_auto(max, min, turbo, gov);
         } else if (*plan == INPUT_PLAN_POWERSAVE) {
@@ -107,12 +111,12 @@ unsigned char psfreq_plan_set_cpu(const char *const plan, int *const max,
         } else if (*plan == INPUT_PLAN_MAX_PERFORMANCE) {
                 r = psfreq_plan_max_performance(max, min, turbo, gov);
         } else {
-                r = 0;
+                r = false;
         }
         return r;
 }
 
-unsigned char psfreq_plan_powersave(int *const max, int *const min,
+bool psfreq_plan_powersave(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_POWERSAVE
@@ -123,11 +127,11 @@ unsigned char psfreq_plan_powersave(int *const max, int *const min,
         *min = 0;
         *turbo = 1;
         *gov = "powersave";
+        return true;
 #endif
-        return 1;
 }
 
-unsigned char psfreq_plan_performance(int *const max, int *const min,
+bool psfreq_plan_performance(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_PERFORMANCE
@@ -138,11 +142,11 @@ unsigned char psfreq_plan_performance(int *const max, int *const min,
         *min = 0;
         *turbo = 1;
         *gov = "powersave";
+        return true;
 #endif
-        return 1;
 }
 
-unsigned char psfreq_plan_max_performance(int *const max, int *const min,
+bool psfreq_plan_max_performance(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_MAX_PERFORMANCE
@@ -153,27 +157,27 @@ unsigned char psfreq_plan_max_performance(int *const max, int *const min,
         *min = 99;
         *turbo = 0;
         *gov = "performance";
+        return true;
 #endif
-        return 1;
 }
 
-unsigned char psfreq_plan_auto(int *const max, int *const min,
+bool psfreq_plan_auto(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
-        unsigned char r;
+        unsigned int r;
         const char *const name = "/sys/class/power_supply/";
         DIR *const dir = opendir(name);
 	psfreq_log_debug("psfreq_plan_auto", "Open dir: %s", name);
         if (!dir) {
 		psfreq_log_error("psfreq_plan_auto",
 			"Couldn't open dir: %s", name);
-                return 0;
+                return false;
 	}
 	r = psfreq_plan_get_power_source(dir, name);
 	if (closedir(dir)) {
 		psfreq_log_error("psfreq_plan_auto",
 			"Couldn't close dir: %s", name);
-		return 0;
+		return false;
 	}
 	/* Set plan here */
 	if (r == 1) {
@@ -191,15 +195,15 @@ unsigned char psfreq_plan_auto(int *const max, int *const min,
 		return psfreq_plan_powersave(max, min, turbo, gov);
 #endif
 	} else {
-                return 0;
+                return false;
         }
 }
 
-unsigned char psfreq_plan_get_power_source(DIR *const dir,
+static unsigned int psfreq_plan_get_power_source(DIR *const dir,
                 const char *const name)
 {
         struct dirent *entry =  readdir(dir);
-        unsigned char result = 0;
+        unsigned int result = 0;
         while(entry) {
                 const char *const e_name = entry->d_name;
                 char *path;
@@ -236,9 +240,9 @@ unsigned char psfreq_plan_get_power_source(DIR *const dir,
         return result;
 }
 
-static unsigned char psfreq_plan_check_power_is_mains(char *const p)
+static unsigned int psfreq_plan_check_power_is_mains(char *const p)
 {
-        char r;
+        unsigned int r;
 	char *type;
         char *stat;
         char status;
@@ -255,8 +259,6 @@ static unsigned char psfreq_plan_check_power_is_mains(char *const p)
                                 "type is NULL");
                 return 0;
         }
-	psfreq_log_debug("psfreq_plan_check_power_is_mains",
-		"Get type from path %s", type);
         if (access(type, F_OK) < 0) {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
                                 "Couldn't open file %s", type);
@@ -270,8 +272,6 @@ static unsigned char psfreq_plan_check_power_is_mains(char *const p)
                                 "power is NULL");
                 return 0;
         }
-        psfreq_log_debug("psfreq_plan_check_power_is_mains",
-                        "Power type: %s", power);
         if (!psfreq_strings_equals("Mains", power)) {
                 psfreq_log_debug("psfreq_plan_check_power_is_mains",
                                 "power source not Mains");
@@ -304,10 +304,8 @@ static unsigned char psfreq_plan_check_power_is_mains(char *const p)
         return r;
 }
 
-unsigned char psfreq_plan_hide_directory(const char *const e)
+static bool psfreq_plan_hide_directory(const char *const e)
 {
-	psfreq_log_debug("psfreq_plan_hide_directory",
-		"Check for self dir or parent dir: '%s'", e);
         return (psfreq_strings_equals(".", e) || psfreq_strings_equals("..", e));
 }
 

@@ -25,29 +25,23 @@
 #ifndef PSFREQ_PLAN_H
 #define PSFREQ_PLAN_H
 
+#include <stdbool.h>
 #include <dirent.h>
 
-#define POWER_PLAN_ITEMS 4
-
-unsigned char psfreq_plan_set_cpu(const char *const plan, int *const max,
+bool psfreq_plan_set_cpu(const char *const plan, int *const max,
                 int *const min, int *const turbo, char **const gov);
 
-unsigned char psfreq_plan_powersave(int *const max, int *const min,
+bool psfreq_plan_powersave(int *const max, int *const min,
                 int *const turbo, char **const gov);
 
-unsigned char psfreq_plan_performance(int *const max, int *const min,
+bool psfreq_plan_performance(int *const max, int *const min,
                 int *const turbo, char **const gov);
 
-unsigned char psfreq_plan_max_performance(int *const max, int *const min,
+bool psfreq_plan_max_performance(int *const max, int *const min,
                 int *const turbo, char **const gov);
 
-unsigned char psfreq_plan_auto(int *const max, int *const min,
+bool psfreq_plan_auto(int *const max, int *const min,
                 int *const turbo, char **const gov);
-
-unsigned char psfreq_plan_get_power_source(DIR *const dir,
-					  const char *const name);
-
-unsigned char psfreq_plan_hide_directory(const char *const e);
 
 #endif
 
