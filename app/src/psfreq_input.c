@@ -29,9 +29,9 @@
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
 
-static unsigned char psfreq_input_string_isdigits(const char *s);
+static bool psfreq_input_string_isdigits(const char *s);
 
-unsigned char psfreq_input_parse(psfreq_option_type *const options,
+bool psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv)
 {
         const char *const shortOptions = ":SGHVcrdqp:m:n:t:g:";
@@ -58,20 +58,16 @@ unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int opt = getopt_long(argc, argv, shortOptions,
                                 longOptions, NULL);
                 if (opt < 0) {
-                        psfreq_log_debug("psfreq_input_parse",
-                                        "end of options reached.");
                         break;
                 } else {
-                        psfreq_log_debug("psfreq_input_parse",
-                                        "found an option.");
-                        if (psfreq_option_parse(options, opt) > 0) {
+                        if (!psfreq_option_parse(options, opt)) {
                                 psfreq_log_debug("psfreq_input_parse",
                                         "Input was not handled properly");
-                                return EXIT_FAILURE;
+                                return false;
                         }
                 }
         }
-        return EXIT_SUCCESS;
+        return true;
 }
 
 char psfreq_input_plan_from_optarg(const char *const p)
@@ -162,13 +158,13 @@ char *psfreq_input_gov_from_optarg(const char *const g)
         return gov;
 }
 
-static unsigned char psfreq_input_string_isdigits(const char *s)
+static bool psfreq_input_string_isdigits(const char *s)
 {
         while (*s) {
                 if (isdigit(*s++) == 0) {
-                        return 0;
+                        return false;
                 }
         }
-        return 1;
+        return true;
 }
 

@@ -22,6 +22,8 @@
  * Helper functions for taking and processing user input from the command line
  */
 
+#include <stdbool.h>
+
 #ifndef PSFREQ_INPUT_H
 #define PSFREQ_INPUT_H
 
@@ -53,7 +55,7 @@
 #include "psfreq_option.h"
 
 
-unsigned char psfreq_input_parse(psfreq_option_type *const options,
+bool psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv);
 
 char psfreq_input_plan_from_optarg(const char *const p);
