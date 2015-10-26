@@ -50,7 +50,7 @@ static unsigned char psfreq_plan_set(const char *const p,
 {
         char **arr;
         char *pp;
-        if (asprintf(&pp, "%s", p) < 0) {
+        if (psfreq_strings_asprintf(&pp, "%s", p) < 0) {
                 psfreq_log_error("psfreq_plan_set",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
@@ -61,7 +61,7 @@ static unsigned char psfreq_plan_set(const char *const p,
         *max = psfreq_strings_to_int(arr[0]);
         *min = psfreq_strings_to_int(arr[1]);
         *turbo = psfreq_strings_to_int(arr[2]);
-        if (asprintf(gov, "%s", arr[3]) < 0) {
+        if (psfreq_strings_asprintf(gov, "%s", arr[3]) < 0) {
                 psfreq_log_error("psfreq_plan_set",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");

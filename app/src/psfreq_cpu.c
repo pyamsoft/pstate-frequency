@@ -213,7 +213,7 @@ static unsigned int psfreq_cpu_init_freq(
                 return 0;
         }
 
-        if (asprintf(&f, "cpu0/cpufreq/%s_%s_freq", type, what) < 0) {
+        if (psfreq_strings_asprintf(&f, "cpu0/cpufreq/%s_%s_freq", type, what) < 0) {
                 psfreq_log_error("psfreq_cpu_init_freq",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
@@ -270,7 +270,7 @@ static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
 
         for (i = 0; i < num; ++i) {
                 char *buf = NULL;
-                if (asprintf(&buf, "cpu%u/cpufreq/scaling_%s", i, what) < 0) {
+                if (psfreq_strings_asprintf(&buf, "cpu%u/cpufreq/scaling_%s", i, what) < 0) {
                         psfreq_log_error("psfreq_cpu_init_vector",
                                 "asprintf returned a -1, indicating a failure "
                                 "during\n either memory allocation or some "
