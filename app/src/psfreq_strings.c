@@ -23,7 +23,6 @@
  * character array string like structures in C.
  */
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +31,7 @@
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
 
+static int psfreq_strings_vasprintf(char **strp, const char *fmt, va_list ap);
 static double psfreq_strings_to_double(const char *const s);
 
 /**
@@ -44,7 +44,7 @@ static double psfreq_strings_to_double(const char *const s);
 char *psfreq_strings_concat(const char *const s1, const char *const s2)
 {
         char *result = NULL;
-        if (asprintf(&result, "%s%s", s1, s2) < 0) {
+        if (psfreq_strings_asprintf(&result, "%s%s", s1, s2) < 0) {
                 psfreq_log_error("psfreq_strings_concat",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
@@ -93,13 +93,47 @@ unsigned int psfreq_strings_to_uint(const char *const s)
 char *psfreq_strings_from_int(const int *const i)
 {
         char *buf = NULL;
-        if (asprintf(&buf, "%d", *i) < 0) {
+        if (psfreq_strings_asprintf(&buf, "%d", *i) < 0) {
                 psfreq_log_error("psfreq_strings_from_int",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
                 return NULL;
         }
         return buf;
+}
+
+int psfreq_strings_asprintf(char **strp, const char *fmt, ...)
+{
+        int ret;
+        va_list ap;
+
+        va_start(ap, fmt);
+        ret = psfreq_strings_vasprintf(strp, fmt, ap);
+        va_end(ap);
+
+        return ret;
+}
+
+static int psfreq_strings_vasprintf(char **strp, const char *fmt, va_list ap)
+{
+        va_list aap;
+        size_t needed_size;
+        char *buf;
+
+        va_copy(aap, ap);
+        needed_size = vsnprintf(NULL, 0, fmt, aap) + 1;
+        va_end(aap);
+
+        buf = malloc(needed_size);
+        if (buf == NULL) {
+                psfreq_log_error("psfreq_strings_vasprintf",
+                                "Error allocating memory for string");
+                return -1;
+        }
+
+        *strp = buf;
+
+        return vsnprintf(buf, needed_size, fmt, ap);
 }
 
 static double psfreq_strings_to_double(const char *const s)
