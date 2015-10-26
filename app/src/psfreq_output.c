@@ -22,6 +22,7 @@
  * Helper functions for presenting formatted output
  */
 
+#include "psfreq_color.h"
 #include"psfreq_log.h"
 #include"psfreq_option.h"
 #include"psfreq_output.h"
@@ -29,20 +30,68 @@
 bool psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                            const psfreq_option_type *const options)
 {
+        if (cpu == NULL) {
+                psfreq_log_error("psfreq_output_get_cpu",
+                                "cpu is NULL");
+                return false;
+        }
+
+        if (options == NULL) {
+                psfreq_log_error("psfreq_output_get_cpu",
+                                "options is NULL");
+                return false;
+        }
 #ifdef VERSION
-	psfreq_log("pstate-frequency %s", VERSION);
+	psfreq_log("%spstate-frequency %s%s", psfreq_color_blue(), VERSION,
+                        psfreq_color_reset());
 #else
-	psfreq_log("pstate-frequency");
+	psfreq_log("%spstate-frequency %s", psfreq_color_blue(),
+                        psfreq_color_reset());
 #endif
         if (options->cpu_get_type == CPU_GET_TYPE_CURRENT) {
-        psfreq_log("    pstate::CPU_DRIVER      -> %s", cpu->scaling_driver);
-        psfreq_log("    pstate::CPU_GOVERNOR    -> %s", cpu->scaling_governor);
-        psfreq_log("    pstate::NO_TURBO        -> %d : %s", cpu->pst_turbo,
-                        (cpu->pst_turbo ?"OFF" :"ON"));
-        psfreq_log("    pstate::CPU_MIN         -> %u%% : %uKHz",
-                        psfreq_cpu_get_scaling_min(cpu), cpu->scaling_min_freq);
-        psfreq_log("    pstate::CPU_MAX         -> %u%% : %uKHz",
-                        psfreq_cpu_get_scaling_max(cpu), cpu->scaling_max_freq);
+                psfreq_log("    %spstate::%s%s%s-> %s%s%s",
+                                psfreq_color_green(),
+                                psfreq_color_blue(),
+                                "CPU_DRIVER   ",
+                                psfreq_color_reset(),
+                                psfreq_color_cyan(),
+                                cpu->scaling_driver,
+                                psfreq_color_reset());
+                psfreq_log("    %spstate::%s%s%s-> %s%s%s",
+                                psfreq_color_green(),
+                                psfreq_color_blue(),
+                                "CPU_GOVERNOR ",
+                                psfreq_color_reset(),
+                                psfreq_color_cyan(),
+                                cpu->scaling_governor,
+                                psfreq_color_reset());
+                psfreq_log("    %spstate::%s%s%s-> %s%d [%s]%s",
+                                psfreq_color_green(),
+                                psfreq_color_blue(),
+                                "NO_TURBO     ",
+                                psfreq_color_reset(),
+                                psfreq_color_cyan(),
+                                cpu->pst_turbo,
+                                (cpu->pst_turbo ?"OFF" :"ON"),
+                                psfreq_color_reset());
+                psfreq_log("    %spstate::%s%s%s-> %s%d%% [%uKHz]%s",
+                                psfreq_color_green(),
+                                psfreq_color_blue(),
+                                "CPU_MIN      ",
+                                psfreq_color_reset(),
+                                psfreq_color_cyan(),
+                                psfreq_cpu_get_scaling_min(cpu),
+                                cpu->scaling_min_freq,
+                                psfreq_color_reset());
+                psfreq_log("    %spstate::%s%s%s-> %s%d%% [%uKHz]%s",
+                                psfreq_color_green(),
+                                psfreq_color_blue(),
+                                "CPU_MAX      ",
+                                psfreq_color_reset(),
+                                psfreq_color_cyan(),
+                                psfreq_cpu_get_scaling_max(cpu),
+                                cpu->scaling_max_freq,
+                                psfreq_color_reset());
         } else if (options->cpu_get_type == CPU_GET_TYPE_REAL) {
                 unsigned int i;
                 char **frequencies = psfreq_cpu_get_real_freqs(cpu);
