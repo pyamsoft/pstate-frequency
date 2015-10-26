@@ -26,7 +26,7 @@
 #include"psfreq_option.h"
 #include"psfreq_output.h"
 
-unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
+bool psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                            const psfreq_option_type *const options)
 {
 #ifdef VERSION
@@ -44,7 +44,7 @@ unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
         psfreq_log("    pstate::CPU_MAX         -> %u%% : %uKHz",
                         psfreq_cpu_get_scaling_max(cpu), cpu->scaling_max_freq);
         } else if (options->cpu_get_type == CPU_GET_TYPE_REAL) {
-                unsigned char i;
+                unsigned int i;
                 char **frequencies = psfreq_cpu_get_real_freqs(cpu);
                 for (i = 0; i < cpu->cpu_num; ++i) {
                         psfreq_log("    pstate::CPU[%d]   -> %s",
@@ -54,9 +54,9 @@ unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
 
                 free(frequencies);
         } else {
-                return 0;
+                return false;
         }
-        return 1;
+        return true;
 }
 
 void psfreq_output_usage(void)
