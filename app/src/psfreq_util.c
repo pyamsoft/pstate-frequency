@@ -23,7 +23,6 @@
  * pipes.
  */
 
-#define _GNU_SOURCE
 #include <stdio.h>
 
 #include "psfreq_log.h"
@@ -37,7 +36,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
         char **lines;
         FILE *pipe;
         unsigned char i;
-        size_t n = 0;
+        const size_t n = 20;
         psfreq_log_debug("psfreq_util_read_pipe", "Check for non-NULL cmd");
         if (cmd == NULL) {
                 psfreq_log_error("psfreq_util_read_pipe",
@@ -70,14 +69,14 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned char *size)
                 return NULL;
         }
         for (i = 0; i < *size; ++i) {
-                char *line = NULL;
+                char line[n];
                 psfreq_log_debug("psfreq_util_read_pipe",
                                 "Attempt to fgets from pipe");
-                if (getline(&line, &n, pipe) < 0) {
+                /* if (getline(&line, &n, pipe) < 0) { */
+                if (fgets(line, n, pipe) == NULL) {
                         psfreq_log_error("psfreq_util_read_pipe",
                                         "Failed to read from pipe");
                         free(lines);
-                        free(line);
                         pclose(pipe);
                         return NULL;
                 } else {
@@ -115,8 +114,8 @@ char *psfreq_util_read2(const char *base, const char *file)
 char *psfreq_util_read(const char *abs_path)
 {
         FILE *f;
-        size_t n = 0;
-        char *line = NULL;
+        const size_t n = 20;
+        char line[n];
 
         psfreq_log_debug("psfreq_util_read",
                         "Attempt to open file: '%s'",
@@ -134,11 +133,11 @@ char *psfreq_util_read(const char *abs_path)
                         abs_path);
         psfreq_log_debug("psfreq_util_read",
                         "Getting a line from file %s\n", abs_path);
-        if (getline(&line, &n, f) < 0) {
+        if (fgets(line, n, f) == NULL) {
+        /* if (getline(&line, &n, f) < 0) { */
                 psfreq_log_error("psfreq_util_read",
                                 "Failed to read buffer from file '%s'.",
                                 abs_path);
-                free(line);
                 fclose(f);
                 return NULL;
         }
@@ -231,6 +230,7 @@ unsigned char psfreq_util_write_num2(const char *base, const char *file,
 static char *psfreq_util_strip_string_end(char *s)
 {
         unsigned int i;
+        char *ns = NULL;
         psfreq_log_debug("psfreq_util_strip_string_end",
                         "Strip newline from string: '%s'", s);
         if (s == NULL) {
@@ -242,5 +242,11 @@ static char *psfreq_util_strip_string_end(char *s)
         if ((i > 0) && (s[i] == '\n')) {
                 s[i] = '\0';
         }
-        return s;
+
+        if (psfreq_strings_asprintf(&ns, "%s", s) < 0) {
+                psfreq_log_error("psfreq_util_strip_string_end",
+                                "Error in asprintf");
+                return NULL;
+        }
+        return ns;
 }
