@@ -31,6 +31,7 @@
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
 
+static const unsigned int RADIX_DECIMAL = 10;
 static int psfreq_strings_vasprintf(char **strp, const char *fmt, va_list ap);
 static double psfreq_strings_to_double(const char *const s);
 
@@ -53,26 +54,26 @@ char *psfreq_strings_concat(const char *const s1, const char *const s2)
         return result;
 }
 
-unsigned char psfreq_strings_starts_with(const char *s, const char *p)
+bool psfreq_strings_starts_with(const char *s, const char *p)
 {
         psfreq_log_debug("psfreq_strings_starts_with",
                         "Check if string '%s' starts with '%s'", s, p);
         while (*p) {
                 if (*p++ != *s++) {
-                        return 0;
+                        return false;
                 }
         }
-        return 1;
+        return true;
 }
 
-unsigned char psfreq_strings_equals(const char *s, const char *p)
+bool psfreq_strings_equals(const char *s, const char *p)
 {
         const size_t size = strlen(s);
         const size_t ssize = strlen(p);
         if (size != ssize) {
                 psfreq_log_debug("psfreq_strings_equals",
                                 "Different size strings");
-                return 0;
+                return false;
         }
         psfreq_log_debug("psfreq_strings_equals",
                         "Check if string '%s' is '%s'", s, p);
