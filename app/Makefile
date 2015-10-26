@@ -45,7 +45,7 @@ $(TARGET): dirs $(OBJECTS)
 dirs:
 	@mkdir -p $(BUILD_DIR)/obj
 	@mkdir -p $(BUILD_DIR)/bin
-	@ln -s $(BUILD_DIR) ./build
+	@ln -sf $(BUILD_DIR) ./build
 
 clean:
 	@rm -rf $(TARGET) $(OBJECTS) $(BUILD_DIR)/obj $(BUILD_DIR)/bin $(BUILD_DIR)
