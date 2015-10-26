@@ -25,6 +25,7 @@
 #ifndef PSFREQ_OPTION_H
 #define PSFREQ_OPTION_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #define ACTION_TYPE_UNDEFINED   -1
@@ -54,13 +55,13 @@ typedef struct psfreq_option_type {
         char *cpu_min;
         char *cpu_governor;
         char *cpu_plan;
-        unsigned char cpu_get_type;
-        unsigned char cpu_sleep;
+        bool cpu_get_type;
+        bool cpu_sleep;
 } psfreq_option_type;
 
 void psfreq_option_init(psfreq_option_type *options);
 
-unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt);
+bool psfreq_option_parse(psfreq_option_type *options, const int opt);
 
 #endif
 
