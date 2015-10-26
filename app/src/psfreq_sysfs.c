@@ -58,24 +58,22 @@ void psfreq_sysfs_init(psfreq_sysfs_type *sysfs)
  * @return Boolean value, true if writing to the file was successfully
  *         performed, false otherwise
  */
-unsigned char psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
+bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf)
 {
-        psfreq_log_debug("psfreq_sysfs_write",
-                        "Check that sysfs is not NULL");
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_sysfs_write",
                                 "sysfs is NULL, exit.");
-                return 0;
+                return false;
         }
         return psfreq_util_write2(sysfs->base_path, file, buf);
 }
 
-unsigned char psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
-                const char *file, const int32_t *num)
+bool psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
+                const char *file, const int *num)
 {
         char *s = psfreq_strings_from_int(num);
-        const unsigned char r = psfreq_sysfs_write(sysfs, file, s);
+        const bool r = psfreq_sysfs_write(sysfs, file, s);
         free(s);
         return r;
 }
@@ -83,8 +81,6 @@ unsigned char psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
 char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
                 const char *file)
 {
-        psfreq_log_debug("psfreq_sysfs_read",
-                        "Check that sysfs is not NULL");
         if (sysfs == NULL) {
                 psfreq_log_error("psfreq_sysfs_read",
                                 "sysfs is NULL, exit.");
