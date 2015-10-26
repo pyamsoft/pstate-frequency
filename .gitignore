@@ -2,3 +2,4 @@ doc-pak/
 description-pak
 backup-*-pre-pstate-frequency.tgz
 *.deb
+app/build
