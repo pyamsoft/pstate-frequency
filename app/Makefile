@@ -45,9 +45,11 @@ $(TARGET): dirs $(OBJECTS)
 dirs:
 	@mkdir -p $(BUILD_DIR)/obj
 	@mkdir -p $(BUILD_DIR)/bin
+	@ln -s $(BUILD_DIR) ./build
 
 clean:
 	@rm -rf $(TARGET) $(OBJECTS) $(BUILD_DIR)/obj $(BUILD_DIR)/bin $(BUILD_DIR)
+	@rm -f ./build
 	@echo "  CLEAN PROJECT"
 
 install-app: all
