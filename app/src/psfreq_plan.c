@@ -22,7 +22,6 @@
  * Helper functions for managing power plans on the system
  */
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

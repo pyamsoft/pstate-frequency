@@ -23,7 +23,6 @@
  * handles the essential setup when a new psfreq_cpu_type is initialized.
  */
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
