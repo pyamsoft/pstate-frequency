@@ -25,7 +25,7 @@ static char *get_cpu_gov(const psfreq_cpu_type *cpu,
 static bool set_cpu(const psfreq_cpu_type *cpu,
                       const psfreq_sysfs_type *sysfs,
                       const int max, const int min,
-                      const int turbo, const char* const gov,
+                      const int turbo, const char *const gov,
                       const bool do_sleep);
 
 static bool has_reqeusted_options(const psfreq_option_type *options)
@@ -132,7 +132,7 @@ static bool init_cpu_and_sysfs(psfreq_cpu_type *cpu,
 static bool set_cpu(const psfreq_cpu_type *cpu,
                       const psfreq_sysfs_type *sysfs,
                       const int max, const int min,
-                      const int turbo, const char* const gov,
+                      const int turbo, const char *const gov,
                       const bool do_sleep)
 {
         const int sane_max = 100;

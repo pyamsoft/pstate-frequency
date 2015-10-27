@@ -32,12 +32,12 @@
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
-static char* psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs);
+static char *psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs);
 static unsigned int psfreq_cpu_init_number_cpus(void);
 static bool psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu);
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
-static char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
+static char *psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
                                 const psfreq_sysfs_type *sysfs);
 static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs);
 static unsigned int psfreq_cpu_init_freq(
@@ -167,7 +167,7 @@ static unsigned int psfreq_cpu_init_number_cpus(void)
         return n;
 }
 
-static char* psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs)
+static char *psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs)
 {
         char *driver;
 
@@ -317,10 +317,10 @@ unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu)
         return ((double) min / max) * 100;
 }
 
-static char* psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
+static char *psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
                                 const psfreq_sysfs_type *sysfs)
 {
-        const char* f;
+        const char *f;
         if (cpu == NULL) {
                 psfreq_log_error("psfreq_cpu_init_governor",
                                 "cpu is NULL");

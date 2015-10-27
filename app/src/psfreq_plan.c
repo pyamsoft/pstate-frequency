@@ -331,7 +331,7 @@ static char **psfreq_plan_strtok(char *s, const size_t num, size_t *arr_len)
         const char *const del = " ,.-";
         char *tok;
         char *saveptr;
-        char** arr = malloc(num * sizeof(char *));
+        char **arr = malloc(num * sizeof(char *));
         *arr_len = 0;
 
         if (arr == NULL) {
