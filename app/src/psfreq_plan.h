@@ -31,17 +31,5 @@
 bool psfreq_plan_set_cpu(const char *const plan, int *const max,
                 int *const min, int *const turbo, char **const gov);
 
-bool psfreq_plan_powersave(int *const max, int *const min,
-                int *const turbo, char **const gov);
-
-bool psfreq_plan_performance(int *const max, int *const min,
-                int *const turbo, char **const gov);
-
-bool psfreq_plan_max_performance(int *const max, int *const min,
-                int *const turbo, char **const gov);
-
-bool psfreq_plan_auto(int *const max, int *const min,
-                int *const turbo, char **const gov);
-
 #endif
 

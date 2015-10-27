@@ -37,7 +37,7 @@ static unsigned int psfreq_plan_get_power_source(DIR *const dir,
                 const char *const name);
 static bool psfreq_plan_hide_directory(const char *const e);
 static unsigned int psfreq_plan_check_power_is_mains(char *const p);
-static char **psfreq_plan_strtok(char *s, const size_t num);
+static char **psfreq_plan_strtok(char *s, const size_t num, size_t *arr_len);
 
 static bool psfreq_plan_set(const char *const p,
                 int *const max, int *const min,
@@ -46,57 +46,14 @@ static bool psfreq_plan_set(const char *const p,
 static bool psfreq_plan_auto_exec(const char *const plan,
                 int *const max, int *const min,
                 int *const turbo, char **const gov);
-
-static bool psfreq_plan_set(const char *const p,
-                int *const max, int *const min,
-                int *const turbo, char **const gov)
-{
-        char **arr;
-        char *pp;
-        if (psfreq_strings_asprintf(&pp, "%s", p) < 0) {
-                psfreq_log_error("psfreq_plan_set",
-                        "asprintf returned a -1, indicating a failure during\n"
-                        "either memory allocation or some other error.");
-                return false;
-        }
-        arr = psfreq_plan_strtok(pp, POWER_PLAN_ITEMS);
-
-        *max = psfreq_strings_to_int(arr[0]);
-        *min = psfreq_strings_to_int(arr[1]);
-        *turbo = psfreq_strings_to_int(arr[2]);
-        if (psfreq_strings_asprintf(gov, "%s", arr[3]) < 0) {
-                psfreq_log_error("psfreq_plan_set",
-                        "asprintf returned a -1, indicating a failure during\n"
-                        "either memory allocation or some other error.");
-                free(pp);
-                free(arr);
-                return false;
-        }
-        free(pp);
-        free(arr);
-        return true;
-}
-
-static bool psfreq_plan_auto_exec(const char *const plan,
-                int *const max, int *const min,
-                int *const turbo, char **const gov)
-{
-        if (psfreq_strings_starts_with(plan, "powersave")
-            || psfreq_strings_equals(plan, "1")) {
-                psfreq_plan_powersave(max, min, turbo, gov);
-        } else if (psfreq_strings_starts_with(plan, "performance")
-                   || psfreq_strings_equals(plan, "2")) {
-                psfreq_plan_performance(max, min, turbo, gov);
-        } else if (psfreq_strings_starts_with(plan, "max-performance")
-                   || psfreq_strings_equals(plan, "3")) {
-                psfreq_plan_max_performance(max, min, turbo, gov);
-        } else {
-                psfreq_log_error("psfreq_plan_auto_ac",
-                                 "Invalid plan specified");
-                return false;
-        }
-        return true;
-}
+static bool psfreq_plan_powersave(int *const max, int *const min,
+                int *const turbo, char **const gov);
+static bool psfreq_plan_performance(int *const max, int *const min,
+                int *const turbo, char **const gov);
+static bool psfreq_plan_max_performance(int *const max, int *const min,
+                int *const turbo, char **const gov);
+static bool psfreq_plan_auto(int *const max, int *const min,
+                int *const turbo, char **const gov);
 
 bool psfreq_plan_set_cpu(const char *const plan, int *const max,
                 int *const min, int *const turbo, char **const gov)
@@ -116,7 +73,66 @@ bool psfreq_plan_set_cpu(const char *const plan, int *const max,
         return r;
 }
 
-bool psfreq_plan_powersave(int *const max, int *const min,
+static bool psfreq_plan_set(const char *const p,
+                int *const max, int *const min,
+                int *const turbo, char **const gov)
+{
+        char **arr = NULL;;
+        char *pp = NULL;
+        size_t arr_len;
+        if (psfreq_strings_asprintf(&pp, "%s", p) < 0) {
+                return false;
+        }
+        arr = psfreq_plan_strtok(pp, POWER_PLAN_ITEMS, &arr_len);
+        if (arr == NULL) {
+                free(pp);
+                return false;
+        }
+
+        /* Check array length */
+        if (arr_len != POWER_PLAN_ITEMS) {
+                psfreq_log_error("psfreq_plan_set",
+                                "Incorrect number of plan items. Got %d wanted %d",
+                                arr_len, POWER_PLAN_ITEMS);
+                free(pp);
+                free(arr);
+                return false;
+        }
+
+        *max = psfreq_strings_to_int(arr[0]);
+        *min = psfreq_strings_to_int(arr[1]);
+        *turbo = psfreq_strings_to_int(arr[2]);
+        if (psfreq_strings_asprintf(gov, "%s", arr[3]) < 0) {
+                free(pp);
+                free(arr);
+                return false;
+        }
+        free(pp);
+        free(arr);
+        return true;
+}
+
+static bool psfreq_plan_auto_exec(const char *const plan,
+                int *const max, int *const min,
+                int *const turbo, char **const gov)
+{
+        if (psfreq_strings_starts_with(plan, "powersave")
+            || psfreq_strings_equals(plan, "1")) {
+                return psfreq_plan_powersave(max, min, turbo, gov);
+        } else if (psfreq_strings_starts_with(plan, "performance")
+                   || psfreq_strings_equals(plan, "2")) {
+                return psfreq_plan_performance(max, min, turbo, gov);
+        } else if (psfreq_strings_starts_with(plan, "max-performance")
+                   || psfreq_strings_equals(plan, "3")) {
+                return psfreq_plan_max_performance(max, min, turbo, gov);
+        } else {
+                psfreq_log_error("psfreq_plan_auto_ac",
+                                 "Invalid plan specified");
+                return false;
+        }
+}
+
+static bool psfreq_plan_powersave(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_POWERSAVE
@@ -131,7 +147,7 @@ bool psfreq_plan_powersave(int *const max, int *const min,
 #endif
 }
 
-bool psfreq_plan_performance(int *const max, int *const min,
+static bool psfreq_plan_performance(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_PERFORMANCE
@@ -146,7 +162,7 @@ bool psfreq_plan_performance(int *const max, int *const min,
 #endif
 }
 
-bool psfreq_plan_max_performance(int *const max, int *const min,
+static bool psfreq_plan_max_performance(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_MAX_PERFORMANCE
@@ -161,7 +177,7 @@ bool psfreq_plan_max_performance(int *const max, int *const min,
 #endif
 }
 
-bool psfreq_plan_auto(int *const max, int *const min,
+static bool psfreq_plan_auto(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
         unsigned int r;
@@ -309,13 +325,20 @@ static bool psfreq_plan_hide_directory(const char *const e)
         return (psfreq_strings_equals(".", e) || psfreq_strings_equals("..", e));
 }
 
-static char **psfreq_plan_strtok(char *s, const size_t num)
+static char **psfreq_plan_strtok(char *s, const size_t num, size_t *arr_len)
 {
-        char** arr = malloc(num * sizeof(char *));
         size_t i = 0;
         const char *const del = " ,.-";
         char *tok;
         char *saveptr;
+        char** arr = malloc(num * sizeof(char *));
+        *arr_len = 0;
+
+        if (arr == NULL) {
+                psfreq_log_debug("psfreq_plan_strtok",
+                                "Failed malloc");
+                return NULL;
+        }
         psfreq_log_debug("psfreq_plan_strtok",
                         "Split string '%s' by delims '%s'", s, del);
         tok = strtok_r(s, del, &saveptr);
@@ -326,5 +349,6 @@ static char **psfreq_plan_strtok(char *s, const size_t num)
                 arr[i++] = tok;
                 tok = strtok_r(NULL, del, &saveptr);
         }
+        *arr_len = i;
         return arr;
 }
