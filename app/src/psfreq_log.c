@@ -44,7 +44,7 @@ void psfreq_log_debug(const char *const name, const char *const fmt, ...)
 {
         va_list arg;
         if (psfreq_log_level_more_verbose(PSFREQ_LOG_DEBUG)) {
-                fprintf(stdout, "%s[D] %s %s",
+                fprintf(stdout, "%s[D] %s: %s",
                                 psfreq_color_blue(), name,
                                 psfreq_color_reset());
         }
@@ -71,7 +71,7 @@ void psfreq_log_error(const char *const name, const char *const fmt, ...)
 {
         va_list arg;
         if (psfreq_log_level_more_verbose(PSFREQ_LOG_DEBUG)) {
-                fprintf(stderr, "%s[E] %s %s",
+                fprintf(stderr, "%s[E] %s: %s",
                                 psfreq_color_red(), name,
                                 psfreq_color_reset());
         }
