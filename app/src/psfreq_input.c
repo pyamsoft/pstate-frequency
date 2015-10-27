@@ -61,8 +61,6 @@ bool psfreq_input_parse(psfreq_option_type *const options,
                         break;
                 } else {
                         if (!psfreq_option_parse(options, opt)) {
-                                psfreq_log_debug("psfreq_input_parse",
-                                        "Input was not handled properly");
                                 return false;
                         }
                 }
