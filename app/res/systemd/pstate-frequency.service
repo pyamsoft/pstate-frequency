@@ -3,7 +3,7 @@ Description=Program to manage CPU frequencies
 After=sysinit.target
 
 [Service]
-Type=oneshot
+Type=simple
 ExecStart=pstate-frequency -S -p 0
 
 [Install]
