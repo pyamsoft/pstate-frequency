@@ -21,7 +21,8 @@ UDEV=99-$(EXEC_NAME).rules
 SYSTEMD=$(EXEC_NAME).service
 SYSTEMD_SLEEP=$(EXEC_NAME)-sleep.service
 X86_NAME=x86_energy_perf_policy
-X86_SLEEP=x86_energy_perf_policy-sleep.service
+X86_SERVICE=$(X86_NAME).service
+X86_SLEEP=$(X86_NAME)-sleep.service
 
 .PHONY: all dirs clean install-app uninstall-app install-res install-bash \
 	install-zsh install-udev install-systemd uninstall-res uninstall-bash \
@@ -103,17 +104,24 @@ install-systemd:
 	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)"
+	@install -Dm 644 $(RES_DIR)/systemd/$(X86_SERVICE) \
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SERVICE)
+	@sed -i "s#$(X86_NAME)#$(PREFIX)/bin/$(X86_NAME)#g" \
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SERVICE)
 	@install -Dm 644 $(RES_DIR)/systemd/$(X86_SLEEP) \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
 	@sed -i "s#$(X86_NAME)#$(PREFIX)/bin/$(X86_NAME)#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
 ifeq ($(X86_ENERGY_PERF_POLICY), 0)
 	@sed -i "s#-v normal#-v powersave#g" \
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SERVICE)
+	@sed -i "s#-v normal#-v powersave#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
 else ifeq ($(X86_ENERGY_PERF_POLICY), 2)
 	@sed -i "s#-v normal#-v performance#g" \
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SERVICE)
+	@sed -i "s#-v normal#-v performance#g" \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
-
 endif
 
 uninstall-res:
@@ -149,6 +157,8 @@ uninstall-systemd:
 	@rm -f $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD)
 	@echo "  UNINSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)"
 	@rm -f $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)
+	@echo "  UNINSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SERVICE)"
+	@rm -f $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SERVICE)
 	@echo "  UNINSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)"
 	@rm -f $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(X86_SLEEP)
 

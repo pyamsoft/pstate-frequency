@@ -1,0 +1,11 @@
+[Unit]
+Description=Run x86_energy_perf_policy
+After=sysinit.target
+
+[Service]
+Type=simple
+ExecStart=x86_energy_perf_policy -v normal
+
+[Install]
+WantedBy=multi-user.target
+
