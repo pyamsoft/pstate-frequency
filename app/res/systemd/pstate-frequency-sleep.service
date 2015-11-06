@@ -4,10 +4,10 @@ Before=sleep.target
 StopWhenUnneeded=yes
 
 [Service]
-Type=oneshot
+Type=simple
 RemainAfterExit=yes
-ExecStart=pstate-frequency -S -p 0
-ExecStop=pstate-frequency -S -p 0
+ExecStart=/bin/true
+ExecStop=pstate-frequency -dd -S -p 0
 
 [Install]
 WantedBy=sleep.target

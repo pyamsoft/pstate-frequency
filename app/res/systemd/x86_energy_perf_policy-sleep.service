@@ -4,9 +4,9 @@ Before=sleep.target
 StopWhenUnneeded=yes
 
 [Service]
-Type=oneshot
+Type=simple
 RemainAfterExit=yes
-ExecStart=x86_energy_perf_policy -v normal
+ExecStart=/bin/true
 ExecStop=x86_energy_perf_policy -v normal
 
 [Install]
