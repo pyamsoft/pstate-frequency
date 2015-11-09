@@ -1,6 +1,6 @@
 [Unit]
 Description=Program to manage CPU frequencies
-After=sysinit.target
+After=basic.target
 
 [Service]
 Type=simple
