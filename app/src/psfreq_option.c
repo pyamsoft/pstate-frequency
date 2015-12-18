@@ -48,7 +48,7 @@ void psfreq_option_init(psfreq_option_type *options)
         options->cpu_plan = PLAN_UNDEFINED;
 
         options->cpu_get_type = CPU_GET_TYPE_CURRENT;
-        options->cpu_sleep = SLEEP;
+        options->cpu_sleep = NO_SLEEP;
 }
 
 bool psfreq_option_parse(psfreq_option_type *options, const int opt)
