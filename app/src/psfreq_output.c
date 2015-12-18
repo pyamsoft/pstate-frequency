@@ -175,7 +175,7 @@ void psfreq_output_usage(void)
 "    -g | --governor  Set the cpufreq governor \n"
 "    -n | --min       Modify current CPU min frequency \n"
 "    -t | --turbo     Modify curent CPU turbo boost state \n"
-"    --no-sleep       Do not sleep before setting CPU frequencies \n");
+"    --sleep          Sleep before setting CPU frequencies \n");
 }
 
 void psfreq_output_version(void)

@@ -196,8 +196,8 @@ bool psfreq_option_parse(psfreq_option_type *options, const int opt)
                 psfreq_log_set_quiet();
                 return true;
         case '2':
-                /* Do not sleep for 2 seconds */
-                options->cpu_sleep = NO_SLEEP;
+                /* Sleep for 2 seconds */
+                options->cpu_sleep = SLEEP;
                 return true;
         case '1':
                 /* Enable color messages */
