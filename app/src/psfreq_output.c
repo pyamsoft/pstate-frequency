@@ -56,7 +56,7 @@ static void psfreq_output_current(const psfreq_cpu_type *cpu)
 {
         psfreq_output_current_out("CPU_DRIVER   ", cpu->scaling_driver);
         psfreq_output_current_out("CPU_GOVERNOR ", cpu->scaling_governor);
-        psfreq_output_current_turbo("NO_TURBO     ", cpu->pst_turbo);
+        psfreq_output_current_turbo("TURBO        ", cpu->pst_turbo);
         psfreq_output_current_freq("CPU_MIN      ",
                         psfreq_cpu_get_scaling_min(cpu),
                         cpu->scaling_min_freq);
