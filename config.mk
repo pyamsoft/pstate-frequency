@@ -130,9 +130,9 @@ INCLUDE_LICENSE?=1
 # both successfully build on all levels of optimizations, though
 # -O2 is the default for the balance between speed and stability
 #
-# [gcc] | clang | OTHER
+# [clang] | gcc | OTHER
 ##
-CC?=gcc
+CC?=clang
 
 ##
 # Install prefix

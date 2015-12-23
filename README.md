@@ -45,7 +45,7 @@ The installation follows a basic process:
 
 While building, there are a couple of options that one may configure or  
 change:  
-+ The C compiler used (defaults to gcc)  
++ The C compiler used (defaults to clang)  
 + The directory to install to (defaults to /usr/local)  
 + Install bash completion (defaults to Yes)  
 + Install zsh completion (defaults to No)  
