@@ -104,8 +104,8 @@ install-systemd-pstate:
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD)"
 	@install -Dm 644 $(RES_DIR)/systemd/$(SYSTEMD) \
 		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD)
-# @sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
-#	$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD)
+	@sed -i "s#$(EXEC_NAME)#$(PREFIX)/bin/$(EXEC_NAME)#g" \
+		$(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD)
 
 install-systemd-sleep-pstate:
 	@echo "  INSTALL  $(DESTDIR)$(SYSTEM_PREFIX)/$(SYSTEMD_UNIT_DIR)/$(SYSTEMD_SLEEP)"

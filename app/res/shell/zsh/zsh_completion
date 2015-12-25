@@ -86,6 +86,7 @@ _unprivilaged_actions()
                 "-q:Supress non-error output"
                 "-d:Enable debugging mode"
                 "--color:Colorize output"
+                "--delay:Delay operation for 5 seconds"
         )
         _describe -t unprivilaged-actions "unprivilaged actions" actions "$@"
 }
