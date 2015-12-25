@@ -48,6 +48,9 @@
 #define SLEEP           1
 #define NO_SLEEP        0
 
+#define DELAY           1
+#define NO_DELAY        0
+
 typedef struct psfreq_option_type {
         char action;
         char *cpu_turbo;
@@ -57,6 +60,7 @@ typedef struct psfreq_option_type {
         char *cpu_plan;
         bool cpu_get_type;
         bool cpu_sleep;
+        bool delay;
 } psfreq_option_type;
 
 void psfreq_option_init(psfreq_option_type *options);

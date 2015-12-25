@@ -180,6 +180,17 @@ int main(int argc, char **argv)
                 return EXIT_FAILURE;
         }
 
+        if (options.delay
+                        && options.action != ACTION_TYPE_HELP
+                        && options.action != ACTION_TYPE_VERSION
+                        && options.action != ACTION_TYPE_UNDEFINED) {
+                /*
+                 * Delay start up for 5 seconds for the
+                 * file system to initialize
+                 */
+                sleep(5);
+        }
+
         if (options.action == ACTION_TYPE_HELP ||
                         options.action == ACTION_TYPE_UNDEFINED) {
                 psfreq_output_usage();

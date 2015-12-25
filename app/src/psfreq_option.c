@@ -49,6 +49,7 @@ void psfreq_option_init(psfreq_option_type *options)
 
         options->cpu_get_type = CPU_GET_TYPE_CURRENT;
         options->cpu_sleep = NO_SLEEP;
+        options->delay = NO_DELAY;
 }
 
 bool psfreq_option_parse(psfreq_option_type *options, const int opt)
@@ -198,6 +199,10 @@ bool psfreq_option_parse(psfreq_option_type *options, const int opt)
         case '2':
                 /* Sleep for 2 seconds */
                 options->cpu_sleep = SLEEP;
+                return true;
+        case '3':
+                /* Delay starting for 5 seconds */
+                options->delay = DELAY;
                 return true;
         case '1':
                 /* Enable color messages */
