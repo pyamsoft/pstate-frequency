@@ -72,21 +72,16 @@ bool psfreq_input_parse(psfreq_option_type *const options,
 char psfreq_input_plan_from_optarg(const char *const p)
 {
         char plan;
-        const char *const automatic = "auto";
-        const char *const powersave = "powersave";
-        const char *const balanced = "balanced";
-        const char *const performance = "performance";
-
-        if (psfreq_strings_starts_with(powersave, p)
+        if (psfreq_strings_starts_with(INPUT_PLAN_NAME_POWERSAVE, p)
                 || psfreq_strings_equals(INPUT_PLAN_STR_POWERSAVE, p)) {
                 plan = INPUT_PLAN_POWERSAVE;
-        } else if (psfreq_strings_starts_with(balanced, p)
+        } else if (psfreq_strings_starts_with(INPUT_PLAN_NAME_BALANCED, p)
                 || psfreq_strings_equals(INPUT_PLAN_STR_BALANCED, p)) {
                 plan = INPUT_PLAN_BALANCED;
-        } else if (psfreq_strings_starts_with(performance, p)
+        } else if (psfreq_strings_starts_with(INPUT_PLAN_NAME_PERFORMANCE, p)
                 || psfreq_strings_equals(INPUT_PLAN_STR_PERFORMANCE, p)) {
                 plan = INPUT_PLAN_PERFORMANCE;
-        } else if (psfreq_strings_starts_with(automatic, p)
+        } else if (psfreq_strings_starts_with(INPUT_PLAN_NAME_AUTO, p)
                 || psfreq_strings_equals(INPUT_PLAN_STR_AUTO, p)) {
                 plan = INPUT_PLAN_AUTO;
         } else {
@@ -100,12 +95,10 @@ char psfreq_input_plan_from_optarg(const char *const p)
 char psfreq_input_turbo_from_optarg(const char *const t)
 {
         char turbo;
-        const char *const turbo_off = "off";
-        const char *const turbo_on = "on";
-        if (psfreq_strings_starts_with(turbo_off, t)
+        if (psfreq_strings_starts_with(INPUT_TURBO_NAME_OFF, t)
                 || psfreq_strings_equals(INPUT_TURBO_STR_OFF, t)) {
                 turbo = INPUT_TURBO_OFF;
-        } else if (psfreq_strings_starts_with(turbo_on, t)
+        } else if (psfreq_strings_starts_with(INPUT_TURBO_NAME_ON, t)
                 || psfreq_strings_equals(INPUT_TURBO_STR_ON, t)) {
                 turbo = INPUT_TURBO_ON;
         } else {
@@ -141,12 +134,10 @@ int psfreq_input_min_from_optarg(const char *const m)
 char *psfreq_input_gov_from_optarg(const char *const g)
 {
         char *gov;
-        const char *const powersave = "powersave";
-        const char *const performance = "performance";
-        if (psfreq_strings_starts_with(powersave, g)
+        if (psfreq_strings_starts_with(INPUT_GOV_POWERSAVE, g)
                 || psfreq_strings_equals(INPUT_GOV_STR_POWERSAVE, g)) {
                 gov = INPUT_GOV_POWERSAVE;
-        } else if (psfreq_strings_starts_with(performance, g)
+        } else if (psfreq_strings_starts_with(INPUT_GOV_PERFORMANCE, g)
                 || psfreq_strings_equals(INPUT_GOV_STR_PERFORMANCE, g)) {
                 gov = INPUT_GOV_PERFORMANCE;
         } else {

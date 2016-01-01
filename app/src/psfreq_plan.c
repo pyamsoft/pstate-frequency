@@ -21,6 +21,9 @@
  * @section DESCRIPTION
  * Helper functions for managing power plans on the system
  */
+/*
+ * For strtok_r using C99
+ */
 #define _POSIX_C_SOURCE 2
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,14 +119,14 @@ static bool psfreq_plan_auto_exec(const char *const plan,
                 int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
-        if (psfreq_strings_starts_with(plan, "powersave")
-            || psfreq_strings_equals(plan, "1")) {
+        if (psfreq_strings_starts_with(plan, INPUT_PLAN_NAME_POWERSAVE)
+            || psfreq_strings_equals(plan, INPUT_PLAN_STR_POWERSAVE)) {
                 return psfreq_plan_powersave(max, min, turbo, gov);
-        } else if (psfreq_strings_starts_with(plan, "balanced")
-                   || psfreq_strings_equals(plan, "2")) {
+        } else if (psfreq_strings_starts_with(plan, INPUT_PLAN_NAME_BALANCED)
+                   || psfreq_strings_equals(plan, INPUT_PLAN_STR_BALANCED)) {
                 return psfreq_plan_balanced(max, min, turbo, gov);
-        } else if (psfreq_strings_starts_with(plan, "performance")
-                   || psfreq_strings_equals(plan, "3")) {
+        } else if (psfreq_strings_starts_with(plan, INPUT_PLAN_NAME_PERFORMANCE)
+                   || psfreq_strings_equals(plan, INPUT_PLAN_STR_PERFORMANCE)) {
                 return psfreq_plan_performance(max, min, turbo, gov);
         } else {
                 psfreq_log_error("psfreq_plan_auto_ac",
@@ -142,7 +145,7 @@ static bool psfreq_plan_powersave(int *const max, int *const min,
         *max = 0;
         *min = 0;
         *turbo = 1;
-        *gov = "powersave";
+        *gov = INPUT_GOV_POWERSAVE;
         return true;
 #endif
 }
@@ -157,7 +160,7 @@ static bool psfreq_plan_balanced(int *const max, int *const min,
         *max = 100;
         *min = 0;
         *turbo = 1;
-        *gov = "powersave";
+        *gov = INPUT_GOV_POWERSAVE;
         return true;
 #endif
 }
@@ -172,7 +175,7 @@ static bool psfreq_plan_performance(int *const max, int *const min,
         *max = 100;
         *min = 99;
         *turbo = 0;
-        *gov = "performance";
+        *gov = INPUT_GOV_PERFORMANCE;
         return true;
 #endif
 }

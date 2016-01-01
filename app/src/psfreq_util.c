@@ -22,6 +22,9 @@
  * Utility functions file to help with things like reading from command
  * pipes.
  */
+/*
+ * For popen using C99
+ */
 #define _POSIX_C_SOURCE 2
 #include <stdio.h>
 

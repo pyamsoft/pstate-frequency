@@ -32,7 +32,10 @@
 #define INPUT_PLAN_POWERSAVE            1
 #define INPUT_PLAN_BALANCED             2
 #define INPUT_PLAN_PERFORMANCE          3
-
+#define INPUT_PLAN_NAME_AUTO            "auto"
+#define INPUT_PLAN_NAME_POWERSAVE       "powersave"
+#define INPUT_PLAN_NAME_BALANCED        "balanced"
+#define INPUT_PLAN_NAME_PERFORMANCE     "performance"
 #define INPUT_PLAN_STR_AUTO             "0"
 #define INPUT_PLAN_STR_POWERSAVE        "1"
 #define INPUT_PLAN_STR_BALANCED         "2"
@@ -41,16 +44,16 @@
 #define INPUT_TURBO_UNDEFINED   -1
 #define INPUT_TURBO_ON          0
 #define INPUT_TURBO_OFF         1
+#define INPUT_TURBO_NAME_ON     "on"
+#define INPUT_TURBO_NAME_OFF    "off"
+#define INPUT_TURBO_STR_ON      "0"
+#define INPUT_TURBO_STR_OFF     "1"
 
-#define INPUT_TURBO_STR_ON        "0"
-#define INPUT_TURBO_STR_OFF       "1"
-
-#define INPUT_GOV_UNDEFINED       NULL
-#define INPUT_GOV_POWERSAVE       "powersave"
-#define INPUT_GOV_PERFORMANCE     "performance"
-
-#define INPUT_GOV_STR_POWERSAVE       "0"
-#define INPUT_GOV_STR_PERFORMANCE     "1"
+#define INPUT_GOV_UNDEFINED             NULL
+#define INPUT_GOV_POWERSAVE             "powersave"
+#define INPUT_GOV_PERFORMANCE           "performance"
+#define INPUT_GOV_STR_POWERSAVE         "0"
+#define INPUT_GOV_STR_PERFORMANCE       "1"
 
 #include "psfreq_option.h"
 

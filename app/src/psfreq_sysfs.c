@@ -27,7 +27,6 @@
  * which is usually located at /sys/devices/system/cpu
  */
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
