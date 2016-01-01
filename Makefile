@@ -10,6 +10,7 @@ DOC_DIR=share/doc
 all:
 	@echo " -- Makefile targets --"
 	@echo
+	@echo "  edit      - Edit the config.mk file to prepare for build"
 	@echo "  bin       - Build the program using options specified in the"
 	@echo "              Makefile"
 	@echo "  options   - List the build environment options including flags"
@@ -18,6 +19,15 @@ all:
 	@echo "              Makefile"
 	@echo "  uninstall - Uninstall the program using options specified in the"
 	@echo "              Makefile"
+
+edit:
+ifndef EDITOR
+	@echo "No \$$EDITOR defined. Editing config.mk using vi"
+	@vi -- config.mk
+else
+	@echo "Editing config.mk using \$$EDITOR ($(EDITOR))"
+	@$(EDITOR) -- config.mk
+endif
 
 bin:
 	@$(MAKE) -C $(PROJECT_DIR)
