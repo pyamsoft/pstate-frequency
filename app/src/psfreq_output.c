@@ -115,9 +115,9 @@ bool psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                 return false;
         }
 
-        if (options == NULL) {
+        if (options == OPT_UNDEFINED) {
                 psfreq_log_error("psfreq_output_get_cpu",
-                                "options is NULL");
+                                "options is undefined");
                 return false;
         }
 #ifdef VERSION

@@ -53,7 +53,7 @@ bool psfreq_input_parse(psfreq_option_type *const options,
                 {"max",           required_argument,  NULL,           'm'},
                 {"min",           required_argument,  NULL,           'n'},
                 {"turbo",         required_argument,  NULL,           't'},
-                {NULL,            0,                  NULL,           0}
+                {NULL,            no_argument,        NULL,           0}
         };
 
         for (;;) {

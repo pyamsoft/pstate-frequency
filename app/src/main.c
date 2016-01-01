@@ -66,7 +66,7 @@ static bool set_cpu_values_raw(const psfreq_cpu_type *cpu,
                 return false;
         }
         *gov = get_cpu_gov(cpu, options);
-        if (*gov == NULL) {
+        if (*gov == GOV_UNDEFINED) {
                 psfreq_log_error("set_cpu_values_raw",
                                 "Bad Gov %s", gov);
                 return false;
@@ -142,14 +142,14 @@ static bool set_cpu(const psfreq_cpu_type *cpu,
         const int sane_min = CPU_FREQUENCY_MINIMUM;
         const int sane_turbo = TURBO_OFF;
         const char *const sane_gov = "powersave";
-        if (cpu == NULL) {
+        if (cpu == CPU_UNDEFINED) {
                 psfreq_log_error("set_cpu",
-                                "cpu is NULL");
+                                "cpu is undefined");
                 return false;
         }
-        if (sysfs == NULL) {
+        if (sysfs == SYSFS_UNDEFINED) {
                 psfreq_log_error("set_cpu",
-                                "sysfs is NULL");
+                                "sysfs is undefined");
                 return false;
         }
 
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
                 int max;
                 int min;
                 int turbo;
-                char *gov = NULL;
+                char *gov = GOV_UNDEFINED;
                 if (geteuid() != EUID_ROOT) {
                         psfreq_log_error("main", "You must be root.");
                         return EXIT_FAILURE;
