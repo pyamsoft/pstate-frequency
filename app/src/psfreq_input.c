@@ -25,6 +25,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 
+#include "psfreq_constants.h"
 #include "psfreq_input.h"
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
@@ -72,22 +73,22 @@ bool psfreq_input_parse(psfreq_option_type *const options,
 char psfreq_input_plan_from_optarg(const char *const p)
 {
         char plan;
-        if (psfreq_strings_starts_with(INPUT_PLAN_NAME_POWERSAVE, p)
-                || psfreq_strings_equals(INPUT_PLAN_STR_POWERSAVE, p)) {
-                plan = INPUT_PLAN_POWERSAVE;
-        } else if (psfreq_strings_starts_with(INPUT_PLAN_NAME_BALANCED, p)
-                || psfreq_strings_equals(INPUT_PLAN_STR_BALANCED, p)) {
-                plan = INPUT_PLAN_BALANCED;
-        } else if (psfreq_strings_starts_with(INPUT_PLAN_NAME_PERFORMANCE, p)
-                || psfreq_strings_equals(INPUT_PLAN_STR_PERFORMANCE, p)) {
-                plan = INPUT_PLAN_PERFORMANCE;
-        } else if (psfreq_strings_starts_with(INPUT_PLAN_NAME_AUTO, p)
-                || psfreq_strings_equals(INPUT_PLAN_STR_AUTO, p)) {
-                plan = INPUT_PLAN_AUTO;
+        if (psfreq_strings_starts_with(PLAN_NAME_POWERSAVE, p)
+                || psfreq_strings_equals(PLAN_STR_POWERSAVE, p)) {
+                plan = PLAN_POWERSAVE;
+        } else if (psfreq_strings_starts_with(PLAN_NAME_BALANCED, p)
+                || psfreq_strings_equals(PLAN_STR_BALANCED, p)) {
+                plan = PLAN_BALANCED;
+        } else if (psfreq_strings_starts_with(PLAN_NAME_PERFORMANCE, p)
+                || psfreq_strings_equals(PLAN_STR_PERFORMANCE, p)) {
+                plan = PLAN_PERFORMANCE;
+        } else if (psfreq_strings_starts_with(PLAN_NAME_AUTO, p)
+                || psfreq_strings_equals(PLAN_STR_AUTO, p)) {
+                plan = PLAN_AUTO;
         } else {
                 psfreq_log_error("psfreq_input_plan_from_optarg",
                         "User input: '%s' is not valid for cpu_plan", p);
-                plan = INPUT_PLAN_UNDEFINED;
+                plan = PLAN_UNDEFINED;
         }
         return plan;
 }
@@ -95,16 +96,16 @@ char psfreq_input_plan_from_optarg(const char *const p)
 char psfreq_input_turbo_from_optarg(const char *const t)
 {
         char turbo;
-        if (psfreq_strings_starts_with(INPUT_TURBO_NAME_OFF, t)
-                || psfreq_strings_equals(INPUT_TURBO_STR_OFF, t)) {
-                turbo = INPUT_TURBO_OFF;
-        } else if (psfreq_strings_starts_with(INPUT_TURBO_NAME_ON, t)
-                || psfreq_strings_equals(INPUT_TURBO_STR_ON, t)) {
-                turbo = INPUT_TURBO_ON;
+        if (psfreq_strings_starts_with(TURBO_NAME_OFF, t)
+                || psfreq_strings_equals(TURBO_STR_OFF, t)) {
+                turbo = TURBO_OFF;
+        } else if (psfreq_strings_starts_with(TURBO_NAME_ON, t)
+                || psfreq_strings_equals(TURBO_STR_ON, t)) {
+                turbo = TURBO_ON;
         } else {
                 psfreq_log_error("psfreq_input_max_from_optarg",
                         "User input: '%s' is not valid for cpu_turbo", t);
-                turbo = INPUT_TURBO_UNDEFINED;
+                turbo = TURBO_UNDEFINED;
         }
         return turbo;
 }
@@ -134,16 +135,16 @@ int psfreq_input_min_from_optarg(const char *const m)
 char *psfreq_input_gov_from_optarg(const char *const g)
 {
         char *gov;
-        if (psfreq_strings_starts_with(INPUT_GOV_POWERSAVE, g)
-                || psfreq_strings_equals(INPUT_GOV_STR_POWERSAVE, g)) {
-                gov = INPUT_GOV_POWERSAVE;
-        } else if (psfreq_strings_starts_with(INPUT_GOV_PERFORMANCE, g)
-                || psfreq_strings_equals(INPUT_GOV_STR_PERFORMANCE, g)) {
-                gov = INPUT_GOV_PERFORMANCE;
+        if (psfreq_strings_starts_with(GOV_POWERSAVE, g)
+                || psfreq_strings_equals(GOV_STR_POWERSAVE, g)) {
+                gov = GOV_POWERSAVE;
+        } else if (psfreq_strings_starts_with(GOV_PERFORMANCE, g)
+                || psfreq_strings_equals(GOV_STR_PERFORMANCE, g)) {
+                gov = GOV_PERFORMANCE;
         } else {
                 psfreq_log_error("psfreq_input_gov_from_optarg",
                         "User input: '%s' is not valid for scaling_governor", g);
-                gov = INPUT_GOV_UNDEFINED;
+                gov = GOV_UNDEFINED;
         }
         return gov;
 }

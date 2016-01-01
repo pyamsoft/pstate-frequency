@@ -34,13 +34,7 @@
 #define ACTION_TYPE_CPU_GET     2
 #define ACTION_TYPE_CPU_SET     3
 
-#define PLAN_UNDEFINED  NULL
-
-#define CPU_UNDEFINED   NULL
-
-#define TURBO_UNDEFINED NULL
-
-#define GOVERNOR_UNDEFINED      NULL
+#define OPT_UNDEFINED  NULL
 
 #define CPU_GET_TYPE_CURRENT    0
 #define CPU_GET_TYPE_REAL       1

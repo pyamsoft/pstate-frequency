@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "psfreq_constants.h"
 #include "psfreq_input.h"
 #include "psfreq_log.h"
 #include "psfreq_plan.h"
@@ -62,13 +63,13 @@ bool psfreq_plan_set_cpu(const char *const plan, int *const max,
                 int *const min, int *const turbo, char **const gov)
 {
         bool r;
-        if (*plan == INPUT_PLAN_AUTO) {
+        if (*plan == PLAN_AUTO) {
                 r = psfreq_plan_auto(max, min, turbo, gov);
-        } else if (*plan == INPUT_PLAN_POWERSAVE) {
+        } else if (*plan == PLAN_POWERSAVE) {
                 r = psfreq_plan_powersave(max, min, turbo, gov);
-        } else if (*plan == INPUT_PLAN_BALANCED) {
+        } else if (*plan == PLAN_BALANCED) {
                 r = psfreq_plan_balanced(max, min, turbo, gov);
-        } else if (*plan == INPUT_PLAN_PERFORMANCE) {
+        } else if (*plan == PLAN_PERFORMANCE) {
                 r = psfreq_plan_performance(max, min, turbo, gov);
         } else {
                 r = false;
@@ -119,14 +120,14 @@ static bool psfreq_plan_auto_exec(const char *const plan,
                 int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
-        if (psfreq_strings_starts_with(plan, INPUT_PLAN_NAME_POWERSAVE)
-            || psfreq_strings_equals(plan, INPUT_PLAN_STR_POWERSAVE)) {
+        if (psfreq_strings_starts_with(plan, PLAN_NAME_POWERSAVE)
+            || psfreq_strings_equals(plan, PLAN_STR_POWERSAVE)) {
                 return psfreq_plan_powersave(max, min, turbo, gov);
-        } else if (psfreq_strings_starts_with(plan, INPUT_PLAN_NAME_BALANCED)
-                   || psfreq_strings_equals(plan, INPUT_PLAN_STR_BALANCED)) {
+        } else if (psfreq_strings_starts_with(plan, PLAN_NAME_BALANCED)
+                   || psfreq_strings_equals(plan, PLAN_STR_BALANCED)) {
                 return psfreq_plan_balanced(max, min, turbo, gov);
-        } else if (psfreq_strings_starts_with(plan, INPUT_PLAN_NAME_PERFORMANCE)
-                   || psfreq_strings_equals(plan, INPUT_PLAN_STR_PERFORMANCE)) {
+        } else if (psfreq_strings_starts_with(plan, PLAN_NAME_PERFORMANCE)
+                   || psfreq_strings_equals(plan, PLAN_STR_PERFORMANCE)) {
                 return psfreq_plan_performance(max, min, turbo, gov);
         } else {
                 psfreq_log_error("psfreq_plan_auto_ac",
@@ -145,7 +146,7 @@ static bool psfreq_plan_powersave(int *const max, int *const min,
         *max = 0;
         *min = 0;
         *turbo = 1;
-        *gov = INPUT_GOV_POWERSAVE;
+        *gov = GOV_POWERSAVE;
         return true;
 #endif
 }
@@ -160,7 +161,7 @@ static bool psfreq_plan_balanced(int *const max, int *const min,
         *max = 100;
         *min = 0;
         *turbo = 1;
-        *gov = INPUT_GOV_POWERSAVE;
+        *gov = GOV_POWERSAVE;
         return true;
 #endif
 }
@@ -175,7 +176,7 @@ static bool psfreq_plan_performance(int *const max, int *const min,
         *max = 100;
         *min = 99;
         *turbo = 0;
-        *gov = INPUT_GOV_PERFORMANCE;
+        *gov = GOV_PERFORMANCE;
         return true;
 #endif
 }

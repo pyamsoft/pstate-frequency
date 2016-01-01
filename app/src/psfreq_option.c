@@ -33,19 +33,19 @@ void psfreq_option_init(psfreq_option_type *options)
         options->action = ACTION_TYPE_UNDEFINED;
 
         /* options->cpu_turbo = malloc(sizeof(char *)); */
-        options->cpu_turbo = TURBO_UNDEFINED;
+        options->cpu_turbo = OPT_UNDEFINED;
 
         /* options->cpu_max = malloc(sizeof(char *)); */
-        options->cpu_max = CPU_UNDEFINED;
+        options->cpu_max = OPT_UNDEFINED;
 
         /* options->cpu_min = malloc(sizeof(char *)); */
-        options->cpu_min = CPU_UNDEFINED;
+        options->cpu_min = OPT_UNDEFINED;
 
         /* options->cpu_governor = malloc(sizeof(char *)); */
-        options->cpu_governor = GOVERNOR_UNDEFINED;
+        options->cpu_governor = OPT_UNDEFINED;
 
         /* options->cpu_plan = malloc(sizeof(char *)); */
-        options->cpu_plan = PLAN_UNDEFINED;
+        options->cpu_plan = OPT_UNDEFINED;
 
         options->cpu_get_type = CPU_GET_TYPE_CURRENT;
         options->cpu_sleep = NO_SLEEP;

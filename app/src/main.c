@@ -30,11 +30,11 @@ static bool set_cpu(const psfreq_cpu_type *cpu,
 
 static bool has_reqeusted_options(const psfreq_option_type *options)
 {
-        if (options->cpu_max == CPU_UNDEFINED
-            && options->cpu_min == CPU_UNDEFINED
-            && options->cpu_turbo == TURBO_UNDEFINED
-            && options->cpu_governor == GOVERNOR_UNDEFINED
-            && options->cpu_plan == PLAN_UNDEFINED) {
+        if (options->cpu_max == OPT_UNDEFINED
+            && options->cpu_min == OPT_UNDEFINED
+            && options->cpu_turbo == OPT_UNDEFINED
+            && options->cpu_governor == OPT_UNDEFINED
+            && options->cpu_plan == OPT_UNDEFINED) {
                 return false;
         }
         return true;
@@ -75,7 +75,7 @@ static int get_cpu_max(const psfreq_cpu_type *cpu,
                 const psfreq_option_type *options)
 {
         int max;
-        if (options->cpu_max != CPU_UNDEFINED) {
+        if (options->cpu_max != OPT_UNDEFINED) {
                 max = psfreq_input_max_from_optarg(options->cpu_max);
         } else {
                 max = psfreq_cpu_get_scaling_max(cpu);
@@ -87,7 +87,7 @@ static int get_cpu_min(const psfreq_cpu_type *cpu,
                 const psfreq_option_type *options)
 {
         int min;
-        if (options->cpu_min != CPU_UNDEFINED) {
+        if (options->cpu_min != OPT_UNDEFINED) {
                 min = psfreq_input_min_from_optarg(options->cpu_min);
         } else {
                 min = psfreq_cpu_get_scaling_min(cpu);
@@ -99,7 +99,7 @@ static char get_cpu_turbo(const psfreq_cpu_type *cpu,
                 const psfreq_option_type *options)
 {
         char turbo;
-        if (options->cpu_turbo != TURBO_UNDEFINED) {
+        if (options->cpu_turbo != OPT_UNDEFINED) {
                 turbo = psfreq_input_turbo_from_optarg(options->cpu_turbo);
         } else {
                 turbo = cpu->pst_turbo;
@@ -111,7 +111,7 @@ static char *get_cpu_gov(const psfreq_cpu_type *cpu,
                 const psfreq_option_type *options)
 {
         char *gov;
-        if (options->cpu_governor != GOVERNOR_UNDEFINED) {
+        if (options->cpu_governor != OPT_UNDEFINED) {
                 gov = psfreq_input_gov_from_optarg(options->cpu_governor);
         } else {
                 gov = cpu->scaling_governor;
@@ -218,7 +218,7 @@ int main(int argc, char **argv)
                         return EXIT_FAILURE;
                 }
                 /* Set cpu */
-                if (options.cpu_plan == PLAN_UNDEFINED) {
+                if (options.cpu_plan == OPT_UNDEFINED) {
                         if (!set_cpu_values_raw(&cpu, &options, &max,
                                                 &min, &turbo, &gov)) {
                                 psfreq_cpu_destroy(&cpu);
