@@ -74,18 +74,18 @@ char psfreq_input_plan_from_optarg(const char *const p)
         char plan;
         const char *const automatic = "auto";
         const char *const powersave = "powersave";
+        const char *const balanced = "balanced";
         const char *const performance = "performance";
-        const char *const max_performance = "max-performance";
 
         if (psfreq_strings_starts_with(powersave, p)
                 || psfreq_strings_equals(INPUT_PLAN_STR_POWERSAVE, p)) {
                 plan = INPUT_PLAN_POWERSAVE;
+        } else if (psfreq_strings_starts_with(balanced, p)
+                || psfreq_strings_equals(INPUT_PLAN_STR_BALANCED, p)) {
+                plan = INPUT_PLAN_BALANCED;
         } else if (psfreq_strings_starts_with(performance, p)
                 || psfreq_strings_equals(INPUT_PLAN_STR_PERFORMANCE, p)) {
                 plan = INPUT_PLAN_PERFORMANCE;
-        } else if (psfreq_strings_starts_with(max_performance, p)
-                || psfreq_strings_equals(INPUT_PLAN_STR_MAX_PERFORMANCE, p)) {
-                plan = INPUT_PLAN_MAX_PERFORMANCE;
         } else if (psfreq_strings_starts_with(automatic, p)
                 || psfreq_strings_equals(INPUT_PLAN_STR_AUTO, p)) {
                 plan = INPUT_PLAN_AUTO;

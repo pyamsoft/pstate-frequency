@@ -73,23 +73,23 @@ INCLUDE_UDEV_RULE?=1
 # cpu_governor: Name of governor.
 #
 # Example:
-#   PRESET_POWER_PLAN_MAX_PERFORMANCE="100 100 0 performance"
-#   PRESET_POWER_PLAN_PERFORMANCE="100 0 1 powersave"
+#   PRESET_POWER_PLAN_PERFORMANCE="100 100 0 performance"
+#   PRESET_POWER_PLAN_BALANCED="100 0 1 powersave"
 #   PRESET_POWER_PLAN_POWERSAVE="0 0 1 powersave"
 #
-PRESET_POWER_PLAN_MAX_PERFORMANCE="100 100 0 performance"
-PRESET_POWER_PLAN_PERFORMANCE="100 0 1 powersave"
+PRESET_POWER_PLAN_PERFORMANCE="100 100 0 performance"
+PRESET_POWER_PLAN_BALANCED="100 0 1 powersave"
 PRESET_POWER_PLAN_POWERSAVE="0 0 1 powersave"
 
 ##
 # Runs the specified power plans on AC and BAT
 #
 # AUTO_POWER_PLAN_AC
-#    1 powersave | [2 performance] | 3 max-performance
+#    1 powersave | [2 balanced] | 3 performance
 # AUTO_POWER_PLAN_BAT
-#    [1 powersave] | 2 performance | 3 max-performance
+#    [1 powersave] | 2 balanced | 3 performance
 ##
-AUTO_POWER_PLAN_AC="performance"
+AUTO_POWER_PLAN_AC="balanced"
 AUTO_POWER_PLAN_BAT="powersave"
 
 ##
@@ -130,9 +130,9 @@ INCLUDE_LICENSE?=1
 # both successfully build on all levels of optimizations, though
 # -O2 is the default for the balance between speed and stability
 #
-# [clang] | gcc | OTHER
+# [gcc] | clang | OTHER
 ##
-CC?=clang
+CC?=gcc
 
 ##
 # Install prefix
@@ -189,17 +189,17 @@ ifdef AUTO_POWER_PLAN_BAT
 endif
 
 ##
-# Add the PRESET_POWER_PLAN_MAX_PERFORMANCE to the CFLAGS if it is defined
-##
-ifdef PRESET_POWER_PLAN_MAX_PERFORMANCE
-	CFLAGS+= -DPRESET_POWER_PLAN_MAX_PERFORMANCE=\"$(PRESET_POWER_PLAN_MAX_PERFORMANCE)\"
-endif
-
-##
 # Add the PRESET_POWER_PLAN_PERFORMANCE to the CFLAGS if it is defined
 ##
 ifdef PRESET_POWER_PLAN_PERFORMANCE
 	CFLAGS+= -DPRESET_POWER_PLAN_PERFORMANCE=\"$(PRESET_POWER_PLAN_PERFORMANCE)\"
+endif
+
+##
+# Add the PRESET_POWER_PLAN_BALANCED to the CFLAGS if it is defined
+##
+ifdef PRESET_POWER_PLAN_BALANCED
+	CFLAGS+= -DPRESET_POWER_PLAN_BALANCED=\"$(PRESET_POWER_PLAN_BALANCED)\"
 endif
 
 ##

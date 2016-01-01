@@ -48,9 +48,9 @@ static bool psfreq_plan_auto_exec(const char *const plan,
                 int *const turbo, char **const gov);
 static bool psfreq_plan_powersave(int *const max, int *const min,
                 int *const turbo, char **const gov);
-static bool psfreq_plan_performance(int *const max, int *const min,
+static bool psfreq_plan_balanced(int *const max, int *const min,
                 int *const turbo, char **const gov);
-static bool psfreq_plan_max_performance(int *const max, int *const min,
+static bool psfreq_plan_performance(int *const max, int *const min,
                 int *const turbo, char **const gov);
 static bool psfreq_plan_auto(int *const max, int *const min,
                 int *const turbo, char **const gov);
@@ -63,10 +63,10 @@ bool psfreq_plan_set_cpu(const char *const plan, int *const max,
                 r = psfreq_plan_auto(max, min, turbo, gov);
         } else if (*plan == INPUT_PLAN_POWERSAVE) {
                 r = psfreq_plan_powersave(max, min, turbo, gov);
+        } else if (*plan == INPUT_PLAN_BALANCED) {
+                r = psfreq_plan_balanced(max, min, turbo, gov);
         } else if (*plan == INPUT_PLAN_PERFORMANCE) {
                 r = psfreq_plan_performance(max, min, turbo, gov);
-        } else if (*plan == INPUT_PLAN_MAX_PERFORMANCE) {
-                r = psfreq_plan_max_performance(max, min, turbo, gov);
         } else {
                 r = false;
         }
@@ -119,12 +119,12 @@ static bool psfreq_plan_auto_exec(const char *const plan,
         if (psfreq_strings_starts_with(plan, "powersave")
             || psfreq_strings_equals(plan, "1")) {
                 return psfreq_plan_powersave(max, min, turbo, gov);
-        } else if (psfreq_strings_starts_with(plan, "performance")
+        } else if (psfreq_strings_starts_with(plan, "balanced")
                    || psfreq_strings_equals(plan, "2")) {
-                return psfreq_plan_performance(max, min, turbo, gov);
-        } else if (psfreq_strings_starts_with(plan, "max-performance")
+                return psfreq_plan_balanced(max, min, turbo, gov);
+        } else if (psfreq_strings_starts_with(plan, "performance")
                    || psfreq_strings_equals(plan, "3")) {
-                return psfreq_plan_max_performance(max, min, turbo, gov);
+                return psfreq_plan_performance(max, min, turbo, gov);
         } else {
                 psfreq_log_error("psfreq_plan_auto_ac",
                                  "Invalid plan specified");
@@ -147,11 +147,11 @@ static bool psfreq_plan_powersave(int *const max, int *const min,
 #endif
 }
 
-static bool psfreq_plan_performance(int *const max, int *const min,
+static bool psfreq_plan_balanced(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
-#ifdef PRESET_POWER_PLAN_PERFORMANCE
-        return psfreq_plan_set(PRESET_POWER_PLAN_PERFORMANCE, max,
+#ifdef PRESET_POWER_PLAN_BALANCED
+        return psfreq_plan_set(PRESET_POWER_PLAN_BALANCED, max,
                         min, turbo, gov);
 #else
         *max = 100;
@@ -162,11 +162,11 @@ static bool psfreq_plan_performance(int *const max, int *const min,
 #endif
 }
 
-static bool psfreq_plan_max_performance(int *const max, int *const min,
+static bool psfreq_plan_performance(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
-#ifdef PRESET_POWER_PLAN_MAX_PERFORMANCE
-        return psfreq_plan_set(PRESET_POWER_PLAN_MAX_PERFORMANCE, max,
+#ifdef PRESET_POWER_PLAN_PERFORMANCE
+        return psfreq_plan_set(PRESET_POWER_PLAN_PERFORMANCE, max,
                         min, turbo, gov);
 #else
         *max = 100;
@@ -201,7 +201,7 @@ static bool psfreq_plan_auto(int *const max, int *const min,
 		return psfreq_plan_auto_exec(AUTO_POWER_PLAN_AC,
                                 max, min, turbo, gov);
 #else
-		return psfreq_plan_performance(max, min, turbo, gov);
+		return psfreq_plan_balanced(max, min, turbo, gov);
 #endif
 	} else if (r == 2) {
 #ifdef AUTO_POWER_PLAN_BAT

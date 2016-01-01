@@ -30,13 +30,13 @@
 #define INPUT_PLAN_UNDEFINED            -1
 #define INPUT_PLAN_AUTO                 0
 #define INPUT_PLAN_POWERSAVE            1
-#define INPUT_PLAN_PERFORMANCE          2
-#define INPUT_PLAN_MAX_PERFORMANCE      3
+#define INPUT_PLAN_BALANCED             2
+#define INPUT_PLAN_PERFORMANCE          3
 
-#define INPUT_PLAN_STR_AUTO                 "0"
-#define INPUT_PLAN_STR_POWERSAVE            "1"
-#define INPUT_PLAN_STR_PERFORMANCE          "2"
-#define INPUT_PLAN_STR_MAX_PERFORMANCE      "3"
+#define INPUT_PLAN_STR_AUTO             "0"
+#define INPUT_PLAN_STR_POWERSAVE        "1"
+#define INPUT_PLAN_STR_BALANCED         "2"
+#define INPUT_PLAN_STR_PERFORMANCE      "3"
 
 #define INPUT_TURBO_UNDEFINED   -1
 #define INPUT_TURBO_ON          0
