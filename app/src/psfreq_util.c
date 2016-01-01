@@ -43,20 +43,20 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size)
         if (cmd == NULL) {
                 psfreq_log_error("psfreq_util_read_pipe",
                                 "cmd is NULL");
-                return NULL;
+                return READ_ERROR;
         }
         if (*size == 0) {
                 psfreq_log_error("psfreq_util_read_pipe",
                                 "Size is 0, which would"
                                 " result in empty array");
-                return NULL;
+                return READ_ERROR;
         }
 
         lines = malloc(*size * sizeof(char *));
         if (lines == NULL) {
                 psfreq_log_error("psfreq_util_read_pipe",
                                 "Failed to malloc for lines");
-                return NULL;
+                return READ_ERROR;
         }
 
         pipe = popen(cmd, "r");
@@ -64,7 +64,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size)
                 psfreq_log_error("psfreq_util_read_pipe",
                                 "Failed to open pipe '%s'", cmd);
                 free(lines);
-                return NULL;
+                return READ_ERROR;
         }
         for (i = 0; i < *size; ++i) {
                 char line[n];
@@ -73,11 +73,15 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size)
                                         "Failed to read from pipe");
                         free(lines);
                         pclose(pipe);
-                        return NULL;
+                        return READ_ERROR;
                 } else {
                         psfreq_log_debug("psfreq_util_read_pipe",
                                 "Assign line '%s' to array %d", line, i);
                         lines[i] = psfreq_util_strip_string_end(line);
+                        if (lines[i] == STRING_STRIP_ERROR) {
+                                psfreq_log_error("psfreq_util_read_pipe",
+                                        "Failed to strip string %d", i);
+                        }
                 }
         }
         pclose(pipe);
@@ -90,7 +94,7 @@ char *psfreq_util_read2(const char *base, const char *file)
         char *abs_path;
         abs_path = psfreq_strings_concat(base, file);
         if (abs_path == NULL) {
-                return NULL;
+                return READ_ERROR;
         }
         r = psfreq_util_read(abs_path);
         free(abs_path);
@@ -102,13 +106,14 @@ char *psfreq_util_read(const char *abs_path)
         FILE *f;
         const size_t n = 20;
         char line[n];
+        char *stripped;
 
         f = fopen(abs_path, "r");
         if (f == NULL) {
                 psfreq_log_error("psfreq_util_read",
                                 "File '%s' failed to open for reading.",
                                 abs_path);
-                return NULL;
+                return READ_ERROR;
         }
 
         if (fgets(line, n, f) == NULL) {
@@ -116,11 +121,16 @@ char *psfreq_util_read(const char *abs_path)
                                 "Failed to read buffer from file '%s'.",
                                 abs_path);
                 fclose(f);
-                return NULL;
+                return READ_ERROR;
         }
 
         fclose(f);
-        return psfreq_util_strip_string_end(line);
+        stripped = psfreq_util_strip_string_end(line);
+        if (stripped == STRING_STRIP_ERROR) {
+                psfreq_log_error("psfreq_util_read",
+                        "Failed to strip line from file");
+        }
+        return stripped;
 }
 
 bool psfreq_util_write(const char *abs_path, const char *buf)
@@ -129,7 +139,7 @@ bool psfreq_util_write(const char *abs_path, const char *buf)
         if (buf == NULL) {
                 psfreq_log_error("psfreq_util_write",
                                 "buf is NULL, exit.");
-                return false;
+                return WRITE_FAILURE;
         }
 
         f = fopen(abs_path, "w");
@@ -137,7 +147,7 @@ bool psfreq_util_write(const char *abs_path, const char *buf)
                 psfreq_log_error("psfreq_util_write",
                                 "File '%s' failed to open for writing.",
                                 abs_path);
-                return false;
+                return WRITE_FAILURE;
         }
 
         if (fprintf(f, "%s\n", buf) < 0) {
@@ -145,11 +155,11 @@ bool psfreq_util_write(const char *abs_path, const char *buf)
                                 "Failed to write buffer: %s to file '%s'.",
                                 buf, abs_path);
                 fclose(f);
-                return false;
+                return WRITE_FAILURE;
         }
 
         fclose(f);
-        return true;
+        return WRITE_SUCCESS;
 }
 
 bool psfreq_util_write2(const char *base, const char *file,
@@ -164,9 +174,9 @@ bool psfreq_util_write2(const char *base, const char *file,
         if (abs_path == NULL) {
                 psfreq_log_error("psfreq_util_write2",
                                 "Concat strings: '%s' and '%s' has failed.\n"
-                                "Function will return false.",
+                                "Function will return WRITE_FAILURE.",
                                 base, file);
-                return false;
+                return WRITE_FAILURE;
         }
 
 	r = psfreq_util_write(abs_path, buf);
@@ -199,7 +209,7 @@ static char *psfreq_util_strip_string_end(char *s)
         if (s == NULL) {
                 psfreq_log_error("psfreq_util_strip_string_end",
                                 "String is NULL");
-                return NULL;
+                return STRING_STRIP_ERROR;
         }
         i = strlen(s) - 1;
         if ((i > 0) && (s[i] == '\n')) {
@@ -207,7 +217,7 @@ static char *psfreq_util_strip_string_end(char *s)
         }
 
         if (psfreq_strings_asprintf(&ns, "%s", s) < 0) {
-                return NULL;
+                return STRING_STRIP_ERROR;
         }
         return ns;
 }

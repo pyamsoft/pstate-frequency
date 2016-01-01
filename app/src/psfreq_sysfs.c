@@ -60,10 +60,10 @@ void psfreq_sysfs_init(psfreq_sysfs_type *sysfs)
 bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf)
 {
-        if (sysfs == NULL) {
+        if (sysfs == SYSFS_UNDEFINED) {
                 psfreq_log_error("psfreq_sysfs_write",
-                                "sysfs is NULL, exit.");
-                return false;
+                                "sysfs is undefined, exit.");
+                return WRITE_FAILURE;
         }
         return psfreq_util_write2(sysfs->base_path, file, buf);
 }
@@ -80,10 +80,10 @@ bool psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
 char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
                 const char *file)
 {
-        if (sysfs == NULL) {
+        if (sysfs == SYSFS_UNDEFINED) {
                 psfreq_log_error("psfreq_sysfs_read",
-                                "sysfs is NULL, exit.");
-                return NULL;
+                                "sysfs is undefined, exit.");
+                return READ_ERROR;
         }
         return psfreq_util_read2(sysfs->base_path, file);
 }

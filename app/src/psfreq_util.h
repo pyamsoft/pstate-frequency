@@ -29,6 +29,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#define READ_ERROR              NULL
+#define STRING_STRIP_ERROR      NULL
+#define WRITE_SUCCESS           true
+#define WRITE_FAILURE           false
+
 char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size);
 char *psfreq_util_read(const char *abs_path);
 char *psfreq_util_read2(const char *base, const char *file);

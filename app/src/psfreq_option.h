@@ -34,16 +34,10 @@
 #define ACTION_TYPE_CPU_GET     2
 #define ACTION_TYPE_CPU_SET     3
 
-#define OPT_UNDEFINED  NULL
+#define OPT_UNDEFINED           NULL
 
 #define CPU_GET_TYPE_CURRENT    0
 #define CPU_GET_TYPE_REAL       1
-
-#define SLEEP           1
-#define NO_SLEEP        0
-
-#define DELAY           1
-#define NO_DELAY        0
 
 typedef struct psfreq_option_type {
         char action;

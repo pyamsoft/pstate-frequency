@@ -1,5 +1,6 @@
 #include <unistd.h>
 
+#include "psfreq_constants.h"
 #include "psfreq_cpu.h"
 #include "psfreq_input.h"
 #include "psfreq_log.h"
@@ -28,6 +29,8 @@ static bool set_cpu(const psfreq_cpu_type *cpu,
                       const int turbo, const char *const gov,
                       const bool do_sleep);
 
+static const unsigned int EUID_ROOT = 0;
+
 static bool has_reqeusted_options(const psfreq_option_type *options)
 {
         if (options->cpu_max == OPT_UNDEFINED
@@ -45,19 +48,19 @@ static bool set_cpu_values_raw(const psfreq_cpu_type *cpu,
                 int *const min, int *const turbo, char **const gov)
 {
         *max = get_cpu_max(cpu, options);
-        if (*max < 0) {
+        if (*max < CPU_FREQUENCY_MINIMUM) {
                 psfreq_log_error("set_cpu_values_raw",
                                 "Bad Max %d", *max);
                 return false;
         }
         *min = get_cpu_min(cpu, options);
-        if (*min < 0) {
+        if (*min < CPU_FREQUENCY_MINIMUM) {
                 psfreq_log_error("set_cpu_values_raw",
                                 "Bad Min %d", *min);
                 return false;
         }
         *turbo = get_cpu_turbo(cpu, options);
-        if (*turbo < 0) {
+        if (*turbo == TURBO_UNDEFINED) {
                 psfreq_log_error("set_cpu_values_raw",
                                 "Bad Turbo %d", *turbo);
                 return false;
@@ -135,19 +138,19 @@ static bool set_cpu(const psfreq_cpu_type *cpu,
                       const int turbo, const char *const gov,
                       const bool do_sleep)
 {
-        const int sane_max = 100;
-        const int sane_min = 0;
-        const int sane_turbo = 1;
+        const int sane_max = CPU_FREQUENCY_MAXIMUM;
+        const int sane_min = CPU_FREQUENCY_MINIMUM;
+        const int sane_turbo = TURBO_OFF;
         const char *const sane_gov = "powersave";
         if (cpu == NULL) {
                 psfreq_log_error("set_cpu",
                                 "cpu is NULL");
-                return 0;
+                return false;
         }
         if (sysfs == NULL) {
                 psfreq_log_error("set_cpu",
                                 "sysfs is NULL");
-                return 0;
+                return false;
         }
 
         /* Set sane cpu values first */
@@ -166,7 +169,7 @@ static bool set_cpu(const psfreq_cpu_type *cpu,
         psfreq_cpu_set_min(cpu, sysfs, &min);
         psfreq_cpu_set_gov(cpu, sysfs, gov);
         psfreq_cpu_set_turbo(sysfs, &turbo);
-        return 1;
+        return true;
 }
 
 int main(int argc, char **argv)
@@ -205,7 +208,7 @@ int main(int argc, char **argv)
                 int min;
                 int turbo;
                 char *gov = NULL;
-                if (geteuid() != 0) {
+                if (geteuid() != EUID_ROOT) {
                         psfreq_log_error("main", "You must be root.");
                         return EXIT_FAILURE;
                 }
@@ -234,7 +237,7 @@ int main(int argc, char **argv)
                         const char plan = \
                                         psfreq_input_plan_from_optarg(
                                                 options.cpu_plan);
-                        if (plan < 0) {
+                        if (plan == PLAN_UNDEFINED) {
                                 psfreq_cpu_destroy(&cpu);
                                 return EXIT_FAILURE;
                         }
@@ -243,7 +246,7 @@ int main(int argc, char **argv)
                         if (!r) {
                                 psfreq_log_error("main",
                                                 "Failed to set plan.");
-                                if (gov != NULL) {
+                                if (gov != GOV_UNDEFINED) {
                                         free(gov);
                                 }
                                 psfreq_cpu_destroy(&cpu);
@@ -253,7 +256,7 @@ int main(int argc, char **argv)
                         set_cpu(&cpu, &sysfs, max, min, turbo, gov,
                                         options.cpu_sleep);
                         /* Actual set */
-                        if (gov != NULL) {
+                        if (gov != GOV_UNDEFINED) {
                                 free(gov);
                         }
                 }

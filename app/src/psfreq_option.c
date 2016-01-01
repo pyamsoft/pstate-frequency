@@ -28,6 +28,11 @@
 #include "psfreq_log.h"
 #include "psfreq_option.h"
 
+static const bool DELAY = true;
+static const bool NO_DELAY = false;
+static const bool SLEEP = true;
+static const bool NO_SLEEP = false;
+
 void psfreq_option_init(psfreq_option_type *options)
 {
         options->action = ACTION_TYPE_UNDEFINED;

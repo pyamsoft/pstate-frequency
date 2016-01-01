@@ -88,7 +88,7 @@ static bool psfreq_plan_set(const char *const p,
                 return false;
         }
         arr = psfreq_plan_strtok(pp, POWER_PLAN_ITEMS, &arr_len);
-        if (arr == NULL) {
+        if (arr == STRTOK_ERROR) {
                 free(pp);
                 return false;
         }
@@ -143,9 +143,9 @@ static bool psfreq_plan_powersave(int *const max, int *const min,
         return psfreq_plan_set(PRESET_POWER_PLAN_POWERSAVE, max,
                         min, turbo, gov);
 #else
-        *max = 0;
-        *min = 0;
-        *turbo = 1;
+        *max = CPU_FREQUENCY_MINIMUM;
+        *min = CPU_FREQUENCY_MINIMUM;
+        *turbo = TURBO_OFF;
         *gov = GOV_POWERSAVE;
         return true;
 #endif
@@ -158,9 +158,9 @@ static bool psfreq_plan_balanced(int *const max, int *const min,
         return psfreq_plan_set(PRESET_POWER_PLAN_BALANCED, max,
                         min, turbo, gov);
 #else
-        *max = 100;
-        *min = 0;
-        *turbo = 1;
+        *max = CPU_FREQUENCY_MAXIMUM;
+        *min = CPU_FREQUENCY_MINIMUM;
+        *turbo = TURBO_OFF;
         *gov = GOV_POWERSAVE;
         return true;
 #endif
@@ -173,9 +173,9 @@ static bool psfreq_plan_performance(int *const max, int *const min,
         return psfreq_plan_set(PRESET_POWER_PLAN_PERFORMANCE, max,
                         min, turbo, gov);
 #else
-        *max = 100;
-        *min = 99;
-        *turbo = 0;
+        *max = CPU_FREQUENCY_MAXIMUM;
+        *min = CPU_FREQUENCY_MAXIMUM;
+        *turbo = TURBO_ON;
         *gov = GOV_PERFORMANCE;
         return true;
 #endif
@@ -223,7 +223,7 @@ static unsigned int psfreq_plan_get_power_source(DIR *const dir,
                 const char *const name)
 {
         struct dirent *entry =  readdir(dir);
-        unsigned int result = 0;
+        unsigned int result = POWER_SOURCE_UNDEFINED;
         while(entry) {
                 const char *const e_name = entry->d_name;
                 char *path;
@@ -233,24 +233,24 @@ static unsigned int psfreq_plan_get_power_source(DIR *const dir,
 			continue;
 		}
 		path = psfreq_strings_concat(name, e_name);
-		if (path == NULL) {
+		if (path == STRING_CONCAT_ERROR) {
 			psfreq_log_error("psfreq_plan_get_power_source",
 				"Path failed");
-			return 0;
+			return POWER_SOURCE_UNDEFINED;
 		}
 		full_path = psfreq_strings_concat(path, "/");
-		if (full_path == NULL) {
+		if (full_path == STRING_CONCAT_ERROR) {
 			psfreq_log_error("psfreq_plan_get_power_source",
 				"Path failed");
 			free(path);
-			return 0;
+			return POWER_SOURCE_UNDEFINED;
 		}
 		psfreq_log_debug("psfreq_plan_get_power_source",
 			"Power supply path: %s", full_path);
                 result = psfreq_plan_check_power_is_mains(full_path);
 		free(path);
 		free(full_path);
-		if (result > 0) {
+		if (result > POWER_SOURCE_UNDEFINED) {
 			break;
 		}
 		psfreq_log_debug("psfreq_plan_get_power_source",
@@ -270,54 +270,54 @@ static unsigned int psfreq_plan_check_power_is_mains(char *const p)
         if (p == NULL) {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
                                 "p is NULL");
-                return 0;
+                return POWER_SOURCE_UNDEFINED;
         }
 
         type = psfreq_strings_concat(p, "/type");
-        if (type == NULL) {
+        if (type == STRING_CONCAT_ERROR) {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
-                                "type is NULL");
-                return 0;
+                                "type is undefined");
+                return POWER_SOURCE_UNDEFINED;
         }
         if (access(type, F_OK) < 0) {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
                                 "Couldn't open file %s", type);
                 free(type);
-                return 0;
+                return POWER_SOURCE_UNDEFINED;
         }
         power = psfreq_util_read(type);
         free(type);
-        if (power == NULL) {
+        if (power == READ_ERROR) {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
-                                "power is NULL");
-                return 0;
+                                "power is undefined");
+                return POWER_SOURCE_UNDEFINED;
         }
         if (!psfreq_strings_equals("Mains", power)) {
                 psfreq_log_debug("psfreq_plan_check_power_is_mains",
                                 "power source not Mains");
                 free(power);
-                return 0;
+                return POWER_SOURCE_UNDEFINED;
         }
         stat = psfreq_util_read2(p, "/online");
-        if (stat == NULL) {
+        if (stat == READ_ERROR) {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
-                                "stat is NULL");
+                                "stat is undefined");
                 free(power);
-                return 0;
+                return POWER_SOURCE_UNDEFINED;
         }
         status = psfreq_strings_to_int(stat);
         if (status < 0) {
                 psfreq_log_error("psfreq_plan_check_power_is_mains",
-                                "stat is 0");
-                r = 0;
+                                "stat is non zero");
+                r = POWER_SOURCE_UNDEFINED;
         } else if (status) {
                 psfreq_log_debug("psfreq_plan_check_power_is_mains",
                                 "stat is AC");
-                r = 1;
+                r = POWER_SOURCE_MAINS;
         } else {
                 psfreq_log_debug("psfreq_plan_check_power_is_mains",
                                 "stat is BAT");
-                r = 2;
+                r = POWER_SOURCE_BATTERY;
         }
         free(stat);
         free(power);
@@ -341,13 +341,13 @@ static char **psfreq_plan_strtok(char *s, const size_t num, size_t *arr_len)
         if (arr == NULL) {
                 psfreq_log_debug("psfreq_plan_strtok",
                                 "Failed malloc");
-                return NULL;
+                return STRTOK_ERROR;
         }
         psfreq_log_debug("psfreq_plan_strtok",
                         "Split string '%s' by delims '%s'", s, del);
         tok = strtok_r(s, del, &saveptr);
         psfreq_log_debug("psfreq_plan_strtok", "First tok success");
-        while (tok != NULL) {
+        while (tok != STRTOK_ERROR) {
                 psfreq_log_debug("psfreq_strings_strok",
                                 "assign '%s' to arr[%d]", tok, i);
                 arr[i++] = tok;

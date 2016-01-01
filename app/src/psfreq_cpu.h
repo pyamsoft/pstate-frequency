@@ -26,6 +26,8 @@
 #ifndef PSFREQ_CPU_H
 #define PSFREQ_CPU_H
 
+#define CPU_UNDEFINED           NULL
+
 #include <stdbool.h>
 
 #include "psfreq_sysfs.h"

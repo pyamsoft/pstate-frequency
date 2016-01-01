@@ -29,6 +29,11 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define VASPRINTF_FAILURE               -1
+#define STRING_CONCAT_ERROR             NULL
+#define STRING_CONVERT_TO_ERROR         0
+#define STRING_CONVERT_FROM_ERROR       NULL
+
 char *psfreq_strings_concat(const char *const s1, const char *const s2);
 bool psfreq_strings_starts_with(const char *s, const char *p);
 bool psfreq_strings_equals(const char *s, const char *p);

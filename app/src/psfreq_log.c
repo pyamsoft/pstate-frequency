@@ -31,9 +31,15 @@
 
 typedef unsigned char psfreq_log_level;
 
-static psfreq_log_level psfreq_log_state = PSFREQ_LOG_NORMAL;
-
 static unsigned char psfreq_log_level_more_verbose(unsigned char log_level);
+
+static const psfreq_log_level PSFREQ_LOG_EXTRA_DEBUG = 1;
+static const psfreq_log_level PSFREQ_LOG_DEBUG       = 1 << 1;
+static const psfreq_log_level PSFREQ_LOG_NORMAL      = 1 << 2;
+static const psfreq_log_level PSFREQ_LOG_QUIET       = 1 << 3;
+static const psfreq_log_level PSFREQ_LOG_ALL_QUIET   = 1 << 4;
+static psfreq_log_level psfreq_log_state = 1 << 2;
+
 
 static unsigned char psfreq_log_level_more_verbose(unsigned char log_level)
 {

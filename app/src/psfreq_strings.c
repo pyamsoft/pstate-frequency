@@ -49,7 +49,7 @@ char *psfreq_strings_concat(const char *const s1, const char *const s2)
                 psfreq_log_error("psfreq_strings_concat",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
-                return NULL;
+                return STRING_CONCAT_ERROR;
         }
         return result;
 }
@@ -98,7 +98,7 @@ char *psfreq_strings_from_int(const int *const i)
                 psfreq_log_error("psfreq_strings_from_int",
                         "asprintf returned a -1, indicating a failure during\n"
                         "either memory allocation or some other error.");
-                return NULL;
+                return STRING_CONVERT_FROM_ERROR;
         }
         return buf;
 }
@@ -129,7 +129,7 @@ static int psfreq_strings_vasprintf(char **strp, const char *fmt, va_list ap)
         if (buf == NULL) {
                 psfreq_log_error("psfreq_strings_vasprintf",
                                 "Error allocating memory for string");
-                return -1;
+                return VASPRINTF_FAILURE;
         }
 
         *strp = buf;

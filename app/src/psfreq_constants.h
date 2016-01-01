@@ -53,4 +53,7 @@
 #define GOV_STR_POWERSAVE       "0"
 #define GOV_STR_PERFORMANCE     "1"
 
+#define CPU_FREQUENCY_MINIMUM   0
+#define CPU_FREQUENCY_MAXIMUM   100
+
 #endif

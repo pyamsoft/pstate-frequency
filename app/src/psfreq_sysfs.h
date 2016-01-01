@@ -31,6 +31,8 @@
 
 #include <stdbool.h>
 
+#define SYSFS_UNDEFINED NULL
+
 typedef struct psfreq_sysfs_type {
         const char *base_path;
 } psfreq_sysfs_type;

@@ -109,9 +109,9 @@ static void psfreq_output_current_freq(const char *const what,
 bool psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                            const psfreq_option_type *const options)
 {
-        if (cpu == NULL) {
+        if (cpu == CPU_UNDEFINED) {
                 psfreq_log_error("psfreq_output_get_cpu",
-                                "cpu is NULL");
+                                "cpu is undefined");
                 return false;
         }
 

@@ -26,6 +26,7 @@
 #define PSFREQ_INPUT_H
 
 #include <stdbool.h>
+
 #include "psfreq_option.h"
 
 bool psfreq_input_parse(psfreq_option_type *const options,

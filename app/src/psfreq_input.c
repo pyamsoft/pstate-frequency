@@ -53,7 +53,7 @@ bool psfreq_input_parse(psfreq_option_type *const options,
                 {"max",           required_argument,  NULL,           'm'},
                 {"min",           required_argument,  NULL,           'n'},
                 {"turbo",         required_argument,  NULL,           't'},
-                {0,               0,                  0,              0}
+                {NULL,            0,                  NULL,           0}
         };
 
         for (;;) {
@@ -152,7 +152,7 @@ char *psfreq_input_gov_from_optarg(const char *const g)
 static bool psfreq_input_string_isdigits(const char *s)
 {
         while (*s) {
-                if (isdigit(*s++) == 0) {
+                if (!isdigit(*s++)) {
                         return false;
                 }
         }

@@ -28,6 +28,11 @@
 #include <stdbool.h>
 #include <dirent.h>
 
+#define STRTOK_ERROR            NULL
+#define POWER_SOURCE_UNDEFINED  0
+#define POWER_SOURCE_MAINS      1
+#define POWER_SOURCE_BATTERY    2
+
 bool psfreq_plan_set_cpu(const char *const plan, int *const max,
                 int *const min, int *const turbo, char **const gov);
 
