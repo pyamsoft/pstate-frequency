@@ -15,7 +15,7 @@ conflicts=('pstate-frequency')
 license=('GPLv2')
 url="https://github.com/pyamsoft/pstate-frequency/archive/${pkgver}.tar.gz"
 source=("${url}")
-sha256sums=('a7a449469d9e9718579ddc355f4481c35916e4b43a39c8676138dd7fa5552450')
+sha256sums=('f2f976ff79711ef9d75a9f2da20999ee8c39b3fd051429a21c29a9d50fa9bf6d')
 
 prepare() {
   cd "$srcdir/${pkgname}-${pkgver}"
