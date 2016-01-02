@@ -359,7 +359,7 @@ static unsigned char psfreq_plan_auto(int *const max, int *const min,
         const char *const name = "/sys/class/power_supply/";
         DIR *const dir = opendir(name);
 	psfreq_log_debug("psfreq_plan_auto", "Open dir: %s", name);
-        if (!dir) {
+        if (dir == NULL) {
 		psfreq_log_error("psfreq_plan_auto",
 			"Couldn't open dir: %s", name);
                 return POWER_PLAN_APPLY_FAILURE;

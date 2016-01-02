@@ -62,36 +62,36 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
         switch(opt) {
         case 0:
                 /* end of options */
-                return 1;
+                return OPTION_PARSE_SUCCESS;
         case 'H':
                 /* Help */
                 if (options->action == ACTION_TYPE_UNDEFINED) {
 			options->action = ACTION_TYPE_HELP;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"Cannot define multiple actions");
-			return 0;
+			return OPTION_PARSE_FAILURE;
 		}
         case 'V':
                 /* Version */
                 if (options->action == ACTION_TYPE_UNDEFINED) {
 			options->action = ACTION_TYPE_VERSION;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"Cannot define multiple actions");
-			return 0;
+			return OPTION_PARSE_FAILURE;
 		}
         case 'G':
                 /* ACTION: Get */
                 if (options->action == ACTION_TYPE_UNDEFINED) {
 			options->action = ACTION_TYPE_CPU_GET;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"Cannot define multiple actions");
-			return 0;
+			return OPTION_PARSE_FAILURE;
 		}
         case 'c':
                 /*
@@ -100,11 +100,11 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_GET) {
                         options->cpu_get_type = CPU_GET_TYPE_CURRENT;
-                        return 1;
+                        return OPTION_PARSE_SUCCESS;
                 } else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -c|--current is only available when acting with -G|--get");
-                        return 0;
+                        return OPTION_PARSE_FAILURE;
                 }
         case 'r':
                 /*
@@ -113,21 +113,21 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_GET) {
                         options->cpu_get_type = CPU_GET_TYPE_REAL;
-                        return 1;
+                        return OPTION_PARSE_SUCCESS;
                 } else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -r|--real is only available when acting with -G|--get");
-                        return 0;
+                        return OPTION_PARSE_FAILURE;
                 }
         case 'S':
                 /* ACTION: Set */
                 if (options->action == ACTION_TYPE_UNDEFINED) {
 			options->action = ACTION_TYPE_CPU_SET;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"Cannot define multiple actions");
-			return 0;
+			return OPTION_PARSE_FAILURE;
 		}
         case 'p':
                 /*
@@ -136,11 +136,11 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_plan = optarg;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -p|--plan is only available when acting with -S|--set");
-                        return 0;
+                        return OPTION_PARSE_FAILURE;
 		}
         case 'm':
                 /*
@@ -149,11 +149,11 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_max = optarg;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -m|--max is only available when acting with -S|--set");
-                        return 0;
+                        return OPTION_PARSE_FAILURE;
 		}
         case 'g':
                 /*
@@ -162,11 +162,11 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_governor = optarg;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -g|--governor is only available when acting with -S|--set");
-                        return 0;
+                        return OPTION_PARSE_FAILURE;
 		}
         case 'n':
                 /*
@@ -175,11 +175,11 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_min = optarg;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -n|--min is only available when acting with -S|--set");
-                        return 0;
+                        return OPTION_PARSE_FAILURE;
 		}
         case 't':
                 /*
@@ -188,44 +188,44 @@ unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
                  */
                 if (options->action == ACTION_TYPE_CPU_SET) {
 			options->cpu_turbo = optarg;
-			return 1;
+			return OPTION_PARSE_SUCCESS;
 		} else {
 			psfreq_log_error("psfreq_option_parse",
 				"The switch -t|--turbo is only available when acting with -S|--set");
-                        return 0;
+                        return OPTION_PARSE_FAILURE;
 		}
         case 'd':
                 /* enable debugging */
                 psfreq_log_set_debug();
-                return 1;
+                return OPTION_PARSE_SUCCESS;
         case 'q':
                 psfreq_log_set_quiet();
-                return 1;
+                return OPTION_PARSE_SUCCESS;
         case '2':
                 /* Sleep for 2 seconds */
                 options->cpu_sleep = SLEEP;
-                return 1;
+                return OPTION_PARSE_SUCCESS;
         case '3':
                 /* Delay starting for 5 seconds */
                 options->delay = DELAY;
-                return 1;
+                return OPTION_PARSE_SUCCESS;
         case '1':
                 /* Enable color messages */
                 psfreq_color_enable();
-                return 1;
+                return OPTION_PARSE_SUCCESS;
         case ':':
                 /* Missing arguments */
                 psfreq_log_error("psfreq_option_parse",
                                 "Missing option arguments");
-                return 0;
+                return OPTION_PARSE_FAILURE;
         case '?':
                 /* Invalid option */
                 psfreq_log_error("psfreq_option_parse", "Invalid option");
-                return 0;
+                return OPTION_PARSE_FAILURE;
         default:
                 psfreq_log_error("psfreq_option_parse",
                                 "End of options, no matching option supported");
-                return 0;
+                return OPTION_PARSE_FAILURE;
         }
 }
 

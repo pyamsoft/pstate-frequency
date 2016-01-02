@@ -48,13 +48,13 @@ static unsigned int psfreq_cpu_init_freq(
 static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs);
 
-static const unsigned char SUCCESS = 1;
-static const unsigned char FAILURE = 0;
 static char **const CPU_VECTOR_UNDEFINED = NULL;
 static const int CPU_NUMBER_UNDEFINED = -1;
 static const unsigned int CPU_FREQUENCY_UNDEFINED = 0;
 static const unsigned char HAS_PSTATE = 1;
 static const unsigned char NO_PSTATE = 0;
+static const unsigned char SUCCESS = 1;
+static const unsigned char FAILURE = 0;
 
 unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
@@ -66,7 +66,7 @@ unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 psfreq_log_error("psfreq_cpu_init",
                         "System does not have intel_pstate and is unsupported");
                 free(cpu->scaling_driver);
-                return FAILURE;
+                return INIT_FAILURE;
         }
 
         cpu->cpu_num = psfreq_cpu_init_number_cpus();
@@ -94,7 +94,7 @@ static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
         cpu->scaling_min_freq = psfreq_cpu_init_freq(sysfs, "scaling", "min");
         cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
         cpu->pst_turbo = psfreq_cpu_init_turbo_boost(sysfs);
-        return SUCCESS;
+        return INIT_SUCCESS;
 }
 
 unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
@@ -404,12 +404,14 @@ unsigned char psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
                                 "cpu->vector_scaling_max_freq is undefined");
                 return FAILURE;
         }
-        if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/max_perf_pct", &n)) {
+        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/max_perf_pct", &n)
+                         == WRITE_FAILURE) {
                 return FAILURE;
         }
         for (i = 0; i < num; ++i) {
-                if (!psfreq_sysfs_write_num(sysfs,
-                                cpu->vector_scaling_max_freq[i], &freq)) {
+                if (psfreq_sysfs_write_num(sysfs,
+                        cpu->vector_scaling_max_freq[i], &freq)
+                                == WRITE_FAILURE) {
                         return FAILURE;
                 }
         }
@@ -454,12 +456,14 @@ unsigned char psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
                                 "cpu->vector_scaling_min_freq is undefined");
                 return FAILURE;
         }
-        if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/min_perf_pct", &n)) {
+        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/min_perf_pct", &n)
+                        == WRITE_FAILURE) {
                 return FAILURE;
         }
         for (i = 0; i < num; ++i) {
-                if (!psfreq_sysfs_write_num(sysfs,
-                                cpu->vector_scaling_min_freq[i], &freq)) {
+                if (psfreq_sysfs_write_num(sysfs,
+                        cpu->vector_scaling_min_freq[i], &freq)
+                                == WRITE_FAILURE) {
                         return FAILURE;
                 }
         }
@@ -494,8 +498,9 @@ unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
                 return FAILURE;
         }
         for (i = 0; i < num; ++i) {
-                if (!psfreq_sysfs_write(sysfs,
-                                cpu->vector_scaling_governor[i], m)) {
+                if (psfreq_sysfs_write(sysfs,
+                        cpu->vector_scaling_governor[i], m)
+                                == WRITE_FAILURE) {
                         return FAILURE;
                 }
         }
@@ -510,7 +515,8 @@ unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
                                 "sysfs is undefined");
                 return FAILURE;
         }
-        if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/no_turbo", m)) {
+        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/no_turbo", m)
+                        == WRITE_FAILURE) {
                 return FAILURE;
         }
         return SUCCESS;

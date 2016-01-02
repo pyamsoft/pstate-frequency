@@ -37,6 +37,8 @@
 #define ACTION_TYPE_CPU_SET     3
 #define CPU_GET_TYPE_CURRENT    0
 #define CPU_GET_TYPE_REAL       1
+#define OPTION_PARSE_SUCCESS    1
+#define OPTION_PARSE_FAILURE    0
 
 typedef struct psfreq_option_type {
         char action;

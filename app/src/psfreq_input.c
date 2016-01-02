@@ -69,7 +69,8 @@ unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 if (opt < 0) {
                         break;
                 } else {
-                        if (!psfreq_option_parse(options, opt)) {
+                        if (psfreq_option_parse(options, opt)
+                                        == OPTION_PARSE_FAILURE) {
                                 return INPUT_PARSE_FAILURE;
                         }
                 }

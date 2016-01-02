@@ -155,7 +155,7 @@ static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
                 psfreq_sysfs_type *sysfs)
 {
         psfreq_sysfs_init(sysfs);
-        if (!psfreq_cpu_init(cpu, sysfs)) {
+        if (psfreq_cpu_init(cpu, sysfs) == INIT_FAILURE) {
                 return FAILURE;
         }
         return SUCCESS;
@@ -208,7 +208,7 @@ int main(int argc, char **argv)
 	psfreq_option_type options;
 
 	psfreq_option_init(&options);
-	if (!psfreq_input_parse(&options, argc, argv)) {
+	if (psfreq_input_parse(&options, argc, argv) == INPUT_PARSE_FAILURE) {
                 return EXIT_FAILURE;
         }
 
@@ -241,19 +241,19 @@ int main(int argc, char **argv)
                         psfreq_log_error("main", "You must be root.");
                         return EXIT_FAILURE;
                 }
-                if (!has_reqeusted_options(&options)) {
+                if (has_reqeusted_options(&options) == FAILURE) {
                         psfreq_log_error("main",
                                         "An operation must be specified");
                         return EXIT_FAILURE;
                 }
-                if (!init_cpu_and_sysfs(&cpu, &sysfs)) {
+                if (init_cpu_and_sysfs(&cpu, &sysfs) == FAILURE) {
                         return EXIT_FAILURE;
                 }
                 /* Set cpu */
                 const char *const p = options.cpu_plan;
                 if (p == OPT_UNDEFINED) {
-                        if (!set_cpu_values_raw(&cpu, &options, &max, &min,
-                                                &turbo, &gov)) {
+                        if (set_cpu_values_raw(&cpu, &options, &max, &min,
+                                                &turbo, &gov) == FAILURE) {
                                 psfreq_cpu_destroy(&cpu);
                                 return EXIT_FAILURE;
                         }
@@ -271,7 +271,7 @@ int main(int argc, char **argv)
                         }
                         r = psfreq_plan_set_cpu(&plan, &max, &min, &turbo,
                                         &gov);
-                        if (!r) {
+                        if (r == POWER_PLAN_APPLY_FAILURE) {
                                 psfreq_log_error("main",
                                                 "Failed to set plan.");
                                 if (gov != GOV_UNDEFINED) {
@@ -291,7 +291,7 @@ int main(int argc, char **argv)
                 /* After setting the cpu, re-init the changed areas */
                 psfreq_cpu_reinit(&cpu, &sysfs);
         } else if (options.action == ACTION_TYPE_CPU_GET) {
-                if (!init_cpu_and_sysfs(&cpu, &sysfs)) {
+                if (init_cpu_and_sysfs(&cpu, &sysfs) == FAILURE) {
                         return EXIT_FAILURE;
                 }
         }

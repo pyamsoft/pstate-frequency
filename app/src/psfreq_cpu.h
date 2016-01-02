@@ -32,7 +32,9 @@
  * NULL is defined as 0, just hard code it here.
  * No need to include the entire stdlib.h
  */
-#define CPU_UNDEFINED           0
+#define CPU_UNDEFINED   0
+#define INIT_FAILURE    0
+#define INIT_SUCCESS    1
 
 typedef struct psfreq_cpu_type {
         unsigned char has_pstate;
