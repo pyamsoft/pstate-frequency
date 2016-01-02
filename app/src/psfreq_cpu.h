@@ -36,14 +36,14 @@
 
 typedef struct psfreq_cpu_type {
         unsigned char has_pstate;
-        unsigned int cpu_num;
+        int cpu_num;
         char **vector_scaling_max_freq;
         char **vector_scaling_min_freq;
         char **vector_scaling_governor;
-        unsigned int cpuinfo_min_freq;
-        unsigned int cpuinfo_max_freq;
-        unsigned int scaling_min_freq;
-        unsigned int scaling_max_freq;
+        long cpuinfo_min_freq;
+        long cpuinfo_max_freq;
+        long scaling_min_freq;
+        long scaling_max_freq;
         char pst_turbo;
         char pst_max;
         char pst_min;

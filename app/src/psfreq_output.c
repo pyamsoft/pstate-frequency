@@ -78,9 +78,19 @@ static void psfreq_output_current_freq(const char *const what,
  */
 static void psfreq_output_real(const psfreq_cpu_type *cpu)
 {
-                unsigned int i;
-                char **frequencies = psfreq_cpu_get_real_freqs(cpu);
-                for (i = 0; i < cpu->cpu_num; ++i) {
+                int i;
+                int num;
+                char **frequencies;
+
+                if (cpu == CPU_UNDEFINED) {
+                        psfreq_log_error("psfreq_output_real",
+                                        "cpu is undefined");
+                        return;
+                }
+
+                num = cpu->cpu_num;
+                frequencies = psfreq_cpu_get_real_freqs(cpu);
+                for (i = 0; i < num; ++i) {
                         psfreq_log("    %spstate::%sCPU[%s%d%s]%s   -> %s%sMHz%s",
                                 psfreq_color_green(), psfreq_color_blue(),
                                 psfreq_color_reset(), i, psfreq_color_blue(),

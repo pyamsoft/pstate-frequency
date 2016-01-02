@@ -55,6 +55,10 @@ static unsigned char set_cpu(const psfreq_cpu_type *cpu,
                       const unsigned char do_sleep);
 
 static const unsigned int EUID_ROOT = 0;
+static const unsigned char SUCCESS = 1;
+static const unsigned char FAILURE = 0;
+static const long DELAY_PERIOD = 5;
+static const long SLEEP_PERIOD = 2;
 
 static unsigned char has_reqeusted_options(const psfreq_option_type *options)
 {
@@ -63,9 +67,9 @@ static unsigned char has_reqeusted_options(const psfreq_option_type *options)
             && options->cpu_turbo == OPT_UNDEFINED
             && options->cpu_governor == OPT_UNDEFINED
             && options->cpu_plan == OPT_UNDEFINED) {
-                return 0;
+                return FAILURE;
         }
-        return 1;
+        return SUCCESS;
 }
 
 static unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
@@ -76,27 +80,27 @@ static unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
         if (*max < CPU_FREQUENCY_MINIMUM) {
                 psfreq_log_error("set_cpu_values_raw",
                                 "Bad Max %d", *max);
-                return 0;
+                return FAILURE;
         }
         *min = get_cpu_min(cpu, options);
         if (*min < CPU_FREQUENCY_MINIMUM) {
                 psfreq_log_error("set_cpu_values_raw",
                                 "Bad Min %d", *min);
-                return 0;
+                return FAILURE;
         }
         *turbo = get_cpu_turbo(cpu, options);
         if (*turbo == TURBO_UNDEFINED) {
                 psfreq_log_error("set_cpu_values_raw",
                                 "Bad Turbo %d", *turbo);
-                return 0;
+                return FAILURE;
         }
         *gov = get_cpu_gov(cpu, options);
         if (*gov == GOV_UNDEFINED) {
                 psfreq_log_error("set_cpu_values_raw",
                                 "Bad Gov %s", gov);
-                return 0;
+                return FAILURE;
         }
-        return 1;
+        return SUCCESS;
 }
 
 static int get_cpu_max(const psfreq_cpu_type *cpu,
@@ -152,9 +156,9 @@ static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
 {
         psfreq_sysfs_init(sysfs);
         if (!psfreq_cpu_init(cpu, sysfs)) {
-                return 0;
+                return FAILURE;
         }
-        return 1;
+        return SUCCESS;
 }
 
 static unsigned char set_cpu(const psfreq_cpu_type *cpu,
@@ -170,12 +174,12 @@ static unsigned char set_cpu(const psfreq_cpu_type *cpu,
         if (cpu == CPU_UNDEFINED) {
                 psfreq_log_error("set_cpu",
                                 "cpu is undefined");
-                return 0;
+                return FAILURE;
         }
         if (sysfs == SYSFS_UNDEFINED) {
                 psfreq_log_error("set_cpu",
                                 "sysfs is undefined");
-                return 0;
+                return FAILURE;
         }
 
         /* Set sane cpu values first */
@@ -185,7 +189,7 @@ static unsigned char set_cpu(const psfreq_cpu_type *cpu,
         psfreq_cpu_set_turbo(sysfs, &sane_turbo);
 
         if (do_sleep) {
-                sleep(2);
+                sleep(SLEEP_PERIOD);
         }
 
         psfreq_log_debug("set_cpu", "Set cpu values: %d, %d, %d, %s",
@@ -194,7 +198,7 @@ static unsigned char set_cpu(const psfreq_cpu_type *cpu,
         psfreq_cpu_set_min(cpu, sysfs, &min);
         psfreq_cpu_set_gov(cpu, sysfs, gov);
         psfreq_cpu_set_turbo(sysfs, &turbo);
-        return 1;
+        return SUCCESS;
 }
 
 int main(int argc, char **argv)
@@ -216,7 +220,7 @@ int main(int argc, char **argv)
                  * Delay start up for 5 seconds for the
                  * file system to initialize
                  */
-                sleep(5);
+                sleep(DELAY_PERIOD);
         }
 
         if (options.action == ACTION_TYPE_HELP ||
@@ -246,9 +250,10 @@ int main(int argc, char **argv)
                         return EXIT_FAILURE;
                 }
                 /* Set cpu */
-                if (options.cpu_plan == OPT_UNDEFINED) {
-                        if (!set_cpu_values_raw(&cpu, &options, &max,
-                                                &min, &turbo, &gov)) {
+                const char *const p = options.cpu_plan;
+                if (p == OPT_UNDEFINED) {
+                        if (!set_cpu_values_raw(&cpu, &options, &max, &min,
+                                                &turbo, &gov)) {
                                 psfreq_cpu_destroy(&cpu);
                                 return EXIT_FAILURE;
                         }
@@ -259,15 +264,13 @@ int main(int argc, char **argv)
                 } else {
                         /* Pass max,min,turbo,gov and set by plan */
                         unsigned char r;
-                        const char plan = \
-                                        psfreq_input_plan_from_optarg(
-                                                options.cpu_plan);
+                        const char plan = psfreq_input_plan_from_optarg(p);
                         if (plan == PLAN_UNDEFINED) {
                                 psfreq_cpu_destroy(&cpu);
                                 return EXIT_FAILURE;
                         }
-                        r = psfreq_plan_set_cpu(&plan, &max, &min,
-                                        &turbo, &gov);
+                        r = psfreq_plan_set_cpu(&plan, &max, &min, &turbo,
+                                        &gov);
                         if (!r) {
                                 psfreq_log_error("main",
                                                 "Failed to set plan.");
@@ -278,9 +281,9 @@ int main(int argc, char **argv)
                                 return EXIT_FAILURE;
                         }
 
+                        /* Actual set */
                         set_cpu(&cpu, &sysfs, max, min, turbo, gov,
                                         options.cpu_sleep);
-                        /* Actual set */
                         if (gov != GOV_UNDEFINED) {
                                 free(gov);
                         }

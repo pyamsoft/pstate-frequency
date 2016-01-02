@@ -148,14 +148,14 @@ int psfreq_strings_to_int(const char *const s)
 }
 
 /**
- * Cast a string to unsigned integer value
+ * Cast a string to long integer value
  *
- * @param s Sting to cast
- * @return Integer value of casted string, -1 if failure
+ * @param s String to cast
+ * @return Long integer value of casted string, -1 if failure
  */
-unsigned int psfreq_strings_to_uint(const char *const s)
+long psfreq_strings_to_long(const char *const s)
 {
-        return (unsigned int) psfreq_strings_to_double(s);
+        return (long) psfreq_strings_to_double(s);
 }
 
 /**

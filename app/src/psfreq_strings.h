@@ -68,18 +68,18 @@ unsigned char psfreq_strings_equals(const char *s, const char *p);
 /**
  * Cast a string to integer value
  *
- * @param s Sting to cast
+ * @param s String to cast
  * @return Integer value of casted string, -1 if failure
  */
 int psfreq_strings_to_int(const char *const s);
 
 /**
- * Cast a string to unsigned integer value
+ * Cast a string to long integer value
  *
  * @param s Sting to cast
- * @return Integer value of casted string, -1 if failure
+ * @return Long integer value of casted string, -1 if failure
  */
-unsigned int psfreq_strings_to_uint(const char *const s);
+long psfreq_strings_to_long(const char *const s);
 
 /**
  * Allocate a string representation of an integer value
