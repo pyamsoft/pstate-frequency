@@ -27,10 +27,40 @@
 #ifndef PSFREQ_LOG_H
 #define PSFREQ_LOG_H
 
+/**
+ * Log output with a fancy wrapper
+ *
+ * @param fmt Format string
+ * @param ... format args
+ */
 void psfreq_log(const char *const fmt, ...);
+
+/**
+ * Log debug level output with a fancy wrapper
+ *
+ * @param name Function name the debug is being called from
+ * @param fmt Format string
+ * @param ... format args
+ */
 void psfreq_log_debug(const char *const name, const char *const fmt, ...);
+
+/**
+ * Log error level output with a fancy wrapper
+ *
+ * @param name Function name the error is being called from
+ * @param fmt Format string
+ * @param ... format args
+ */
 void psfreq_log_error(const char *const name, const char *const fmt, ...);
+
+/**
+ * Set log level to debug
+ */
 void psfreq_log_set_debug(void);
+
+/**
+ * Set log level to quiet
+ */
 void psfreq_log_set_quiet(void);
 
 #endif

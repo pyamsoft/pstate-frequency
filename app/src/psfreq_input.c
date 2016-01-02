@@ -30,6 +30,15 @@
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
 
+/**
+ * Parse the passed in input and pass the processed input to options
+ *
+ * @param options The psfreq_option_type instance to use
+ * @param argc Number of arguments, literally just pass it argc from main
+ * @param argv arguments array, literally just pass it argv from main
+ * @return Boolean value, true if all options parsed successfully, false if
+ * otherwise
+ */
 unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv)
 {
@@ -68,6 +77,12 @@ unsigned char psfreq_input_parse(psfreq_option_type *const options,
         return INPUT_PARSE_SUCCESS;
 }
 
+/**
+ * Parse the power plan from the option argument
+ *
+ * @param p The option argument string to parse
+ * @return The power plan value, or undefined if passed in input is invalid
+ */
 char psfreq_input_plan_from_optarg(const char *const p)
 {
         char plan;
@@ -91,6 +106,12 @@ char psfreq_input_plan_from_optarg(const char *const p)
         return plan;
 }
 
+/**
+ * Parse the turbo from the option argument
+ *
+ * @param t The option argument string to parse
+ * @return The turbo value, or undefined if passed in input is invalid
+ */
 char psfreq_input_turbo_from_optarg(const char *const t)
 {
         char turbo;
@@ -108,6 +129,12 @@ char psfreq_input_turbo_from_optarg(const char *const t)
         return turbo;
 }
 
+/**
+ * Parse the governor from the option argument
+ *
+ * @param g The option argument string to parse
+ * @return The governor value, or undefined if passed in input is invalid
+ */
 char *psfreq_input_gov_from_optarg(const char *const g)
 {
         char *gov;

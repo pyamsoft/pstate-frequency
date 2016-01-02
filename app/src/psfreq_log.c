@@ -32,6 +32,11 @@
 
 typedef unsigned char psfreq_log_level;
 
+/**
+ * Compare current log level to passed in log level
+ *
+ * @param log_level Log level required
+ */
 static unsigned char psfreq_log_level_more_verbose(unsigned char log_level);
 
 static const psfreq_log_level PSFREQ_LOG_EXTRA_DEBUG = 1;
@@ -39,14 +44,19 @@ static const psfreq_log_level PSFREQ_LOG_DEBUG       = 1 << 1;
 static const psfreq_log_level PSFREQ_LOG_NORMAL      = 1 << 2;
 static const psfreq_log_level PSFREQ_LOG_QUIET       = 1 << 3;
 static const psfreq_log_level PSFREQ_LOG_ALL_QUIET   = 1 << 4;
+
+/*
+ * Apperantly can't assign this to PSFREQ_LOG_NORMAL because it
+ * is 'not constant'
+ */
 static psfreq_log_level psfreq_log_state = 1 << 2;
 
-
-static unsigned char psfreq_log_level_more_verbose(unsigned char log_level)
-{
-        return (psfreq_log_state < log_level);
-}
-
+/**
+ * Log output with a fancy wrapper
+ *
+ * @param fmt Format string
+ * @param ... format args
+ */
 void psfreq_log_debug(const char *const name, const char *const fmt, ...)
 {
         va_list arg;
@@ -63,6 +73,13 @@ void psfreq_log_debug(const char *const name, const char *const fmt, ...)
         }
 }
 
+/**
+ * Log debug level output with a fancy wrapper
+ *
+ * @param name Function name the debug is being called from
+ * @param fmt Format string
+ * @param ... format args
+ */
 void psfreq_log(const char *const fmt, ...)
 {
         va_list arg;
@@ -74,6 +91,13 @@ void psfreq_log(const char *const fmt, ...)
         }
 }
 
+/**
+ * Log error level output with a fancy wrapper
+ *
+ * @param name Function name the error is being called from
+ * @param fmt Format string
+ * @param ... format args
+ */
 void psfreq_log_error(const char *const name, const char *const fmt, ...)
 {
         va_list arg;
@@ -90,6 +114,9 @@ void psfreq_log_error(const char *const name, const char *const fmt, ...)
         }
 }
 
+/**
+ * Set log level to debug
+ */
 void psfreq_log_set_debug(void)
 {
         unsigned char v = PSFREQ_LOG_EXTRA_DEBUG;
@@ -98,6 +125,9 @@ void psfreq_log_set_debug(void)
         }
 }
 
+/**
+ * Set log level to quiet
+ */
 void psfreq_log_set_quiet(void)
 {
         unsigned char v = PSFREQ_LOG_ALL_QUIET;
@@ -105,3 +135,14 @@ void psfreq_log_set_quiet(void)
                 psfreq_log_state <<= 1;
         }
 }
+
+/**
+ * Compare current log level to passed in log level
+ *
+ * @param log_level Log level required
+ */
+static unsigned char psfreq_log_level_more_verbose(unsigned char log_level)
+{
+        return (psfreq_log_state < log_level);
+}
+

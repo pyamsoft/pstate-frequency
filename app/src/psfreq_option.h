@@ -50,7 +50,19 @@ typedef struct psfreq_option_type {
         unsigned char delay;
 } psfreq_option_type;
 
+/**
+ * Initialize a new psfreq_option_type instance
+ *
+ * @param options the option instance to initialize
+ */
 void psfreq_option_init(psfreq_option_type *options);
+
+/**
+ * Parse options returned from the GNU getopt_long function
+ *
+ * @param options the option instance to use
+ * @param opt The option code from getopt_long
+ */
 unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt);
 
 #endif

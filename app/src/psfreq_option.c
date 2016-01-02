@@ -33,30 +33,30 @@ static const unsigned char NO_DELAY = 0;
 static const unsigned char SLEEP = 1;
 static const unsigned char NO_SLEEP = 0;
 
+/**
+ * Initialize a new psfreq_option_type instance
+ *
+ * @param options the option instance to initialize
+ */
 void psfreq_option_init(psfreq_option_type *options)
 {
         options->action = ACTION_TYPE_UNDEFINED;
-
-        /* options->cpu_turbo = malloc(sizeof(char *)); */
         options->cpu_turbo = OPT_UNDEFINED;
-
-        /* options->cpu_max = malloc(sizeof(char *)); */
         options->cpu_max = OPT_UNDEFINED;
-
-        /* options->cpu_min = malloc(sizeof(char *)); */
         options->cpu_min = OPT_UNDEFINED;
-
-        /* options->cpu_governor = malloc(sizeof(char *)); */
         options->cpu_governor = OPT_UNDEFINED;
-
-        /* options->cpu_plan = malloc(sizeof(char *)); */
         options->cpu_plan = OPT_UNDEFINED;
-
         options->cpu_get_type = CPU_GET_TYPE_CURRENT;
         options->cpu_sleep = NO_SLEEP;
         options->delay = NO_DELAY;
 }
 
+/**
+ * Parse options returned from the GNU getopt_long function
+ *
+ * @param options the option instance to use
+ * @param opt The option code from getopt_long
+ */
 unsigned char psfreq_option_parse(psfreq_option_type *options, const int opt)
 {
         switch(opt) {
