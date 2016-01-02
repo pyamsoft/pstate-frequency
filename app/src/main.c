@@ -34,20 +34,91 @@
 #include "psfreq_strings.h"
 #include "psfreq_sysfs.h"
 
+/**
+ * Check that the requested options are set
+ *
+ * @param options psfreq_option_type instance to use
+ * @return Boolean type, true if options are ready, false if otherwise
+ */
 static unsigned char has_reqeusted_options(const psfreq_option_type *options);
-static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
-                psfreq_sysfs_type *sysfs);
-static int get_cpu_max(const psfreq_cpu_type *cpu,
-                const psfreq_option_type *options);
-static int get_cpu_min(const psfreq_cpu_type *cpu,
-                const psfreq_option_type *options);
-static char get_cpu_turbo(const psfreq_cpu_type *cpu,
-                const psfreq_option_type *options);
+
+/**
+ * Check that the requested options are set
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @param max The max cpu value holder
+ * @param min The min cpu value holder
+ * @param turbo The turbo cpu value holder
+ * @param gov The governor cpu value holder
+ * @return Boolean type, true if successful, false if otherwise
+ */
 static unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
                 const psfreq_option_type *options, int *const max,
                 int *const min, int *const turbo, char **const gov);
+
+/**
+ * Get the cpu max, either requested or current value
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @return The cpu max
+ */
+static int get_cpu_max(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options);
+
+/**
+ * Get the cpu min, either requested or current value
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @return The cpu min
+ */
+static int get_cpu_min(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options);
+
+/**
+ * Get the cpu turbo, either requested or current value
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @return The cpu turbo
+ */
+static char get_cpu_turbo(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options);
+
+/**
+ * Get the cpu governor, either requested or current value
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @return The cpu governor
+ */
 static char *get_cpu_gov(const psfreq_cpu_type *cpu,
                 const psfreq_option_type *options);
+
+/**
+ * Initialize safely both the sysfs and the cpu instances
+ *
+ * @param cpu psfreq_cpu_type instance to initialize
+ * @param sysfs psfreq_sysfs_type instance to initialize
+ * @return Boolean type, true if initialization successful, false if otherwise
+ */
+static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
+                psfreq_sysfs_type *sysfs);
+
+/**
+ * Set the CPU values, first setting sane defaults and then user values
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param sysfs psfreq_sysfs_type instance to use
+ * @param max The max cpu value holder
+ * @param min The min cpu value holder
+ * @param turbo The turbo cpu value holder
+ * @param gov The governor cpu value holder
+ * @param do_sleep Boolean type, sleep for SLEEP_PERIOD if set
+ * @return Boolean type, true if setting is successful, false if otherwise
+ */
 static unsigned char set_cpu(const psfreq_cpu_type *cpu,
                       const psfreq_sysfs_type *sysfs,
                       const int max, const int min,
@@ -59,149 +130,6 @@ static const unsigned char SUCCESS = 1;
 static const unsigned char FAILURE = 0;
 static const long DELAY_PERIOD = 5;
 static const long SLEEP_PERIOD = 2;
-
-static unsigned char has_reqeusted_options(const psfreq_option_type *options)
-{
-        if (options->cpu_max == OPT_UNDEFINED
-            && options->cpu_min == OPT_UNDEFINED
-            && options->cpu_turbo == OPT_UNDEFINED
-            && options->cpu_governor == OPT_UNDEFINED
-            && options->cpu_plan == OPT_UNDEFINED) {
-                return FAILURE;
-        }
-        return SUCCESS;
-}
-
-static unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
-                const psfreq_option_type *options, int *const max,
-                int *const min, int *const turbo, char **const gov)
-{
-        *max = get_cpu_max(cpu, options);
-        if (*max < CPU_FREQUENCY_MINIMUM) {
-                psfreq_log_error("set_cpu_values_raw",
-                                "Bad Max %d", *max);
-                return FAILURE;
-        }
-        *min = get_cpu_min(cpu, options);
-        if (*min < CPU_FREQUENCY_MINIMUM) {
-                psfreq_log_error("set_cpu_values_raw",
-                                "Bad Min %d", *min);
-                return FAILURE;
-        }
-        *turbo = get_cpu_turbo(cpu, options);
-        if (*turbo == TURBO_UNDEFINED) {
-                psfreq_log_error("set_cpu_values_raw",
-                                "Bad Turbo %d", *turbo);
-                return FAILURE;
-        }
-        *gov = get_cpu_gov(cpu, options);
-        if (*gov == GOV_UNDEFINED) {
-                psfreq_log_error("set_cpu_values_raw",
-                                "Bad Gov %s", gov);
-                return FAILURE;
-        }
-        return SUCCESS;
-}
-
-static int get_cpu_max(const psfreq_cpu_type *cpu,
-                const psfreq_option_type *options)
-{
-        int max;
-        if (options->cpu_max != OPT_UNDEFINED) {
-                max = psfreq_strings_to_int(options->cpu_max);
-        } else {
-                max = psfreq_cpu_get_scaling_max(cpu);
-        }
-        return max;
-}
-
-static int get_cpu_min(const psfreq_cpu_type *cpu,
-                const psfreq_option_type *options)
-{
-        int min;
-        if (options->cpu_min != OPT_UNDEFINED) {
-                min = psfreq_strings_to_int(options->cpu_min);
-        } else {
-                min = psfreq_cpu_get_scaling_min(cpu);
-        }
-        return min;
-}
-
-static char get_cpu_turbo(const psfreq_cpu_type *cpu,
-                const psfreq_option_type *options)
-{
-        char turbo;
-        if (options->cpu_turbo != OPT_UNDEFINED) {
-                turbo = psfreq_input_turbo_from_optarg(options->cpu_turbo);
-        } else {
-                turbo = cpu->pst_turbo;
-        }
-        return turbo;
-}
-
-static char *get_cpu_gov(const psfreq_cpu_type *cpu,
-                const psfreq_option_type *options)
-{
-        char *gov;
-        if (options->cpu_governor != OPT_UNDEFINED) {
-                gov = psfreq_input_gov_from_optarg(options->cpu_governor);
-        } else {
-                gov = cpu->scaling_governor;
-        }
-        return gov;
-}
-
-static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
-                psfreq_sysfs_type *sysfs)
-{
-        psfreq_sysfs_init(sysfs);
-        if (psfreq_cpu_init(cpu, sysfs) == INIT_FAILURE) {
-                psfreq_log_error("init_cpu_and_sysfs",
-                        "System has failed to initialize");
-                return FAILURE;
-        }
-        return SUCCESS;
-}
-
-static unsigned char set_cpu(const psfreq_cpu_type *cpu,
-                      const psfreq_sysfs_type *sysfs,
-                      const int max, const int min,
-                      const int turbo, const char *const gov,
-                      const unsigned char do_sleep)
-{
-        const int sane_max = CPU_FREQUENCY_MAXIMUM;
-        const int sane_min = CPU_FREQUENCY_MINIMUM;
-        const int sane_turbo = TURBO_OFF;
-        const char *const sane_gov = "powersave";
-        if (cpu == CPU_UNDEFINED) {
-                psfreq_log_error("set_cpu",
-                                "cpu is undefined");
-                return FAILURE;
-        }
-        if (sysfs == SYSFS_UNDEFINED) {
-                psfreq_log_error("set_cpu",
-                                "sysfs is undefined");
-                return FAILURE;
-        }
-
-        /* Set sane cpu values first */
-        psfreq_cpu_set_max(cpu, sysfs, &sane_max);
-        psfreq_cpu_set_min(cpu, sysfs, &sane_min);
-        psfreq_cpu_set_gov(cpu, sysfs, sane_gov);
-        psfreq_cpu_set_turbo(sysfs, &sane_turbo);
-
-        if (do_sleep) {
-                sleep(SLEEP_PERIOD);
-        }
-
-        psfreq_log_debug("set_cpu", "Set cpu values: %d, %d, %d, %s",
-                        max, min, turbo, gov);
-        psfreq_cpu_set_max(cpu, sysfs, &max);
-        psfreq_cpu_set_min(cpu, sysfs, &min);
-        psfreq_cpu_set_gov(cpu, sysfs, gov);
-        psfreq_cpu_set_turbo(sysfs, &turbo);
-        return SUCCESS;
-}
 
 int main(int argc, char **argv)
 {
@@ -301,3 +229,212 @@ int main(int argc, char **argv)
 	psfreq_cpu_destroy(&cpu);
 	return EXIT_SUCCESS;
 }
+
+
+/**
+ * Check that the requested options are set
+ *
+ * @param options psfreq_option_type instance to use
+ * @return Boolean type, true if options are ready, false if otherwise
+ */
+static unsigned char has_reqeusted_options(const psfreq_option_type *options)
+{
+        if (options->cpu_max == OPT_UNDEFINED
+            && options->cpu_min == OPT_UNDEFINED
+            && options->cpu_turbo == OPT_UNDEFINED
+            && options->cpu_governor == OPT_UNDEFINED
+            && options->cpu_plan == OPT_UNDEFINED) {
+                return FAILURE;
+        }
+        return SUCCESS;
+}
+
+/**
+ * Check that the requested options are set
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @param max The max cpu value holder
+ * @param min The min cpu value holder
+ * @param turbo The turbo cpu value holder
+ * @param gov The governor cpu value holder
+ * @return Boolean type, true if successful, false if otherwise
+ */
+static unsigned char set_cpu_values_raw(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options, int *const max,
+                int *const min, int *const turbo, char **const gov)
+{
+        *max = get_cpu_max(cpu, options);
+        if (*max < CPU_FREQUENCY_MINIMUM) {
+                psfreq_log_error("set_cpu_values_raw",
+                                "Bad Max %d", *max);
+                return FAILURE;
+        }
+        *min = get_cpu_min(cpu, options);
+        if (*min < CPU_FREQUENCY_MINIMUM) {
+                psfreq_log_error("set_cpu_values_raw",
+                                "Bad Min %d", *min);
+                return FAILURE;
+        }
+        *turbo = get_cpu_turbo(cpu, options);
+        if (*turbo == TURBO_UNDEFINED) {
+                psfreq_log_error("set_cpu_values_raw",
+                                "Bad Turbo %d", *turbo);
+                return FAILURE;
+        }
+        *gov = get_cpu_gov(cpu, options);
+        if (*gov == GOV_UNDEFINED) {
+                psfreq_log_error("set_cpu_values_raw",
+                                "Bad Gov %s", gov);
+                return FAILURE;
+        }
+        return SUCCESS;
+}
+
+/**
+ * Get the cpu max, either requested or current value
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @return The cpu max
+ */
+static int get_cpu_max(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options)
+{
+        int max;
+        if (options->cpu_max != OPT_UNDEFINED) {
+                max = psfreq_strings_to_int(options->cpu_max);
+        } else {
+                max = psfreq_cpu_get_scaling_max(cpu);
+        }
+        return max;
+}
+
+/**
+ * Get the cpu min, either requested or current value
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @return The cpu min
+ */
+static int get_cpu_min(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options)
+{
+        int min;
+        if (options->cpu_min != OPT_UNDEFINED) {
+                min = psfreq_strings_to_int(options->cpu_min);
+        } else {
+                min = psfreq_cpu_get_scaling_min(cpu);
+        }
+        return min;
+}
+
+/**
+ * Get the cpu turbo, either requested or current value
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @return The cpu turbo
+ */
+static char get_cpu_turbo(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options)
+{
+        char turbo;
+        if (options->cpu_turbo != OPT_UNDEFINED) {
+                turbo = psfreq_input_turbo_from_optarg(options->cpu_turbo);
+        } else {
+                turbo = cpu->pst_turbo;
+        }
+        return turbo;
+}
+
+/**
+ * Get the cpu governor, either requested or current value
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param options psfreq_option_type instance to use
+ * @return The cpu governor
+ */
+static char *get_cpu_gov(const psfreq_cpu_type *cpu,
+                const psfreq_option_type *options)
+{
+        char *gov;
+        if (options->cpu_governor != OPT_UNDEFINED) {
+                gov = psfreq_input_gov_from_optarg(options->cpu_governor);
+        } else {
+                gov = cpu->scaling_governor;
+        }
+        return gov;
+}
+
+/**
+ * Initialize safely both the sysfs and the cpu instances
+ *
+ * @param cpu psfreq_cpu_type instance to initialize
+ * @param sysfs psfreq_sysfs_type instance to initialize
+ * @return Boolean type, true if initialization successful, false if otherwise
+ */
+static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
+                psfreq_sysfs_type *sysfs)
+{
+        psfreq_sysfs_init(sysfs);
+        if (psfreq_cpu_init(cpu, sysfs) == INIT_FAILURE) {
+                psfreq_log_error("init_cpu_and_sysfs",
+                        "System has failed to initialize");
+                return FAILURE;
+        }
+        return SUCCESS;
+}
+
+/**
+ * Set the CPU values, first setting sane defaults and then user values
+ *
+ * @param cpu psfreq_cpu_type instance to use
+ * @param sysfs psfreq_sysfs_type instance to use
+ * @param max The max cpu value holder
+ * @param min The min cpu value holder
+ * @param turbo The turbo cpu value holder
+ * @param gov The governor cpu value holder
+ * @param do_sleep Boolean type, sleep for SLEEP_PERIOD if set
+ * @return Boolean type, true if setting is successful, false if otherwise
+ */
+static unsigned char set_cpu(const psfreq_cpu_type *cpu,
+                      const psfreq_sysfs_type *sysfs,
+                      const int max, const int min,
+                      const int turbo, const char *const gov,
+                      const unsigned char do_sleep)
+{
+        const int sane_max = CPU_FREQUENCY_MAXIMUM;
+        const int sane_min = CPU_FREQUENCY_MINIMUM;
+        const int sane_turbo = TURBO_OFF;
+        const char *const sane_gov = "powersave";
+        if (cpu == CPU_UNDEFINED) {
+                psfreq_log_error("set_cpu",
+                                "cpu is undefined");
+                return FAILURE;
+        }
+        if (sysfs == SYSFS_UNDEFINED) {
+                psfreq_log_error("set_cpu",
+                                "sysfs is undefined");
+                return FAILURE;
+        }
+
+        /* Set sane cpu values first */
+        psfreq_cpu_set_max(cpu, sysfs, &sane_max);
+        psfreq_cpu_set_min(cpu, sysfs, &sane_min);
+        psfreq_cpu_set_gov(cpu, sysfs, sane_gov);
+        psfreq_cpu_set_turbo(sysfs, &sane_turbo);
+
+        if (do_sleep) {
+                sleep(SLEEP_PERIOD);
+        }
+
+        psfreq_log_debug("set_cpu", "Set cpu values: %d, %d, %d, %s",
+                        max, min, turbo, gov);
+        psfreq_cpu_set_max(cpu, sysfs, &max);
+        psfreq_cpu_set_min(cpu, sysfs, &min);
+        psfreq_cpu_set_gov(cpu, sysfs, gov);
+        psfreq_cpu_set_turbo(sysfs, &turbo);
+        return SUCCESS;
+}
+
