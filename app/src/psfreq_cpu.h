@@ -26,14 +26,16 @@
 #ifndef PSFREQ_CPU_H
 #define PSFREQ_CPU_H
 
-#define CPU_UNDEFINED           NULL
-
-#include <stdbool.h>
-
 #include "psfreq_sysfs.h"
 
+/*
+ * NULL is defined as 0, just hard code it here.
+ * No need to include the entire stdlib.h
+ */
+#define CPU_UNDEFINED           0
+
 typedef struct psfreq_cpu_type {
-        bool has_pstate;
+        unsigned char has_pstate;
         unsigned int cpu_num;
         char **vector_scaling_max_freq;
         char **vector_scaling_min_freq;
@@ -49,37 +51,26 @@ typedef struct psfreq_cpu_type {
         char *scaling_driver;
 } psfreq_cpu_type;
 
-bool psfreq_cpu_init(psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs);
-
-bool psfreq_cpu_reinit(psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs);
-
 void psfreq_cpu_destroy(psfreq_cpu_type *cpu);
-
 unsigned int psfreq_cpu_get_cpuinfo_min(const psfreq_cpu_type *cpu);
-
 unsigned int psfreq_cpu_get_cpuinfo_max(void);
-
 unsigned int psfreq_cpu_get_scaling_min(const psfreq_cpu_type *cpu);
-
 unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu);
-
-bool psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const int *const m);
-
-bool psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const int *const m);
-
-bool psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const char *const m);
-
-bool psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
+unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
                                    const int *const m);
-
 char **psfreq_cpu_get_real_freqs(const psfreq_cpu_type *cpu);
 
 #endif

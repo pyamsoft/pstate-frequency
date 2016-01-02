@@ -25,21 +25,15 @@
 #ifndef PSFREQ_INPUT_H
 #define PSFREQ_INPUT_H
 
-#include <stdbool.h>
-
 #include "psfreq_option.h"
 
-bool psfreq_input_parse(psfreq_option_type *const options,
+#define INPUT_PARSE_SUCCESS 1
+#define INPUT_PARSE_FAILURE 0
+
+unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv);
-
 char psfreq_input_plan_from_optarg(const char *const p);
-
 char psfreq_input_turbo_from_optarg(const char *const t);
-
-int psfreq_input_max_from_optarg(const char *const m);
-
-int psfreq_input_min_from_optarg(const char *const m);
-
 char *psfreq_input_gov_from_optarg(const char *const g);
 
 #endif

@@ -28,10 +28,28 @@
 #include "psfreq_cpu.h"
 #include "psfreq_option.h"
 
-bool psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
+#define OUTPUT_FAILURE 0
+#define OUTPUT_SUCCESS 1
+
+/**
+ * Output the current pstate-frequency frequency CPU configuration
+ * based on user specified option flags
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ * @param options The psfreq_option_type instance to use
+ * @return Boolean value, true if output was successful, false if otherwise
+ */
+unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                            const psfreq_option_type *const options);
 
+/**
+ * Output the usage and help
+ */
 void psfreq_output_usage(void);
+
+/**
+ * Output the program version
+ */
 void psfreq_output_version(void);
 
 #endif

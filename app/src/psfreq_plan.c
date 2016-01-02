@@ -26,7 +26,10 @@
  */
 #define _POSIX_C_SOURCE 2
 #include <stdio.h>
+
+#include <dirent.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "psfreq_constants.h"
@@ -36,33 +39,144 @@
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
+static const char *const CURRENT_DIR = ".";
+static const char *const PARENT_DIR = "..";
 static const unsigned int POWER_PLAN_ITEMS = 4;
+static const unsigned char HIDE_DIRECTORY = 1;
+static const unsigned char NO_HIDE_DIRECTORY = 0;
+
+/**
+ * Internal, tokenizes the passed in plan values and sets the cpu values
+ *
+ * @param p The plan requested
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_set(const char *const p,
+                int *const max, int *const min,
+                int *const turbo, char **const gov);
+
+/**
+ * Parse the requested automatic plan and run it
+ *
+ * @param plan The plan requested
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_auto_exec(const char *const plan,
+                int *const max, int *const min,
+                int *const turbo, char **const gov);
+
+/**
+ * Run the powersave plan, either user preset or fallback to a default
+ *
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_powersave(int *const max, int *const min,
+                int *const turbo, char **const gov);
+
+/**
+ * Run the balanced plan, either user preset or fallback to a default
+ *
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_balanced(int *const max, int *const min,
+                int *const turbo, char **const gov);
+
+/**
+ * Run the performance plan, either user preset or fallback to a default
+ *
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_performance(int *const max, int *const min,
+                int *const turbo, char **const gov);
+
+/**
+ * Run the auto plan by figuring out the current power supply state
+ * of the machine and setting the plan based on user variables
+ *
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_auto(int *const max, int *const min,
+                int *const turbo, char **const gov);
+
+/**
+ * Get the status of the current power source with the type Mains
+ *
+ * @param dir The directory to look for power supply classes in
+ * @param name The name of the directory passed as dir
+ * @return An integer value denoting the type of power supply, either
+ * undefined, mains, or battery
+ */
 static unsigned int psfreq_plan_get_power_source(DIR *const dir,
                 const char *const name);
-static bool psfreq_plan_hide_directory(const char *const e);
-static unsigned int psfreq_plan_check_power_is_mains(char *const p);
-static char **psfreq_plan_strtok(char *s, const size_t num, size_t *arr_len);
 
-static bool psfreq_plan_set(const char *const p,
-                int *const max, int *const min,
-                int *const turbo, char **const gov);
+/**
+ * Check if the full path is the Mains type power supply
+ *
+ * @param p The full path to the power supply
+ * @return Integer value, undefined if the power supply is not accessable
+ * or does not specify a curent online status, mains if the power source
+ * is Mains, and battery if the power source is battery
+ */
+static unsigned int psfreq_plan_mains_online(char *const p);
 
-static bool psfreq_plan_auto_exec(const char *const plan,
-                int *const max, int *const min,
-                int *const turbo, char **const gov);
-static bool psfreq_plan_powersave(int *const max, int *const min,
-                int *const turbo, char **const gov);
-static bool psfreq_plan_balanced(int *const max, int *const min,
-                int *const turbo, char **const gov);
-static bool psfreq_plan_performance(int *const max, int *const min,
-                int *const turbo, char **const gov);
-static bool psfreq_plan_auto(int *const max, int *const min,
-                int *const turbo, char **const gov);
 
-bool psfreq_plan_set_cpu(const char *const plan, int *const max,
+/**
+ * Check if the directory name represented by e is the current or
+ * parent directory
+ *
+ * @param e Directory name
+ * @return Boolean, true if directory is either current or parent and should
+ * be hidden from results, false if otherwise
+ */
+static unsigned char psfreq_plan_hide_directory(const char *const e);
+
+/**
+ * Wrapper for the strtok_r function to be used to parse user power plans
+ *
+ * @param s String entered by user
+ * @param arr_len Hold the length of the returned array
+ * @return An array holding each tokenized user input value
+ */
+static char **psfreq_plan_strtok(char *s, size_t *arr_len);
+
+/**
+ * Sets the cpu values based on the passed in plan
+ *
+ * @param plan The plan requested
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+unsigned char psfreq_plan_set_cpu(const char *const plan, int *const max,
                 int *const min, int *const turbo, char **const gov)
 {
-        bool r;
+        unsigned char r;
         if (*plan == PLAN_AUTO) {
                 r = psfreq_plan_auto(max, min, turbo, gov);
         } else if (*plan == PLAN_POWERSAVE) {
@@ -72,12 +186,22 @@ bool psfreq_plan_set_cpu(const char *const plan, int *const max,
         } else if (*plan == PLAN_PERFORMANCE) {
                 r = psfreq_plan_performance(max, min, turbo, gov);
         } else {
-                r = false;
+                r = POWER_PLAN_APPLY_FAILURE;
         }
         return r;
 }
 
-static bool psfreq_plan_set(const char *const p,
+/**
+ * Internal, tokenizes the passed in plan values and sets the cpu values
+ *
+ * @param p The plan requested
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_set(const char *const p,
                 int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
@@ -85,12 +209,12 @@ static bool psfreq_plan_set(const char *const p,
         char *pp = NULL;
         size_t arr_len;
         if (psfreq_strings_asprintf(&pp, "%s", p) < 0) {
-                return false;
+                return POWER_PLAN_APPLY_FAILURE;
         }
-        arr = psfreq_plan_strtok(pp, POWER_PLAN_ITEMS, &arr_len);
+        arr = psfreq_plan_strtok(pp, &arr_len);
         if (arr == STRTOK_ERROR) {
                 free(pp);
-                return false;
+                return POWER_PLAN_APPLY_FAILURE;
         }
 
         /* Check array length */
@@ -100,7 +224,7 @@ static bool psfreq_plan_set(const char *const p,
                                 arr_len, POWER_PLAN_ITEMS);
                 free(pp);
                 free(arr);
-                return false;
+                return POWER_PLAN_APPLY_FAILURE;
         }
 
         *max = psfreq_strings_to_int(arr[0]);
@@ -109,14 +233,24 @@ static bool psfreq_plan_set(const char *const p,
         if (psfreq_strings_asprintf(gov, "%s", arr[3]) < 0) {
                 free(pp);
                 free(arr);
-                return false;
+                return POWER_PLAN_APPLY_FAILURE;
         }
         free(pp);
         free(arr);
-        return true;
+        return POWER_PLAN_APPLY_SUCCESS;
 }
 
-static bool psfreq_plan_auto_exec(const char *const plan,
+/**
+ * Parse the requested automatic plan and run it
+ *
+ * @param plan The plan requested
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_auto_exec(const char *const plan,
                 int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
@@ -132,11 +266,20 @@ static bool psfreq_plan_auto_exec(const char *const plan,
         } else {
                 psfreq_log_error("psfreq_plan_auto_ac",
                                  "Invalid plan specified");
-                return false;
+                return POWER_PLAN_APPLY_FAILURE;
         }
 }
 
-static bool psfreq_plan_powersave(int *const max, int *const min,
+/**
+ * Run the powersave plan, either user preset or fallback to a default
+ *
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_powersave(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_POWERSAVE
@@ -147,11 +290,20 @@ static bool psfreq_plan_powersave(int *const max, int *const min,
         *min = CPU_FREQUENCY_MINIMUM;
         *turbo = TURBO_OFF;
         *gov = GOV_POWERSAVE;
-        return true;
+        return POWER_PLAN_APPLY_SUCCESS;
 #endif
 }
 
-static bool psfreq_plan_balanced(int *const max, int *const min,
+/**
+ * Run the balanced plan, either user preset or fallback to a default
+ *
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_balanced(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_BALANCED
@@ -162,11 +314,20 @@ static bool psfreq_plan_balanced(int *const max, int *const min,
         *min = CPU_FREQUENCY_MINIMUM;
         *turbo = TURBO_OFF;
         *gov = GOV_POWERSAVE;
-        return true;
+        return POWER_PLAN_APPLY_SUCCESS;
 #endif
 }
 
-static bool psfreq_plan_performance(int *const max, int *const min,
+/**
+ * Run the performance plan, either user preset or fallback to a default
+ *
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_performance(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
 #ifdef PRESET_POWER_PLAN_PERFORMANCE
@@ -177,11 +338,21 @@ static bool psfreq_plan_performance(int *const max, int *const min,
         *min = CPU_FREQUENCY_MAXIMUM;
         *turbo = TURBO_ON;
         *gov = GOV_PERFORMANCE;
-        return true;
+        return POWER_PLAN_APPLY_SUCCESS;
 #endif
 }
 
-static bool psfreq_plan_auto(int *const max, int *const min,
+/**
+ * Run the auto plan by figuring out the current power supply state
+ * of the machine and setting the plan based on user variables
+ *
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+static unsigned char psfreq_plan_auto(int *const max, int *const min,
                 int *const turbo, char **const gov)
 {
         unsigned int r;
@@ -191,23 +362,23 @@ static bool psfreq_plan_auto(int *const max, int *const min,
         if (!dir) {
 		psfreq_log_error("psfreq_plan_auto",
 			"Couldn't open dir: %s", name);
-                return false;
+                return POWER_PLAN_APPLY_FAILURE;
 	}
 	r = psfreq_plan_get_power_source(dir, name);
 	if (closedir(dir)) {
 		psfreq_log_error("psfreq_plan_auto",
 			"Couldn't close dir: %s", name);
-		return false;
+		return POWER_PLAN_APPLY_FAILURE;
 	}
 	/* Set plan here */
-	if (r == 1) {
+	if (r == POWER_SOURCE_MAINS) {
 #ifdef AUTO_POWER_PLAN_AC
 		return psfreq_plan_auto_exec(AUTO_POWER_PLAN_AC,
                                 max, min, turbo, gov);
 #else
 		return psfreq_plan_balanced(max, min, turbo, gov);
 #endif
-	} else if (r == 2) {
+	} else if (r == POWER_SOURCE_BATTERY) {
 #ifdef AUTO_POWER_PLAN_BAT
 		return psfreq_plan_auto_exec(AUTO_POWER_PLAN_BAT,
                                 max, min, turbo, gov);
@@ -215,10 +386,18 @@ static bool psfreq_plan_auto(int *const max, int *const min,
 		return psfreq_plan_powersave(max, min, turbo, gov);
 #endif
 	} else {
-                return false;
+                return POWER_PLAN_APPLY_FAILURE;
         }
 }
 
+/**
+ * Get the status of the current power source with the type Mains
+ *
+ * @param dir The directory to look for power supply classes in
+ * @param name The name of the directory passed as dir
+ * @return An integer value denoting the type of power supply, either
+ * undefined, mains, or battery
+ */
 static unsigned int psfreq_plan_get_power_source(DIR *const dir,
                 const char *const name)
 {
@@ -247,7 +426,7 @@ static unsigned int psfreq_plan_get_power_source(DIR *const dir,
 		}
 		psfreq_log_debug("psfreq_plan_get_power_source",
 			"Power supply path: %s", full_path);
-                result = psfreq_plan_check_power_is_mains(full_path);
+                result = psfreq_plan_mains_online(full_path);
 		free(path);
 		free(full_path);
 		if (result > POWER_SOURCE_UNDEFINED) {
@@ -260,7 +439,15 @@ static unsigned int psfreq_plan_get_power_source(DIR *const dir,
         return result;
 }
 
-static unsigned int psfreq_plan_check_power_is_mains(char *const p)
+/**
+ * Check if the full path is the Mains type power supply
+ *
+ * @param p The full path to the power supply
+ * @return Integer value, undefined if the power supply is not accessable
+ * or does not specify a curent online status, mains if the power source
+ * is Mains, and battery if the power source is battery
+ */
+static unsigned int psfreq_plan_mains_online(char *const p)
 {
         unsigned int r;
 	char *type;
@@ -268,19 +455,19 @@ static unsigned int psfreq_plan_check_power_is_mains(char *const p)
         char status;
         char *power;
         if (p == NULL) {
-                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                psfreq_log_error("psfreq_plan_mains_online",
                                 "p is NULL");
                 return POWER_SOURCE_UNDEFINED;
         }
 
         type = psfreq_strings_concat(p, "/type");
         if (type == STRING_CONCAT_ERROR) {
-                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                psfreq_log_error("psfreq_plan_mains_online",
                                 "type is undefined");
                 return POWER_SOURCE_UNDEFINED;
         }
         if (access(type, F_OK) < 0) {
-                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                psfreq_log_error("psfreq_plan_mains_online",
                                 "Couldn't open file %s", type);
                 free(type);
                 return POWER_SOURCE_UNDEFINED;
@@ -288,34 +475,34 @@ static unsigned int psfreq_plan_check_power_is_mains(char *const p)
         power = psfreq_util_read(type);
         free(type);
         if (power == READ_ERROR) {
-                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                psfreq_log_error("psfreq_plan_mains_online",
                                 "power is undefined");
                 return POWER_SOURCE_UNDEFINED;
         }
         if (!psfreq_strings_equals("Mains", power)) {
-                psfreq_log_debug("psfreq_plan_check_power_is_mains",
+                psfreq_log_debug("psfreq_plan_mains_online",
                                 "power source not Mains");
                 free(power);
                 return POWER_SOURCE_UNDEFINED;
         }
         stat = psfreq_util_read2(p, "/online");
         if (stat == READ_ERROR) {
-                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                psfreq_log_error("psfreq_plan_mains_online",
                                 "stat is undefined");
                 free(power);
                 return POWER_SOURCE_UNDEFINED;
         }
         status = psfreq_strings_to_int(stat);
         if (status < 0) {
-                psfreq_log_error("psfreq_plan_check_power_is_mains",
+                psfreq_log_error("psfreq_plan_mains_online",
                                 "stat is non zero");
                 r = POWER_SOURCE_UNDEFINED;
         } else if (status) {
-                psfreq_log_debug("psfreq_plan_check_power_is_mains",
+                psfreq_log_debug("psfreq_plan_mains_online",
                                 "stat is AC");
                 r = POWER_SOURCE_MAINS;
         } else {
-                psfreq_log_debug("psfreq_plan_check_power_is_mains",
+                psfreq_log_debug("psfreq_plan_mains_online",
                                 "stat is BAT");
                 r = POWER_SOURCE_BATTERY;
         }
@@ -324,18 +511,42 @@ static unsigned int psfreq_plan_check_power_is_mains(char *const p)
         return r;
 }
 
-static bool psfreq_plan_hide_directory(const char *const e)
+/**
+ * Check if the directory name represented by e is the current or
+ * parent directory
+ *
+ * @param e Directory name
+ * @return Boolean, true if directory is either current or parent and should
+ * be hidden from results, false if otherwise
+ */
+static unsigned char psfreq_plan_hide_directory(const char *const e)
 {
-        return (psfreq_strings_equals(".", e) || psfreq_strings_equals("..", e));
+        unsigned char res = psfreq_strings_equals(CURRENT_DIR, e);
+        if (res == STRING_COMPARE_SUCCESS) {
+                return HIDE_DIRECTORY;
+        }
+        res = psfreq_strings_equals(PARENT_DIR, e);
+        if (res == STRING_COMPARE_SUCCESS) {
+                return HIDE_DIRECTORY;
+        }
+
+        return NO_HIDE_DIRECTORY;
 }
 
-static char **psfreq_plan_strtok(char *s, const size_t num, size_t *arr_len)
+/**
+ * Wrapper for the strtok_r function to be used to parse user power plans
+ *
+ * @param s String entered by user
+ * @param arr_len Hold the length of the returned array
+ * @return An array holding each tokenized user input value
+ */
+static char **psfreq_plan_strtok(char *s, size_t *arr_len)
 {
         size_t i = 0;
         const char *const del = " ,.-";
         char *tok;
         char *saveptr;
-        char **arr = malloc(num * sizeof(char *));
+        char **arr = malloc(POWER_PLAN_ITEMS * sizeof(char *));
         *arr_len = 0;
 
         if (arr == NULL) {
@@ -356,3 +567,4 @@ static char **psfreq_plan_strtok(char *s, const size_t num, size_t *arr_len)
         *arr_len = i;
         return arr;
 }
+

@@ -28,13 +28,31 @@
 #define _POSIX_C_SOURCE 2
 #include <stdio.h>
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
+static const char NEWLINE_CHAR = '\n';
+
+/**
+ * Strip the newline from the end of a string if it contains one
+ *
+ * @param s String to strip newline from
+ * @return The string with newline stripped
+ */
 static char *psfreq_util_strip_string_end(char *s);
 
-char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size)
+/**
+ * Read a number of lines from a pipe
+ *
+ * @param cmd The command which the pipe will be opened from
+ * @param size Number of lines to read from the pipe
+ * @return Vector containing the contents read from the pipe
+ */
+char **psfreq_util_read_pipe(const char *const cmd, const unsigned int size)
 {
         char **lines;
         FILE *pipe;
@@ -45,14 +63,13 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size)
                                 "cmd is NULL");
                 return READ_ERROR;
         }
-        if (*size == 0) {
+        if (size == 0) {
                 psfreq_log_error("psfreq_util_read_pipe",
-                                "Size is 0, which would"
-                                " result in empty array");
+                                "Size is 0, which results in empty array");
                 return READ_ERROR;
         }
 
-        lines = malloc(*size * sizeof(char *));
+        lines = malloc(size * sizeof(char *));
         if (lines == NULL) {
                 psfreq_log_error("psfreq_util_read_pipe",
                                 "Failed to malloc for lines");
@@ -66,7 +83,7 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size)
                 free(lines);
                 return READ_ERROR;
         }
-        for (i = 0; i < *size; ++i) {
+        for (i = 0; i < size; ++i) {
                 char line[n];
                 if (fgets(line, n, pipe) == NULL) {
                         psfreq_log_error("psfreq_util_read_pipe",
@@ -88,12 +105,18 @@ char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size)
         return lines;
 }
 
+/**
+ * Read a single line buffer from a file
+ * @param base The base path of the file to read from
+ * @param file The relative path from the base of the file to read from
+ * @return The stripped single line read from the file, NULL if otherhwise
+ */
 char *psfreq_util_read2(const char *base, const char *file)
 {
         char *r;
         char *abs_path;
         abs_path = psfreq_strings_concat(base, file);
-        if (abs_path == NULL) {
+        if (abs_path == STRING_CONCAT_ERROR) {
                 return READ_ERROR;
         }
         r = psfreq_util_read(abs_path);
@@ -101,6 +124,11 @@ char *psfreq_util_read2(const char *base, const char *file)
         return r;
 }
 
+/**
+ * Read a single line buffer from a file
+ * @param abs_path The absolute path of the file to read from
+ * @return The stripped single line read from the file, NULL if otherhwise
+ */
 char *psfreq_util_read(const char *abs_path)
 {
         FILE *f;
@@ -133,7 +161,13 @@ char *psfreq_util_read(const char *abs_path)
         return stripped;
 }
 
-bool psfreq_util_write(const char *abs_path, const char *buf)
+/**
+ * Write a buffer to a file
+ * @param abs_path The absolute path of the file to write to
+ * @param buf Buffer to write to file
+ * @return Boolean, true if file was written to, false if otherwise
+ */
+unsigned char psfreq_util_write(const char *abs_path, const char *buf)
 {
         FILE *f;
         if (buf == NULL) {
@@ -162,19 +196,25 @@ bool psfreq_util_write(const char *abs_path, const char *buf)
         return WRITE_SUCCESS;
 }
 
-bool psfreq_util_write2(const char *base, const char *file,
+/**
+ * Write a buffer to a file
+ * @param base The base path of the file to write to
+ * @param file The relative path from the base of the file to write to
+ * @param buf Buffer to write to file
+ * @return Boolean, true if file was written to, false if otherwise
+ */
+unsigned char psfreq_util_write2(const char *base, const char *file,
                 const char *buf)
 {
 	char *abs_path;
-	bool r;
+	unsigned char r;
         psfreq_log_debug("psfreq_util_write2",
                         "Concat strings: '%s' and '%s'",
                         base, file);
         abs_path = psfreq_strings_concat(base, file);
-        if (abs_path == NULL) {
+        if (abs_path == STRING_CONCAT_ERROR) {
                 psfreq_log_error("psfreq_util_write2",
-                                "Concat strings: '%s' and '%s' has failed.\n"
-                                "Function will return WRITE_FAILURE.",
+                                "Concat strings: '%s' and '%s' has failed",
                                 base, file);
                 return WRITE_FAILURE;
         }
@@ -184,24 +224,42 @@ bool psfreq_util_write2(const char *base, const char *file,
 	return r;
 }
 
-bool psfreq_util_write_num(const char *abs_path, const int *num)
+/**
+ * Write a number to a file
+ * @param abs_path The absolute path of the file to write to
+ * @param num Number value to write to file
+ * @return Boolean, true if file was written to, false if otherwise
+ */
+unsigned char psfreq_util_write_num(const char *abs_path, const int *num)
 {
         char *s = psfreq_strings_from_int(num);
-        const bool r = psfreq_util_write(abs_path, s);
+        const unsigned char r = psfreq_util_write(abs_path, s);
         free(s);
         return r;
 }
 
-bool psfreq_util_write_num2(const char *base, const char *file,
+/**
+ * Write a number to a file
+ * @param base The base path of the file to write to
+ * @param file The relative path from the base of the file to write to
+ * @param num Number value to write to file
+ * @return Boolean, true if file was written to, false if otherwise
+ */
+unsigned char psfreq_util_write_num2(const char *base, const char *file,
                 const int *num)
 {
         char *s = psfreq_strings_from_int(num);
-        const bool r = psfreq_util_write2(base, file, s);
+        const unsigned char r = psfreq_util_write2(base, file, s);
         free(s);
         return r;
 }
 
-
+/**
+ * Strip the newline from the end of a string if it contains one
+ *
+ * @param s String to strip newline from
+ * @return The string with newline stripped
+ */
 static char *psfreq_util_strip_string_end(char *s)
 {
         unsigned int i;
@@ -212,8 +270,8 @@ static char *psfreq_util_strip_string_end(char *s)
                 return STRING_STRIP_ERROR;
         }
         i = strlen(s) - 1;
-        if ((i > 0) && (s[i] == '\n')) {
-                s[i] = '\0';
+        if ((i > 0) && (s[i] == NEWLINE_CHAR)) {
+                s[i] = NULL_CHAR;
         }
 
         if (psfreq_strings_asprintf(&ns, "%s", s) < 0) {

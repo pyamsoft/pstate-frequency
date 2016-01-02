@@ -24,6 +24,7 @@
  * entirely silenced output using the all_quiet mode.
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "psfreq_color.h"

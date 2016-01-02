@@ -22,20 +22,60 @@
  * Helper functions for presenting formatted output
  */
 
+#include <stdlib.h>
+
 #include "psfreq_color.h"
 #include "psfreq_log.h"
 #include "psfreq_option.h"
 #include "psfreq_output.h"
 
-static void psfreq_output_current(const psfreq_cpu_type *cpu);
+/**
+ * Output the realtime CPU frequencies
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ */
 static void psfreq_output_real(const psfreq_cpu_type *cpu);
+
+/**
+ * Output the current pstate-frequency configuration
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ */
+static void psfreq_output_current(const psfreq_cpu_type *cpu);
+
+/**
+ * Output the current pstate-frequency generic CPU configuration
+ *
+ * @param what String as a title for generic CPU field
+ * @param str The value of the generic CPU field
+ */
 static void psfreq_output_current_out(const char *const what,
                 const char *const str);
+
+/**
+ * Output the current pstate-frequency turbo CPU configuration
+ *
+ * @param what String as a title for turbo CPU field
+ * @param str The value of the turbo CPU field
+ */
 static void psfreq_output_current_turbo(const char *const what,
                 const char turbo);
+
+/**
+ * Output the current pstate-frequency frequency CPU configuration
+ *
+ * @param what String as a title for frequency CPU field
+ * @param percent The value of the frequency in percentage
+ * @param freq The value of the frequency in MHz
+ */
 static void psfreq_output_current_freq(const char *const what,
                 const unsigned int percent, const int freq);
 
+/**
+ * Output the realtime CPU frequencies
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ */
 static void psfreq_output_real(const psfreq_cpu_type *cpu)
 {
                 unsigned int i;
@@ -52,6 +92,11 @@ static void psfreq_output_real(const psfreq_cpu_type *cpu)
                 free(frequencies);
 }
 
+/**
+ * Output the current pstate-frequency configuration
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ */
 static void psfreq_output_current(const psfreq_cpu_type *cpu)
 {
         psfreq_output_current_out("CPU_DRIVER   ", cpu->scaling_driver);
@@ -65,6 +110,12 @@ static void psfreq_output_current(const psfreq_cpu_type *cpu)
                         cpu->scaling_max_freq);
 }
 
+/**
+ * Output the current pstate-frequency generic CPU configuration
+ *
+ * @param what String as a title for generic CPU field
+ * @param str The value of the generic CPU field
+ */
 static void psfreq_output_current_out(const char *const what,
                 const char *const str)
 {
@@ -78,6 +129,12 @@ static void psfreq_output_current_out(const char *const what,
                         psfreq_color_reset());
 }
 
+/**
+ * Output the current pstate-frequency turbo CPU configuration
+ *
+ * @param what String as a title for turbo CPU field
+ * @param str The value of the turbo CPU field
+ */
 static void psfreq_output_current_turbo(const char *const what,
                 const char turbo)
 {
@@ -92,6 +149,13 @@ static void psfreq_output_current_turbo(const char *const what,
                         psfreq_color_reset());
 }
 
+/**
+ * Output the current pstate-frequency frequency CPU configuration
+ *
+ * @param what String as a title for frequency CPU field
+ * @param percent The value of the frequency in percentage
+ * @param freq The value of the frequency in MHz
+ */
 static void psfreq_output_current_freq(const char *const what,
                 const unsigned int percent, const int freq)
 {
@@ -106,19 +170,27 @@ static void psfreq_output_current_freq(const char *const what,
                         psfreq_color_reset());
 }
 
-bool psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
+/**
+ * Output the current pstate-frequency frequency CPU configuration
+ * based on user specified option flags
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ * @param options The psfreq_option_type instance to use
+ * @return Boolean value, true if output was successful, false if otherwise
+ */
+unsigned char psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
                            const psfreq_option_type *const options)
 {
         if (cpu == CPU_UNDEFINED) {
                 psfreq_log_error("psfreq_output_get_cpu",
                                 "cpu is undefined");
-                return false;
+                return OUTPUT_FAILURE;
         }
 
         if (options == OPT_UNDEFINED) {
                 psfreq_log_error("psfreq_output_get_cpu",
                                 "options is undefined");
-                return false;
+                return OUTPUT_FAILURE;
         }
 #ifdef VERSION
 	psfreq_log("%spstate-frequency %s%s", psfreq_color_blue(), VERSION,
@@ -132,11 +204,14 @@ bool psfreq_output_get_cpu(const psfreq_cpu_type *const cpu,
         } else if (options->cpu_get_type == CPU_GET_TYPE_REAL) {
                 psfreq_output_real(cpu);
         } else {
-                return false;
+                return OUTPUT_FAILURE;
         }
-        return true;
+        return OUTPUT_SUCCESS;
 }
 
+/**
+ * Output the usage and help
+ */
 void psfreq_output_usage(void)
 {
 	psfreq_log(
@@ -179,6 +254,9 @@ void psfreq_output_usage(void)
 "    --sleep          Sleep before setting CPU frequencies\n");
 }
 
+/**
+ * Output the program version
+ */
 void psfreq_output_version(void)
 {
 	psfreq_log(

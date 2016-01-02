@@ -25,15 +25,25 @@
 #ifndef PSFREQ_PLAN_H
 #define PSFREQ_PLAN_H
 
-#include <stdbool.h>
-#include <dirent.h>
-
-#define STRTOK_ERROR            NULL
+#define STRTOK_ERROR            0
 #define POWER_SOURCE_UNDEFINED  0
 #define POWER_SOURCE_MAINS      1
 #define POWER_SOURCE_BATTERY    2
 
-bool psfreq_plan_set_cpu(const char *const plan, int *const max,
+#define POWER_PLAN_APPLY_SUCCESS 1
+#define POWER_PLAN_APPLY_FAILURE 0
+
+/**
+ * Sets the cpu values based on the passed in plan
+ *
+ * @param plan The plan requested
+ * @param max Value to store the cpu max into
+ * @param min Value to store the cpu min into
+ * @param turbo Value to store the cpu turbo into
+ * @param gov Value to store the cpu governor into
+ * @return Boolean value, true if plan was set successfully, false otherwise
+ */
+unsigned char psfreq_plan_set_cpu(const char *const plan, int *const max,
                 int *const min, int *const turbo, char **const gov);
 
 #endif

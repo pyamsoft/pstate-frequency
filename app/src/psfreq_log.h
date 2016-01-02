@@ -27,12 +27,9 @@
 #ifndef PSFREQ_LOG_H
 #define PSFREQ_LOG_H
 
-#include <stdarg.h>
-
 void psfreq_log(const char *const fmt, ...);
 void psfreq_log_debug(const char *const name, const char *const fmt, ...);
 void psfreq_log_error(const char *const name, const char *const fmt, ...);
-
 void psfreq_log_set_debug(void);
 void psfreq_log_set_quiet(void);
 

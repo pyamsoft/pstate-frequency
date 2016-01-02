@@ -26,22 +26,73 @@
 #ifndef PSFREQ_UTIL_H
 #define PSFREQ_UTIL_H
 
-#include <stdbool.h>
-#include <stdlib.h>
+/*
+ * NULL is defined as 0, just hard code it here.
+ * No need to include the entire stdlib.h
+ */
+#define READ_ERROR              0
+#define STRING_STRIP_ERROR      0
+#define WRITE_SUCCESS           1
+#define WRITE_FAILURE           0
 
-#define READ_ERROR              NULL
-#define STRING_STRIP_ERROR      NULL
-#define WRITE_SUCCESS           true
-#define WRITE_FAILURE           false
+/**
+ * Read a number of lines from a pipe
+ *
+ * @param cmd The command which the pipe will be opened from
+ * @param size Number of lines to read from the pipe
+ * @return Vector containing the contents read from the pipe
+ */
+char **psfreq_util_read_pipe(const char *const cmd, const unsigned int size);
 
-char **psfreq_util_read_pipe(const char *const cmd, const unsigned int *size);
+/**
+ * Read a single line buffer from a file
+ * @param base The base path of the file to read from
+ * @param file The relative path from the base of the file to read from
+ * @return The stripped single line read from the file, NULL if otherhwise
+ */
 char *psfreq_util_read(const char *abs_path);
+
+/**
+ * Read a single line buffer from a file
+ * @param abs_path The absolute path of the file to read from
+ * @return The stripped single line read from the file, NULL if otherhwise
+ */
 char *psfreq_util_read2(const char *base, const char *file);
-bool psfreq_util_write(const char *abs_path, const char *buf);
-bool psfreq_util_write2(const char *base, const char *file,
+
+/**
+ * Write a buffer to a file
+ * @param abs_path The absolute path of the file to write to
+ * @param buf Buffer to write to file
+ * @return Boolean, true if file was written to, false if otherwise
+ */
+unsigned char psfreq_util_write(const char *abs_path, const char *buf);
+
+/**
+ * Write a buffer to a file
+ * @param base The base path of the file to write to
+ * @param file The relative path from the base of the file to write to
+ * @param buf Buffer to write to file
+ * @return Boolean, true if file was written to, false if otherwise
+ */
+unsigned char psfreq_util_write2(const char *base, const char *file,
                 const char *buf);
-bool psfreq_util_write_num(const char *abs_path, const int *num);
-bool psfreq_util_write_num2(const char *base, const char *file,
+
+/**
+ * Write a number to a file
+ * @param abs_path The absolute path of the file to write to
+ * @param num Number value to write to file
+ * @return Boolean, true if file was written to, false if otherwise
+ */
+unsigned char psfreq_util_write_num(const char *abs_path, const int *num);
+
+/**
+ * Write a number to a file
+ * @param base The base path of the file to write to
+ * @param file The relative path from the base of the file to write to
+ * @param num Number value to write to file
+ * @return Boolean, true if file was written to, false if otherwise
+ */
+unsigned char psfreq_util_write_num2(const char *base, const char *file,
                 const int *num);
 
 #endif

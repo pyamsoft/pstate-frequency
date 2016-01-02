@@ -35,7 +35,7 @@
 
 static char *psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs);
 static unsigned int psfreq_cpu_init_number_cpus(void);
-static bool psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu);
+static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu);
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what);
 static char *psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
@@ -45,14 +45,14 @@ static unsigned int psfreq_cpu_init_freq(
                 const psfreq_sysfs_type *sysfs,
                 const char *const type,
                 const char *const what);
-static bool psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
+static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs);
 
 static char **const CPU_VECTOR_UNDEFINED = NULL;
 static const unsigned int CPU_NUMBER_UNDEFINED = 0;
 static const unsigned int CPU_FREQUENCY_UNDEFINED = 0;
 
-bool psfreq_cpu_init(psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
         char *m;
@@ -62,7 +62,7 @@ bool psfreq_cpu_init(psfreq_cpu_type *cpu,
                 psfreq_log_error("psfreq_cpu_init",
                         "System does not have intel_pstate and is unsupported");
                 free(cpu->scaling_driver);
-                return false;
+                return 0;
         }
         cpu->cpu_num = psfreq_cpu_init_number_cpus();
         cpu->vector_scaling_min_freq = psfreq_cpu_init_vector(cpu, "min_freq");
@@ -83,7 +83,7 @@ bool psfreq_cpu_init(psfreq_cpu_type *cpu,
         return psfreq_cpu_init_dynamic(cpu, sysfs);
 }
 
-static bool psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
+static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
         cpu->scaling_max_freq = psfreq_cpu_init_freq(sysfs, "scaling",
@@ -92,10 +92,10 @@ static bool psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
                                                         "min");
         cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
         cpu->pst_turbo = psfreq_cpu_init_turbo_boost(sysfs);
-        return true;
+        return 1;
 }
 
-bool psfreq_cpu_reinit(psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
         /*
@@ -153,7 +153,7 @@ static unsigned int psfreq_cpu_init_number_cpus(void)
 {
         const char *const cmd = "grep processor /proc/cpuinfo | wc -l";
         const unsigned int size = 1;
-        char **res = psfreq_util_read_pipe(cmd, &size);
+        char **res = psfreq_util_read_pipe(cmd, size);
         unsigned int n;
 
         if (res == READ_ERROR) {
@@ -191,7 +191,7 @@ static char *psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs)
         return driver;
 }
 
-static bool psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu)
+static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu)
 {
 
         const char *const cmp = "intel_pstate";
@@ -224,7 +224,7 @@ static unsigned int psfreq_cpu_init_freq(
                 return CPU_FREQUENCY_UNDEFINED;
         }
         result = psfreq_strings_to_uint(line);
-        if (result == STRING_CONVERT_TO_ERROR) {
+        if (result == (unsigned int) STRING_CONVERT_TO_ERROR) {
                 psfreq_log_error("psfreq_cpu_init_freq",
                                 "Unable to convert string '%s' to uint", line);
         }
@@ -365,7 +365,7 @@ static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs)
         return turbo;
 }
 
-bool psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const int *const m)
 {
@@ -383,37 +383,37 @@ bool psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
         if (sysfs == SYSFS_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_max",
                                 "sysfs is undefined");
-                return false;
+                return 0;
         }
         if (cpu == CPU_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_max",
                                 "cpu is undefined");
-                return false;
+                return 0;
         }
         if (cpu->cpu_num == CPU_NUMBER_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_max",
                                 "cpu->cpu_num is undefined");
-                return false;
+                return 0;
         }
         if (cpu->vector_scaling_max_freq == CPU_VECTOR_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_max",
                                 "cpu->vector_scaling_max_freq is undefined");
-                return false;
+                return 0;
         }
         if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/max_perf_pct", &n)) {
-                return false;
+                return 0;
         }
         const unsigned int num = cpu->cpu_num;
         for (i = 0; i < num; ++i) {
                 if (!psfreq_sysfs_write_num(sysfs,
                                 cpu->vector_scaling_max_freq[i], &freq)) {
-                        return false;
+                        return 0;
                 }
         }
-        return true;
+        return 1;
 }
 
-bool psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const int *const m)
 {
@@ -431,37 +431,37 @@ bool psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
         if (sysfs == SYSFS_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_min",
                                 "sysfs is undefined");
-                return false;
+                return 0;
         }
         if (cpu == CPU_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_min",
                                 "cpu is undefined");
-                return false;
+                return 0;
         }
         if (cpu->cpu_num == CPU_NUMBER_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_min",
                                 "cpu->cpu_num is undefined");
-                return false;
+                return 0;
         }
         if (cpu->vector_scaling_min_freq == CPU_VECTOR_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_min",
                                 "cpu->vector_scaling_min_freq is undefined");
-                return false;
+                return 0;
         }
         if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/min_perf_pct", &n)) {
-                return false;
+                return 0;
         }
         const unsigned int num = cpu->cpu_num;
         for (i = 0; i < num; ++i) {
                 if (!psfreq_sysfs_write_num(sysfs,
                                 cpu->vector_scaling_min_freq[i], &freq)) {
-                        return false;
+                        return 0;
                 }
         }
-        return true;
+        return 1;
 }
 
-bool psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
+unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const char *const m)
 {
@@ -469,45 +469,45 @@ bool psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
         if (sysfs == SYSFS_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_gov",
                                 "sysfs is undefined");
-                return false;
+                return 0;
         }
         if (cpu == CPU_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_gov",
                                 "cpu is undefined");
-                return false;
+                return 0;
         }
         if (cpu->cpu_num == CPU_NUMBER_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_gov",
                                 "cpu->cpu_num is undefined");
-                return false;
+                return 0;
         }
         if (cpu->vector_scaling_governor == CPU_VECTOR_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_gov",
                                 "cpu->vector_scaling_governor is undefined");
-                return false;
+                return 0;
         }
         const unsigned int num = cpu->cpu_num;
         for (i = 0; i < num; ++i) {
                 if (!psfreq_sysfs_write(sysfs,
                                 cpu->vector_scaling_governor[i], m)) {
-                        return false;
+                        return 0;
                 }
         }
-        return true;
+        return 1;
 }
 
-bool psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
+unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
                                    const int *const m)
 {
         if (sysfs == SYSFS_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_set_turbo",
                                 "sysfs is undefined");
-                return false;
+                return 0;
         }
         if (!psfreq_sysfs_write_num(sysfs, "intel_pstate/no_turbo", m)) {
-                return false;
+                return 0;
         }
-        return true;
+        return 1;
 }
 
 char **psfreq_cpu_get_real_freqs(const psfreq_cpu_type *cpu)
@@ -519,7 +519,7 @@ char **psfreq_cpu_get_real_freqs(const psfreq_cpu_type *cpu)
                 return CPU_VECTOR_UNDEFINED;
         }
 
-        res = psfreq_util_read_pipe(cmd, &size);
+        res = psfreq_util_read_pipe(cmd, size);
         if (res == READ_ERROR) {
                 return CPU_VECTOR_UNDEFINED;
         }

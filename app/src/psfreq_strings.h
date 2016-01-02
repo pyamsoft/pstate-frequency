@@ -25,21 +25,78 @@
 #ifndef PSFREQ_STRINGS_H
 #define PSFREQ_STRINGS_H
 
-#include <stdarg.h>
-#include <stdbool.h>
-#include <string.h>
-
+/*
+ * NULL is defined as 0, just hard code it here.
+ * No need to include the entire stdlib.h
+ */
+#define NULL_CHAR                       '\0'
 #define VASPRINTF_FAILURE               -1
-#define STRING_CONCAT_ERROR             NULL
-#define STRING_CONVERT_TO_ERROR         0
-#define STRING_CONVERT_FROM_ERROR       NULL
+#define STRING_CONCAT_ERROR             0
+#define STRING_CONVERT_TO_ERROR         -1
+#define STRING_CONVERT_FROM_ERROR       0
+#define STRING_COMPARE_SUCCESS          1
+#define STRING_COMPARE_FAILURE          0
 
+/**
+ * Concatinate two strings together
+ *
+ * @param s1 Base string that will be concatinated upon
+ * @param s2 String that will be appended to s1
+ * @return String which is the combination of s1 and s2
+ */
 char *psfreq_strings_concat(const char *const s1, const char *const s2);
-bool psfreq_strings_starts_with(const char *s, const char *p);
-bool psfreq_strings_equals(const char *s, const char *p);
+
+/**
+ * Checks that the string s starts with the same characters as the string p
+ *
+ * @param s1 The string to compare against
+ * @param s2 The prefix to compare with
+ * @return Boolean, true if string s has prefix p, false if otherwise
+ */
+unsigned char psfreq_strings_starts_with(const char *s, const char *p);
+
+/**
+ * Checks that the string s and p are equivalent in contents
+ *
+ * @param s1 First string
+ * @param s2 Second string
+ * @return Boolean, true if string s and p have equivalent contents,
+ * false if otherwise
+ */
+unsigned char psfreq_strings_equals(const char *s, const char *p);
+
+/**
+ * Cast a string to integer value
+ *
+ * @param s Sting to cast
+ * @return Integer value of casted string, -1 if failure
+ */
 int psfreq_strings_to_int(const char *const s);
+
+/**
+ * Cast a string to unsigned integer value
+ *
+ * @param s Sting to cast
+ * @return Integer value of casted string, -1 if failure
+ */
 unsigned int psfreq_strings_to_uint(const char *const s);
+
+/**
+ * Allocate a string representation of an integer value
+ *
+ * @param i Integer to cast into a string
+ * @return String representation of integer, NULL otherwise
+ */
 char *psfreq_strings_from_int(const int *const i);
+
+/**
+ * A simple version of asprintf
+ *
+ * @param strp String pointer to store result into
+ * @param fmt Formatting string
+ * @param ... Arguments to fmt string
+ * @return Integer return value of vasprintf
+ */
 int psfreq_strings_asprintf(char **strp, const char *fmt, ...);
 
 #endif

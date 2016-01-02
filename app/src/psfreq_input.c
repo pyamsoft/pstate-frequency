@@ -30,9 +30,7 @@
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
 
-static bool psfreq_input_string_isdigits(const char *s);
-
-bool psfreq_input_parse(psfreq_option_type *const options,
+unsigned char psfreq_input_parse(psfreq_option_type *const options,
                 const int argc, char **const argv)
 {
         const char *const shortOptions = ":SGHVcrdqp:m:n:t:g:";
@@ -63,11 +61,11 @@ bool psfreq_input_parse(psfreq_option_type *const options,
                         break;
                 } else {
                         if (!psfreq_option_parse(options, opt)) {
-                                return false;
+                                return INPUT_PARSE_FAILURE;
                         }
                 }
         }
-        return true;
+        return INPUT_PARSE_SUCCESS;
 }
 
 char psfreq_input_plan_from_optarg(const char *const p)
@@ -110,28 +108,6 @@ char psfreq_input_turbo_from_optarg(const char *const t)
         return turbo;
 }
 
-int psfreq_input_max_from_optarg(const char *const m)
-{
-        if (!psfreq_input_string_isdigits(m)) {
-                psfreq_log_error("psfreq_input_max_from_optarg",
-                        "User input: '%s' is not valid for cpu_max", m);
-                return -1;
-        } else {
-                return psfreq_strings_to_int(m);
-        }
-}
-
-int psfreq_input_min_from_optarg(const char *const m)
-{
-        if (!psfreq_input_string_isdigits(m)) {
-                psfreq_log_error("psfreq_input_min_from_optarg",
-                        "User input: '%s' is not valid for cpu_min", m);
-                return -1;
-        } else {
-                return psfreq_strings_to_int(m);
-        }
-}
-
 char *psfreq_input_gov_from_optarg(const char *const g)
 {
         char *gov;
@@ -147,15 +123,5 @@ char *psfreq_input_gov_from_optarg(const char *const g)
                 gov = GOV_UNDEFINED;
         }
         return gov;
-}
-
-static bool psfreq_input_string_isdigits(const char *s)
-{
-        while (*s) {
-                if (!isdigit(*s++)) {
-                        return false;
-                }
-        }
-        return true;
 }
 

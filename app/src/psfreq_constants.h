@@ -47,7 +47,11 @@
 #define TURBO_STR_ON            "0"
 #define TURBO_STR_OFF           "1"
 
-#define GOV_UNDEFINED           NULL
+/*
+ * NULL is defined as 0, just hard code it here.
+ * No need to include the entire stdlib.h
+ */
+#define GOV_UNDEFINED           0
 #define GOV_POWERSAVE           "powersave"
 #define GOV_PERFORMANCE         "performance"
 #define GOV_STR_POWERSAVE       "0"

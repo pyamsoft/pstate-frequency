@@ -27,9 +27,7 @@
  * which is usually located at /sys/devices/system/cpu
  */
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "psfreq_log.h"
 #include "psfreq_strings.h"
@@ -39,6 +37,7 @@
 /**
  * Initialize a new psfreq_sysfs_type
  *
+ * @param sysfs psfreq_sysfs_type instance to use
  * @return A new instance of psfreq_sysfs_type using the default base path
  */
 void psfreq_sysfs_init(psfreq_sysfs_type *sysfs)
@@ -57,7 +56,7 @@ void psfreq_sysfs_init(psfreq_sysfs_type *sysfs)
  * @return Boolean value, true if writing to the file was successfully
  *         performed, false otherwise
  */
-bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
+unsigned char psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
                 const char *file, const char *buf)
 {
         if (sysfs == SYSFS_UNDEFINED) {
@@ -68,15 +67,31 @@ bool psfreq_sysfs_write(const psfreq_sysfs_type *sysfs,
         return psfreq_util_write2(sysfs->base_path, file, buf);
 }
 
-bool psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
+/**
+ * Wrapper around psfreq_sysfs_write to work with integer values
+ *
+ * @param sysfs psfreq_sysfs_type instance to use
+ * @param file relative file path from sysfs->base_path to write to
+ * @param num Number value to work with
+ * @return Boolean value, true if writing to the file was successfully
+ *         performed, false otherwise
+ */
+unsigned char psfreq_sysfs_write_num(const psfreq_sysfs_type *sysfs,
                 const char *file, const int *num)
 {
         char *s = psfreq_strings_from_int(num);
-        const bool r = psfreq_sysfs_write(sysfs, file, s);
+        const unsigned int r = psfreq_sysfs_write(sysfs, file, s);
         free(s);
         return r;
 }
 
+/**
+ * Read string value from a file
+ *
+ * @param sysfs psfreq_sysfs_type instance to use
+ * @param file relative file path from sysfs->base_path to write to
+ * @return String containing file contents, NULL otherwise
+ */
 char *psfreq_sysfs_read(const psfreq_sysfs_type *sysfs,
                 const char *file)
 {

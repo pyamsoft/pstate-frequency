@@ -22,11 +22,10 @@
  * Constants for defining various color related arguments
  */
 
-#include <stdbool.h>
-
 #include "psfreq_color.h"
 
-static bool colored = false;
+static unsigned char COLORED = 1;
+static unsigned char colored = 0;
 static char *const none = "";
 static char *const reset = "\033[0m";
 static char *const red = "\033[1;31m";
@@ -41,7 +40,7 @@ static char *psfreq_color_set(char *color);
 static char *psfreq_color_set(char *color)
 {
         char *s;
-        if (colored) {
+        if (colored == COLORED) {
                 s = color;
         } else {
                 s = none;
@@ -51,7 +50,7 @@ static char *psfreq_color_set(char *color)
 
 void psfreq_color_enable(void)
 {
-        colored = true;
+        colored = 1;
 }
 
 char *psfreq_color_reset(void)
