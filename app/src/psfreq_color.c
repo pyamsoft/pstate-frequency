@@ -24,6 +24,14 @@
 
 #include "psfreq_color.h"
 
+/**
+ * Set the output stream to a specified color
+ *
+ * @param color The color code to use
+ * @return The color code if color is enabled, else empty string
+ */
+static char *psfreq_color_set(char *color);
+
 static unsigned char COLORED = 1;
 static unsigned char colored = 0;
 static char *const none = "";
@@ -35,8 +43,90 @@ static char *const magenta = "\033[1;35m";
 static char *const cyan = "\033[1;36m";
 static char *const white = "\033[1;37m";
 
-static char *psfreq_color_set(char *color);
+/**
+ * Enable colored output
+ */
+void psfreq_color_enable(void)
+{
+        colored = 1;
+}
 
+/**
+ * Reset output color
+ *
+ * @return Reset output color
+ */
+char *psfreq_color_reset(void)
+{
+        return psfreq_color_set(reset);
+}
+
+/**
+ * Red output color
+ *
+ * @return Red output color
+ */
+char *psfreq_color_red(void)
+{
+        return psfreq_color_set(red);
+}
+
+/**
+ * Green output color
+ *
+ * @return Green output color
+ */
+char *psfreq_color_green(void)
+{
+        return psfreq_color_set(green);
+}
+
+/**
+ * Blue output color
+ *
+ * @return Blue output color
+ */
+char *psfreq_color_blue(void)
+{
+        return psfreq_color_set(blue);
+}
+
+/**
+ * Magenta output color
+ *
+ * @return Magenta output color
+ */
+char *psfreq_color_magenta(void)
+{
+        return psfreq_color_set(magenta);
+}
+
+/**
+ * Cyan output color
+ *
+ * @return Cyan output color
+ */
+char *psfreq_color_cyan(void)
+{
+        return psfreq_color_set(cyan);
+}
+
+/**
+ * White output color
+ *
+ * @return White output color
+ */
+char *psfreq_color_white(void)
+{
+        return psfreq_color_set(white);
+}
+
+/**
+ * Set the output stream to a specified color
+ *
+ * @param color The color code to use
+ * @return The color code if color is enabled, else empty string
+ */
 static char *psfreq_color_set(char *color)
 {
         char *s;
@@ -46,45 +136,5 @@ static char *psfreq_color_set(char *color)
                 s = none;
         }
         return s;
-}
-
-void psfreq_color_enable(void)
-{
-        colored = 1;
-}
-
-char *psfreq_color_reset(void)
-{
-        return psfreq_color_set(reset);
-}
-
-char *psfreq_color_red(void)
-{
-        return psfreq_color_set(red);
-}
-
-char *psfreq_color_green(void)
-{
-        return psfreq_color_set(green);
-}
-
-char *psfreq_color_blue(void)
-{
-        return psfreq_color_set(blue);
-}
-
-char *psfreq_color_magenta(void)
-{
-        return psfreq_color_set(magenta);
-}
-
-char *psfreq_color_cyan(void)
-{
-        return psfreq_color_set(cyan);
-}
-
-char *psfreq_color_white(void)
-{
-        return psfreq_color_set(white);
 }
 

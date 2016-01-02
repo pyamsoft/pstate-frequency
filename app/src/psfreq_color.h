@@ -25,13 +25,58 @@
 #ifndef PSFREQ_COLOR_H
 #define PSFREQ_COLOR_H
 
+/**
+ * Enable colored output
+ */
 void psfreq_color_enable(void);
+
+/**
+ * Reset output color
+ *
+ * @return Reset output color
+ */
 char *psfreq_color_reset(void);
+
+/**
+ * Red output color
+ *
+ * @return Red output color
+ */
 char *psfreq_color_red(void);
+
+/**
+ * Green output color
+ *
+ * @return Green output color
+ */
 char *psfreq_color_green(void);
+
+/**
+ * Blue output color
+ *
+ * @return Blue output color
+ */
 char *psfreq_color_blue(void);
+
+/**
+ * Magenta output color
+ *
+ * @return Magenta output color
+ */
 char *psfreq_color_magenta(void);
+
+/**
+ * Cyan output color
+ *
+ * @return Cyan output color
+ */
 char *psfreq_color_cyan(void);
+
+/**
+ * White output color
+ *
+ * @return White output color
+ */
 char *psfreq_color_white(void);
 
 #endif

@@ -39,13 +39,14 @@ that which is advertised to be available.
 
 The installation follows a basic process:  
 ```
+# make edit
 # make bin
 # make install
 ```
 
 While building, there are a couple of options that one may configure or  
 change:  
-+ The C compiler used (defaults to clang)  
++ The C compiler used (defaults to gcc)  
 + The directory to install to (defaults to /usr/local)  
 + Install bash completion (defaults to Yes)  
 + Install zsh completion (defaults to No)  

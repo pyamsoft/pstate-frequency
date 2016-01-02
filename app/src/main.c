@@ -156,6 +156,8 @@ static unsigned char init_cpu_and_sysfs(psfreq_cpu_type *cpu,
 {
         psfreq_sysfs_init(sysfs);
         if (psfreq_cpu_init(cpu, sysfs) == INIT_FAILURE) {
+                psfreq_log_error("init_cpu_and_sysfs",
+                        "System has failed to initialize");
                 return FAILURE;
         }
         return SUCCESS;

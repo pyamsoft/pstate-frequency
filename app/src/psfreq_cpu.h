@@ -53,26 +53,116 @@ typedef struct psfreq_cpu_type {
         char *scaling_driver;
 } psfreq_cpu_type;
 
+/**
+ * Initalize a new psfreq_cpu_type instance
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @return Boolean type, true if init successful, false if otherwise
+ */
 unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs);
+
+/**
+ * Re-initialize the dynamic parts of the psfreq_cpu_type
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @return Boolean type, true if init successful, false if otherwise
+ */
 unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs);
+
+/**
+ * Free memory held by an initialized psfreq_cpu_type instance
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ */
 void psfreq_cpu_destroy(psfreq_cpu_type *cpu);
+
+/**
+ * Get the cpuinfo_min_freq value as a percent
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ * @return The value of the cpuinfo min freq as a percent value
+ */
 unsigned int psfreq_cpu_get_cpuinfo_min(const psfreq_cpu_type *cpu);
+
+/**
+ * Get the cpuinfo_max_freq value as a percent
+ *
+ * @return The value of the cpuinfo min freq as a percent value (hard 100)
+ */
 unsigned int psfreq_cpu_get_cpuinfo_max(void);
+
+/**
+ * Get the scaling_min_freq value as a percent
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ * @return The value of the scaling min freq as a percent value
+ */
 unsigned int psfreq_cpu_get_scaling_min(const psfreq_cpu_type *cpu);
+
+/**
+ * Get the scaling_max_freq value as a percent
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ * @return The value of the scaling max freq as a percent value
+ */
 unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu);
+
+/**
+ * Write the sysfs cpu max
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @param m The value to set for the max
+ * @return Boolean type, true if application is successful, false otherwise
+ */
 unsigned char psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const int *const m);
+
+/**
+ * Write the sysfs cpu min
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @param m The value to set for the min
+ * @return Boolean type, true if application is successful, false otherwise
+ */
 unsigned char psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const int *const m);
+
+/**
+ * Write the sysfs cpu governor
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @param m The value to set for the governor
+ * @return Boolean type, true if application is successful, false otherwise
+ */
 unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
                                  const psfreq_sysfs_type *sysfs,
                                  const char *const m);
+
+/**
+ * Write the sysfs cpu turbo
+ *
+ * @param sysfs An already initialized sysfs instance
+ * @param m The value to set for the turbo
+ * @return Boolean type, true if application is successful, false otherwise
+ */
 unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
                                    const int *const m);
+
+/**
+ * Retrieve the real CPU frequencies from the CPU
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @return Vector of Strings, 1 entry for each CPU, undefined if errors occur
+ */
 char **psfreq_cpu_get_real_freqs(const psfreq_cpu_type *cpu);
 
 #endif

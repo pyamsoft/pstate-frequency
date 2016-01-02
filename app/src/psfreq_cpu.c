@@ -33,20 +33,89 @@
 #include "psfreq_strings.h"
 #include "psfreq_util.h"
 
-static char *psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs);
+/**
+ * Sections of the psfreq_cpu_type can be read multiple times during lifetime
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @return Boolean type, true if init successful, false if otherwise
+ */
+static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs);
+
+/**
+ * Find the total number of online CPUS in the system
+ *
+ * @return The number of online CPUs
+ */
 static int psfreq_cpu_init_number_cpus(void);
+
+/**
+ * Find the current CPU scaling driver
+ *
+ * @param sysfs An already initialized sysfs instance
+ * @return The name of the CPU scaling driver, undefined if otherwise
+ */
+static char *psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs);
+
+/**
+ * Returns whether or not the current driver is intel_pstate
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @return Boolean type, true if the current cpu driver is intel_pstate
+ */
 static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu);
-static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
-                const char *const what);
-static char *psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
-                                const psfreq_sysfs_type *sysfs);
-static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs);
-static unsigned int psfreq_cpu_init_freq(
+
+/**
+ * Returns a CPU frequency as specified by arguments
+ *
+ * @param sysfs An already initialized sysfs instance
+ * @param type The frequency type, scaling or cpuinfo
+ * @param what Which frequency, either min or max
+ * @return Value of the frequency in KHz
+ */
+static long psfreq_cpu_init_freq(
                 const psfreq_sysfs_type *sysfs,
                 const char *const type,
                 const char *const what);
-static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
-                const psfreq_sysfs_type *sysfs);
+
+/**
+ * Returns a CPU vector
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ * @param what The specific field by which to build the vector
+ * @return Vector of CPU values
+ */
+static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
+                const char *const what);
+
+/**
+ * Discover the current scaling_governor
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ * @param sysfs An already initialized sysfs instance
+ * @return Name of the governor, undefined if error
+ */
+static char *psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
+                                const psfreq_sysfs_type *sysfs);
+
+/**
+ * Discover the current system turbo boost value
+ *
+ * @param sysfs An already initialized sysfs instance
+ * @return The current value of turbo boost
+ */
+static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs);
+
+
+/**
+ * Get the passed in value as a percent
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ * @return The value of the passed in field as a percent value
+ */
+static unsigned int psfreq_cpu_get_cpu_pct(const psfreq_cpu_type *cpu,
+                const unsigned int val);
 
 static char **const CPU_VECTOR_UNDEFINED = NULL;
 static const int CPU_NUMBER_UNDEFINED = -1;
@@ -56,47 +125,88 @@ static const unsigned char NO_PSTATE = 0;
 static const unsigned char SUCCESS = 1;
 static const unsigned char FAILURE = 0;
 
+/**
+ * Initalize a new psfreq_cpu_type instance
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @return Boolean type, true if init successful, false if otherwise
+ */
 unsigned char psfreq_cpu_init(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
         char *m;
         cpu->scaling_driver = psfreq_cpu_init_driver(sysfs);
+        if (cpu->scaling_driver == CPU_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+
         cpu->has_pstate = psfreq_cpu_init_has_pstate(cpu);
         if (cpu->has_pstate == NO_PSTATE) {
-                psfreq_log_error("psfreq_cpu_init",
-                        "System does not have intel_pstate and is unsupported");
                 free(cpu->scaling_driver);
                 return INIT_FAILURE;
         }
 
         cpu->cpu_num = psfreq_cpu_init_number_cpus();
+        if (cpu->cpu_num == CPU_NUMBER_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+
         cpu->vector_scaling_min_freq = psfreq_cpu_init_vector(cpu, "min_freq");
+        if (cpu->vector_scaling_min_freq == CPU_VECTOR_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+
         cpu->vector_scaling_max_freq = psfreq_cpu_init_vector(cpu, "max_freq");
+        if (cpu->vector_scaling_max_freq == CPU_VECTOR_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+
         cpu->vector_scaling_governor = psfreq_cpu_init_vector(cpu, "governor");
+        if (cpu->vector_scaling_governor == CPU_VECTOR_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+
         cpu->cpuinfo_max_freq = psfreq_cpu_init_freq(sysfs, "cpuinfo", "max");
+        if (cpu->cpuinfo_max_freq == CPU_FREQUENCY_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+
         cpu->cpuinfo_min_freq = psfreq_cpu_init_freq(sysfs, "cpuinfo", "min");
+        if (cpu->cpuinfo_min_freq == CPU_FREQUENCY_UNDEFINED) {
+                return INIT_FAILURE;
+        }
 
         m = psfreq_sysfs_read(sysfs, "intel_pstate/max_perf_pct");
+        if (m == READ_ERROR) {
+                return INIT_FAILURE;
+        }
         cpu->pst_max = psfreq_strings_to_int(m);
+        if (cpu->pst_max == STRING_CONVERT_TO_ERROR) {
+                return INIT_FAILURE;
+        }
         free(m);
 
         m = psfreq_sysfs_read(sysfs, "intel_pstate/min_perf_pct");
+        if (m == READ_ERROR) {
+                return INIT_FAILURE;
+        }
         cpu->pst_min = psfreq_strings_to_int(m);
+        if (cpu->pst_min == STRING_CONVERT_TO_ERROR) {
+                return INIT_FAILURE;
+        }
         free(m);
 
         return psfreq_cpu_init_dynamic(cpu, sysfs);
 }
 
-static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
-                const psfreq_sysfs_type *sysfs)
-{
-        cpu->scaling_max_freq = psfreq_cpu_init_freq(sysfs, "scaling", "max");
-        cpu->scaling_min_freq = psfreq_cpu_init_freq(sysfs, "scaling", "min");
-        cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
-        cpu->pst_turbo = psfreq_cpu_init_turbo_boost(sysfs);
-        return INIT_SUCCESS;
-}
-
+/**
+ * Re-initialize the dynamic parts of the psfreq_cpu_type
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @return Boolean type, true if init successful, false if otherwise
+ */
 unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
                 const psfreq_sysfs_type *sysfs)
 {
@@ -107,6 +217,11 @@ unsigned char psfreq_cpu_reinit(psfreq_cpu_type *cpu,
         return psfreq_cpu_init_dynamic(cpu, sysfs);
 }
 
+/**
+ * Free memory held by an initialized psfreq_cpu_type instance
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ */
 void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
 {
         int i;
@@ -147,9 +262,318 @@ void psfreq_cpu_destroy(psfreq_cpu_type *cpu)
         free(cpu->scaling_driver);
 }
 
-/*
- * Find the total number of CPUS (logical and physical) that exist on the
- * system.
+/**
+ * Get the cpuinfo_min_freq value as a percent
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ * @return The value of the cpuinfo min freq as a percent value
+ */
+unsigned int psfreq_cpu_get_cpuinfo_min(const psfreq_cpu_type *cpu)
+{
+        if (cpu == CPU_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_get_cpuinfo_min",
+                                "cpu is undefined");
+                return CPU_FREQUENCY_UNDEFINED;
+        }
+        return psfreq_cpu_get_cpu_pct(cpu, cpu->cpuinfo_min_freq);
+}
+
+/**
+ * Get the cpuinfo_max_freq value as a percent
+ *
+ * @return The value of the cpuinfo min freq as a percent value (hard 100)
+ */
+unsigned int psfreq_cpu_get_cpuinfo_max(void)
+{
+        return CPU_FREQUENCY_MAXIMUM;
+}
+
+/**
+ * Get the scaling_min_freq value as a percent
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ * @return The value of the scaling min freq as a percent value
+ */
+unsigned int psfreq_cpu_get_scaling_min(const psfreq_cpu_type *cpu)
+{
+        if (cpu == CPU_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_get_scaling_min",
+                                "cpu is undefined");
+                return CPU_FREQUENCY_UNDEFINED;
+        }
+        return psfreq_cpu_get_cpu_pct(cpu, cpu->scaling_min_freq);
+}
+
+/**
+ * Get the scaling_max_freq value as a percent
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ * @return The value of the scaling max freq as a percent value
+ */
+unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu)
+{
+        if (cpu == CPU_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_get_scaling_max",
+                                "cpu is undefined");
+                return CPU_FREQUENCY_UNDEFINED;
+        }
+        return psfreq_cpu_get_cpu_pct(cpu, cpu->scaling_max_freq);
+}
+
+/**
+ * Write the sysfs cpu max
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @param m The value to set for the max
+ * @return Boolean type, true if application is successful, false otherwise
+ */
+unsigned char psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const int *const m)
+{
+        int i;
+        int freq;
+        int n;
+        int num;
+        if (*m >= CPU_FREQUENCY_MAXIMUM) {
+                n = psfreq_cpu_get_cpuinfo_max();
+        } else if (*m <= CPU_FREQUENCY_MINIMUM) {
+                n = psfreq_cpu_get_cpuinfo_min(cpu) + 1;
+        } else {
+                n = *m;
+        }
+        if (sysfs == SYSFS_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "sysfs is undefined");
+                return FAILURE;
+        }
+        if (cpu == CPU_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "cpu is undefined");
+                return FAILURE;
+        }
+
+        num = cpu->cpu_num;
+        if (num == CPU_NUMBER_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "cpu->cpu_num is undefined");
+                return FAILURE;
+        }
+        if (cpu->vector_scaling_max_freq == CPU_VECTOR_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_max",
+                                "cpu->vector_scaling_max_freq is undefined");
+                return FAILURE;
+        }
+        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/max_perf_pct", &n)
+                         == WRITE_FAILURE) {
+                return FAILURE;
+        }
+
+        freq = cpu->cpuinfo_max_freq * ((double) n / CPU_FREQUENCY_MAXIMUM);
+        for (i = 0; i < num; ++i) {
+                if (psfreq_sysfs_write_num(sysfs,
+                        cpu->vector_scaling_max_freq[i], &freq)
+                                == WRITE_FAILURE) {
+                        return FAILURE;
+                }
+        }
+        return SUCCESS;
+}
+
+/**
+ * Write the sysfs cpu min
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @param m The value to set for the min
+ * @return Boolean type, true if application is successful, false otherwise
+ */
+unsigned char psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const int *const m)
+{
+        int i;
+        int freq;
+        int n;
+        int num;
+
+        if (*m >= CPU_FREQUENCY_MAXIMUM) {
+                n = psfreq_cpu_get_cpuinfo_max() - 1;
+        } else if (*m <= CPU_FREQUENCY_MINIMUM) {
+                n = psfreq_cpu_get_cpuinfo_min(cpu);
+        } else {
+                n = *m;
+        }
+        if (sysfs == SYSFS_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "sysfs is undefined");
+                return FAILURE;
+        }
+        if (cpu == CPU_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "cpu is undefined");
+                return FAILURE;
+        }
+
+        num = cpu->cpu_num;
+        if (num == CPU_NUMBER_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "cpu->cpu_num is undefined");
+                return FAILURE;
+        }
+        if (cpu->vector_scaling_min_freq == CPU_VECTOR_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_min",
+                                "cpu->vector_scaling_min_freq is undefined");
+                return FAILURE;
+        }
+        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/min_perf_pct", &n)
+                        == WRITE_FAILURE) {
+                return FAILURE;
+        }
+
+        freq = cpu->cpuinfo_max_freq * ((double) n / CPU_FREQUENCY_MAXIMUM);
+        for (i = 0; i < num; ++i) {
+                if (psfreq_sysfs_write_num(sysfs,
+                        cpu->vector_scaling_min_freq[i], &freq)
+                                == WRITE_FAILURE) {
+                        return FAILURE;
+                }
+        }
+        return SUCCESS;
+}
+
+/**
+ * Write the sysfs cpu governor
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @param m The value to set for the governor
+ * @return Boolean type, true if application is successful, false otherwise
+ */
+unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
+                                 const psfreq_sysfs_type *sysfs,
+                                 const char *const m)
+{
+        int i;
+        int num;
+        if (sysfs == SYSFS_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_gov",
+                                "sysfs is undefined");
+                return FAILURE;
+        }
+        if (cpu == CPU_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_gov",
+                                "cpu is undefined");
+                return FAILURE;
+        }
+
+        num = cpu->cpu_num;
+        if (num == CPU_NUMBER_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_gov",
+                                "cpu->cpu_num is undefined");
+                return FAILURE;
+        }
+        if (cpu->vector_scaling_governor == CPU_VECTOR_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_gov",
+                                "cpu->vector_scaling_governor is undefined");
+                return FAILURE;
+        }
+        for (i = 0; i < num; ++i) {
+                if (psfreq_sysfs_write(sysfs,
+                        cpu->vector_scaling_governor[i], m)
+                                == WRITE_FAILURE) {
+                        return FAILURE;
+                }
+        }
+        return SUCCESS;
+}
+
+/**
+ * Write the sysfs cpu turbo
+ *
+ * @param sysfs An already initialized sysfs instance
+ * @param m The value to set for the turbo
+ * @return Boolean type, true if application is successful, false otherwise
+ */
+unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
+                                   const int *const m)
+{
+        if (sysfs == SYSFS_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_set_turbo",
+                                "sysfs is undefined");
+                return FAILURE;
+        }
+        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/no_turbo", m)
+                        == WRITE_FAILURE) {
+                return FAILURE;
+        }
+        return SUCCESS;
+}
+
+/**
+ * Retrieve the real CPU frequencies from the CPU
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @return Vector of Strings, 1 entry for each CPU, undefined if errors occur
+ */
+char **psfreq_cpu_get_real_freqs(const psfreq_cpu_type *cpu)
+{
+        const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
+        int size;
+        char **res;
+        if (cpu == CPU_UNDEFINED) {
+                psfreq_log_error("psfreq_cpu_get_real_freqs",
+                                "cpu is undefined");
+                return CPU_VECTOR_UNDEFINED;
+        }
+
+        size = cpu->cpu_num;
+        if (size == CPU_NUMBER_UNDEFINED) {
+                return CPU_VECTOR_UNDEFINED;
+        }
+
+        res = psfreq_util_read_pipe(cmd, size);
+        if (res == READ_ERROR) {
+                return CPU_VECTOR_UNDEFINED;
+        }
+        return res;
+}
+
+/**
+ * Sections of the psfreq_cpu_type can be read multiple times during lifetime
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @param sysfs An already initialized sysfs instance
+ * @return Boolean type, true if init successful, false if otherwise
+ */
+static unsigned char psfreq_cpu_init_dynamic(psfreq_cpu_type *cpu,
+                const psfreq_sysfs_type *sysfs)
+{
+        cpu->scaling_max_freq = psfreq_cpu_init_freq(sysfs, "scaling", "max");
+        if (cpu->scaling_max_freq == CPU_FREQUENCY_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+        cpu->scaling_min_freq = psfreq_cpu_init_freq(sysfs, "scaling", "min");
+        if (cpu->scaling_min_freq == CPU_FREQUENCY_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+        cpu->scaling_governor = psfreq_cpu_init_governor(cpu, sysfs);
+        if (cpu->scaling_governor == GOV_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+        cpu->pst_turbo = psfreq_cpu_init_turbo_boost(sysfs);
+        if (cpu->pst_turbo == TURBO_UNDEFINED) {
+                return INIT_FAILURE;
+        }
+        return INIT_SUCCESS;
+}
+
+
+/**
+ * Find the total number of online CPUS in the system
+ *
+ * @return The number of online CPUs
  */
 static int psfreq_cpu_init_number_cpus(void)
 {
@@ -174,6 +598,12 @@ static int psfreq_cpu_init_number_cpus(void)
         return n;
 }
 
+/**
+ * Find the current CPU scaling driver
+ *
+ * @param sysfs An already initialized sysfs instance
+ * @return The name of the CPU scaling driver, undefined if otherwise
+ */
 static char *psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs)
 {
         char *driver;
@@ -193,6 +623,12 @@ static char *psfreq_cpu_init_driver(const psfreq_sysfs_type *sysfs)
         return driver;
 }
 
+/**
+ * Returns whether or not the current driver is intel_pstate
+ *
+ * @param cpu The psfreq_cpu_type instance to init
+ * @return Boolean type, true if the current cpu driver is intel_pstate
+ */
 static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu)
 {
 
@@ -201,7 +637,15 @@ static unsigned char psfreq_cpu_init_has_pstate(const psfreq_cpu_type *cpu)
         return psfreq_strings_equals(cmp, driver);
 }
 
-static unsigned int psfreq_cpu_init_freq(
+/**
+ * Returns a CPU frequency as specified by arguments
+ *
+ * @param sysfs An already initialized sysfs instance
+ * @param type The frequency type, scaling or cpuinfo
+ * @param what Which frequency, either min or max
+ * @return Value of the frequency in KHz
+ */
+static long psfreq_cpu_init_freq(
                 const psfreq_sysfs_type *sysfs,
                 const char *const type,
                 const char *const what)
@@ -235,6 +679,13 @@ static unsigned int psfreq_cpu_init_freq(
         return result;
 }
 
+/**
+ * Returns a CPU vector
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ * @param what The specific field by which to build the vector
+ * @return Vector of CPU values
+ */
 static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                 const char *const what)
 {
@@ -247,6 +698,7 @@ static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
                                 "cpu is undefined, failed to find cpu number");
                 return CPU_VECTOR_UNDEFINED;
         }
+
         num = cpu->cpu_num;
         if (num == CPU_NUMBER_UNDEFINED) {
                 psfreq_log_error("psfreq_cpu_init_vector",
@@ -276,54 +728,13 @@ static char **psfreq_cpu_init_vector(const psfreq_cpu_type *cpu,
         return vector;
 }
 
-unsigned int psfreq_cpu_get_cpuinfo_min(const psfreq_cpu_type *cpu)
-{
-        unsigned int min;
-        unsigned int max;
-        if (cpu == CPU_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_get_cpuinfo_min",
-                                "cpu is undefined");
-                return CPU_FREQUENCY_UNDEFINED;
-        }
-        min = cpu->cpuinfo_min_freq;
-        max = cpu->cpuinfo_max_freq;
-        return ((double) min / max) * CPU_FREQUENCY_MAXIMUM;
-}
-
-unsigned int psfreq_cpu_get_cpuinfo_max(void)
-{
-        /* Hardcoded to CPU_FREQUENCY_MAXIMUM */
-        return CPU_FREQUENCY_MAXIMUM;
-}
-
-unsigned int psfreq_cpu_get_scaling_min(const psfreq_cpu_type *cpu)
-{
-        unsigned int min;
-        unsigned int max;
-        if (cpu == CPU_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_get_scaling_min",
-                                "cpu is undefined");
-                return CPU_FREQUENCY_UNDEFINED;
-        }
-        min = cpu->scaling_min_freq;
-        max = cpu->cpuinfo_max_freq;
-        return ((double) min / max) * CPU_FREQUENCY_MAXIMUM;
-}
-
-unsigned int psfreq_cpu_get_scaling_max(const psfreq_cpu_type *cpu)
-{
-        unsigned int min;
-        unsigned int max;
-        if (cpu == CPU_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_get_scaling_max",
-                                "cpu is undefined");
-                return CPU_FREQUENCY_UNDEFINED;
-        }
-        min = cpu->scaling_max_freq;
-        max = cpu->cpuinfo_max_freq;
-        return ((double) min / max) * CPU_FREQUENCY_MAXIMUM;
-}
-
+/**
+ * Discover the current scaling_governor
+ *
+ * @param cpu The psfreq_cpu_type instance to use
+ * @param sysfs An already initialized sysfs instance
+ * @return Name of the governor, undefined if error
+ */
 static char *psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
                                 const psfreq_sysfs_type *sysfs)
 {
@@ -348,6 +759,12 @@ static char *psfreq_cpu_init_governor(const psfreq_cpu_type *cpu,
         return psfreq_sysfs_read(sysfs, f);
 }
 
+/**
+ * Discover the current system turbo boost value
+ *
+ * @param sysfs An already initialized sysfs instance
+ * @return The current value of turbo boost
+ */
 static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs)
 {
         char turbo;
@@ -367,181 +784,21 @@ static char psfreq_cpu_init_turbo_boost(const psfreq_sysfs_type *sysfs)
         return turbo;
 }
 
-unsigned char psfreq_cpu_set_max(const psfreq_cpu_type *cpu,
-                                 const psfreq_sysfs_type *sysfs,
-                                 const int *const m)
+/**
+ * Get the passed in value as a percent
+ *
+ * @param cpu The psfreq_cpu_type instance to free
+ * @return The value of the passed in field as a percent value
+ */
+static unsigned int psfreq_cpu_get_cpu_pct(const psfreq_cpu_type *cpu,
+                const unsigned int val)
 {
-        int i;
-        int freq;
-        int n;
-        int num;
-        if (*m >= CPU_FREQUENCY_MAXIMUM) {
-                n = psfreq_cpu_get_cpuinfo_max();
-        } else if (*m <= CPU_FREQUENCY_MINIMUM) {
-                n = psfreq_cpu_get_cpuinfo_min(cpu) + 1;
-        } else {
-                n = *m;
-        }
-        freq = cpu->cpuinfo_max_freq * ((double) n / CPU_FREQUENCY_MAXIMUM);
-        if (sysfs == SYSFS_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_max",
-                                "sysfs is undefined");
-                return FAILURE;
-        }
         if (cpu == CPU_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_max",
+                psfreq_log_error("psfreq_cpu_get_cpu_pct",
                                 "cpu is undefined");
-                return FAILURE;
+                return CPU_FREQUENCY_UNDEFINED;
         }
-        num = cpu->cpu_num;
-        if (num == CPU_NUMBER_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_max",
-                                "cpu->cpu_num is undefined");
-                return FAILURE;
-        }
-        if (cpu->vector_scaling_max_freq == CPU_VECTOR_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_max",
-                                "cpu->vector_scaling_max_freq is undefined");
-                return FAILURE;
-        }
-        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/max_perf_pct", &n)
-                         == WRITE_FAILURE) {
-                return FAILURE;
-        }
-        for (i = 0; i < num; ++i) {
-                if (psfreq_sysfs_write_num(sysfs,
-                        cpu->vector_scaling_max_freq[i], &freq)
-                                == WRITE_FAILURE) {
-                        return FAILURE;
-                }
-        }
-        return SUCCESS;
+        return ((double) val / cpu->cpuinfo_max_freq) * CPU_FREQUENCY_MAXIMUM;
 }
 
-unsigned char psfreq_cpu_set_min(const psfreq_cpu_type *cpu,
-                                 const psfreq_sysfs_type *sysfs,
-                                 const int *const m)
-{
-        int i;
-        int freq;
-        int n;
-        int num;
-
-        if (*m >= CPU_FREQUENCY_MAXIMUM) {
-                n = psfreq_cpu_get_cpuinfo_max() - 1;
-        } else if (*m <= CPU_FREQUENCY_MINIMUM) {
-                n = psfreq_cpu_get_cpuinfo_min(cpu);
-        } else {
-                n = *m;
-        }
-        freq = cpu->cpuinfo_max_freq * ((double) n / CPU_FREQUENCY_MAXIMUM);
-        if (sysfs == SYSFS_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_min",
-                                "sysfs is undefined");
-                return FAILURE;
-        }
-        if (cpu == CPU_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_min",
-                                "cpu is undefined");
-                return FAILURE;
-        }
-        num = cpu->cpu_num;
-        if (num == CPU_NUMBER_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_min",
-                                "cpu->cpu_num is undefined");
-                return FAILURE;
-        }
-        if (cpu->vector_scaling_min_freq == CPU_VECTOR_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_min",
-                                "cpu->vector_scaling_min_freq is undefined");
-                return FAILURE;
-        }
-        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/min_perf_pct", &n)
-                        == WRITE_FAILURE) {
-                return FAILURE;
-        }
-        for (i = 0; i < num; ++i) {
-                if (psfreq_sysfs_write_num(sysfs,
-                        cpu->vector_scaling_min_freq[i], &freq)
-                                == WRITE_FAILURE) {
-                        return FAILURE;
-                }
-        }
-        return SUCCESS;
-}
-
-unsigned char psfreq_cpu_set_gov(const psfreq_cpu_type *cpu,
-                                 const psfreq_sysfs_type *sysfs,
-                                 const char *const m)
-{
-        int i;
-        int num;
-        if (sysfs == SYSFS_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_gov",
-                                "sysfs is undefined");
-                return FAILURE;
-        }
-        if (cpu == CPU_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_gov",
-                                "cpu is undefined");
-                return FAILURE;
-        }
-        num = cpu->cpu_num;
-        if (num == CPU_NUMBER_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_gov",
-                                "cpu->cpu_num is undefined");
-                return FAILURE;
-        }
-        if (cpu->vector_scaling_governor == CPU_VECTOR_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_gov",
-                                "cpu->vector_scaling_governor is undefined");
-                return FAILURE;
-        }
-        for (i = 0; i < num; ++i) {
-                if (psfreq_sysfs_write(sysfs,
-                        cpu->vector_scaling_governor[i], m)
-                                == WRITE_FAILURE) {
-                        return FAILURE;
-                }
-        }
-        return SUCCESS;
-}
-
-unsigned char psfreq_cpu_set_turbo(const psfreq_sysfs_type *sysfs,
-                                   const int *const m)
-{
-        if (sysfs == SYSFS_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_set_turbo",
-                                "sysfs is undefined");
-                return FAILURE;
-        }
-        if (psfreq_sysfs_write_num(sysfs, "intel_pstate/no_turbo", m)
-                        == WRITE_FAILURE) {
-                return FAILURE;
-        }
-        return SUCCESS;
-}
-
-char **psfreq_cpu_get_real_freqs(const psfreq_cpu_type *cpu)
-{
-        const char *cmd = "grep MHz /proc/cpuinfo | cut -c12-";
-        int size;
-        char **res;
-        if (cpu == CPU_UNDEFINED) {
-                psfreq_log_error("psfreq_cpu_get_real_freqs",
-                                "cpu is undefined");
-                return CPU_VECTOR_UNDEFINED;
-        }
-
-        size = cpu->cpu_num;
-        if (size == CPU_NUMBER_UNDEFINED) {
-                return CPU_VECTOR_UNDEFINED;
-        }
-
-        res = psfreq_util_read_pipe(cmd, size);
-        if (res == READ_ERROR) {
-                return CPU_VECTOR_UNDEFINED;
-        }
-        return res;
-}
 

@@ -254,6 +254,11 @@ static double psfreq_strings_to_double(const char *const s)
  */
 static unsigned char psfreq_strings_isdigits(const char *s)
 {
+        if (s == NULL) {
+                psfreq_log_error("psfreq_strings_isdigits",
+                                "String is NULL");
+                return STRING_COMPARE_FAILURE;
+        }
         char c = *s;
         while (c != NULL_CHAR) {
                 if (isdigit(c) == STRING_COMPARE_FAILURE) {
