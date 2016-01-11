@@ -4,62 +4,18 @@
 VERSION:=2.0.3
 
 ##
-# C Standard
+# Install prefix
 #
-# The standard is implicitly set to C11 in the newest GCC 5. To have support
-# for the widest range of machines, we compile with the same standard as
-# Linux, explicitly setting to gnu89. Due to the current nature of the project
-# the standard is no longer a configurable value.
+# Understand that this prefix will only affect the destination of the
+# installed pstate-frequency binary and the installed documentation
+#
+# The bash-completion, zsh-completion, udev rule, and systemd unit files
+# expect to be installed into the /usr directory, and may not work if they
+# are installed anywhere other than the /usr directory.
+#
+# [/usr/local] | /usr | other
 ##
-
-##
-# bash-completion
-#
-# Include a bash completion file
-#
-# 0 NO | [1 YES]
-##
-INCLUDE_BASH_COMPLETION?=1
-
-##
-# zsh-completion
-#
-# Include a zsh completion file
-#
-# [0 NO] | 1 YES
-##
-INCLUDE_ZSH_COMPLETION?=0
-
-##
-# systemd services
-#
-# Include a systemd unit
-#
-# 0 NO | [1 YES]
-##
-INCLUDE_SYSTEMD_UNIT?=1
-
-##
-# x86_energy_perf_policy policies
-#
-# Modify the x86_energy_perf_policy systemd rule to set the policy to
-# a given preset
-#
-# see X86_ENERGY_PERF_POLICY(8) for details
-#
-# 0 POWERSAVE | [1 NORMAL] | 2 PERFORMANCE
-##
-X86_ENERGY_PERF_POLICY?=1
-
-##
-# udev rules
-#
-# Include a udev rule which will set the pstate to powersave on battery and
-# performance on AC power
-#
-# 0 NO | [1 YES]
-##
-INCLUDE_UDEV_RULE?=1
+PREFIX?=/usr/local
 
 ##
 # Preset power plan values
@@ -91,6 +47,55 @@ PRESET_POWER_PLAN_POWERSAVE="0 0 1 powersave"
 ##
 AUTO_POWER_PLAN_AC="balanced"
 AUTO_POWER_PLAN_BAT="powersave"
+
+##
+# x86_energy_perf_policy policies
+#
+# Modify the x86_energy_perf_policy systemd rule to set the policy to
+# a given preset
+#
+# see X86_ENERGY_PERF_POLICY(8) for details
+#
+# 0 POWERSAVE | [1 NORMAL] | 2 PERFORMANCE
+##
+X86_ENERGY_PERF_POLICY?=1
+
+##
+# bash-completion
+#
+# Include a bash completion file
+#
+# 0 NO | [1 YES]
+##
+INCLUDE_BASH_COMPLETION?=1
+
+##
+# zsh-completion
+#
+# Include a zsh completion file
+#
+# [0 NO] | 1 YES
+##
+INCLUDE_ZSH_COMPLETION?=0
+
+##
+# systemd services
+#
+# Include a systemd unit
+#
+# 0 NO | [1 YES]
+##
+INCLUDE_SYSTEMD_UNIT?=1
+
+##
+# udev rules
+#
+# Include a udev rule which will set the pstate to powersave on battery and
+# performance on AC power
+#
+# 0 NO | [1 YES]
+##
+INCLUDE_UDEV_RULE?=1
 
 ##
 # Install README.md
@@ -133,20 +138,6 @@ INCLUDE_LICENSE?=1
 # [gcc] | clang | OTHER
 ##
 CC?=gcc
-
-##
-# Install prefix
-#
-# Understand that this prefix will only affect the destination of the
-# installed pstate-frequency binary and the installed documentation
-#
-# The bash-completion, zsh-completion, udev rule, and systemd unit files
-# expect to be installed into the /usr directory, and may not work if they
-# are installed anywhere other than the /usr directory.
-#
-# [/usr/local] | /usr | other
-##
-PREFIX?=/usr/local
 
 ##
 # Linker Flags
