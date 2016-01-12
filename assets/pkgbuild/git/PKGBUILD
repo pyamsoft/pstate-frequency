@@ -44,7 +44,7 @@ prepare() {
   # best practices. It is highly recommended that you
   # enable the line to allow for editing the config.mk file
   #
-  make DESTDIR="${pkgdir}" edit
+  # make DESTDIR="${pkgdir}" edit
 
   make DESTDIR="${pkgdir}" options
 }
