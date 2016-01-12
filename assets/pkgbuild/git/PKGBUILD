@@ -46,18 +46,18 @@ prepare() {
   #
   # make DESTDIR="${pkgdir}" PREFIX="/usr" edit
 
-  make DESTDIR="${pkgdir}" PREFIX="/usr" options
+  make DESTDIR="${pkgdir}" options
 }
 
 build() {
   cd "${srcdir}/${_gitname}"
 
-  make DESTDIR="${pkgdir}" PREFIX="/usr" clean
-  make DESTDIR="${pkgdir}" PREFIX="/usr" bin
+  make DESTDIR="${pkgdir}" clean
+  make DESTDIR="${pkgdir}" bin
 }
 
 package() {
   cd "${srcdir}/${_gitname}"
 
-  make DESTDIR="${pkgdir}" PREFIX="/usr" install
+  make DESTDIR="${pkgdir}" install
 }
