@@ -145,7 +145,7 @@ CC?=gcc
 # Do NOT modify these unless you know what you are doing
 ##
 LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
-	 $(LDFLAGS)
+	 -Wl,--gc-sections $(LDFLAGS)
 
 ##
 # Compiler flags
