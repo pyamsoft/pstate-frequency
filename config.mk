@@ -135,7 +135,11 @@ INCLUDE_LICENSE?=1
 # both successfully build on all levels of optimizations, though
 # -O2 is the default for the balance between speed and stability
 #
-# [gcc] | clang | OTHER
+# Any and all of the C compilers explicitly listed here should always be
+# supported by pstate-frequency. If there are any issues encountered while
+# building with one of these compilers, please file an Issue ticket.
+#
+# [gcc] | clang | musl-gcc | OTHER
 ##
 CC?=gcc
 
