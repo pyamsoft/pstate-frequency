@@ -4,7 +4,7 @@ After=sysinit.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash -c "sleep 5 && x86_energy_perf_policy -v normal"
+ExecStart=/bin/sh -c "sleep 5 && x86_energy_perf_policy -v normal"
 
 [Install]
 WantedBy=multi-user.target
