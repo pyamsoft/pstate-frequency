@@ -6,8 +6,8 @@ pstate-frequency is able to adjust the Intel p-state driver values for the
 minimum and maximum scaling frequencies and the state of turbo boost.
 
 
-[![Build Status](https://travis-ci.org/pyamsoft/pstate-frequency.svg?branch=master)](https://travis-ci.org/pyamsoft/pstate-frequency)
-
+[![Travis Build Status](https://travis-ci.org/pyamsoft/pstate-frequency.svg?branch=master)](https://travis-ci.org/pyamsoft/pstate-frequency)
+[![Coverity Scan Build](https://scan.coverity.com/projects/7648/badge.svg)](https://scan.coverity.com/projects/7648/)
 
 ### Requirements
 
@@ -99,15 +99,15 @@ will be updated generally whenever a bug is fixed or patched.
 The binary by default is named **pstate-frequency**  
 When called without any options, the program will display something like  
 the following:  
-![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_run.png)
+[![Example Run](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_run.png)](https://github.com/pyamsoft/pstate-frequency)
 
 When called with the *-G --get* option, the program will display something  
 like the following:  
-![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_get.png)
+[![Example Get](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_get.png)](https://github.com/pyamsoft/pstate-frequency)
 
 When called with the *-S --set* option, the program will display something  
 like the following:  
-![](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_set.png)
+[![Example Set](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_set.png)](https://github.com/pyamsoft/pstate-frequency)
 
 The *-G --get* option can be called by a normal user and can take various  
 flags as optional arguments:  
