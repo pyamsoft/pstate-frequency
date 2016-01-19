@@ -122,7 +122,6 @@ static unsigned int psfreq_cpu_get_cpu_pct(const psfreq_cpu_type *cpu,
 static char **const CPU_VECTOR_UNDEFINED = NULL;
 static const int CPU_NUMBER_UNDEFINED = -1;
 static const unsigned int CPU_FREQUENCY_UNDEFINED = 0;
-static const unsigned char HAS_PSTATE = 1;
 static const unsigned char NO_PSTATE = 0;
 static const unsigned char SUCCESS = 1;
 static const unsigned char FAILURE = 0;
