@@ -4,10 +4,11 @@
 make clean || exit 1
 
 # Run coverity build tool
+current_date=$(date "+%Y-%m-%d %H-%M %Z")
 cov-build --dir cov-int make bin || exit 1
 
 # Create a tarball for uploading
-tar czvf pstate-frequency.tar.gz cov-int || exit 1
+tar czvf "pstate-frequency-${current_date}.tar.gz" cov-int || exit 1
 
 # Clean exit
 exit 0

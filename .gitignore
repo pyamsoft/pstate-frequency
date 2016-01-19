@@ -3,5 +3,5 @@ description-pak
 backup-*-pre-pstate-frequency.tgz
 *.deb
 app/build
-pstate-frequency.tar.gz
-cov-int/
+pstate-frequency-*.tar.gz
+cov-int*/
