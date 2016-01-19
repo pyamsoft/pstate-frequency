@@ -161,8 +161,8 @@ LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
 # -fstack-protector-strong
 ##
 CFLAGS:= -std=c99 -O2 \
-	-march=native -pipe \
-	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
+	-march=native -pipe -pedantic \
+	-Wall -Wextra -Werror -Wmissing-declarations \
 	-Wunreachable-code $(CFLAGS)
 
 ##
