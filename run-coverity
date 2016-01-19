@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Clean the build
+make clean || exit 1
+
+# Run coverity build tool
+cov-build --dir cov-int make bin || exit 1
+
+# Create a tarball for uploading
+tar czvf pstate-frequency.tar.gz cov-int || exit 1
+
+# Clean exit
+exit 0
