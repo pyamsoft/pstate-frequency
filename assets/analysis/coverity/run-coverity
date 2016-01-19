@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# This is super duper hacky, but it finds the project directory
+# on my system, so it 'works'
+project_dir="$(dirname $(readlink -f $0))/../../.."
+cd "${project_dir}" || exit 1
+
+# Clean the build
+make clean || exit 2
+
+# Run coverity build tool
+current_date=$(date "+%Y-%m-%d %H-%M %Z")
+cov-build --dir cov-int make bin || exit 3
+
+# Create a tarball for uploading
+mkdir -p coverity || exit 4
+tar czvf "coverity/pstate-frequency-${current_date}.tar.gz" cov-int || exit 5
+
+# Copy created tar to downloads folder for uploading
+download_dir=$(xdg-user-dir DOWNLOAD)
+cp "coverity/pstate-frequency-${current_date}.tar.gz" "${download_dir}" || exit 6
+
+# Clean exit
+exit 0
