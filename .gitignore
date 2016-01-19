@@ -5,3 +5,4 @@ backup-*-pre-pstate-frequency.tgz
 app/build
 pstate-frequency-*.tar.gz
 cov-int*/
+coverity/
