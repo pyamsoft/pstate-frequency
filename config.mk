@@ -155,11 +155,15 @@ LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
 # Compiler flags
 #
 # Do NOT modify these unless you know what you are doing
+#
+# Additional CFLAGS
+#
+# -fstack-protector-strong
 ##
 CFLAGS:= -std=c99 -O2 \
 	-march=native -pipe \
 	-Wall -Wextra -Werror -Wpedantic -Wmissing-declarations \
-	-Wunreachable-code -fstack-protector-strong $(CFLAGS)
+	-Wunreachable-code $(CFLAGS)
 
 ##
 # Add the VERSION to the CFLAGS if it is defined
