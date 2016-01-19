@@ -6,6 +6,9 @@ pstate-frequency is able to adjust the Intel p-state driver values for the
 minimum and maximum scaling frequencies and the state of turbo boost.
 
 
+[![Build Status](https://travis-ci.org/pyamsoft/pstate-frequency.svg?branch=master)](https://travis-ci.org/pyamsoft/pstate-frequency)
+
+
 ### Requirements
 
 + Intel P-State driver (included in kernel 3.9 and upwards).  
