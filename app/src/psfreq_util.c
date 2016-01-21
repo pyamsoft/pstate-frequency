@@ -1,9 +1,4 @@
 /**
- * @file psfreq_util.c
- * @author pyamsoft <pyam(dot)soft(at)gmail(dot)com>
- *
- * @section LICENSE
- *
  *  Copyright (C) 2014 - 2016 Peter Kenji Yamanaka
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,11 +14,8 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * @section DESCRIPTION
- * Utility functions file to help with things like reading from command
- * pipes.
  */
+
 /*
  * For popen using C99
  */

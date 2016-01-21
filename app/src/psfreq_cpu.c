@@ -1,9 +1,4 @@
 /**
- * @file psfreq_cpu_init.c
- * @author pyamsoft <pyam(dot)soft(at)gmail(dot)com>
- *
- * @section LICENSE
- *
  *  Copyright (C) 2014 - 2016 Peter Kenji Yamanaka
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,10 +14,6 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * @section DESCRIPTION
- * Part of the implementation for the psfreq_cpu_type. This module
- * handles the essential setup when a new psfreq_cpu_type is initialized.
  */
 
 #include <stdio.h>

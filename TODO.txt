@@ -1,7 +1,0 @@
-2.1.0
-
-        Document all functions in the style of JavaDoc/doxygen
-        Reach feature completeness
-                - No new features will be added
-                - Maintain stability with new kernel releases
-

@@ -1,9 +1,4 @@
 /**
- * @file psfreq_strings.h
- * @author pyamsoft <pyam(dot)soft(at)gmail(dot)com>
- *
- * @section LICENSE
- *
  *  Copyright (C) 2014 - 2016 Peter Kenji Yamanaka
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,11 +14,8 @@
  *  You should have received a copy of the GNU General Public License along
  *  with this program; if not, write to the Free Software Foundation, Inc.,
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * @section DESCRIPTION
- * A couple of general purpose functions which can be applied to various
- * character array string like structures in C.
  */
+
 #ifndef PSFREQ_STRINGS_H
 #define PSFREQ_STRINGS_H
 
