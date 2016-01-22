@@ -233,12 +233,25 @@ will only make use of the following sys files:
 + /sys/devices/system/cpu/intel_pstate/min_perf_pct  
 + /sys/devices/system/cpu/intel_pstate/no_turbo  
 
-## Questions
+## Development
+
+pstate-frequency is developed in the Open on Github at:
+```
+https://github.com/pyamsoft/pstate-frequency
+```
+If you know a few things about C programming and are wanting to help  
+out with development you can do so by creating issue tickets to squash bugs,  
+and propose feature requests for future inclusion.
+
+pstate-frequency has a publicly view able Trello board available at:  
+```
+https://trello.com/b/yyLHiU7X
+```
+
+## Issues
 
 Questions or issues should be either posted in the issue section of this  
 repository, or directed by email to pyamsoft @ pyam(dot)soft(at)gmail(dot)com
-
-## Issues
 
 Check the issues page on GitHub for any notes about outstanding or existing  
 issues. If you encounter a problem with pstate-frequency of which no such  
