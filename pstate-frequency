@@ -41,36 +41,48 @@ execution_sleep=0 # Number of seconds to sleep in between setting values
 # Options that expect an argument
 
 # Log levels
-readonly mask_log_level_off=0
-readonly mask_log_level_quiet=1
-readonly mask_log_level_normal=2
-readonly mask_log_level_verbose=3
-readonly mask_log_level_all=4
-log_level="${mask_log_level_normal}"
+readonly const_log_level_off=0
+readonly const_log_level_quiet=1
+readonly const_log_level_normal=2
+readonly const_log_level_verbose=3
+readonly const_log_level_all=4
+log_level="${const_log_level_normal}"
 
 # Execution modes
-# 0000 = 0 -> HELP
-# 0001 = 1 -> VERSION
-# 0010 = 2 -> GET
-# 0100 = 4 -> SET
-readonly mask_mode_help=0
-readonly mask_mode_version=1
-readonly mask_mode_get=2
-readonly mask_mode_set=3
-mode="${mask_mode_help}"
+readonly const_mode_help=0
+readonly const_mode_version=1
+readonly const_mode_get=2
+readonly const_mode_set=3
+mode="${const_mode_help}"
 
-# Get bitmask
-# 0000 = 0 -> CURRENT
-# 0001 = 1 -> REAL
-readonly mask_get_type_current=0
-readonly mask_get_type_real=1
-get_type="${mask_get_type_current}"
+# Get modes
+readonly const_get_type_current=0
+readonly const_get_type_real=1
+get_type="${const_get_type_current}"
 
-# Set bitmask
-set_max=0
-set_min=0
-set_turbo=0
-set_governor=0
+# Set commands
+readonly const_set_max_false=0
+readonly const_set_max_true=1
+set_max="${const_set_max_false}"
+
+readonly const_set_min_false=0
+readonly const_set_min_true=1
+set_min="${const_set_min_false}"
+
+readonly const_set_turbo_false=0
+readonly const_set_turbo_true=1
+set_turbo="${const_set_turbo_false}"
+
+readonly const_set_governor_false=0
+readonly const_set_governor_true=1
+set_governor="${const_set_governor_false}"
+
+# Plan modes
+readonly const_power_plan_none=0
+readonly const_power_plan_powersave=1
+readonly const_power_plan_balanced=2
+readonly const_power_plan_performance=3
+power_plan_mode="${const_power_plan_none}"
 
 # Supported option flags
 #
@@ -100,7 +112,7 @@ set_governor=0
 # log_level = normal, verbose, all
 log()
 {
-  if [ "${log_level}" -ge "${mask_log_level_normal}" ]; then
+  if [ "${log_level}" -ge "${const_log_level_normal}" ]; then
     printf -- "$@\n"
   fi
 }
@@ -110,7 +122,7 @@ log()
 # log_level = verbose, all
 log_verbose()
 {
-  if [ "${log_level}" -ge "${mask_log_level_verbose}" ]; then
+  if [ "${log_level}" -ge "${const_log_level_verbose}" ]; then
     printf -- "DEBUG: $@\n"
   fi
 }
@@ -120,7 +132,7 @@ log_verbose()
 # log_level = all
 log_all()
 {
-  if [ "${log_level}" -eq "${mask_log_level_all}" ]; then
+  if [ "${log_level}" -eq "${const_log_level_all}" ]; then
     printf -- "VERBOSE: $@\n"
   fi
 }
@@ -130,7 +142,7 @@ log_all()
 # log_level = quiet, normal, verbose, all
 log_quiet()
 {
-  if [ "${log_level}" -ge "${mask_log_level_quiet}" ]; then
+  if [ "${log_level}" -ge "${const_log_level_quiet}" ]; then
     printf -- "$@\n"
   fi
 }
@@ -208,7 +220,7 @@ print_version()
 
 log_more_verbose()
 {
-  if [ "${log_level}" -lt "${mask_log_level_all}" ]; then
+  if [ "${log_level}" -lt "${const_log_level_all}" ]; then
     log_level=$((${log_level} + 1))
     log_all "log_level more verbose"
   fi
@@ -216,7 +228,7 @@ log_more_verbose()
 
 log_less_verbose()
 {
-  if [ "${log_level}" -gt "${mask_log_level_off}" ]; then
+  if [ "${log_level}" -gt "${const_log_level_off}" ]; then
     log_all "log_level less verbose"
     log_level=$((${log_level} - 1))
   fi
@@ -234,6 +246,16 @@ handle_argument()
   else
     log_verbose "option expects argument: ${option_expects_argument}"
     log_verbose "argument: $1"
+
+    case "${option_expects_argument}" in
+      plan)
+        log_verbose "Command: plan"
+        ;;
+      *)
+        elog_quiet "Invalid option --${option_expects_argument}"
+        exit 2
+        ;;
+    esac
   fi
 }
 
@@ -243,7 +265,7 @@ option_expects_argument=""
 eval optind_expanded="\$${OPTIND}"
 while [ -n "${optind_expanded}" ]; do
   while getopts ":HVGSpmntgcrdq-:" option; do
-    log_verbose "option: -${option}${OPTARG}"
+    log_verbose "parse option: -${option}${OPTARG}"
     case "${option}" in
       -)
         case "${OPTARG}" in
@@ -257,11 +279,11 @@ while [ -n "${optind_expanded}" ]; do
             ;;
           get)
             option_expects_argument=""
-            mode="${mask_mode_get}"
+            mode="${const_mode_get}"
             ;;
           set)
             option_expects_argument=""
-            mode="${mask_mode_set}"
+            mode="${const_mode_set}"
             ;;
           plan)
             option_expects_argument="plan"
@@ -378,9 +400,9 @@ while [ -n "${optind_expanded}" ]; do
 done
 
 case "${mode}" in
-  "${mask_mode_get}")
+  "${const_mode_get}")
     ;;
-  "${mask_mode_set}")
+  "${const_mode_set}")
     ;;
 esac
 
