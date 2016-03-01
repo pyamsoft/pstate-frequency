@@ -33,6 +33,7 @@ readonly version="3.0.0"
 # 3 - Wrong operation mode
 # 4 - Invalid power plan
 # 5 - Missing essential requirement
+# 6 - Missing root
 
 # Options that do not handle an argument
 execution_delay=0 # Number of seconds to delay script
@@ -153,7 +154,7 @@ log_quiet()
 # Error logging
 elog()
 {
-  log "ERROR :$@" 1>&2
+  log "ERROR: $@" 1>&2
 }
 
 # Verbose error logging
@@ -672,8 +673,20 @@ do_get()
   esac
 }
 
+root_do_set()
+{
+  echo "YOU ARE ROOT"
+}
 
-# Initialization
+do_set()
+{
+  if [ "$(id -u)" -eq 0 ]; then
+    root_do_set
+  else
+    elog_quiet "You must be root."
+    exit 6
+  fi
+}
 
 # Sanity check
 check_binary printf
@@ -893,6 +906,7 @@ case "${mode}" in
     log_verbose "set_min: ${set_min_type} [${set_min_arg}]"
     log_verbose "set_turbo: ${set_turbo_type} [${set_turbo_arg}]"
     log_verbose "set_governor: ${set_governor_type} [${set_governor_arg}]"
+    do_set
     ;;
   *)
     print_usage
