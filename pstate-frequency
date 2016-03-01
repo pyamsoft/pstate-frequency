@@ -294,8 +294,10 @@ set_max()
     log_verbose "Check that '${value}' is all digits"
     if [ $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is all digits"
-      log_verbose "Bound value '${value}' between ${const_system_cpu_min_value} and ${const_system_cpu_max_value}"
-      value="$(set_variable_bounds "${value}" ${const_system_cpu_min_value} ${const_system_cpu_max_value})"
+      local fixed_min="$(( ${const_system_cpu_min_value} + 1 ))"
+      log_verbose "Bound value '${value}' between ${fixed_min} and ${const_system_cpu_max_value}"
+      value="$(set_variable_bounds "${value}" ${fixed_min} ${const_system_cpu_max_value})"
+      unset fixed_min
       set_max_type="${const_set_max_true}"
       set_max_arg="${value}"
       log_verbose "set_max_arg: '${set_max_arg}'"
@@ -332,8 +334,10 @@ set_min()
     log_verbose "Check that '${value}' is all digits"
     if [ $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is all digits"
-      log_verbose "Bound value '${value}' between ${const_system_cpu_min_value} and ${const_system_cpu_max_value}"
-      value="$(set_variable_bounds "${value}" ${const_system_cpu_min_value} ${const_system_cpu_max_value})"
+      local fixed_max="$(( ${const_system_cpu_max_value} - 1 ))"
+      log_verbose "Bound value '${value}' between ${const_system_cpu_min_value} and ${fixed_max}"
+      value="$(set_variable_bounds "${value}" ${const_system_cpu_min_value} ${fixed_max})"
+      unset fixed_max
       set_min_type="${const_set_min_true}"
       set_min_arg="${value}"
       log_verbose "set_min_arg: '${set_min_arg}'"
@@ -730,6 +734,29 @@ root_write_turbo()
   log_all "Turbo value written to ${const_system_intel_pstate_turbo}"
 }
 
+root_write_governor()
+{
+  log_verbose "Convert cpu_governor '$1' to name"
+  local governor_name=""
+  if [ "$1" -eq 0 ]; then
+    log_verbose "Governor: powersave"
+    governor_name="powersave"
+  else
+    log_verbose "Governor: performance"
+    governor_name="performance"
+  fi
+
+  for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
+    local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_governor"
+    log_verbose "Write governor: ${governor_name} to file: ${target}"
+    echo "${governor_name}" > "${target}"
+    unset target
+    log_all "Governor written to ${target}"
+  done
+
+  unset governor_name
+}
+
 root_do_set()
 {
   log_verbose "YOU ARE ROOT"
@@ -754,7 +781,7 @@ root_do_set()
   local sane_max="${const_system_cpu_max_value}"
   local sane_min="${const_system_cpu_min_value}"
   local sane_turbo=1
-  local sane_governor="powersave"
+  local sane_governor=0
 
   log_verbose "Check if we are setting max"
   if [ "${set_max_type}" -eq 1 ]; then
@@ -796,7 +823,13 @@ root_do_set()
     fi
   fi
 
-  log_verbose "Check if max is less than min"
+  log_verbose "Check that min is not >= max"
+  if [ "${setting_cpu_min}" -ge "${setting_cpu_max}" ]; then
+    log_verbose "set min to just below max"
+    setting_cpu_min="$(( ${setting_cpu_max} - 1 ))"
+  fi
+
+  log_verbose "Check that max is not <= min"
   if [ "${setting_cpu_max}" -le "${setting_cpu_min}" ]; then
     log_verbose "set max to just above min"
     setting_cpu_max="$(( ${setting_cpu_min} + 1 ))"
@@ -811,6 +844,7 @@ root_do_set()
   root_write_max "${sane_max}"
   root_write_min "${sane_min}"
   root_write_turbo "${sane_turbo}"
+  root_write_governor "${sane_governor}"
 
   if [ "${execution_sleep}" -eq 1 ]; then
     log_verbose "Sleep for 2 seconds requested by user"
@@ -821,6 +855,7 @@ root_do_set()
   root_write_max "${setting_cpu_max}"
   root_write_min "${setting_cpu_min}"
   root_write_turbo "${setting_cpu_turbo}"
+  root_write_governor "${setting_cpu_governor}"
 
   unset sane_max
   unset sane_min
