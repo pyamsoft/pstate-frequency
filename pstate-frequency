@@ -677,28 +677,37 @@ while [ -n "${optind_expanded}" ]; do
             mode="${const_mode_set}"
             ;;
           plan)
+            log_verbose "Attempt to set plan"
             option_expects_argument="plan"
             long_option="${option_expects_argument}"
             ;;
           max)
+            log_verbose "Attempt to set max"
             option_expects_argument="max"
             long_option="${option_expects_argument}"
             ;;
           min)
+            log_verbose "Attempt to set min"
             option_expects_argument="min"
             long_option="${option_expects_argument}"
             ;;
           turbo)
+            log_verbose "Attempt to set turbo"
             option_expects_argument="turbo"
             long_option="${option_expects_argument}"
             ;;
           governor)
+            log_verbose "Attempt to set governor"
             option_expects_argument="governor"
             long_option="${option_expects_argument}"
             ;;
           current)
+            log_verbose "Set get_type to current"
+            get_type="${const_get_type_current}"
             ;;
           real)
+            log_verbose "Set get_type to real"
+            get_type="${const_get_type_real}"
             ;;
           debug)
             log_more_verbose
@@ -737,23 +746,32 @@ while [ -n "${optind_expanded}" ]; do
         mode="${const_mode_set}"
         ;;
       p)
+        log_verbose "Attempt to set plan"
         set_power_plan "${OPTARG}"
         ;;
       m)
+        log_verbose "Attempt to set max"
         set_max "${OPTARG}"
         ;;
       n)
+        log_verbose "Attempt to set min"
         set_min "${OPTARG}"
         ;;
       t)
+        log_verbose "Attempt to set turbo"
         set_turbo "${OPTARG}"
         ;;
       g)
+        log_verbose "Attempt to set governor"
         set_governor "${OPTARG}"
         ;;
       c)
+        log_verbose "Set get_type to current"
+        get_type="${const_get_type_current}"
         ;;
       r)
+        log_verbose "Set get_type to real"
+        get_type="${const_get_type_real}"
         ;;
       d)
         log_more_verbose
