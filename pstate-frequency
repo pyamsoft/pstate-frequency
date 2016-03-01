@@ -50,11 +50,10 @@ readonly const_log_level_all=4
 log_level="${const_log_level_normal}"
 
 # Execution modes
-readonly const_mode_help=0
-readonly const_mode_version=1
-readonly const_mode_get=2
-readonly const_mode_set=3
-mode="${const_mode_help}"
+readonly const_mode_none=0
+readonly const_mode_get=1
+readonly const_mode_set=2
+mode="${const_mode_none}"
 
 # Get modes
 readonly const_get_type_current=0
@@ -294,6 +293,76 @@ set_max()
   fi
 }
 
+# Set the argument for cpu_min
+# Can be set multiple times, final time overrides
+set_min()
+{
+  log_verbose "set_min requires SET operation mode"
+  if [ "${mode}" -eq "${const_mode_set}" ]; then
+    local value=""
+    log_verbose "Check for special case arguments: max, min"
+    if [ "$1" = "max" ]; then
+      log_verbose "Argument was 'max' set to 100"
+      value="100"
+    elif [ "$1" = "min" ]; then
+      log_verbose "Argument was 'min' set to 0"
+      value="0"
+    else
+      log_verbose "Argument was not special, read as is"
+      value="$1"
+    fi
+    log_verbose "Check that '${value}' is all digits"
+    if [ $(is_digits "${value}") -eq 1 ]; then
+      log_verbose "'${value}' is all digits"
+      set_min_type="${const_set_min_true}"
+      set_min_arg="${value}"
+    else
+      elog_quiet "min argument '${value}' is not a number"
+      unset value
+      exit 2
+    fi
+    unset value
+  else
+    elog_quiet "Cannot set min outside of SET operation mode"
+    exit 3
+  fi
+}
+
+# Set the argument for cpu_turbo
+# Can be set multiple times, final time overrides
+set_turbo()
+{
+  log_verbose "set_turbo requires SET operation mode"
+  if [ "${mode}" -eq "${const_mode_set}" ]; then
+    local value=""
+    log_verbose "Check for special case arguments: on, off"
+    if [ "$1" = "on" ]; then
+      log_verbose "Argument was 'on' set to 0"
+      value="0"
+    elif [ "$1" = "off" ]; then
+      log_verbose "Argument was 'off' set to 1"
+      value="1"
+    else
+      log_verbose "Argument was not special, read as is"
+      value="$1"
+    fi
+    log_verbose "Check that '${value}' is all digits"
+    if [ $(is_digits "${value}") -eq 1 ]; then
+      log_verbose "'${value}' is all digits"
+      set_turbo_type="${const_set_turbo_true}"
+      set_turbo_arg="${value}"
+    else
+      elog_quiet "turbo argument '${value}' is not a number"
+      unset value
+      exit 2
+    fi
+    unset value
+  else
+    elog_quiet "Cannot set turbo outside of SET operation mode"
+    exit 3
+  fi
+}
+
 # Handle long options which take arguments
 handle_long_option_argument()
 {
@@ -318,9 +387,11 @@ handle_long_option_argument()
         ;;
       min)
         log_verbose "Long option: min"
+        set_min "$1"
         ;;
       turbo)
         log_verbose "Long option: turbo"
+        set_turbo "$1"
         ;;
       governor)
         log_verbose "Long option: governor"
@@ -368,9 +439,11 @@ while [ -n "${optind_expanded}" ]; do
             exit 0
             ;;
           get)
+            log_verbose "Set operation mode to GET"
             mode="${const_mode_get}"
             ;;
           set)
+            log_verbose "Set operation mode to SET"
             mode="${const_mode_set}"
             ;;
           plan)
@@ -426,8 +499,11 @@ while [ -n "${optind_expanded}" ]; do
         exit 0
         ;;
       G)
+        log_verbose "Set operation mode to GET"
+        mode="${const_mode_get}"
         ;;
       S)
+        log_verbose "Set operation mode to SET"
         mode="${const_mode_set}"
         ;;
       p)
@@ -436,8 +512,10 @@ while [ -n "${optind_expanded}" ]; do
         set_max "${OPTARG}"
         ;;
       n)
+        set_min "${OPTARG}"
         ;;
       t)
+        set_turbo "${OPTARG}"
         ;;
       g)
         ;;
