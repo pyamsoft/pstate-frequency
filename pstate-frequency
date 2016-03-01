@@ -232,7 +232,8 @@ handle_argument()
     elog_quiet "Illegal command $1"
     exit 2
   else
-    log_verbose "option: ${option_expects_argument}"
+    log_verbose "option expects argument: ${option_expects_argument}"
+    log_verbose "argument: $1"
   fi
 }
 
@@ -242,6 +243,7 @@ option_expects_argument=""
 eval optind_expanded="\$${OPTIND}"
 while [ -n "${optind_expanded}" ]; do
   while getopts ":HVGSpmntgcrdq-:" option; do
+    log_verbose "option: -${option}${OPTARG}"
     case "${option}" in
       -)
         case "${OPTARG}" in
