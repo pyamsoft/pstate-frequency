@@ -155,25 +155,25 @@ log_quiet()
 # Error logging
 elog()
 {
-  log "$@" 1>&2
+  log "ERROR :$@" 1>&2
 }
 
 # Verbose error logging
 elog_verbose()
 {
-  log_verbose "$@" 1>&2
+  log_verbose "ERROR: $@" 1>&2
 }
 
 # All error logging
 elog_all()
 {
-  log_all "$@" 1>&2
+  log_all "ERROR: $@" 1>&2
 }
 
 # Quiet error logging
 elog_quiet()
 {
-  log_quiet "$@" 1>&2
+  log_quiet "ERROR: $@" 1>&2
 }
 
 # Check the environment path for the given binary, exit if it is not found
@@ -222,6 +222,19 @@ print_usage()
   log "    --sleep          Sleep before setting CPU frequencies"
 }
 
+# Check if the passed in variable is digits
+is_digits()
+{
+  case "$1" in
+    ([!0-9]*|'')
+      printf -- 0
+      ;;
+    (*)
+      printf -- 1
+      ;;
+  esac
+}
+
 # Print version
 print_version()
 {
@@ -250,9 +263,31 @@ log_less_verbose()
 # Can be set multiple times, final time overrides
 set_max()
 {
+  log_verbose "set_max requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
-    set_max_type="${const_set_max_true}"
-    set_max_arg="$1"
+    local value=""
+    log_verbose "Check for special case arguments: max, min"
+    if [ "$1" = "max" ]; then
+      log_verbose "Argument was 'max' set to 100"
+      value="100"
+    elif [ "$1" = "min" ]; then
+      log_verbose "Argument was 'min' set to 0"
+      value="0"
+    else
+      log_verbose "Argument was not special, read as is"
+      value="$1"
+    fi
+    log_verbose "Check that '${value}' is all digits"
+    if [ $(is_digits "${value}") -eq 1 ]; then
+      log_verbose "'${value}' is all digits"
+      set_max_type="${const_set_max_true}"
+      set_max_arg="${value}"
+    else
+      elog_quiet "max argument '${value}' is not a number"
+      unset value
+      exit 2
+    fi
+    unset value
   else
     elog_quiet "Cannot set max outside of SET operation mode"
     exit 3
@@ -267,7 +302,7 @@ handle_long_option_argument()
   elif [ -z "${option_expects_argument}" ]; then
     elog_verbose "option does not expect argument!"
     elog_verbose "argument: $1"
-    elog_quiet "Illegal long option argument $1"
+    elog_quiet "Illegal argument $1"
     exit 2
   else
     log_verbose "option expects argument: ${option_expects_argument}"
@@ -317,6 +352,7 @@ while [ -n "${optind_expanded}" ]; do
       elog_quiet "Long option --${long_option} expects argument"
       exit 2
     fi
+
     option_expects_argument=""
     long_option="${option_expects_argument}"
     case "${option}" in
@@ -392,6 +428,7 @@ while [ -n "${optind_expanded}" ]; do
       G)
         ;;
       S)
+        mode="${const_mode_set}"
         ;;
       p)
         ;;
