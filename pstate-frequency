@@ -723,6 +723,13 @@ root_write_min()
   unset max_freq
 }
 
+root_write_turbo()
+{
+  log_verbose "Write turbo_value '$1' to intel_pstate file: ${const_system_intel_pstate_turbo}"
+  echo "$1" > "${const_system_intel_pstate_turbo}"
+  log_all "Turbo value written to ${const_system_intel_pstate_turbo}"
+}
+
 root_do_set()
 {
   log_verbose "YOU ARE ROOT"
@@ -803,6 +810,7 @@ root_do_set()
   log_verbose "setting sane values first"
   root_write_max "${sane_max}"
   root_write_min "${sane_min}"
+  root_write_turbo "${sane_turbo}"
 
   if [ "${execution_sleep}" -eq 1 ]; then
     log_verbose "Sleep for 2 seconds requested by user"
@@ -812,6 +820,7 @@ root_do_set()
   log_verbose "Set actual values"
   root_write_max "${setting_cpu_max}"
   root_write_min "${setting_cpu_min}"
+  root_write_turbo "${setting_cpu_turbo}"
 
   unset sane_max
   unset sane_min
@@ -835,6 +844,7 @@ do_set()
 {
   if [ "$(id -u)" -eq 0 ]; then
     root_do_set
+    do_get_current
   else
     elog_quiet "You must be root."
     exit 6
