@@ -628,6 +628,11 @@ case "${mode}" in
   "${const_mode_get}")
     ;;
   "${const_mode_set}")
+    log_verbose "MODE: SET"
+    log_verbose "set_max: ${set_max_type} [${set_max_arg}]"
+    log_verbose "set_min: ${set_min_type} [${set_min_arg}]"
+    log_verbose "set_turbo: ${set_turbo_type} [${set_turbo_arg}]"
+    log_verbose "set_governor: ${set_governor_type} [${set_governor_arg}]"
     ;;
 esac
 
