@@ -26,6 +26,11 @@
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
 readonly version="3.0.0"
 
+# Exit codes
+# 0 - Success
+# 1 - Missing Binary
+# 2 - Invalid option
+
 # Options that do not handle an argument
 display_help=0
 display_version=0
@@ -183,7 +188,7 @@ print_version()
 
 handle_argument()
 {
-  echo "handle: $1"
+  log "handle: $1"
 }
 
 # While risky to call eval, this is one way to
@@ -233,6 +238,8 @@ while [ -n "${optind_expanded}" ]; do
           sleep)
             ;;
           *)
+            # We must provide our own error message in this case
+            log "Illegal option --${OPTARG}"
             print_usage
             exit 2
             ;;
