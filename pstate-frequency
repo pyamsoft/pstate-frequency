@@ -237,7 +237,7 @@ is_digits()
 # Print version
 print_version()
 {
-  log_quiet "pstate-frequency version ${version}"
+  log "pstate-frequency version ${version}"
 }
 
 # Increase log verbosity
@@ -643,7 +643,17 @@ do_get_current()
 
 do_get_real()
 {
-  echo
+  local real_freqs="$(grep MHz /proc/cpuinfo | cut -c12-)"
+  local i=0
+
+  print_version
+  for freq in ${real_freqs}; do
+    log "    pstate::CPU[$i]   -> ${freq}MHz"
+    i=$(( $i + 1))
+  done
+
+  unset i
+  unset real_freqs
 }
 
 do_get()
@@ -670,6 +680,7 @@ check_binary printf
 check_binary grep
 check_binary cat
 check_binary wc
+check_binary cut
 
 # System related vars
 readonly const_system_power_supply_dir="/sys/class/power_supply"
@@ -884,8 +895,8 @@ case "${mode}" in
     log_verbose "set_governor: ${set_governor_type} [${set_governor_arg}]"
     ;;
   *)
-    elog_quiet "Invalid operation mode"
-    exit 3
+    print_usage
+    ;;
 esac
 
 log_all "Exit: Success"
