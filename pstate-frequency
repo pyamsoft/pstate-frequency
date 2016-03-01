@@ -486,11 +486,41 @@ set_power_plan()
   fi
 }
 
+# Check if the current power source is Mains
+is_power_supply_mains()
+{
+  # For each power supply
+  for power_supply in "${const_system_power_supply_dir}"/*; do
+    # Get the power_supply type
+    local type="$(cat ${power_supply}/type )"
+
+    # Check if the type is Mains
+    if [ "${type}" = "Mains" ]; then
+
+      # If Mains, check if the online file exists
+      if [ -e "${power_supply}"/online ]; then
+
+        # If online exists, cat out the status
+        cat -- "${power_supply}"/online
+        return
+      fi
+    fi
+  done
+
+  # We did not find any power supply listed as Mains, print 0 for false
+  printf -- 0
+
+}
+
 # Sets the power plan based on the current plugged in status
 set_power_plan_auto()
 {
   log_verbose "Set power plan to: auto"
-  # TODO
+  if [ $(is_power_supply_mains) -eq 1 ]; then
+    set_power_plan_balanced
+  else
+    set_power_plan_powersave
+  fi
 }
 
 # Sets the power plan to a low power mode
@@ -585,6 +615,7 @@ check_binary cat
 check_binary wc
 
 # System related vars
+readonly const_system_power_supply_dir="/sys/class/power_supply"
 readonly const_system_intel_pstate_dir="/sys/devices/system/cpu/intel_pstate"
 readonly const_system_intel_pstate_max="${const_system_intel_pstate_dir}/max_perf_pct"
 readonly const_system_intel_pstate_min="${const_system_intel_pstate_dir}/min_perf_pct"
