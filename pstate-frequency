@@ -31,11 +31,10 @@ readonly version="3.0.0"
 # 1 - Missing Binary
 # 2 - Invalid option
 # 3 - Wrong operation mode
+# 4 - Invalid power plan
+# 5 - Missing essential requirement
 
 # Options that do not handle an argument
-display_help=0
-display_version=0
-
 execution_delay=0 # Number of seconds to delay script
 execution_sleep=0 # Number of seconds to sleep in between setting values
 
@@ -82,11 +81,11 @@ set_governor_type="${const_set_governor_false}"
 set_governor_arg=""
 
 # Plan modes
-readonly const_power_plan_none=0
+readonly const_power_plan_auto=0
 readonly const_power_plan_powersave=1
 readonly const_power_plan_balanced=2
 readonly const_power_plan_performance=3
-power_plan_mode="${const_power_plan_none}"
+readonly const_power_plan_max=4
 
 # Supported option flags
 #
@@ -282,11 +281,11 @@ set_max()
     local value=""
     log_verbose "Check for special case arguments: max, min"
     if [ "$1" = "max" ]; then
-      log_verbose "Argument was 'max' set to 100"
-      value="100"
+      log_verbose "Argument was 'max' set to ${const_system_cpu_max_value}"
+      value="${const_system_cpu_max_value}"
     elif [ "$1" = "min" ]; then
-      log_verbose "Argument was 'min' set to 0"
-      value="0"
+      log_verbose "Argument was 'min' set to ${const_system_cpu_min_value}"
+      value="${const_system_cpu_min_value}"
     else
       log_verbose "Argument was not special, read as is"
       value="$1"
@@ -294,8 +293,8 @@ set_max()
     log_verbose "Check that '${value}' is all digits"
     if [ $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is all digits"
-      log_verbose "Bound value '${value}' between 0 and 100"
-      value="$(set_variable_bounds "${value}" 0 100)"
+      log_verbose "Bound value '${value}' between ${const_system_cpu_min_value} and ${const_system_cpu_max_value}"
+      value="$(set_variable_bounds "${value}" ${const_system_cpu_min_value} ${const_system_cpu_max_value})"
       set_max_type="${const_set_max_true}"
       set_max_arg="${value}"
       log_verbose "set_max_arg: '${set_max_arg}'"
@@ -320,11 +319,11 @@ set_min()
     local value=""
     log_verbose "Check for special case arguments: max, min"
     if [ "$1" = "max" ]; then
-      log_verbose "Argument was 'max' set to 100"
-      value="100"
+      log_verbose "Argument was 'max' set to ${const_system_cpu_max_value}"
+      value="${const_system_cpu_max_value}"
     elif [ "$1" = "min" ]; then
-      log_verbose "Argument was 'min' set to 0"
-      value="0"
+      log_verbose "Argument was 'min' set to ${const_system_cpu_min_value}"
+      value="${const_system_cpu_min_value}"
     else
       log_verbose "Argument was not special, read as is"
       value="$1"
@@ -332,8 +331,8 @@ set_min()
     log_verbose "Check that '${value}' is all digits"
     if [ $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is all digits"
-      log_verbose "Bound value '${value}' between 0 and 100"
-      value="$(set_variable_bounds "${value}" 0 100)"
+      log_verbose "Bound value '${value}' between ${const_system_cpu_min_value} and ${const_system_cpu_max_value}"
+      value="$(set_variable_bounds "${value}" ${const_system_cpu_min_value} ${const_system_cpu_max_value})"
       set_min_type="${const_set_min_true}"
       set_min_arg="${value}"
       log_verbose "set_min_arg: '${set_min_arg}'"
@@ -425,6 +424,115 @@ set_governor()
   fi
 }
 
+# Set the power plan based on argument
+set_power_plan()
+{
+  log_verbose "set_power_plan requires SET operation mode"
+  if [ "${mode}" -eq "${const_mode_set}" ]; then
+    local value=""
+    log_verbose "Check for special case arguments: auto, powersave, balanced, performance, max"
+    if [ "$1" = "auto" ]; then
+      log_verbose "Argument was 'auto' set to ${const_power_plan_auto}"
+      value="${const_power_plan_auto}"
+    elif [ "$1" = "powersave" ]; then
+      log_verbose "Argument was 'powersave' set to ${const_power_plan_powersave}"
+      value="${const_power_plan_powersave}"
+    elif [ "$1" = "balanced" ]; then
+      log_verbose "Argument was 'balanced' set to ${const_power_plan_balanced}"
+      value="${const_power_plan_balanced}"
+    elif [ "$1" = "performance" ]; then
+      log_verbose "Argument was 'performance' set to ${const_power_plan_performance}"
+      value="${const_power_plan_performance}"
+    elif [ "$1" = "max" ]; then
+      log_verbose "Argument was 'max' set to ${const_power_plan_max}"
+      value="${const_power_plan_max}"
+    else
+      log_verbose "Argument was not special, read as is"
+      value="$1"
+    fi
+    log_verbose "Check that '${value}' is all digits"
+    if [ $(is_digits "${value}") -eq 1 ]; then
+      log_verbose "'${value}' is all digits"
+      case "${value}" in
+        "${const_power_plan_auto}")
+          set_power_plan_auto
+          ;;
+        "${const_power_plan_powersave}")
+          set_power_plan_powersave
+          ;;
+        "${const_power_plan_balanced}")
+          set_power_plan_balanced
+          ;;
+        "${const_power_plan_performance}")
+          set_power_plan_performance
+          ;;
+        "${const_power_plan_max}")
+          set_power_plan_max
+          ;;
+        *)
+          elog_quiet "Invalid power plan: ${value}"
+          exit 4
+          ;;
+      esac
+    else
+      elog_quiet "power plan argument '${value}' is not a number"
+      unset value
+      exit 2
+    fi
+    unset value
+  else
+    elog_quiet "Cannot set power plan outside of SET operation mode"
+    exit 3
+  fi
+}
+
+# Sets the power plan based on the current plugged in status
+set_power_plan_auto()
+{
+  log_verbose "Set power plan to: auto"
+  # TODO
+}
+
+# Sets the power plan to a low power mode
+set_power_plan_powersave()
+{
+  log_verbose "Set power plan to: powersave"
+  set_max 0
+  set_min 0
+  set_turbo 1
+  set_governor 0
+}
+
+# Sets the power plan to a balanced mode
+set_power_plan_balanced()
+{
+  log_verbose "Set power plan to: balanced"
+  set_max 100
+  set_min 0
+  set_turbo 1
+  set_governor 0
+}
+
+# Sets the power plan to a performance mode
+set_power_plan_performance()
+{
+  log_verbose "Set power plan to: performance"
+  set_max 100
+  set_min 0
+  set_turbo 0
+  set_governor 1
+}
+
+# Sets the power plan to the max available performance mode
+set_power_plan_max()
+{
+  log_verbose "Set power plan to: performance"
+  set_max 100
+  set_min 100
+  set_turbo 0
+  set_governor 1
+}
+
 # Handle long options which take arguments
 handle_long_option_argument()
 {
@@ -442,6 +550,7 @@ handle_long_option_argument()
     case "${option_expects_argument}" in
       plan)
         log_verbose "Long option: plan"
+        set_power_plan "$1"
         ;;
       max)
         log_verbose "Long option: max"
@@ -467,6 +576,32 @@ handle_long_option_argument()
   fi
 }
 
+
+# Initialization
+
+# Sanity check
+check_binary grep
+check_binary cat
+check_binary wc
+
+# System related vars
+readonly const_system_intel_pstate_dir="/sys/devices/system/cpu/intel_pstate"
+readonly const_system_intel_pstate_max="${const_system_intel_pstate_dir}/max_perf_pct"
+readonly const_system_intel_pstate_min="${const_system_intel_pstate_dir}/min_perf_pct"
+readonly const_system_intel_pstate_turbo="${const_system_intel_pstate_dir}/no_turbo"
+
+# Check that we have intel_pstate at the intel_pstate location
+if [ ! -d "${const_system_intel_pstate_dir}" ]; then
+  elog_quiet "${const_system_intel_pstate_dir} does not exist on the system"
+  elog_quiet "ABORT"
+  exit 5
+fi
+
+readonly const_system_cpu_number="$(grep "processor" /proc/cpuinfo | wc -l)"
+readonly const_system_cpu_max_freq="$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq)"
+readonly const_system_cpu_min_freq="$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq)"
+readonly const_system_cpu_max_value=100
+readonly const_system_cpu_min_value=$(( ${const_system_cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
 
 # While risky to call eval, this is one way to
 # emulate the bash indirect_expansion ability
@@ -570,6 +705,7 @@ while [ -n "${optind_expanded}" ]; do
         mode="${const_mode_set}"
         ;;
       p)
+        set_power_plan "${OPTARG}"
         ;;
       m)
         set_max "${OPTARG}"
