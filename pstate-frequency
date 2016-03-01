@@ -222,6 +222,7 @@ print_usage()
 }
 
 # Check if the passed in variable is digits
+# Does not support negative numbers
 is_digits()
 {
   case "$1" in
@@ -258,6 +259,20 @@ log_less_verbose()
   fi
 }
 
+# Guarantee the variable passed at $1
+# is >= $2 and <= $3
+# $1 is guaranteed to be a number
+set_variable_bounds()
+{
+  if [ "$1" -lt "$2" ]; then
+    printf -- "$2"
+  elif [ "$1" -gt "$3" ]; then
+    printf -- "$3"
+  else
+    printf -- "$1"
+  fi
+}
+
 # Set the argument for cpu_max
 # Can be set multiple times, final time overrides
 set_max()
@@ -279,8 +294,11 @@ set_max()
     log_verbose "Check that '${value}' is all digits"
     if [ $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is all digits"
+      log_verbose "Bound value '${value}' between 0 and 100"
+      value="$(set_variable_bounds "${value}" 0 100)"
       set_max_type="${const_set_max_true}"
       set_max_arg="${value}"
+      log_verbose "set_max_arg: '${set_max_arg}'"
     else
       elog_quiet "max argument '${value}' is not a number"
       unset value
@@ -314,8 +332,11 @@ set_min()
     log_verbose "Check that '${value}' is all digits"
     if [ $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is all digits"
+      log_verbose "Bound value '${value}' between 0 and 100"
+      value="$(set_variable_bounds "${value}" 0 100)"
       set_min_type="${const_set_min_true}"
       set_min_arg="${value}"
+      log_verbose "set_min_arg: '${set_min_arg}'"
     else
       elog_quiet "min argument '${value}' is not a number"
       unset value
@@ -349,8 +370,11 @@ set_turbo()
     log_verbose "Check that '${value}' is all digits"
     if [ $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is all digits"
+      log_verbose "Bound value '${value}' between 0 and 1"
+      value="$(set_variable_bounds "${value}" 0 1)"
       set_turbo_type="${const_set_turbo_true}"
       set_turbo_arg="${value}"
+      log_verbose "set_turbo_arg: '${set_turbo_arg}'"
     else
       elog_quiet "turbo argument '${value}' is not a number"
       unset value
@@ -359,6 +383,44 @@ set_turbo()
     unset value
   else
     elog_quiet "Cannot set turbo outside of SET operation mode"
+    exit 3
+  fi
+}
+
+# Set the argument for cpu_governor
+# Can be set multiple times, final time overrides
+set_governor()
+{
+  log_verbose "set_governor requires SET operation mode"
+  if [ "${mode}" -eq "${const_mode_set}" ]; then
+    local value=""
+    log_verbose "Check for special case arguments: powersave, performance"
+    if [ "$1" = "powersave" ]; then
+      log_verbose "Argument was 'powersave' set to 0"
+      value="0"
+    elif [ "$1" = "performance" ]; then
+      log_verbose "Argument was 'performance' set to 1"
+      value="1"
+    else
+      log_verbose "Argument was not special, read as is"
+      value="$1"
+    fi
+    log_verbose "Check that '${value}' is all digits"
+    if [ $(is_digits "${value}") -eq 1 ]; then
+      log_verbose "'${value}' is all digits"
+      log_verbose "Bound value '${value}' between 0 and 1"
+      value="$(set_variable_bounds "${value}" 0 1)"
+      set_governor_type="${const_set_governor_true}"
+      set_governor_arg="${value}"
+      log_verbose "set_governor_arg: '${set_governor_arg}'"
+    else
+      elog_quiet "governor argument '${value}' is not a number"
+      unset value
+      exit 2
+    fi
+    unset value
+  else
+    elog_quiet "Cannot set governor outside of SET operation mode"
     exit 3
   fi
 }
@@ -395,6 +457,7 @@ handle_long_option_argument()
         ;;
       governor)
         log_verbose "Long option: governor"
+        set_governor "$1"
         ;;
       *)
         elog_quiet "Invalid option --${option_expects_argument}"
@@ -518,6 +581,7 @@ while [ -n "${optind_expanded}" ]; do
         set_turbo "${OPTARG}"
         ;;
       g)
+        set_governor "${OPTARG}"
         ;;
       c)
         ;;
