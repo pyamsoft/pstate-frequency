@@ -699,11 +699,33 @@ root_do_set()
   local setting_cpu_turbo=""
   local setting_cpu_governor=""
 
+  local cpu_max_freq="$(cat "${const_system_scaling_max_freq}" )"
+  local cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
+  local cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
+  local cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+
   log_verbose "Check if we are setting max"
-  if [ "${set_max_type}" ]; then
-    # TODO
-    true
+  if [ "${set_max_type}" -eq 1 ]; then
+    log_verbose "Set max to arg"
+    setting_cpu_max="${set_max_arg}"
+  else
+    log_verbose "Set max to current system"
+    setting_cpu_max="${cpu_max_value}"
   fi
+
+  log_verbose "Check if we are setting min"
+  if [ "${set_max_type}" -eq 1 ]; then
+    log_verbose "Set min to arg"
+    setting_cpu_min="${set_min_arg}"
+  else
+    log_verbose "Set min to current system"
+    setting_cpu_min="${cpu_min_value}"
+  fi
+
+  unset cpu_max_freq
+  unset cpu_min_freq
+  unset cpu_max_value
+  unset cpu_min_value
 
   unset setting_cpu_max
   unset setting_cpu_min
