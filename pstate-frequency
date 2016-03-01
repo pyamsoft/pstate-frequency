@@ -30,6 +30,7 @@ readonly version="3.0.0"
 # 0 - Success
 # 1 - Missing Binary
 # 2 - Invalid option
+# 3 - Wrong operation mode
 
 # Options that do not handle an argument
 display_help=0
@@ -63,19 +64,23 @@ get_type="${const_get_type_current}"
 # Set commands
 readonly const_set_max_false=0
 readonly const_set_max_true=1
-set_max="${const_set_max_false}"
+set_max_type="${const_set_max_false}"
+set_max_arg=""
 
 readonly const_set_min_false=0
 readonly const_set_min_true=1
-set_min="${const_set_min_false}"
+set_min_type="${const_set_min_false}"
+set_min_arg=""
 
 readonly const_set_turbo_false=0
 readonly const_set_turbo_true=1
-set_turbo="${const_set_turbo_false}"
+set_turbo_type="${const_set_turbo_false}"
+set_turbo_arg=""
 
 readonly const_set_governor_false=0
 readonly const_set_governor_true=1
-set_governor="${const_set_governor_false}"
+set_governor_type="${const_set_governor_false}"
+set_governor_arg=""
 
 # Plan modes
 readonly const_power_plan_none=0
@@ -153,16 +158,19 @@ elog()
   log "$@" 1>&2
 }
 
+# Verbose error logging
 elog_verbose()
 {
   log_verbose "$@" 1>&2
 }
 
+# All error logging
 elog_all()
 {
   log_all "$@" 1>&2
 }
 
+# Quiet error logging
 elog_quiet()
 {
   log_quiet "$@" 1>&2
@@ -178,6 +186,7 @@ check_binary()
   fi
 }
 
+# Print usage
 print_usage()
 {
   log "usage:"
@@ -213,11 +222,13 @@ print_usage()
   log "    --sleep          Sleep before setting CPU frequencies"
 }
 
+# Print version
 print_version()
 {
   log_quiet "pstate-frequency version ${version}"
 }
 
+# Increase log verbosity
 log_more_verbose()
 {
   if [ "${log_level}" -lt "${const_log_level_all}" ]; then
@@ -226,6 +237,7 @@ log_more_verbose()
   fi
 }
 
+# Decrease log verbosity
 log_less_verbose()
 {
   if [ "${log_level}" -gt "${const_log_level_off}" ]; then
@@ -234,14 +246,28 @@ log_less_verbose()
   fi
 }
 
-handle_argument()
+# Set the argument for cpu_max
+# Can be set multiple times, final time overrides
+set_max()
+{
+  if [ "${mode}" -eq "${const_mode_set}" ]; then
+    set_max_type="${const_set_max_true}"
+    set_max_arg="$1"
+  else
+    elog_quiet "Cannot set max outside of SET operation mode"
+    exit 3
+  fi
+}
+
+# Handle long options which take arguments
+handle_long_option_argument()
 {
   if [ "$1" = '-' ]; then
     log_all "Skip '-' processing"
   elif [ -z "${option_expects_argument}" ]; then
     elog_verbose "option does not expect argument!"
     elog_verbose "argument: $1"
-    elog_quiet "Illegal command $1"
+    elog_quiet "Illegal long option argument $1"
     exit 2
   else
     log_verbose "option expects argument: ${option_expects_argument}"
@@ -249,7 +275,20 @@ handle_argument()
 
     case "${option_expects_argument}" in
       plan)
-        log_verbose "Command: plan"
+        log_verbose "Long option: plan"
+        ;;
+      max)
+        log_verbose "Long option: max"
+        set_max "$1"
+        ;;
+      min)
+        log_verbose "Long option: min"
+        ;;
+      turbo)
+        log_verbose "Long option: turbo"
+        ;;
+      governor)
+        log_verbose "Long option: governor"
         ;;
       *)
         elog_quiet "Invalid option --${option_expects_argument}"
@@ -259,15 +298,30 @@ handle_argument()
   fi
 }
 
+
 # While risky to call eval, this is one way to
 # emulate the bash indirect_expansion ability
+long_option=""
 option_expects_argument=""
 eval optind_expanded="\$${OPTIND}"
 while [ -n "${optind_expanded}" ]; do
-  while getopts ":HVGSpmntgcrdq-:" option; do
-    log_verbose "parse option: -${option}${OPTARG}"
+  while getopts ":HVGSp:m:n:t:g:crdq-:" option; do
+
+    # Log if not long option
+    if [ "${option}" != '-' ]; then
+      log_verbose "parse short option: -${option} ${OPTARG}"
+    fi
+
+    # Set only on long option with arg
+    if [ -n "${option_expects_argument}" ]; then
+      elog_quiet "Long option --${long_option} expects argument"
+      exit 2
+    fi
+    option_expects_argument=""
+    long_option="${option_expects_argument}"
     case "${option}" in
       -)
+        log_verbose "parse long option: -${option}${OPTARG}"
         case "${OPTARG}" in
           help)
             print_usage
@@ -278,50 +332,46 @@ while [ -n "${optind_expanded}" ]; do
             exit 0
             ;;
           get)
-            option_expects_argument=""
             mode="${const_mode_get}"
             ;;
           set)
-            option_expects_argument=""
             mode="${const_mode_set}"
             ;;
           plan)
             option_expects_argument="plan"
+            long_option="${option_expects_argument}"
             ;;
           max)
             option_expects_argument="max"
+            long_option="${option_expects_argument}"
             ;;
           min)
             option_expects_argument="min"
+            long_option="${option_expects_argument}"
             ;;
           turbo)
             option_expects_argument="turbo"
+            long_option="${option_expects_argument}"
             ;;
           governor)
             option_expects_argument="governor"
+            long_option="${option_expects_argument}"
             ;;
           current)
-            option_expects_argument=""
             ;;
           real)
-            option_expects_argument=""
             ;;
           debug)
-            option_expects_argument=""
             log_more_verbose
             ;;
           quiet)
-            option_expects_argument=""
             log_less_verbose
             ;;
           delay)
-            option_expects_argument=""
             ;;
           color)
-            option_expects_argument=""
             ;;
           sleep)
-            option_expects_argument=""
             ;;
           *)
             # We must provide our own error message in this case
@@ -340,42 +390,32 @@ while [ -n "${optind_expanded}" ]; do
         exit 0
         ;;
       G)
-        option_expects_argument=""
         ;;
       S)
-        option_expects_argument=""
         ;;
       p)
-        option_expects_argument="plan"
         ;;
       m)
-        option_expects_argument="max"
+        set_max "${OPTARG}"
         ;;
       n)
-        option_expects_argument="min"
         ;;
       t)
-        option_expects_argument="turbo"
         ;;
       g)
-        option_expects_argument="governor"
         ;;
       c)
-        option_expects_argument=""
         ;;
       r)
-        option_expects_argument=""
         ;;
       d)
-        option_expects_argument=""
         log_more_verbose
         ;;
       q)
-        option_expects_argument=""
         log_less_verbose
         ;;
       *)
-        elog_quiet "Illegal option ${optind_expanded}"
+        elog_quiet "Illegal option -${OPTARG}"
         print_usage
         exit 2
         ;;
@@ -385,13 +425,19 @@ while [ -n "${optind_expanded}" ]; do
   # Re-establish the current OPTIND target
   eval optind_expanded="\$${OPTIND}"
   if [ -z "${optind_expanded}" ]; then
-    break
+    if [ -n "${option_expects_argument}" ]; then
+      elog_quiet "Long option --${long_option} expects argument"
+      exit 2
+    else
+      break
+    fi
   else
     # This is a plain arg and should be handled by one of the options which takes an argument
-    handle_argument "${optind_expanded}"
+    handle_long_option_argument "${optind_expanded}"
 
     # Set back to null
     option_expects_argument=""
+    long_option="${option_expects_argument}"
   fi
 
   # Shift the options
