@@ -694,6 +694,7 @@ check_binary grep
 check_binary cat
 check_binary wc
 check_binary cut
+check_binary id
 
 # System related vars
 readonly const_system_power_supply_dir="/sys/class/power_supply"
