@@ -685,6 +685,44 @@ root_do_set_has_arg()
   fi
 }
 
+root_write_max()
+{
+  log_verbose "Write max_value '$1' to intel_pstate file: ${const_system_intel_pstate_max}"
+  echo "$1" > "${const_system_intel_pstate_max}"
+  log_all "Max value written to ${const_system_intel_pstate_max}"
+
+  local max_freq=$(( $1 * ${const_system_cpu_max_freq} / 100 ))
+
+  for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
+    local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_max_freq"
+    log_verbose "Write freq: ${max_freq}KHz to file: ${target}"
+    echo "${max_freq}" > "${target}"
+    unset target
+    log_all "Max value written to ${target}"
+  done
+
+  unset max_freq
+}
+
+root_write_min()
+{
+  log_verbose "Write min_value '$1' to intel_pstate file: ${const_system_intel_pstate_min}"
+  echo "$1" > "${const_system_intel_pstate_min}"
+  log_all "Min value written to ${const_system_intel_pstate_min}"
+
+  local min_freq=$(( $1 * ${const_system_cpu_max_freq} / 100 ))
+
+  for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
+    local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_min_freq"
+    log_verbose "Write freq: ${min_freq}KHz to file: ${target}"
+    echo "${min_freq}" > "${target}"
+    unset target
+    log_all "Min value written to ${target}"
+  done
+
+  unset max_freq
+}
+
 root_do_set()
 {
   log_verbose "YOU ARE ROOT"
@@ -703,6 +741,13 @@ root_do_set()
   local cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
   local cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
   local cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+  local cpu_turbo="$(cat ${const_system_intel_pstate_turbo} )"
+  local cpu_governor="$(cat ${const_system_scaling_governor} )"
+
+  local sane_max="${const_system_cpu_max_value}"
+  local sane_min="${const_system_cpu_min_value}"
+  local sane_turbo=1
+  local sane_governor="powersave"
 
   log_verbose "Check if we are setting max"
   if [ "${set_max_type}" -eq 1 ]; then
@@ -714,7 +759,7 @@ root_do_set()
   fi
 
   log_verbose "Check if we are setting min"
-  if [ "${set_max_type}" -eq 1 ]; then
+  if [ "${set_min_type}" -eq 1 ]; then
     log_verbose "Set min to arg"
     setting_cpu_min="${set_min_arg}"
   else
@@ -722,10 +767,63 @@ root_do_set()
     setting_cpu_min="${cpu_min_value}"
   fi
 
+  log_verbose "Check if we are setting turbo"
+  if [ "${set_turbo_type}" -eq 1 ]; then
+    log_verbose "Set turbo to arg"
+    setting_cpu_turbo="${set_turbo_arg}"
+  else
+    log_verbose "Set turbo to current system"
+    setting_cpu_turbo="${cpu_turbo}"
+  fi
+
+  log_verbose "Check if we are setting governor"
+  if [ "${set_governor_type}" -eq 1 ]; then
+    log_verbose "Set governor to arg"
+    setting_cpu_governor="${set_governor_arg}"
+  else
+    log_verbose "Set governor to current system"
+    if [ "${cpu_governor}" = "powersave" ]; then
+      setting_cpu_governor=0
+    else
+      setting_cpu_governor=1
+    fi
+  fi
+
+  log_verbose "Check if max is less than min"
+  if [ "${setting_cpu_max}" -le "${setting_cpu_min}" ]; then
+    log_verbose "set max to just above min"
+    setting_cpu_max="$(( ${setting_cpu_min} + 1 ))"
+  fi
+
+  log_verbose "setting_cpu_max: ${setting_cpu_max}"
+  log_verbose "setting_cpu_min: ${setting_cpu_min}"
+  log_verbose "setting_cpu_turbo: ${setting_cpu_turbo}"
+  log_verbose "setting_cpu_governor: ${setting_cpu_governor}"
+
+  log_verbose "setting sane values first"
+  root_write_max "${sane_max}"
+  root_write_min "${sane_min}"
+
+  if [ "${execution_sleep}" -eq 1 ]; then
+    log_verbose "Sleep for 2 seconds requested by user"
+    sleep 2
+  fi
+
+  log_verbose "Set actual values"
+  root_write_max "${setting_cpu_max}"
+  root_write_min "${setting_cpu_min}"
+
+  unset sane_max
+  unset sane_min
+  unset sane_turbo
+  unset sane_governor
+
   unset cpu_max_freq
   unset cpu_min_freq
   unset cpu_max_value
   unset cpu_min_value
+  unset cpu_turbo
+  unset cpu_governor
 
   unset setting_cpu_max
   unset setting_cpu_min
