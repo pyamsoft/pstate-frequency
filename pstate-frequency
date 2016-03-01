@@ -1003,6 +1003,7 @@ while [ -n "${optind_expanded}" ]; do
           color)
             ;;
           sleep)
+            execution_sleep=1
             ;;
           *)
             # We must provide our own error message in this case
