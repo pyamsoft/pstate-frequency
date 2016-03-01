@@ -606,6 +606,62 @@ handle_long_option_argument()
   fi
 }
 
+do_get_current()
+{
+  local cpu_max_freq="$(cat "${const_system_scaling_max_freq}" )"
+  local cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
+  local cpu_turbo="$(cat ${const_system_intel_pstate_turbo} )"
+  local cpu_governor="$(cat ${const_system_scaling_governor} )"
+  local cpu_driver="$(cat ${const_system_scaling_driver} )"
+
+  local cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
+  local cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+
+  local cpu_turbo_onoff=""
+  if [ "${cpu_turbo}" -eq 1 ]; then
+    cpu_turbo_onoff="OFF"
+  else
+    cpu_turbo_onoff="ON"
+  fi
+
+  print_version
+  log "    pstate::CPU_DRIVER   -> ${cpu_driver}"
+  log "    pstate::CPU_GOVERNOR -> ${cpu_governor}"
+  log "    pstate::TURBO        -> ${cpu_turbo} [${cpu_turbo_onoff}]"
+  log "    pstate::CPU_MIN      -> ${cpu_min_value}%% [${cpu_min_freq}KHz]"
+  log "    pstate::CPU_MAX      -> ${cpu_max_value}%% [${cpu_max_freq}KHz]"
+
+  unset cpu_turbo_onoff
+  unset cpu_max_freq
+  unset cpu_min_freq
+  unset cpu_max_value
+  unset cpu_min_value
+  unset cpu_turbo
+  unset cpu_governor
+  unset cpu_driver
+}
+
+do_get_real()
+{
+  echo
+}
+
+do_get()
+{
+  case "${get_type}" in
+    "${const_get_type_current}")
+      do_get_current
+      ;;
+    "${const_get_type_real}")
+      do_get_real
+      ;;
+    *)
+      elog_quiet "Invalid GET type"
+      exit 3
+      ;;
+  esac
+}
+
 
 # Initialization
 
@@ -621,6 +677,10 @@ readonly const_system_intel_pstate_dir="/sys/devices/system/cpu/intel_pstate"
 readonly const_system_intel_pstate_max="${const_system_intel_pstate_dir}/max_perf_pct"
 readonly const_system_intel_pstate_min="${const_system_intel_pstate_dir}/min_perf_pct"
 readonly const_system_intel_pstate_turbo="${const_system_intel_pstate_dir}/no_turbo"
+readonly const_system_scaling_max_freq="/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq"
+readonly const_system_scaling_min_freq="/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"
+readonly const_system_scaling_governor="/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
+readonly const_system_scaling_driver="/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
 
 # Check that we have intel_pstate at the intel_pstate location
 if [ ! -d "${const_system_intel_pstate_dir}" ]; then
@@ -814,6 +874,7 @@ case "${mode}" in
   "${const_mode_get}")
     log_verbose "MODE: GET"
     log_verbose "get_type: ${get_type}"
+    do_get
     ;;
   "${const_mode_set}")
     log_verbose "MODE: SET"
