@@ -626,6 +626,8 @@ done
 
 case "${mode}" in
   "${const_mode_get}")
+    log_verbose "MODE: GET"
+    log_verbose "get_type: ${get_type}"
     ;;
   "${const_mode_set}")
     log_verbose "MODE: SET"
@@ -634,8 +636,13 @@ case "${mode}" in
     log_verbose "set_turbo: ${set_turbo_type} [${set_turbo_arg}]"
     log_verbose "set_governor: ${set_governor_type} [${set_governor_arg}]"
     ;;
+  *)
+    elog_quiet "Invalid operation mode"
+    exit 3
 esac
 
+log_all "Exit: Success"
+exit 0
 
 # vim: set syntax=sh tabstop=2 softtabstop=2 shiftwidth=2 shiftround expandtab:
 
