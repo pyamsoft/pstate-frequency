@@ -673,9 +673,42 @@ do_get()
   esac
 }
 
+root_do_set_has_arg()
+{
+  if [ "${set_max_type}" -eq 1 ] \
+    || [ "${set_min_type}" -eq 1 ] \
+    || [ "${set_turbo_type}" -eq 1 ] \
+    || [ "${set_governor_type}" -eq 1 ]; then
+    printf -- 1
+  else
+    printf -- 0
+  fi
+}
+
 root_do_set()
 {
-  echo "YOU ARE ROOT"
+  log_verbose "YOU ARE ROOT"
+  log_verbose "Check that we are setting something"
+  if [ "$(root_do_set_has_arg)" -eq 0 ]; then
+    elog_quiet "Not setting any CPU options"
+    exit 5
+  fi
+
+  local setting_cpu_max=""
+  local setting_cpu_min=""
+  local setting_cpu_turbo=""
+  local setting_cpu_governor=""
+
+  log_verbose "Check if we are setting max"
+  if [ "${set_max_type}" ]; then
+    # TODO
+    true
+  fi
+
+  unset setting_cpu_max
+  unset setting_cpu_min
+  unset setting_cpu_turbo
+  unset setting_cpu_governor
 }
 
 do_set()
