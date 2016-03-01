@@ -41,16 +41,11 @@ execution_sleep=0 # Number of seconds to sleep in between setting values
 # Options that expect an argument
 
 # Log levels
-# 0000 = 0 -> OFF
-# 0001 = 1 -> QUIET
-# 0010 = 2 -> NORMAL
-# 0100 = 4 -> VERBOSE
-# 1000 = 8 -> ALL
 readonly mask_log_level_off=0
 readonly mask_log_level_quiet=1
 readonly mask_log_level_normal=2
-readonly mask_log_level_verbose=4
-readonly mask_log_level_all=8
+readonly mask_log_level_verbose=3
+readonly mask_log_level_all=4
 log_level="${mask_log_level_normal}"
 
 # Execution modes
@@ -61,7 +56,7 @@ log_level="${mask_log_level_normal}"
 readonly mask_mode_help=0
 readonly mask_mode_version=1
 readonly mask_mode_get=2
-readonly mask_mode_set=4
+readonly mask_mode_set=3
 mode="${mask_mode_help}"
 
 # Get bitmask
@@ -72,39 +67,10 @@ readonly mask_get_type_real=1
 get_type="${mask_get_type_current}"
 
 # Set bitmask
-# 0000 = 0  -> NONE
-# 0001 = 1  -> MAX
-# 0010 = 2  -> MIN
-# 0100 = 4  -> TURBO
-# 1000 = 8  -> GOVERNOR
-# 0011 = 3  -> MAX & MIN
-# 0101 = 5  -> MAX & TURBO
-# 1001 = 9  -> MAX & GOVERNOR
-# 0110 = 6  -> MIN & TURBO
-# 1010 = 10 -> MIN & GOVERNOR
-# 1100 = 12 -> TURBO & GOVERNOR
-# 0111 = 7  -> MAX & MIN & TURBO
-# 1011 = 11 -> MAX & MIN & GOVERNOR
-# 1101 = 13 -> MAX & TURBO & GOVERNOR
-# 1110 = 14 -> MIN & TURBO & GOVERNOR
-# 1111 = 15 -> MAX & MIN & TURBO & GOVERNOR
-readonly mask_set_type_none=0
-readonly mask_set_type_max=1
-readonly mask_set_type_min=2
-readonly mask_set_type_turbo=4
-readonly mask_set_type_governor=8
-readonly mask_set_type_max_min="$((${mask_set_type_max} + ${mask_set_type_min}))"
-readonly mask_set_type_max_turbo="$((${mask_set_type_max} + ${mask_set_type_turbo}))"
-readonly mask_set_type_max_governor="$((${mask_set_type_max} + ${mask_set_type_governor}))"
-readonly mask_set_type_min_turbo="$((${mask_set_type_min} + ${mask_set_type_turbo}))"
-readonly mask_set_type_min_governor="$((${mask_set_type_min} + ${mask_set_type_governor}))"
-readonly mask_set_type_turbo_governor="$((${mask_set_type_turbo} + ${mask_set_type_governor}))"
-readonly mask_set_type_max_min_turbo="$((${mask_set_type_max_min} + ${mask_set_type_turbo}))"
-readonly mask_set_type_max_min_governor="$((${mask_set_type_max_min} + ${mask_set_type_governor}))"
-readonly mask_set_type_max_turbo_governor="$((${mask_set_type_max_turbo} + ${mask_set_type_governor}))"
-readonly mask_set_type_min_turbo_governor="$((${mask_set_type_min_turbo} + ${mask_set_type_governor}))"
-readonly mask_set_type_max_min_turbo_governor="$((${mask_set_type_max_min_turbo} + ${mask_set_type_governor}))"
-set_type=0
+set_max=0
+set_min=0
+set_turbo=0
+set_governor=0
 
 # Supported option flags
 #
@@ -129,73 +95,150 @@ set_type=0
 # --color
 # --sleep
 
+# Normal log
+# Can be seen at
+# log_level = normal, verbose, all
 log()
 {
-  if [ "${log_level}" -eq "${mask_log_level_normal}" ]; then
+  if [ "${log_level}" -ge "${mask_log_level_normal}" ]; then
     printf -- "$@\n"
   fi
+}
+
+# Verbose log
+# Can be seen at
+# log_level = verbose, all
+log_verbose()
+{
+  if [ "${log_level}" -ge "${mask_log_level_verbose}" ]; then
+    printf -- "DEBUG: $@\n"
+  fi
+}
+
+# All log
+# Can be seen at
+# log_level = all
+log_all()
+{
+  if [ "${log_level}" -eq "${mask_log_level_all}" ]; then
+    printf -- "VERBOSE: $@\n"
+  fi
+}
+
+# Quiet log
+# Can be seen at
+# log_level = quiet, normal, verbose, all
+log_quiet()
+{
+  if [ "${log_level}" -ge "${mask_log_level_quiet}" ]; then
+    printf -- "$@\n"
+  fi
+}
+
+# Error logging
+elog()
+{
+  log "$@" 1>&2
+}
+
+elog_verbose()
+{
+  log_verbose "$@" 1>&2
+}
+
+elog_all()
+{
+  log_all "$@" 1>&2
+}
+
+elog_quiet()
+{
+  log_quiet "$@" 1>&2
 }
 
 # Check the environment path for the given binary, exit if it is not found
 check_binary()
 {
   if ! which "$1" > /dev/null 2>&1; then
-    log "The '$1' binary is required for operation of this script."
-    log "Please install '$1' onto your system."
+    log_quiet "The '$1' binary is required for operation of this script."
+    log_quiet "Please install '$1' onto your system."
     exit 1
   fi
 }
 
 print_usage()
 {
-  log "usage:"
-  log "pstate-frequency [verbose] [ACTION] [option(s)]"
-  log
-  log "verbose:"
-  log "    unprivileged:"
-  log "    -d | --debug     Print debugging messages to stdout (multiple)"
-  log "    -q | --quiet     Supress all non-error output (multiple)"
-  log "    --color          Colorize output"
-  log
-  log
-  log "actions:"
-  log "    unprivileged:"
-  log "    -H | --help      Display this help and exit"
-  log "    -V | --version   Display application version and exit"
-  log "    -G | --get       Access current CPU values"
-  log "    --delay          Delay execution by 5 seconds"
-  log "    privileged:"
-  log "    -S | --set       Modify current CPU values"
-  log
-  log
-  log "options:"
-  log "    unprivileged:"
-  log "    -c | --current   Display the current user set CPU values"
-  log "    -r | --real      Display the real time CPU frequencies"
-  log "    privileged:"
-  log "    -p | --plan      Set a predefined power plan"
-  log "    -m | --max       Modify current CPU max frequency"
-  log "    -g | --governor  Set the cpufreq governor"
-  log "    -n | --min       Modify current CPU min frequency"
-  log "    -t | --turbo     Modify curent CPU turbo boost state"
-  log "    --sleep          Sleep before setting CPU frequencies"
+  log_quiet "usage:"
+  log_quiet "pstate-frequency [verbose] [ACTION] [option(s)]"
+  log_quiet
+  log_quiet "verbose:"
+  log_quiet "    unprivileged:"
+  log_quiet "    -d | --debug     Print debugging messages to stdout (multiple)"
+  log_quiet "    -q | --quiet     Supress all non-error output (multiple)"
+  log_quiet "    --color          Colorize output"
+  log_quiet
+  log_quiet
+  log_quiet "actions:"
+  log_quiet "    unprivileged:"
+  log_quiet "    -H | --help      Display this help and exit"
+  log_quiet "    -V | --version   Display application version and exit"
+  log_quiet "    -G | --get       Access current CPU values"
+  log_quiet "    --delay          Delay execution by 5 seconds"
+  log_quiet "    privileged:"
+  log_quiet "    -S | --set       Modify current CPU values"
+  log_quiet
+  log_quiet
+  log_quiet "options:"
+  log_quiet "    unprivileged:"
+  log_quiet "    -c | --current   Display the current user set CPU values"
+  log_quiet "    -r | --real      Display the real time CPU frequencies"
+  log_quiet "    privileged:"
+  log_quiet "    -p | --plan      Set a predefined power plan"
+  log_quiet "    -m | --max       Modify current CPU max frequency"
+  log_quiet "    -g | --governor  Set the cpufreq governor"
+  log_quiet "    -n | --min       Modify current CPU min frequency"
+  log_quiet "    -t | --turbo     Modify curent CPU turbo boost state"
+  log_quiet "    --sleep          Sleep before setting CPU frequencies"
 }
 
 print_version()
 {
-  log "pstate-frequency version ${version}"
+  log_quiet "pstate-frequency version ${version}"
+}
+
+log_more_verbose()
+{
+  if [ "${log_level}" -lt "${mask_log_level_all}" ]; then
+    log_level=$((${log_level} + 1))
+    log_all "log_level more verbose"
+  fi
+}
+
+log_less_verbose()
+{
+  if [ "${log_level}" -gt "${mask_log_level_off}" ]; then
+    log_all "log_level less verbose"
+    log_level=$((${log_level} - 1))
+  fi
 }
 
 handle_argument()
 {
-  log "handle: $1"
+  if [ -z "${option_expects_argument}" ]; then
+    elog_verbose "option does not expect argument!"
+    elog_verbose "argument: $1"
+    elog_quiet "Illegal command $1"
+  else
+    log_verbose "option: ${option_expects_argument}"
+  fi
 }
 
 # While risky to call eval, this is one way to
 # emulate the bash indirect_expansion ability
+option_expects_argument=""
 eval optind_expanded="\$${OPTIND}"
 while [ -n "${optind_expanded}" ]; do
-  while getopts "HVGSpmntgcrdq-:" option; do
+  while getopts ":HVGSpmntgcrdq-:" option; do
     case "${option}" in
       -)
         case "${OPTARG}" in
@@ -208,38 +251,54 @@ while [ -n "${optind_expanded}" ]; do
             exit 0
             ;;
           get)
+            option_expects_argument=""
             mode="${mask_mode_get}"
             ;;
           set)
+            option_expects_argument=""
             mode="${mask_mode_set}"
             ;;
           plan)
+            option_expects_argument="plan"
             ;;
           max)
+            option_expects_argument="max"
             ;;
           min)
+            option_expects_argument="min"
             ;;
           turbo)
+            option_expects_argument="turbo"
             ;;
           governor)
+            option_expects_argument="governor"
             ;;
           current)
+            option_expects_argument=""
             ;;
           real)
+            option_expects_argument=""
             ;;
           debug)
+            option_expects_argument=""
+            log_more_verbose
             ;;
           quiet)
+            option_expects_argument=""
+            log_less_verbose
             ;;
           delay)
+            option_expects_argument=""
             ;;
           color)
+            option_expects_argument=""
             ;;
           sleep)
+            option_expects_argument=""
             ;;
           *)
             # We must provide our own error message in this case
-            log "Illegal option --${OPTARG}"
+            elog_quiet "Illegal option --${OPTARG}"
             print_usage
             exit 2
             ;;
@@ -254,28 +313,42 @@ while [ -n "${optind_expanded}" ]; do
         exit 0
         ;;
       G)
+        option_expects_argument=""
         ;;
       S)
+        option_expects_argument=""
         ;;
       p)
+        option_expects_argument="plan"
         ;;
       m)
+        option_expects_argument="max"
         ;;
       n)
+        option_expects_argument="min"
         ;;
       t)
+        option_expects_argument="turbo"
         ;;
       g)
+        option_expects_argument="governor"
         ;;
       c)
+        option_expects_argument=""
         ;;
       r)
+        option_expects_argument=""
         ;;
       d)
+        option_expects_argument=""
+        log_more_verbose
         ;;
       q)
+        option_expects_argument=""
+        log_less_verbose
         ;;
       *)
+        elog_quiet "Illegal option ${optind_expanded}"
         print_usage
         exit 2
         ;;
@@ -284,10 +357,17 @@ while [ -n "${optind_expanded}" ]; do
 
   # Re-establish the current OPTIND target
   eval optind_expanded="\$${OPTIND}"
-  [ -z "${optind_expanded}" ] && break || {
+  if [ -z "${optind_expanded}" ]; then
+    break
+  else
     # This is a plain arg and should be handled by one of the options which takes an argument
     handle_argument "${optind_expanded}"
-  }
+
+    # Set back to null
+    option_expects_argument=""
+  fi
+
+  # Shift the options
   shift $OPTIND
   OPTIND=1
 done
