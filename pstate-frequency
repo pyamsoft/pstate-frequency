@@ -1,0 +1,243 @@
+#!/bin/sh
+
+# The MIT License (MIT)
+#
+# Copyright (c) 2016 Peter Kenji Yamanaka
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# pstate-frequency
+# by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
+
+# Options that do not handle an argument
+display_help=0
+display_version=0
+
+execution_delay=0 # Number of seconds to delay script
+execution_sleep=0 # Number of seconds to sleep in between setting values
+
+# Options that expect an argument
+
+# Log levels
+# 0000 = 0 -> OFF
+# 0001 = 1 -> QUIET
+# 0010 = 2 -> NORMAL
+# 0100 = 4 -> VERBOSE
+# 1000 = 8 -> ALL
+readonly mask_log_level_off=0
+readonly mask_log_level_quiet=1
+readonly mask_log_level_normal=2
+readonly mask_log_level_verbose=4
+readonly mask_log_level_all=8
+log_level="${mask_log_level_normal}"
+
+# Execution modes
+# 0000 = 0 -> HELP
+# 0001 = 1 -> VERSION
+# 0010 = 2 -> GET
+# 0100 = 4 -> SET
+readonly mask_mode_help=0
+readonly mask_mode_version=1
+readonly mask_mode_get=2
+readonly mask_mode_set=4
+mode="${mask_mode_help}"
+
+# Get bitmask
+# 0000 = 0 -> CURRENT
+# 0001 = 1 -> REAL
+readonly mask_get_type_current=0
+readonly mask_get_type_real=1
+get_type="${mask_get_type_current}"
+
+# Set bitmask
+# 0000 = 0  -> NONE
+# 0001 = 1  -> MAX
+# 0010 = 2  -> MIN
+# 0100 = 4  -> TURBO
+# 1000 = 8  -> GOVERNOR
+# 0011 = 3  -> MAX & MIN
+# 0101 = 5  -> MAX & TURBO
+# 1001 = 9  -> MAX & GOVERNOR
+# 0110 = 6  -> MIN & TURBO
+# 1010 = 10 -> MIN & GOVERNOR
+# 1100 = 12 -> TURBO & GOVERNOR
+# 0111 = 7  -> MAX & MIN & TURBO
+# 1011 = 11 -> MAX & MIN & GOVERNOR
+# 1101 = 13 -> MAX & TURBO & GOVERNOR
+# 1110 = 14 -> MIN & TURBO & GOVERNOR
+# 1111 = 15 -> MAX & MIN & TURBO & GOVERNOR
+readonly mask_set_type_none=0
+readonly mask_set_type_max=1
+readonly mask_set_type_min=2
+readonly mask_set_type_turbo=4
+readonly mask_set_type_governor=8
+readonly mask_set_type_max_min="$((${mask_set_type_max} + ${mask_set_type_min}))"
+readonly mask_set_type_max_turbo="$((${mask_set_type_max} + ${mask_set_type_turbo}))"
+readonly mask_set_type_max_governor="$((${mask_set_type_max} + ${mask_set_type_governor}))"
+readonly mask_set_type_min_turbo="$((${mask_set_type_min} + ${mask_set_type_turbo}))"
+readonly mask_set_type_min_governor="$((${mask_set_type_min} + ${mask_set_type_governor}))"
+readonly mask_set_type_turbo_governor="$((${mask_set_type_turbo} + ${mask_set_type_governor}))"
+readonly mask_set_type_max_min_turbo="$((${mask_set_type_max_min} + ${mask_set_type_turbo}))"
+readonly mask_set_type_max_min_governor="$((${mask_set_type_max_min} + ${mask_set_type_governor}))"
+readonly mask_set_type_max_turbo_governor="$((${mask_set_type_max_turbo} + ${mask_set_type_governor}))"
+readonly mask_set_type_min_turbo_governor="$((${mask_set_type_min_turbo} + ${mask_set_type_governor}))"
+readonly mask_set_type_max_min_turbo_governor="$((${mask_set_type_max_min_turbo} + ${mask_set_type_governor}))"
+set_type=0
+
+# Supported option flags
+#
+# -H | --help
+# -V | --version
+# -G | --get
+# -S | --set
+#
+# -p | --plan
+# -m | --max
+# -n | --min
+# -t | --turbo
+# -g | --governor
+#
+# -c | --current
+# -r | --real
+#
+# -d | --debug
+# -q | --quiet
+#
+# --delay
+# --color
+# --sleep
+
+log()
+{
+  if [ "${log_level}" -eq "${mask_log_level_normal}" ]; then
+    printf -- "$@\n"
+  fi
+}
+
+# Check the environment path for the given binary, exit if it is not found
+check_binary()
+{
+  if ! which "$1" > /dev/null 2>&1; then
+    log "The '$1' binary is required for operation of this script."
+    log "Please install '$1' onto your system."
+    exit 1
+  fi
+}
+
+print_usage()
+{
+  log "Usage"
+}
+
+handle_argument()
+{
+  echo "handle: $1"
+}
+
+# While risky to call eval, this is one way to
+# emulate the bash indirect_expansion ability
+eval optind_expanded="\$${OPTIND}"
+while [ -n "${optind_expanded}" ]; do
+  while getopts "HVGSpmntgcrdq-:" option; do
+    case "${option}" in
+      -)
+        case "${OPTARG}" in
+          help)
+            ;;
+          version)
+            ;;
+          get)
+            ;;
+          set)
+            ;;
+          plan)
+            ;;
+          max)
+            ;;
+          min)
+            ;;
+          turbo)
+            ;;
+          governor)
+            ;;
+          current)
+            ;;
+          real)
+            ;;
+          debug)
+            ;;
+          quiet)
+            ;;
+          delay)
+            ;;
+          color)
+            ;;
+          sleep)
+            ;;
+          *)
+            print_usage
+            exit 2
+            ;;
+        esac
+        ;;
+      H)
+        ;;
+      V)
+        ;;
+      G)
+        ;;
+      S)
+        ;;
+      p)
+        ;;
+      m)
+        ;;
+      n)
+        ;;
+      t)
+        ;;
+      g)
+        ;;
+      c)
+        ;;
+      r)
+        ;;
+      d)
+        ;;
+      q)
+        ;;
+      *)
+        print_usage
+        exit 2
+        ;;
+    esac
+  done
+
+  # Re-establish the current OPTIND target
+  eval optind_expanded="\$${OPTIND}"
+  [ -z "${optind_expanded}" ] && break || {
+    # This is a plain arg and should be handled by one of the options which takes an argument
+    handle_argument "${optind_expanded}"
+  }
+  shift $OPTIND
+  OPTIND=1
+done
+
+# vim: set syntax=sh tabstop=2 softtabstop=2 shiftwidth=2 shiftround expandtab:
+
