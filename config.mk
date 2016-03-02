@@ -21,11 +21,6 @@
 # SOFTWARE.
 
 ##
-# Version Number
-##
-VERSION:=2.0.5
-
-##
 # Install prefix
 #
 # Understand that this prefix will only affect the destination of the
@@ -38,37 +33,6 @@ VERSION:=2.0.5
 # [/usr/local] | /usr | other
 ##
 PREFIX?=/usr/local
-
-##
-# Preset power plan values
-#
-#	cpu_max cpu_min cpu_turbo cpu_governor
-#
-# cpu_max: Number between 0 (min) and 100 (max)
-# cpu_min: Number between 0 (min) and 100 (max)
-# cpu_turbo: IF using intel_pstate, 1 (OFF) or 0 (ON).
-#	     IF using acpi-cpufreq, 0 (OFF) or 1 (ON).
-# cpu_governor: Name of governor.
-#
-# Example:
-#   PRESET_POWER_PLAN_PERFORMANCE="100 100 0 performance"
-#   PRESET_POWER_PLAN_BALANCED="100 0 1 powersave"
-#   PRESET_POWER_PLAN_POWERSAVE="0 0 1 powersave"
-#
-PRESET_POWER_PLAN_PERFORMANCE="100 100 0 performance"
-PRESET_POWER_PLAN_BALANCED="100 0 1 powersave"
-PRESET_POWER_PLAN_POWERSAVE="0 0 1 powersave"
-
-##
-# Runs the specified power plans on AC and BAT
-#
-# AUTO_POWER_PLAN_AC
-#    1 powersave | [2 balanced] | 3 performance
-# AUTO_POWER_PLAN_BAT
-#    [1 powersave] | 2 balanced | 3 performance
-##
-AUTO_POWER_PLAN_AC="balanced"
-AUTO_POWER_PLAN_BAT="powersave"
 
 ##
 # x86_energy_perf_policy policies
@@ -140,104 +104,14 @@ INCLUDE_DOC?=1
 INCLUDE_SRC?=1
 
 ##
-# Install copy of the GPLv2 License
+# Install copy of the MIT License
 #
-# Installs a copy of the GPLv2 License
+# Installs a copy of the MIT License
 # $(PREFIX)/share/doc/pstate-frequency/project
 #
 # 0 NO | [1 YES]
 ##
 INCLUDE_LICENSE?=1
-
-##
-# C Compiler
-#
-# This will default to the GNU C compiler, gcc
-# The project has been tested against gcc and clang
-# both successfully build on all levels of optimizations, though
-# -O2 is the default for the balance between speed and stability
-#
-# Any and all of the C compilers explicitly listed here should always be
-# supported by pstate-frequency. If there are any issues encountered while
-# building with one of these compilers, please file an Issue ticket.
-#
-# [gcc] | clang | musl-gcc | OTHER
-##
-CC?=gcc
-
-##
-# Linker Flags
-#
-# Do NOT modify these unless you know what you are doing
-##
-LDFLAGS:= -Wl,-O2,--sort-common,--as-needed,-z,relro,-z,now,--strip-all \
-	 -Wl,--gc-sections $(LDFLAGS)
-
-##
-# Compiler flags
-#
-# Do NOT modify these unless you know what you are doing
-#
-# Additional CFLAGS
-#
-# -fstack-protector-strong
-##
-CFLAGS:= -std=c99 -O2 \
-	-march=native -pipe -pedantic \
-	-Wall -Wextra -Werror -Wmissing-declarations \
-	-Wunreachable-code $(CFLAGS)
-
-##
-# Add the VERSION to the CFLAGS if it is defined
-# (NOTE) VERSION should be defined for a sane build!
-##
-ifdef VERSION
-	CFLAGS+= -DVERSION=\"$(VERSION)[$(CC)]\"
-endif
-
-##
-# Add the AUTO_POWER_PLAN_AC to the CFLAGS if it is defined
-##
-ifdef AUTO_POWER_PLAN_AC
-	CFLAGS+= -DAUTO_POWER_PLAN_AC=\"$(AUTO_POWER_PLAN_AC)\"
-endif
-
-##
-# Add the AUTO_POWER_PLAN_BAT to the CFLAGS if it is defined
-##
-ifdef AUTO_POWER_PLAN_BAT
-	CFLAGS+= -DAUTO_POWER_PLAN_BAT=\"$(AUTO_POWER_PLAN_BAT)\"
-endif
-
-##
-# Add the PRESET_POWER_PLAN_PERFORMANCE to the CFLAGS if it is defined
-##
-ifdef PRESET_POWER_PLAN_PERFORMANCE
-	CFLAGS+= -DPRESET_POWER_PLAN_PERFORMANCE=\"$(PRESET_POWER_PLAN_PERFORMANCE)\"
-endif
-
-##
-# Add the PRESET_POWER_PLAN_BALANCED to the CFLAGS if it is defined
-##
-ifdef PRESET_POWER_PLAN_BALANCED
-	CFLAGS+= -DPRESET_POWER_PLAN_BALANCED=\"$(PRESET_POWER_PLAN_BALANCED)\"
-endif
-
-##
-# Add the PRESET_POWER_PLAN_POWERSAVE to the CFLAGS if it is defined
-##
-ifdef PRESET_POWER_PLAN_POWERSAVE
-	CFLAGS+= -DPRESET_POWER_PLAN_POWERSAVE=\"$(PRESET_POWER_PLAN_POWERSAVE)\"
-endif
-
-##
-# Add the INCLUDE_UDEV_RULE to the CFLAGS if it is defined
-# (NOTE) As of version 1.2.10, the INCLUDE_UDEV_RULE does NOT
-# affect the ability of pstate-frequency to use the automatic power plan.
-##
-ifeq ($(INCLUDE_UDEV_RULE), 1)
-	CFLAGS+= -DINCLUDE_UDEV_RULE=$(INCLUDE_UDEV_RULE)
-endif
 
 ##
 # Make Flags
