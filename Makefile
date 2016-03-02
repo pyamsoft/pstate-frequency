@@ -22,36 +22,44 @@
 
 include config.mk
 
-EXEC_NAME=pstate-frequency
-PROJECT_DIR=app
-DOC_DIR=share/doc
+# Directory for script resources
+RES_DIR=res
 
-.PHONY: all clean install install-src install-doc install-license uninstall \
-	uninstall-src uninstall-doc uninstall-license options bin edit \
-	coverity
+# certain system files will only properly work situated at /usr
+SYSTEM_PREFIX=/usr
+
+# name of the x86_energy_perf_policy binary
+X86_NAME=x86_energy_perf_policy
+
+SCRIPT_INSTALL_SRC="pstate-frequency"
+DOC_INSTALL_SRC="README.md"
+LICENSE_INSTALL_SRC="LICENSE"
+BASH_INSTALL_SRC="$(RES_DIR)/shell/bash/bash_completion"
+ZSH_INSTALL_SRC="$(RES_DIR)/shell/zsh/zsh_completion"
+UDEV_INSTALL_SRC="$(RES_DIR)/udev/99-pstate-frequency.rules"
+SYSTEMD_SERVICE_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency.service"
+SYSTEMD_SERVICE_SLEEP_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency-sleep.service"
+X86_SERVICE_SLEEP_INSTALL_SRC="$(RES_DIR)/systemd/x86_energy_perf_policy-sleep.service"
+X86_SERVICE_INSTALL_SRC="$(RES_DIR)/systemd/x86_energy_perf_policy.service"
+
+SCRIPT_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/bin/$(NAME)"
+DOC_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/share/doc/$(NAME)/README.md"
+LICENSE_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/share/doc/$(NAME)/LICENSE"
+BASH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/bash-completion/completions/$(NAME)"
+ZSH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/zsh/site-functions/_$(NAME)"
+UDEV_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/udev/rules.d/99-$(NAME).rules"
+SYSTEMD_SERVICE_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME).service"
+SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)-sleep.service"
+X86_SERVICE_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(X86_NAME).service"
+X86_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(X86_NAME)-sleep.service"
+
+.PHONY: all install install-doc install-license uninstall edit \
+	install-res install-bash install-zsh install-udev install-systemd
 
 all:
-	@echo " -- Makefile targets --"
-	@echo
-	@echo "  -- Build Targets --"
-	@echo "  edit      - Edit the config.mk file to prepare for build"
-	@echo "  bin       - Build the program using options specified in the"
-	@echo "              Makefile"
-	@echo "  options   - List the build environment options including"
-	@echo "		     flags"
-	@echo "  clean     - Clean the build to start from scratch"
-	@echo "  install   - Install the program using options specified in"
-	@echo "              the Makefile"
-	@echo "  uninstall - Uninstall the program using options specified in"
-	@echo "              the Makefile"
-	@echo
-	@echo "  -- Test Targets --"
-	@echo
-	@echo "  coverity  - Run a coverity build and create a tar ready for"
-	@echo "              uploading to coverity scan"
-
-coverity:
-	@./assets/analysis/coverity/run-coverity
+	@echo "Targets"
+	@echo " install uninstall edit"
+	@echo $(TARGET)
 
 edit:
 ifndef EDITOR
@@ -62,24 +70,10 @@ else
 	@$(EDITOR) -- config.mk
 endif
 
-bin:
-	@$(MAKE) -C $(PROJECT_DIR)
-
-options:
-	@echo "CFLAGS  = " $(CFLAGS)
-	@echo "LDFLAGS   = " $(LDFLAGS)
-	@echo "MAKEFLAGS = " $(MAKEFLAGS)
-	@echo "CC       = " $(CC)
-
-clean:
-	@$(MAKE) -C $(PROJECT_DIR) clean
-
-install: bin
-	@$(MAKE) -C $(PROJECT_DIR) install-app
-	@$(MAKE) -C $(PROJECT_DIR) install-res
-ifeq ($(INCLUDE_SRC), 1)
-	@$(MAKE) install-src
-endif
+install:
+	@echo "Installing..."
+	@$(MAKE) install-script
+	@$(MAKE) install-res
 ifeq ($(INCLUDE_DOC), 1)
 	@$(MAKE) install-doc
 endif
@@ -88,25 +82,91 @@ ifeq ($(INCLUDE_LICENSE), 1)
 	@$(MAKE) install-license
 endif
 
+install-script:
+	@echo "  INSTALL  $(SCRIPT_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(SCRIPT_INSTALL_TARGET))"
+	@install -Dm 755 "$(SCRIPT_INSTALL_SRC)" "$(SCRIPT_INSTALL_TARGET)"
+
 install-doc:
-	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md"
-	@install -Dm 644 README.md $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
+	@echo "  INSTALL  $(DOC_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(DOC_INSTALL_TARGET))"
+	@install -Dm 644 "$(DOC_INSTALL_SRC)" "$(DOC_INSTALL_TARGET)"
 
 install-license:
-	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/LICENSE"
-	@install -Dm 644 LICENSE $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
+	@echo "  INSTALL  $(LICENSE_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(LICENSE_INSTALL_TARGET))"
+	@install -Dm 644 "$(LICENSE_INSTALL_SRC)" "$(LICENSE_INSTALL_TARGET)"
 
-install-src:
-	@echo "  INSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src"
-	@install -d $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)
-	@cp -r --no-preserve=mode $(PROJECT_DIR)/src $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src
+install-res:
+ifeq ($(INCLUDE_BASH_COMPLETION), 1)
+	@$(MAKE) install-bash
+endif
+ifeq ($(INCLUDE_ZSH_COMPLETION), 1)
+	@$(MAKE) install-zsh
+endif
+ifeq ($(INCLUDE_UDEV_RULE), 1)
+	@$(MAKE) install-udev
+endif
+ifeq ($(INCLUDE_SYSTEMD_UNIT), 1)
+	@$(MAKE) install-systemd
+endif
+
+install-bash:
+	@echo "  INSTALL  $(BASH_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(BASH_INSTALL_TARGET))"
+	@install -Dm 644 "$(BASH_INSTALL_SRC)" "$(BASH_INSTALL_TARGET)"
+
+install-zsh:
+	@echo "  INSTALL  $(ZSH_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(ZSH_INSTALL_TARGET))"
+	@install -Dm 644 "$(ZSH_INSTALL_SRC)" "$(ZSH_INSTALL_TARGET)"
+
+install-udev:
+	@echo "  INSTALL  $(UDEV_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(UDEV_INSTALL_TARGET))"
+	@install -Dm 644 "$(UDEV_INSTALL_SRC)" "$(UDEV_INSTALL_TARGET)"
+
+install-systemd:
+	@$(MAKE) install-systemd-pstate
+	@$(MAKE) install-systemd-pstate-sleep
+	@$(MAKE) install-systemd-x86
+	@$(MAKE) install-systemd-x86-sleep
+
+install-systemd-pstate:
+	@echo "  INSTALL  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_INSTALL_TARGET))"
+	@install -Dm 644 "$(SYSTEMD_SERVICE_INSTALL_SRC)" "$(SYSTEMD_SERVICE_INSTALL_TARGET)"
+
+install-systemd-pstate-sleep:
+	@echo "  INSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET))"
+	@install -Dm 644 "$(SYSTEMD_SERVICE_SLEEP_INSTALL_SRC)" "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
+
+install-systemd-x86:
+	@echo "  INSTALL  $(X86_SERVICE_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(X86_SERVICE_INSTALL_TARGET))"
+	@install -Dm 644 "$(X86_SERVICE_INSTALL_SRC)" "$(X86_SERVICE_INSTALL_TARGET)"
+ifeq ($(X86_ENERGY_PERF_POLICY), 0)
+	@sed -i "s#-v normal#-v powersave#g" "$(X86_SERVICE_INSTALL_TARGET)"
+else ifeq ($(X86_ENERGY_PERF_POLICY), 2)
+	@sed -i "s#-v normal#-v performance#g" "$(X86_SERVICE_INSTALL_TARGET)"
+endif
+
+install-systemd-x86-sleep:
+	@echo "  INSTALL  $(X86_SERVICE_SLEEP_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(X86_SERVICE_SLEEP_INSTALL_TARGET))"
+	@install -Dm 644 "$(X86_SERVICE_SLEEP_INSTALL_SRC)" "$(X86_SERVICE_SLEEP_INSTALL_TARGET)"
+ifeq ($(X86_ENERGY_PERF_POLICY), 0)
+	@sed -i "s#-v normal#-v powersave#g" "$(X86_SERVICE_SLEEP_INSTALL_TARGET)"
+else ifeq ($(X86_ENERGY_PERF_POLICY), 2)
+	@sed -i "s#-v normal#-v performance#g" "$(X86_SERVICE_SLEEP_INSTALL_TARGET)"
+endif
+
 
 uninstall:
-	@$(MAKE) -C $(PROJECT_DIR) uninstall-app
-	@$(MAKE) -C $(PROJECT_DIR) uninstall-res
-ifeq ($(INCLUDE_SRC), 1)
-	@$(MAKE) uninstall-src
-endif
+	@echo "Uninstalling..."
+	@$(MAKE) uninstall-script
+	@$(MAKE) uninstall-res
 ifeq ($(INCLUDE_DOC), 1)
 	@$(MAKE) uninstall-doc
 endif
@@ -114,18 +174,64 @@ ifeq ($(INCLUDE_LICENSE), 1)
 	@$(MAKE) uninstall-license
 endif
 
+uninstall-script:
+	@echo "  UNINSTALL  $(SCRIPT_INSTALL_TARGET)"
+	@rm -f "$(SCRIPT_INSTALL_TARGET)"
+
 uninstall-doc:
-	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md"
-	@rm -f $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/README.md
-	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
+	@echo "  UNINSTALL  $(DOC_INSTALL_TARGET)"
+	@rm -f "$(DOC_INSTALL_TARGET)"
+	@rmdir --ignore-fail-on-non-empty "$(shell dirname $(DOC_INSTALL_TARGET))"
 
 uninstall-license:
-	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/LICENSE"
-	@rm -f $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/LICENSE
-	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
+	@echo "  UNINSTALL  $(LICENSE_INSTALL_TARGET)"
+	@rm -f "$(LICENSE_INSTALL_TARGET)"
+	@rmdir --ignore-fail-on-non-empty "$(shell dirname $(LICENSE_INSTALL_TARGET))"
 
-uninstall-src:
-	@echo "  UNINSTALL  $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src"
-	@rm -rf $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME)/src
-	@rmdir $(DESTDIR)$(PREFIX)/$(DOC_DIR)/$(EXEC_NAME) --ignore-fail-on-non-empty
+uninstall-res:
+ifeq ($(INCLUDE_BASH_COMPLETION), 1)
+	@$(MAKE) uninstall-bash
+endif
+ifeq ($(INCLUDE_ZSH_COMPLETION), 1)
+	@$(MAKE) uninstall-zsh
+endif
+ifeq ($(INCLUDE_UDEV_RULE), 1)
+	@$(MAKE) uninstall-udev
+endif
+ifeq ($(INCLUDE_SYSTEMD_UNIT), 1)
+	@$(MAKE) uninstall-systemd
+endif
 
+uninstall-bash:
+	@echo "  UNINSTALL  $(BASH_INSTALL_TARGET)"
+	@rm -f "$(BASH_INSTALL_TARGET)"
+
+uninstall-zsh:
+	@echo "  UNINSTALL  $(ZSH_INSTALL_TARGET)"
+	@rm -f "$(ZSH_INSTALL_TARGET)"
+
+uninstall-udev:
+	@echo "  UNINSTALL  $(UDEV_INSTALL_TARGET)"
+	@rm -f "$(UDEV_INSTALL_TARGET)"
+
+uninstall-systemd:
+	@$(MAKE) uninstall-systemd-pstate
+	@$(MAKE) uninstall-systemd-pstate-sleep
+	@$(MAKE) uninstall-systemd-x86
+	@$(MAKE) uninstall-systemd-x86-sleep
+
+uninstall-systemd-pstate:
+	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
+	@rm -f "$(SYSTEMD_SERVICE_INSTALL_TARGET)"
+
+uninstall-systemd-pstate-sleep:
+	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
+	@rm -f "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
+
+uninstall-systemd-x86:
+	@echo "  UNINSTALL  $(X86_SERVICE_INSTALL_TARGET)"
+	@rm -f "$(X86_SERVICE_INSTALL_TARGET)"
+
+uninstall-systemd-x86-sleep:
+	@echo "  UNINSTALL  $(X86_SERVICE_SLEEP_INSTALL_TARGET)"
+	@rm -f "$(X86_SERVICE_SLEEP_INSTALL_TARGET)"

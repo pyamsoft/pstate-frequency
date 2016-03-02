@@ -21,6 +21,13 @@
 # SOFTWARE.
 
 ##
+# Name of the script
+#
+# You can change this, but note that it may have unforseen consequences
+##
+NAME=pstate-frequency
+
+##
 # Install prefix
 #
 # Understand that this prefix will only affect the destination of the
@@ -92,16 +99,6 @@ INCLUDE_UDEV_RULE?=1
 # 0 NO | [1 YES]
 ##
 INCLUDE_DOC?=1
-
-##
-# Install copy of source code
-#
-# Installs a copy of the C++ related source code to
-# $(PREFIX)/share/doc/pstate-frequency/project
-#
-# 0 NO | [1 YES]
-##
-INCLUDE_SRC?=1
 
 ##
 # Install copy of the MIT License
