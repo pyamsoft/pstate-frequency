@@ -127,7 +127,7 @@ log()
 log_verbose()
 {
   if [ "${log_level}" -ge "${const_log_level_verbose}" ]; then
-    printf -- "DEBUG: $@\n"
+    printf -- "VERBOSE: $@\n"
   fi
 }
 
@@ -137,7 +137,7 @@ log_verbose()
 log_all()
 {
   if [ "${log_level}" -eq "${const_log_level_all}" ]; then
-    printf -- "VERBOSE: $@\n"
+    printf -- "DEBUG: $@\n"
   fi
 }
 
