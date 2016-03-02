@@ -5,7 +5,7 @@
 pkgname=pstate-frequency-git
 _gitname=pstate-frequency
 pkgdesc="Easily control Intel p-state driver (git version)"
-pkgver=2.0.4.r579.114f53f
+pkgver="3.0.0".r620.5220b3d
 pkgrel=1
 arch=('i686' 'x86_64')
 makedepends=('git')
@@ -30,7 +30,7 @@ sha256sums=(
 pkgver() {
   cd "${srcdir}/${_gitname}"
 
-  printf "%s.r%s.%s" "$(awk -F '=' '{if (/^VERSION:=/) {print $2}}' 'config.mk')" \
+  printf "%s.r%s.%s" "$(awk -F '=' '{if (/^readonly version=/) {print $2}}' "${_gitname}")" \
                 "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
@@ -45,15 +45,6 @@ prepare() {
   # enable the line to allow for editing the config.mk file
   #
   # make DESTDIR="${pkgdir}" edit
-
-  make DESTDIR="${pkgdir}" options
-}
-
-build() {
-  cd "${srcdir}/${_gitname}"
-
-  make DESTDIR="${pkgdir}" clean
-  make DESTDIR="${pkgdir}" bin
 }
 
 package() {
