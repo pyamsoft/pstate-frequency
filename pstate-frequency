@@ -878,6 +878,11 @@ root_do_set()
 do_set()
 {
   if [ "$(id -u)" -eq 0 ]; then
+    if [ "${execution_delay}" -eq 1 ]; then
+      log_verbose "Delay for 5 seconds requested by user"
+      sleep 5
+    fi
+
     root_do_set
     do_get_current
   else
@@ -999,6 +1004,7 @@ while [ -n "${optind_expanded}" ]; do
             log_less_verbose
             ;;
           delay)
+            execution_delay=1
             ;;
           color)
             ;;
