@@ -29,7 +29,7 @@ StopWhenUnneeded=yes
 Type=simple
 RemainAfterExit=yes
 ExecStart=/bin/true
-ExecStop=x86_energy_perf_policy -v normal
+ExecStop=/bin/sh -c "x86_energy_perf_policy -v normal"
 
 [Install]
 WantedBy=sleep.target

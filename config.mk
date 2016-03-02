@@ -24,6 +24,9 @@
 # Name of the script
 #
 # You can change this, but note that it may have unforseen consequences
+#
+# For example, this does not currently change the content inside of
+# any res/ files. Use at your own risk.
 ##
 NAME=pstate-frequency
 

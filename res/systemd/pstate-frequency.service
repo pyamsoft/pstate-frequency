@@ -26,7 +26,7 @@ After=basic.target
 
 [Service]
 Type=simple
-ExecStart=pstate-frequency --delay -dd -S -p 0
+ExecStart=/bin/sh -c "pstate-frequency --delay -dd -S -p 0"
 
 [Install]
 WantedBy=multi-user.target
