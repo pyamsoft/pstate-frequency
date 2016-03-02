@@ -179,8 +179,8 @@ elog_quiet()
 check_binary()
 {
   if ! which "$1" > /dev/null 2>&1; then
-    echo "The '$1' binary is required for operation of this script."
-    echo "Please install '$1' onto your system."
+    printf "The '$1' binary is required for operation of this script."
+    printf "Please install '$1' onto your system."
     exit 1
   fi
 }
@@ -892,7 +892,6 @@ do_set()
 }
 
 # Sanity check
-check_binary printf
 check_binary grep
 check_binary cat
 check_binary wc
