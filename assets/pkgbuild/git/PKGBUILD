@@ -13,7 +13,7 @@ depends=('coreutils' 'grep')
 optdepends=('x86_energy_perf_policy: For the x86_energy_perf_policy-sleep.service')
 provides=('pstate-frequency')
 conflicts=('pstate-frequency')
-license=('GPLv2')
+license=('MIT')
 url="https://github.com/pyamsoft/pstate-frequency.git"
 
 ##
