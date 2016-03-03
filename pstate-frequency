@@ -182,7 +182,7 @@ check_binary()
     exit 1
   fi
 
-  IFS=":"
+  local IFS=":"
   for part in ${PATH}; do
     local check="${part}/$1"
     if [ -e "${check}" ]; then
