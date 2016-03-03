@@ -178,11 +178,22 @@ elog_quiet()
 # Check the environment path for the given binary, exit if it is not found
 check_binary()
 {
-  if ! which "$1" > /dev/null 2>&1; then
-    printf "The '$1' binary is required for operation of this script."
-    printf "Please install '$1' onto your system."
+  if [ -z "$1" ]; then
     exit 1
   fi
+
+  local IFS=":"
+  for part in ${PATH}; do
+    local check="${part}/$1"
+    if [ -e "${check}" ]; then
+      unset check
+      return
+    fi
+    unset check
+  done
+
+  exit 1
+
 }
 
 # Print usage
@@ -890,6 +901,7 @@ do_set()
     exit 6
   fi
 }
+
 
 # Sanity check
 check_binary grep
