@@ -108,7 +108,6 @@ readonly const_power_plan_max=4
 # -q | --quiet
 #
 # --delay
-# --color
 # --sleep
 
 # Normal log
@@ -206,7 +205,6 @@ print_usage()
   log "    unprivileged:"
   log "    -d | --debug     Print debugging messages to stdout (multiple)"
   log "    -q | --quiet     Supress all non-error output (multiple)"
-  log "    --color          Colorize output"
   log
   log
   log "actions:"
@@ -703,7 +701,7 @@ root_do_set_has_arg()
 root_write_max()
 {
   log_verbose "Write max_value '$1' to intel_pstate file: ${const_system_intel_pstate_max}"
-  echo "$1" > "${const_system_intel_pstate_max}"
+  printf -- "$1" > "${const_system_intel_pstate_max}"
   log_all "Max value written to ${const_system_intel_pstate_max}"
 
   local max_freq=$(( $1 * ${const_system_cpu_max_freq} / 100 ))
@@ -711,7 +709,7 @@ root_write_max()
   for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
     local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_max_freq"
     log_verbose "Write freq: ${max_freq}KHz to file: ${target}"
-    echo "${max_freq}" > "${target}"
+    printf -- "${max_freq}" > "${target}"
     unset target
     log_all "Max value written to ${target}"
   done
@@ -722,7 +720,7 @@ root_write_max()
 root_write_min()
 {
   log_verbose "Write min_value '$1' to intel_pstate file: ${const_system_intel_pstate_min}"
-  echo "$1" > "${const_system_intel_pstate_min}"
+  printf -- "$1" > "${const_system_intel_pstate_min}"
   log_all "Min value written to ${const_system_intel_pstate_min}"
 
   local min_freq=$(( $1 * ${const_system_cpu_max_freq} / 100 ))
@@ -730,7 +728,7 @@ root_write_min()
   for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
     local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_min_freq"
     log_verbose "Write freq: ${min_freq}KHz to file: ${target}"
-    echo "${min_freq}" > "${target}"
+    printf -- "${min_freq}" > "${target}"
     unset target
     log_all "Min value written to ${target}"
   done
@@ -741,7 +739,7 @@ root_write_min()
 root_write_turbo()
 {
   log_verbose "Write turbo_value '$1' to intel_pstate file: ${const_system_intel_pstate_turbo}"
-  echo "$1" > "${const_system_intel_pstate_turbo}"
+  printf -- "$1" > "${const_system_intel_pstate_turbo}"
   log_all "Turbo value written to ${const_system_intel_pstate_turbo}"
 }
 
@@ -760,7 +758,7 @@ root_write_governor()
   for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
     local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_governor"
     log_verbose "Write governor: ${governor_name} to file: ${target}"
-    echo "${governor_name}" > "${target}"
+    printf -- "${governor_name}" > "${target}"
     unset target
     log_all "Governor written to ${target}"
   done
@@ -909,6 +907,7 @@ check_binary cat
 check_binary wc
 check_binary cut
 check_binary id
+check_binary sleep
 
 # System related vars
 readonly const_system_power_supply_dir="/sys/class/power_supply"
@@ -1018,6 +1017,10 @@ while [ -n "${optind_expanded}" ]; do
             execution_delay=1
             ;;
           color)
+            log_quiet "Option: --color"
+            log_quiet "This option is deprecated."
+            log_quiet "To be removed in 3.1.0"
+            sleep 2
             ;;
           sleep)
             execution_sleep=1
