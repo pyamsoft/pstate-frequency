@@ -42,14 +42,12 @@ that which is advertised to be available.
 
 The installation follows a basic process:  
 ```
-# make edit
-# make bin
+$ make edit
 # make install
 ```
 
 While building, there are a couple of options that one may configure or  
 change:  
-+ The C compiler used (defaults to gcc)  
 + The directory to install to (defaults to /usr/local)  
 + Install bash completion (defaults to Yes)  
 + Install zsh completion (defaults to No)  
@@ -57,10 +55,6 @@ change:
 + Install udev rules for automatic frequency setting (defaults to Yes)  
 + Install this README as documentation (defaults to Yes)  
 + Install a copy of the source code as documentation (defaults to Yes)  
-
-Also note that the config.mk file specifies by default the option  
-*-march=native* which can only be used by newer version of clang and  
-gcc version including and above 4.9
 
 
 #### Distribution Specific Installations
@@ -141,13 +135,14 @@ lowest available and disables Turbo Boost.
 2. **balanced (2)** Sets the minimum scaling frequency to the  
 lowest available, the maximum scaling frequency to the highest available  
 non-turbo frequency and disables Turbo Boost.  
-3. **performance (3)** Sets the minimum and maximum scaling frequencies  
+3. **performance (3)** Sets the minimum scaling frequency to the  
+lowest available, the maximum scaling frequency to the highest available  
+frequency and enables Turbo Boost.  
+4. **max (4)** Sets the minimum and maximum scaling frequencies  
 to the highest available frequency taking into account Turbo Boost  
 frequencies, and enables Turbo Boost.  
-4. **auto (0)** If the computer's main powersource is online, then the  
-power plan defined by the user configurable *AUTO_POWER_PLAN_AC* or the  
+5. **auto (0)** If the computer's main powersource is online, then the  
 *balanced* plan is set. If the main powersource is offline, then the  
-power plan defined by the user configurable *AUTO_POWER_PLAN_BAT* or the  
 *powersave* plan is set.  
 
 
