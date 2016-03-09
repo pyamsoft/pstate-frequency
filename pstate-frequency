@@ -850,10 +850,10 @@ root_do_set()
   log_verbose "setting_cpu_governor: ${setting_cpu_governor}"
 
   log_verbose "setting sane values first"
+  root_write_governor "${sane_governor}"
   root_write_max "${sane_max}"
   root_write_min "${sane_min}"
   root_write_turbo "${sane_turbo}"
-  root_write_governor "${sane_governor}"
 
   if [ "${execution_sleep}" -eq 1 ]; then
     log_verbose "Sleep for 2 seconds requested by user"
@@ -861,10 +861,10 @@ root_do_set()
   fi
 
   log_verbose "Set actual values"
+  root_write_governor "${setting_cpu_governor}"
   root_write_max "${setting_cpu_max}"
   root_write_min "${setting_cpu_min}"
   root_write_turbo "${setting_cpu_turbo}"
-  root_write_governor "${setting_cpu_governor}"
 
   unset sane_max
   unset sane_min
