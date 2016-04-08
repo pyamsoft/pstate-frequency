@@ -827,6 +827,30 @@ root_write_governor()
   unset governor_name
 }
 
+root_write_x86_policy()
+{
+  if [ -n "$1" ]; then
+    log_verbose "x86_perf_policy was requested: '$1'"
+    local x86_bin="x86_energy_perf_policy"
+    local x86_bin_result
+    x86_bin_result=$(check_binary "${x86_bin}")
+    if [ $? -eq 1 ]; then
+      elog_quiet "Not setting x86_perf_policy even though it was requested"
+    else
+      log_verbose "Setting x86_perf_policy to '$1'"
+      if [ "${log_level}" -ge "${const_log_level_verbose}" ]; then
+      "${x86_bin}" -v "$1"
+      else
+      "${x86_bin}" "$1" > /dev/null
+      fi
+    fi
+    unset x86_bin_result
+    unset x86_bin
+  else
+    log_verbose "x86_perf_policy was not requested"
+  fi
+}
+
 root_do_set()
 {
   log_verbose "YOU ARE ROOT"
@@ -840,6 +864,7 @@ root_do_set()
   local setting_cpu_min=""
   local setting_cpu_turbo=""
   local setting_cpu_governor=""
+  local setting_x86_policy=""
 
   local cpu_max_freq="$(cat "${const_system_scaling_max_freq}" )"
   local cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
@@ -893,6 +918,15 @@ root_do_set()
     fi
   fi
 
+  log_verbose "Check if we are setting x86_policy"
+  if [ "${set_x86_policy_type}" -eq 1 ]; then
+    log_verbose "Set x86_policy to arg"
+    setting_x86_policy="${set_x86_policy_arg}"
+  else
+    log_verbose "Set x86_policy to none"
+    setting_x86_policy=""
+  fi
+
   log_verbose "Check that min is not >= max"
   if [ "${setting_cpu_min}" -ge "${setting_cpu_max}" ]; then
     log_verbose "set min to just below max"
@@ -926,6 +960,7 @@ root_do_set()
   root_write_max "${setting_cpu_max}"
   root_write_min "${setting_cpu_min}"
   root_write_turbo "${setting_cpu_turbo}"
+  root_write_x86_policy "${setting_x86_policy}"
 
   unset sane_max
   unset sane_min
