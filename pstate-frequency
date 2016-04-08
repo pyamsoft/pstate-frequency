@@ -1196,6 +1196,7 @@ case "${mode}" in
     log_verbose "set_min: ${set_min_type} [${set_min_arg}]"
     log_verbose "set_turbo: ${set_turbo_type} [${set_turbo_arg}]"
     log_verbose "set_governor: ${set_governor_type} [${set_governor_arg}]"
+    log_verbose "set_x86: ${set_x86_policy_type} [${set_x86_policy_arg}]"
     do_set
     ;;
   *)
