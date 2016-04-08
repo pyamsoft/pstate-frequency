@@ -28,9 +28,6 @@ RES_DIR=res
 # certain system files will only properly work situated at /usr
 SYSTEM_PREFIX=/usr
 
-# name of the x86_energy_perf_policy binary
-X86_NAME=x86_energy_perf_policy
-
 SCRIPT_INSTALL_SRC="pstate-frequency"
 DOC_INSTALL_SRC="README.md"
 LICENSE_INSTALL_SRC="LICENSE"
@@ -39,8 +36,6 @@ ZSH_INSTALL_SRC="$(RES_DIR)/shell/zsh/zsh_completion"
 UDEV_INSTALL_SRC="$(RES_DIR)/udev/99-pstate-frequency.rules"
 SYSTEMD_SERVICE_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency.service"
 SYSTEMD_SERVICE_SLEEP_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency-sleep.service"
-X86_SERVICE_SLEEP_INSTALL_SRC="$(RES_DIR)/systemd/x86_energy_perf_policy-sleep.service"
-X86_SERVICE_INSTALL_SRC="$(RES_DIR)/systemd/x86_energy_perf_policy.service"
 
 SCRIPT_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/bin/$(NAME)"
 DOC_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/share/doc/$(NAME)/README.md"
@@ -50,11 +45,14 @@ ZSH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/zsh/site-functions/_$(NAME
 UDEV_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/udev/rules.d/99-$(NAME).rules"
 SYSTEMD_SERVICE_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME).service"
 SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)-sleep.service"
-X86_SERVICE_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(X86_NAME).service"
-X86_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(X86_NAME)-sleep.service"
 
-.PHONY: all install install-doc install-license uninstall edit \
-	install-res install-bash install-zsh install-udev install-systemd
+.PHONY: all install uninstall edit \
+	install-doc install-license install-script install-res \
+	install-bash install-zsh install-udev install-systemd \
+	install-systemd-pstate install-systemd-pstate-sleep \
+	uninstall-script uninstall-doc uninstall-license uninstall-res \
+	uninstall-bash uninstall-zsh uninstall-udev uninstall-systemd \
+	uninstall-systemd-pstate uninstall-systemd-pstate-sleep
 
 all:
 	@echo "Targets"
@@ -129,8 +127,6 @@ install-udev:
 install-systemd:
 	@$(MAKE) install-systemd-pstate
 	@$(MAKE) install-systemd-pstate-sleep
-	@$(MAKE) install-systemd-x86
-	@$(MAKE) install-systemd-x86-sleep
 
 install-systemd-pstate:
 	@echo "  INSTALL  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
@@ -141,27 +137,6 @@ install-systemd-pstate-sleep:
 	@echo "  INSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET))"
 	@install -Dm 644 "$(SYSTEMD_SERVICE_SLEEP_INSTALL_SRC)" "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
-
-install-systemd-x86:
-	@echo "  INSTALL  $(X86_SERVICE_INSTALL_TARGET)"
-	@mkdir -p "$(shell dirname $(X86_SERVICE_INSTALL_TARGET))"
-	@install -Dm 644 "$(X86_SERVICE_INSTALL_SRC)" "$(X86_SERVICE_INSTALL_TARGET)"
-ifeq ($(X86_ENERGY_PERF_POLICY), 0)
-	@sed -i "s#-v normal#-v powersave#g" "$(X86_SERVICE_INSTALL_TARGET)"
-else ifeq ($(X86_ENERGY_PERF_POLICY), 2)
-	@sed -i "s#-v normal#-v performance#g" "$(X86_SERVICE_INSTALL_TARGET)"
-endif
-
-install-systemd-x86-sleep:
-	@echo "  INSTALL  $(X86_SERVICE_SLEEP_INSTALL_TARGET)"
-	@mkdir -p "$(shell dirname $(X86_SERVICE_SLEEP_INSTALL_TARGET))"
-	@install -Dm 644 "$(X86_SERVICE_SLEEP_INSTALL_SRC)" "$(X86_SERVICE_SLEEP_INSTALL_TARGET)"
-ifeq ($(X86_ENERGY_PERF_POLICY), 0)
-	@sed -i "s#-v normal#-v powersave#g" "$(X86_SERVICE_SLEEP_INSTALL_TARGET)"
-else ifeq ($(X86_ENERGY_PERF_POLICY), 2)
-	@sed -i "s#-v normal#-v performance#g" "$(X86_SERVICE_SLEEP_INSTALL_TARGET)"
-endif
-
 
 uninstall:
 	@echo "Uninstalling..."
@@ -217,8 +192,6 @@ uninstall-udev:
 uninstall-systemd:
 	@$(MAKE) uninstall-systemd-pstate
 	@$(MAKE) uninstall-systemd-pstate-sleep
-	@$(MAKE) uninstall-systemd-x86
-	@$(MAKE) uninstall-systemd-x86-sleep
 
 uninstall-systemd-pstate:
 	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
@@ -228,10 +201,3 @@ uninstall-systemd-pstate-sleep:
 	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 	@rm -f "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 
-uninstall-systemd-x86:
-	@echo "  UNINSTALL  $(X86_SERVICE_INSTALL_TARGET)"
-	@rm -f "$(X86_SERVICE_INSTALL_TARGET)"
-
-uninstall-systemd-x86-sleep:
-	@echo "  UNINSTALL  $(X86_SERVICE_SLEEP_INSTALL_TARGET)"
-	@rm -f "$(X86_SERVICE_SLEEP_INSTALL_TARGET)"
