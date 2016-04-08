@@ -88,6 +88,15 @@ readonly const_power_plan_balanced=2
 readonly const_power_plan_performance=3
 readonly const_power_plan_max=4
 
+# X86_perf_policy levels
+readonly const_set_x86_policy_false=0
+readonly const_set_x86_policy_true=1
+readonly const_x86_policy_powersave=0
+readonly const_x86_policy_normal=1
+readonly const_x86_policy_performance=2
+set_x86_policy_type=""
+set_x86_policy_arg=""
+
 # Supported option flags
 #
 # -H | --help
@@ -439,6 +448,49 @@ set_governor()
   fi
 }
 
+# Set the argument for x86_perf_policy
+# Can be set multiple times, final time overrides
+set_x86()
+{
+  log_verbose "set_x86 requires SET operation mode"
+  if [ "${mode}" -eq "${const_mode_set}" ]; then
+    local value=""
+    log_verbose "Check for special case arguments: 0, 1, 2"
+    if [ "$1" = "0" ]; then
+      log_verbose "Argument was '0' set to powersave"
+      value="powersave"
+    elif [ "$1" = "1" ]; then
+      log_verbose "Argument was '1' set to normal"
+      value="normal"
+    elif [ "$1" = "2" ]; then
+      log_verbose "Argument was '2' set to performance"
+      value="performance"
+    else
+      log_verbose "Argument was not special, read as is"
+      value="$1"
+    fi
+    log_verbose "Check that '${value}' is not digits"
+    if [ ! $(is_digits "${value}") -eq 1 ]; then
+      log_verbose "'${value}' is not digits"
+      if [ "${value}" != "powersave" ] && [ "${value}" != "normal" ] && [ "${value}" != "performance" ]; then
+        elog_quiet "Invalid x86_perf_policy specified, do not change"
+      else
+        set_x86_policy_type="${const_set_x86_policy_true}"
+        set_x86_policy_arg="${value}"
+        log_verbose "set_x86_policy_arg: '${set_x86_policy_arg}'"
+      fi
+    else
+      elog_quiet "x86 argument '${value}' is a number"
+      unset value
+      exit 2
+    fi
+    unset value
+  else
+    elog_quiet "Cannot set x86 outside of SET operation mode"
+    exit 3
+  fi
+}
+
 # Set the power plan based on argument
 set_power_plan()
 {
@@ -612,6 +664,10 @@ handle_long_option_argument()
       governor)
         log_verbose "Long option: governor"
         set_governor "$1"
+        ;;
+      x86)
+        log_verbose "Long option: x86"
+        set_x86 "$1"
         ;;
       *)
         elog_quiet "Invalid option --${option_expects_argument}"
@@ -944,7 +1000,7 @@ long_option=""
 option_expects_argument=""
 eval optind_expanded="\$${OPTIND}"
 while [ -n "${optind_expanded}" ]; do
-  while getopts ":HVGSp:m:n:t:g:crdq-:" option; do
+  while getopts ":HVGSp:m:n:t:g:x:crdq-:" option; do
 
     # Log if not long option
     if [ "${option}" != '-' ]; then
@@ -1030,6 +1086,11 @@ while [ -n "${optind_expanded}" ]; do
           sleep)
             execution_sleep=1
             ;;
+          x86)
+            log_verbose "Attempt to set x86_perf_policy"
+            option_expects_argument="x86"
+            long_option="${option_expects_argument}"
+            ;;
           *)
             # We must provide our own error message in this case
             elog_quiet "Illegal option --${OPTARG}"
@@ -1087,6 +1148,10 @@ while [ -n "${optind_expanded}" ]; do
         ;;
       q)
         log_less_verbose
+        ;;
+      x)
+        log_verbose "Attempt to set x86_perf_policy"
+        set_x86 "${OPTARG}"
         ;;
       *)
         elog_quiet "Illegal option -${OPTARG}"
