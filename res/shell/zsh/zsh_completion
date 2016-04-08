@@ -63,7 +63,9 @@ _options()
         elif [ "$words[$index]" = "-p" ] || [ "$words[$index]" = "--plan" ]; then
                 _alternative \
                         ":power plan name or number:"
-
+        elif [ "$words[$index]" = "-x" ] || [ "$words[$index]" = "--x86" ]; then
+                _alternative \
+                        ":energy perf policy powersave,normal,performance,none:"
         else
                 _actions
         fi
@@ -91,6 +93,7 @@ _privilaged_options()
                 "-n:Set the CPU min"
                 "-t:Set the CPU turbo"
                 "-g:Set the CPU governor"
+                "-x:Set the x86_energy_perf_policy"
                 "--sleep:Sleep before setting"
         )
         _describe -t privilaged-options "privilaged options" options "$@"
