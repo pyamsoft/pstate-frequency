@@ -45,18 +45,6 @@ NAME=pstate-frequency
 PREFIX?=/usr/local
 
 ##
-# x86_energy_perf_policy policies
-#
-# Modify the x86_energy_perf_policy systemd rule to set the policy to
-# a given preset
-#
-# see X86_ENERGY_PERF_POLICY(8) for details
-#
-# 0 POWERSAVE | [1 NORMAL] | 2 PERFORMANCE
-##
-X86_ENERGY_PERF_POLICY?=1
-
-##
 # bash-completion
 #
 # Include a bash completion file
