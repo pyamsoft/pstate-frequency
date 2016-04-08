@@ -900,6 +900,10 @@ do_set()
   fi
 }
 
+# Set a sanitized PATH
+unset PATH
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 
 # Sanity check
 check_binary grep
