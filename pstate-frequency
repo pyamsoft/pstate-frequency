@@ -178,7 +178,8 @@ elog_quiet()
 check_binary()
 {
   if [ -z "$1" ]; then
-    exit 1
+    elog_quiet "Must specify a path to a binary"
+    return 1
   fi
 
   local IFS=":"
@@ -186,13 +187,13 @@ check_binary()
     local check="${part}/$1"
     if [ -e "${check}" ]; then
       unset check
-      return
+      return 0
     fi
     unset check
   done
 
-  exit 1
-
+  elog_quiet "Binary '$1' not found in \$PATH"
+  return 1
 }
 
 # Print usage
@@ -906,12 +907,12 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 
 # Sanity check
-check_binary grep
-check_binary cat
-check_binary wc
-check_binary cut
-check_binary id
-check_binary sleep
+check_binary grep || exit 1
+check_binary cat || exit 1
+check_binary wc || exit 1
+check_binary cut || exit 1
+check_binary id || exit 1
+check_binary sleep || exit 1
 
 # System related vars
 readonly const_system_power_supply_dir="/sys/class/power_supply"
