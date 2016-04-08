@@ -472,7 +472,11 @@ set_x86()
     log_verbose "Check that '${value}' is not digits"
     if [ ! $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is not digits"
-      if [ "${value}" != "powersave" ] && [ "${value}" != "normal" ] && [ "${value}" != "performance" ]; then
+      if [ "${value}" = "none" ]; then
+        log_verbose "x86_policy_arg: None requested. Reset values"
+        set_x86_policy_type="${const_set_x86_policy_false}"
+        set_x86_policy_arg=""
+      elif [ "${value}" != "powersave" ] && [ "${value}" != "normal" ] && [ "${value}" != "performance" ]; then
         elog_quiet "Invalid x86_perf_policy specified, do not change"
       else
         set_x86_policy_type="${const_set_x86_policy_true}"
