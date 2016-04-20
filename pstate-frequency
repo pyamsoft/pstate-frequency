@@ -777,8 +777,8 @@ root_write_max()
     local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_max_freq"
     log_verbose "Write freq: ${max_freq}KHz to file: ${target}"
     printf -- "${max_freq}" > "${target}"
-    unset target
     log_all "Max value written to ${target}"
+    unset target
   done
 
   unset max_freq
@@ -796,8 +796,8 @@ root_write_min()
     local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_min_freq"
     log_verbose "Write freq: ${min_freq}KHz to file: ${target}"
     printf -- "${min_freq}" > "${target}"
-    unset target
     log_all "Min value written to ${target}"
+    unset target
   done
 
   unset max_freq
@@ -817,8 +817,8 @@ root_write_governor()
     local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_governor"
     log_verbose "Write governor: $1 to file: ${target}"
     printf -- "$1" > "${target}"
-    unset target
     log_all "Governor $1 written to ${target}"
+    unset target
   done
 
   unset governor_name
