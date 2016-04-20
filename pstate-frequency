@@ -1110,12 +1110,6 @@ while [ -n "${optind_expanded}" ]; do
           delay)
             execution_delay=1
             ;;
-          color)
-            log_quiet "Option: --color"
-            log_quiet "This option is deprecated."
-            log_quiet "To be removed in 3.1.0"
-            sleep 2
-            ;;
           sleep)
             execution_sleep=1
             ;;
