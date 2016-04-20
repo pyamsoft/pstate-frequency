@@ -418,26 +418,28 @@ set_governor()
   if [ "${mode}" -eq "${const_mode_set}" ]; then
     local value=""
     log_verbose "Check for special case arguments: powersave, performance"
-    if [ "$1" = "powersave" ]; then
-      log_verbose "Argument was 'powersave' set to 0"
-      value="0"
-    elif [ "$1" = "performance" ]; then
-      log_verbose "Argument was 'performance' set to 1"
-      value="1"
+    if [ "$1" = "0" ]; then
+      log_verbose "Argument was '0' set to powersave"
+      value="powersave"
+    elif [ "$1" = "1" ]; then
+      log_verbose "Argument was '1' set to performance"
+      value="performance"
     else
       log_verbose "Argument was not special, read as is"
       value="$1"
     fi
-    log_verbose "Check that '${value}' is all digits"
-    if [ $(is_digits "${value}") -eq 1 ]; then
-      log_verbose "'${value}' is all digits"
-      log_verbose "Bound value '${value}' between 0 and 1"
-      value="$(set_variable_bounds "${value}" 0 1)"
-      set_governor_type="${const_set_governor_true}"
-      set_governor_arg="${value}"
-      log_verbose "set_governor_arg: '${set_governor_arg}'"
+    log_verbose "Check that '${value}' is not digits"
+    if [ ! $(is_digits "${value}") -eq 1 ]; then
+      log_verbose "'${value}' is not digits"
+      if [ "${value}" != "powersave" ] && [ "${value}" != "performance" ]; then
+        elog_quiet "Invalid governor specified, do not change"
+      else
+        set_governor_type="${const_set_governor_true}"
+        set_governor_arg="${value}"
+        log_verbose "set_governor_arg: '${set_governor_arg}'"
+      fi
     else
-      elog_quiet "governor argument '${value}' is not a number"
+      elog_quiet "governor argument '${value}' is a number"
       unset value
       exit 2
     fi
@@ -810,22 +812,13 @@ root_write_turbo()
 
 root_write_governor()
 {
-  log_verbose "Convert cpu_governor '$1' to name"
-  local governor_name=""
-  if [ "$1" -eq 0 ]; then
-    log_verbose "Governor: powersave"
-    governor_name="powersave"
-  else
-    log_verbose "Governor: performance"
-    governor_name="performance"
-  fi
-
+  log_verbose "Write cpu_governor '$1' to all CPUs"
   for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
     local target="/sys/devices/system/cpu/cpu${i}/cpufreq/scaling_governor"
-    log_verbose "Write governor: ${governor_name} to file: ${target}"
-    printf -- "${governor_name}" > "${target}"
+    log_verbose "Write governor: $1 to file: ${target}"
+    printf -- "$1" > "${target}"
     unset target
-    log_all "Governor written to ${target}"
+    log_all "Governor $1 written to ${target}"
   done
 
   unset governor_name
@@ -880,7 +873,7 @@ root_do_set()
   local sane_max="${const_system_cpu_max_value}"
   local sane_min="${const_system_cpu_min_value}"
   local sane_turbo=1
-  local sane_governor=0
+  local sane_governor="powersave"
 
   log_verbose "Check if we are setting max"
   if [ "${set_max_type}" -eq 1 ]; then
@@ -915,11 +908,7 @@ root_do_set()
     setting_cpu_governor="${set_governor_arg}"
   else
     log_verbose "Set governor to current system"
-    if [ "${cpu_governor}" = "powersave" ]; then
-      setting_cpu_governor=0
-    else
-      setting_cpu_governor=1
-    fi
+    setting_cpu_governor="${cpu_governor}"
   fi
 
   log_verbose "Check if we are setting x86_policy"
@@ -982,6 +971,7 @@ root_do_set()
   unset setting_cpu_min
   unset setting_cpu_turbo
   unset setting_cpu_governor
+  unset setting_x86_policy
 }
 
 do_set()
