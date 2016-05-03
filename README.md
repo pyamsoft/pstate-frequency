@@ -5,10 +5,6 @@ Easily control Intel p-state driver on Linux (3.9 and upwards)
 pstate-frequency is able to adjust the Intel p-state driver values for the  
 minimum and maximum scaling frequencies and the state of turbo boost.
 
-
-[![Travis Build Status](https://travis-ci.org/pyamsoft/pstate-frequency.svg?branch=master)](https://travis-ci.org/pyamsoft/pstate-frequency)
-[![Coverity Scan Build](https://scan.coverity.com/projects/7648/badge.svg)](https://scan.coverity.com/projects/7648/)
-
 ### Requirements
 
 + Intel P-State driver (included in kernel 3.9 and upwards).  
