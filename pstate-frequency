@@ -990,6 +990,16 @@ do_set()
   fi
 }
 
+# Check that we have intel_pstate at the intel_pstate location
+has_pstate_dir()
+{
+  if [ -d "${const_system_intel_pstate_dir}" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 # Set a sanitized PATH
 unset PATH
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -1013,19 +1023,29 @@ readonly const_system_scaling_max_freq="/sys/devices/system/cpu/cpu0/cpufreq/sca
 readonly const_system_scaling_min_freq="/sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"
 readonly const_system_scaling_governor="/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
 readonly const_system_scaling_driver="/sys/devices/system/cpu/cpu0/cpufreq/scaling_driver"
-
-# Check that we have intel_pstate at the intel_pstate location
-if [ ! -d "${const_system_intel_pstate_dir}" ]; then
-  elog_quiet "${const_system_intel_pstate_dir} does not exist on the system"
-  elog_quiet "ABORT"
-  exit 5
-fi
-
 readonly const_system_cpu_number="$(grep "processor" /proc/cpuinfo | wc -l)"
 readonly const_system_cpu_max_freq="$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq)"
 readonly const_system_cpu_min_freq="$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_min_freq)"
 readonly const_system_cpu_max_value=100
 readonly const_system_cpu_min_value=$(( ${const_system_cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+
+program_name="$(basename $0)"
+has_pstate_dir_result=$(has_pstate_dir)
+if [ $? -eq 1 ] && [ "${program_name}" = "pstate-frequency" ]; then
+  unset program_name
+  unset has_pstate_dir_result
+  elog_quiet "Standard intel_pstate directory does not exist at: ${const_system_intel_pstate_dir}"
+  elog_quiet "Abort"
+  exit 5
+elif [ "${program_name}" != "cpu-frequency" ] && [ "${program_name}" != "pstate-frequency" ]; then
+  unset program_name
+  unset has_pstate_dir_result
+  elog_quiet "Unsupported program version found: ${program_name}"
+  elog_quiet "Abort"
+  exit 5
+fi
+unset program_name
+unset has_pstate_dir_result
 
 # While risky to call eval, this is one way to
 # emulate the bash indirect_expansion ability
