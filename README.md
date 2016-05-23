@@ -7,11 +7,10 @@ minimum and maximum scaling frequencies and the state of turbo boost.
 
 ### Requirements
 
-+ Intel P-State driver (included in kernel 3.9 and upwards).  
-Enable it by adding **intel_pstate=enable** to the boot command line.  
-Starting with version 2.0.0, only intel_pstate will be suported. There  
-are plenty of other tools that can support acpi-cpufreq and other CPU  
-drivers.
++ The intel_pstate (included in kernel 3.9 and upwards) OR  
+the acpi-cpufreq driver. Other CPU scaling drivers are not supported and so  
+the behavior of the pstate-frequency script when running with an unsupported  
+CPU driver is undefined.
 
 + coreutils  
 The standard GNU tools for things like cat, wc, grep, and cut. These are  
