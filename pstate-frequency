@@ -381,7 +381,7 @@ set_turbo()
     local value=""
     log_verbose "Check for special case arguments: on, off"
     if [ "$1" = "on" ]; then
-      if [ ${has_pstate_dir} ]; then
+      if [ $(has_pstate_dir) -eq 1 ]; then
         log_verbose "Argument was 'on' set to 0"
         value="0"
       else
@@ -389,7 +389,7 @@ set_turbo()
         value="1"
       fi
     elif [ "$1" = "off" ]; then
-      if [ ${has_pstate_dir} ]; then
+      if [ $(has_pstate_dir) -eq 1 ]; then
         log_verbose "Argument was 'off' set to 1"
         value="1"
       else
@@ -633,7 +633,7 @@ set_power_plan_powersave()
   set_min 0
   set_governor powersave
   set_x86 0
-  if [ ${has_pstate_dir} ]; then
+  if [ $(has_pstate_dir) -eq 1 ]; then
     set_turbo 1
   else
     set_turbo 0
@@ -647,7 +647,7 @@ set_power_plan_balanced()
   set_max 100
   set_min 0
   set_x86 0
-  if [ ${has_pstate_dir} ]; then
+  if [ $(has_pstate_dir) -eq 1 ]; then
     set_governor powersave
     set_turbo 1
   else
@@ -664,7 +664,7 @@ set_power_plan_performance()
   set_min 0
   set_governor performance
   set_x86 1
-  if [ ${has_pstate_dir} ]; then
+  if [ $(has_pstate_dir) -eq 1 ]; then
     set_turbo 0
   else
     set_turbo 1
@@ -679,7 +679,7 @@ set_power_plan_max()
   set_min 100
   set_governor performance
   set_x86 2
-  if [ ${has_pstate_dir} ]; then
+  if [ $(has_pstate_dir) -eq 1 ]; then
     set_turbo 0
   else
     set_turbo 1
@@ -741,7 +741,7 @@ do_get_current()
   local cpu_driver="$(cat "${const_system_scaling_driver}" )"
 
   local cpu_turbo
-  if [ "${has_pstate_dir}" ]; then
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
     cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
   else
     cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
@@ -752,13 +752,13 @@ do_get_current()
 
   local cpu_turbo_onoff=""
   if [ "${cpu_turbo}" -eq 1 ]; then
-    if [ ${has_pstate_dir} ]; then
+    if [ $(has_pstate_dir) -eq 1 ]; then
       cpu_turbo_onoff="OFF"
     else
       cpu_turbo_onoff="ON"
     fi
   else
-    if [ ${has_pstate_dir} ]; then
+    if [ $(has_pstate_dir) -eq 1 ]; then
       cpu_turbo_onoff="ON"
     else
       cpu_turbo_onoff="OFF"
@@ -827,7 +827,7 @@ root_do_set_has_arg()
 
 root_write_max()
 {
-  if [ ${has_pstate_dir} ]; then
+  if [ $(has_pstate_dir) -eq 1 ]; then
     log_verbose "Write max_value '$1' to intel_pstate file: ${const_system_intel_pstate_max}"
     printf -- "$1" > "${const_system_intel_pstate_max}"
     log_all "Max value written to ${const_system_intel_pstate_max}"
@@ -848,7 +848,7 @@ root_write_max()
 
 root_write_min()
 {
-  if [ ${has_pstate_dir} ]; then
+  if [ $(has_pstate_dir) -eq 1 ]; then
     log_verbose "Write min_value '$1' to intel_pstate file: ${const_system_intel_pstate_min}"
     printf -- "$1" > "${const_system_intel_pstate_min}"
     log_all "Min value written to ${const_system_intel_pstate_min}"
@@ -869,7 +869,7 @@ root_write_min()
 
 root_write_turbo()
 {
-  if [ ${has_pstate_dir} ]; then
+  if [ $(has_pstate_dir) -eq 1 ]; then
     log_verbose "Write turbo_value '$1' to intel_pstate file: ${const_system_intel_pstate_turbo}"
     printf -- "$1" > "${const_system_intel_pstate_turbo}"
     log_all "Turbo value written to ${const_system_intel_pstate_turbo}"
@@ -939,7 +939,7 @@ root_do_set()
   local cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
   local cpu_governor="$(cat "${const_system_scaling_governor}" )"
   local cpu_turbo
-  if [ ${has_pstate_dir} ]; then
+  if [ $(has_pstate_dir) -eq 1 ]; then
     cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
   else
     cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
@@ -1069,9 +1069,9 @@ do_set()
 has_pstate_dir()
 {
   if [ -d "${const_system_intel_pstate_dir}" ]; then
-    return 0
+    printf -- 1
   else
-    return 1
+    printf -- 0
   fi
 }
 
