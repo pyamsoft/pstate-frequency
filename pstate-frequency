@@ -427,27 +427,45 @@ set_governor()
   log_verbose "set_governor requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
     local value=""
-    log_verbose "Check for special case arguments: powersave, performance"
-    if [ "$1" = "0" ]; then
-      log_verbose "Argument was '0' set to powersave"
-      value="powersave"
-    elif [ "$1" = "1" ]; then
-      log_verbose "Argument was '1' set to performance"
-      value="performance"
-    else
-      log_verbose "Argument was not special, read as is"
+    local all_available_governors=$(cat "${const_system_cpu_available_governors}" )
+    if [ $(is_digits "$1") -eq 1 ]; then
+    local count=0
+      for available_gov in ${all_available_governors}; do
+        if [ "${count}" -eq "$1" ]; then
+          log_verbose "Value is a predefined governor name: ${available_gov}"
+          value="${available_gov}"
+          break;
+        fi
+
+        # Increment count
+        ((count++))
+      done
+    fi
+
+    if [ -z "${value}" ]; then
+      log_verbose "Value is not special, read as is"
       value="$1"
     fi
+
     log_verbose "Check that '${value}' is not digits"
     if [ ! $(is_digits "${value}") -eq 1 ]; then
       log_verbose "'${value}' is not digits"
-      if [ "${value}" != "powersave" ] && [ "${value}" != "performance" ]; then
+      local is_valid_governor=0
+      for available_gov in ${all_available_governors}; do
+        if [ "${value}" = "${available_gov}" ]; then
+          is_valid_governor=1
+          break
+        fi
+      done
+
+      if [ ${is_valid_governor} -ne 1 ]; then
         elog_quiet "Invalid governor specified, do not change"
       else
         set_governor_type="${const_set_governor_true}"
         set_governor_arg="${value}"
         log_verbose "set_governor_arg: '${set_governor_arg}'"
       fi
+      unset is_valid_governor
     else
       elog_quiet "governor argument '${value}' is a number"
       unset value
@@ -612,7 +630,7 @@ set_power_plan_powersave()
   log_verbose "Set power plan to: powersave"
   set_max 0
   set_min 0
-  set_governor 0
+  set_governor powersave
   set_x86 0
   if [ ${has_pstate_dir} ]; then
     set_turbo 1
@@ -627,11 +645,12 @@ set_power_plan_balanced()
   log_verbose "Set power plan to: balanced"
   set_max 100
   set_min 0
-  set_governor 0
   set_x86 0
   if [ ${has_pstate_dir} ]; then
+    set_governor powersave
     set_turbo 1
   else
+    set_governor ondemand
     set_turbo 0
   fi
 }
@@ -642,7 +661,7 @@ set_power_plan_performance()
   log_verbose "Set power plan to: performance"
   set_max 100
   set_min 0
-  set_governor 1
+  set_governor performance
   set_x86 1
   if [ ${has_pstate_dir} ]; then
     set_turbo 0
@@ -657,7 +676,7 @@ set_power_plan_max()
   log_verbose "Set power plan to: performance"
   set_max 100
   set_min 100
-  set_governor 1
+  set_governor performance
   set_x86 2
   if [ ${has_pstate_dir} ]; then
     set_turbo 0
@@ -1075,6 +1094,7 @@ readonly const_system_scaling_max_freq="${const_system_cpu_dir}/cpu0/cpufreq/sca
 readonly const_system_scaling_min_freq="${const_system_cpu_dir}/cpu0/cpufreq/scaling_min_freq"
 readonly const_system_scaling_governor="${const_system_cpu_dir}/cpu0/cpufreq/scaling_governor"
 readonly const_system_scaling_driver="${const_system_cpu_dir}/cpu0/cpufreq/scaling_driver"
+readonly const_system_cpu_available_governors="${const_system_cpu_dir}/cpu0/cpufreq/scaling_available_governors"
 readonly const_system_cpu_number="$(grep "processor" /proc/cpuinfo | wc -l)"
 readonly const_system_cpu_max_freq="$(cat "${const_system_cpu_dir}/cpu0/cpufreq/cpuinfo_max_freq" )"
 readonly const_system_cpu_min_freq="$(cat "${const_system_cpu_dir}/cpu0/cpufreq/cpuinfo_min_freq" )"
