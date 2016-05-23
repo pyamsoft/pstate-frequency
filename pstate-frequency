@@ -1029,24 +1029,6 @@ readonly const_system_cpu_min_freq="$(cat /sys/devices/system/cpu/cpu0/cpufreq/c
 readonly const_system_cpu_max_value=100
 readonly const_system_cpu_min_value=$(( ${const_system_cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
 
-program_name="$(basename $0)"
-has_pstate_dir_result=$(has_pstate_dir)
-if [ $? -eq 1 ] && [ "${program_name}" = "pstate-frequency" ]; then
-  unset program_name
-  unset has_pstate_dir_result
-  elog_quiet "Standard intel_pstate directory does not exist at: ${const_system_intel_pstate_dir}"
-  elog_quiet "Abort"
-  exit 5
-elif [ "${program_name}" != "cpu-frequency" ] && [ "${program_name}" != "pstate-frequency" ]; then
-  unset program_name
-  unset has_pstate_dir_result
-  elog_quiet "Unsupported program version found: ${program_name}"
-  elog_quiet "Abort"
-  exit 5
-fi
-unset program_name
-unset has_pstate_dir_result
-
 # While risky to call eval, this is one way to
 # emulate the bash indirect_expansion ability
 long_option=""
