@@ -381,11 +381,21 @@ set_turbo()
     local value=""
     log_verbose "Check for special case arguments: on, off"
     if [ "$1" = "on" ]; then
-      log_verbose "Argument was 'on' set to 0"
-      value="0"
+      if [ ${has_pstate_dir} ]; then
+        log_verbose "Argument was 'on' set to 0"
+        value="0"
+      else
+        log_verbose "Argument was 'on' set to 1"
+        value="1"
+      fi
     elif [ "$1" = "off" ]; then
-      log_verbose "Argument was 'off' set to 1"
-      value="1"
+      if [ ${has_pstate_dir} ]; then
+        log_verbose "Argument was 'off' set to 1"
+        value="1"
+      else
+        log_verbose "Argument was 'off' set to 0"
+        value="0"
+      fi
     else
       log_verbose "Argument was not special, read as is"
       value="$1"
@@ -602,9 +612,13 @@ set_power_plan_powersave()
   log_verbose "Set power plan to: powersave"
   set_max 0
   set_min 0
-  set_turbo 1
   set_governor 0
   set_x86 0
+  if [ ${has_pstate_dir} ]; then
+    set_turbo 1
+  else
+    set_turbo 0
+  fi
 }
 
 # Sets the power plan to a balanced mode
@@ -613,9 +627,13 @@ set_power_plan_balanced()
   log_verbose "Set power plan to: balanced"
   set_max 100
   set_min 0
-  set_turbo 1
   set_governor 0
   set_x86 0
+  if [ ${has_pstate_dir} ]; then
+    set_turbo 1
+  else
+    set_turbo 0
+  fi
 }
 
 # Sets the power plan to a performance mode
@@ -624,9 +642,13 @@ set_power_plan_performance()
   log_verbose "Set power plan to: performance"
   set_max 100
   set_min 0
-  set_turbo 0
   set_governor 1
   set_x86 1
+  if [ ${has_pstate_dir} ]; then
+    set_turbo 0
+  else
+    set_turbo 1
+  fi
 }
 
 # Sets the power plan to the max available performance mode
@@ -635,9 +657,13 @@ set_power_plan_max()
   log_verbose "Set power plan to: performance"
   set_max 100
   set_min 100
-  set_turbo 0
   set_governor 1
   set_x86 2
+  if [ ${has_pstate_dir} ]; then
+    set_turbo 0
+  else
+    set_turbo 1
+  fi
 }
 
 # Handle long options which take arguments
@@ -706,9 +732,17 @@ do_get_current()
 
   local cpu_turbo_onoff=""
   if [ "${cpu_turbo}" -eq 1 ]; then
-    cpu_turbo_onoff="OFF"
+    if [ ${has_pstate_dir} ]; then
+      cpu_turbo_onoff="OFF"
+    else
+      cpu_turbo_onoff="ON"
+    fi
   else
-    cpu_turbo_onoff="ON"
+    if [ ${has_pstate_dir} ]; then
+      cpu_turbo_onoff="ON"
+    else
+      cpu_turbo_onoff="OFF"
+    fi
   fi
 
   print_version
