@@ -94,7 +94,7 @@ readonly const_set_x86_policy_true=1
 readonly const_x86_policy_powersave=0
 readonly const_x86_policy_normal=1
 readonly const_x86_policy_performance=2
-set_x86_policy_type=""
+set_x86_policy_type="${const_set_x86_policy_false}"
 set_x86_policy_arg=""
 
 # Supported option flags
@@ -945,11 +945,6 @@ root_do_set()
     cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
   fi
 
-  local sane_max="${const_system_cpu_max_value}"
-  local sane_min="${const_system_cpu_min_value}"
-  local sane_turbo=1
-  local sane_governor="powersave"
-
   log_verbose "Check if we are setting max"
   if [ "${set_max_type}" -eq 1 ]; then
     log_verbose "Set max to arg"
@@ -1012,28 +1007,35 @@ root_do_set()
   log_verbose "setting_cpu_turbo: ${setting_cpu_turbo}"
   log_verbose "setting_cpu_governor: ${setting_cpu_governor}"
 
-  log_verbose "setting sane values first"
-  root_write_governor "${sane_governor}"
-  root_write_max "${sane_max}"
-  root_write_min "${sane_min}"
-  root_write_turbo "${sane_turbo}"
-
   if [ "${execution_sleep}" -eq 1 ]; then
     log_verbose "Sleep for 2 seconds requested by user"
     sleep 2
   fi
 
+  # settings are applied as follows:
+  # the governor is applied first incase it also affects other CPU settings
+  # max is set next except in the case where the current system minimum value
+  # is higher than the requested max. In this case, min will be set first, as
+  # the logic above should guarantee that it is lower than the max
   log_verbose "Set actual values"
   root_write_governor "${setting_cpu_governor}"
-  root_write_max "${setting_cpu_max}"
-  root_write_min "${setting_cpu_min}"
+
+  # Because setting the governor may have changed CPU values, we re-read them
+  # here before going through the apply logic
+  cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
+  cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
+  cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+
+  # Set max first if it is greater than the current CPU min
+  if [ "${setting_cpu_max}" -gt "${cpu_min_value}" ]; then
+    root_write_max "${setting_cpu_max}"
+    root_write_min "${setting_cpu_min}"
+  else
+    root_write_min "${setting_cpu_min}"
+    root_write_max "${setting_cpu_max}"
+  fi
   root_write_turbo "${setting_cpu_turbo}"
   root_write_x86_policy "${setting_x86_policy}"
-
-  unset sane_max
-  unset sane_min
-  unset sane_turbo
-  unset sane_governor
 
   unset cpu_max_freq
   unset cpu_min_freq
