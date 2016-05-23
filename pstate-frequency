@@ -691,9 +691,15 @@ do_get_current()
 {
   local cpu_max_freq="$(cat "${const_system_scaling_max_freq}" )"
   local cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
-  local cpu_turbo="$(cat ${const_system_intel_pstate_turbo} )"
-  local cpu_governor="$(cat ${const_system_scaling_governor} )"
-  local cpu_driver="$(cat ${const_system_scaling_driver} )"
+  local cpu_governor="$(cat "${const_system_scaling_governor}" )"
+  local cpu_driver="$(cat "${const_system_scaling_driver}" )"
+
+  local cpu_turbo
+  if [ "${has_pstate_dir}" ]; then
+    cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
+  else
+    cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
+  fi
 
   local cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
   local cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
@@ -1016,10 +1022,6 @@ check_binary sleep || exit 1
 # System related vars
 readonly const_system_power_supply_dir="/sys/class/power_supply"
 readonly const_system_cpu_dir="/sys/devices/system/cpu"
-readonly const_system_intel_pstate_dir="${const_system_cpu_dir}/intel_pstate"
-readonly const_system_intel_pstate_max="${const_system_intel_pstate_dir}/max_perf_pct"
-readonly const_system_intel_pstate_min="${const_system_intel_pstate_dir}/min_perf_pct"
-readonly const_system_intel_pstate_turbo="${const_system_intel_pstate_dir}/no_turbo"
 readonly const_system_scaling_max_freq="${const_system_cpu_dir}/cpu0/cpufreq/scaling_max_freq"
 readonly const_system_scaling_min_freq="${const_system_cpu_dir}/cpu0/cpufreq/scaling_min_freq"
 readonly const_system_scaling_governor="${const_system_cpu_dir}/cpu0/cpufreq/scaling_governor"
@@ -1029,6 +1031,15 @@ readonly const_system_cpu_max_freq="$(cat "${const_system_cpu_dir}/cpu0/cpufreq/
 readonly const_system_cpu_min_freq="$(cat "${const_system_cpu_dir}/cpu0/cpufreq/cpuinfo_min_freq" )"
 readonly const_system_cpu_max_value=100
 readonly const_system_cpu_min_value=$(( ${const_system_cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+
+# intel_pstate related vars
+readonly const_system_intel_pstate_dir="${const_system_cpu_dir}/intel_pstate"
+readonly const_system_intel_pstate_max="${const_system_intel_pstate_dir}/max_perf_pct"
+readonly const_system_intel_pstate_min="${const_system_intel_pstate_dir}/min_perf_pct"
+readonly const_system_intel_pstate_turbo="${const_system_intel_pstate_dir}/no_turbo"
+
+# acpi-cpufreq related vars
+readonly const_system_cpufreq_boost="${const_system_cpu_dir}/cpufreq/boost"
 
 # While risky to call eval, this is one way to
 # emulate the bash indirect_expansion ability
