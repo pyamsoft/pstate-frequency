@@ -24,7 +24,7 @@
 
 # pstate-frequency
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
-readonly version="3.3.1"
+readonly version="3.3.2"
 
 # Exit codes
 # 0 - Success
