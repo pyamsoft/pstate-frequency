@@ -773,9 +773,11 @@ root_do_set_has_arg()
 
 root_write_max()
 {
-  log_verbose "Write max_value '$1' to intel_pstate file: ${const_system_intel_pstate_max}"
-  printf -- "$1" > "${const_system_intel_pstate_max}"
-  log_all "Max value written to ${const_system_intel_pstate_max}"
+  if [ ${has_pstate_dir} ]; then
+    log_verbose "Write max_value '$1' to intel_pstate file: ${const_system_intel_pstate_max}"
+    printf -- "$1" > "${const_system_intel_pstate_max}"
+    log_all "Max value written to ${const_system_intel_pstate_max}"
+  fi
 
   local max_freq=$(( $1 * ${const_system_cpu_max_freq} / 100 ))
 
@@ -792,9 +794,11 @@ root_write_max()
 
 root_write_min()
 {
-  log_verbose "Write min_value '$1' to intel_pstate file: ${const_system_intel_pstate_min}"
-  printf -- "$1" > "${const_system_intel_pstate_min}"
-  log_all "Min value written to ${const_system_intel_pstate_min}"
+  if [ ${has_pstate_dir} ]; then
+    log_verbose "Write min_value '$1' to intel_pstate file: ${const_system_intel_pstate_min}"
+    printf -- "$1" > "${const_system_intel_pstate_min}"
+    log_all "Min value written to ${const_system_intel_pstate_min}"
+  fi
 
   local min_freq=$(( $1 * ${const_system_cpu_max_freq} / 100 ))
 
@@ -811,9 +815,15 @@ root_write_min()
 
 root_write_turbo()
 {
-  log_verbose "Write turbo_value '$1' to intel_pstate file: ${const_system_intel_pstate_turbo}"
-  printf -- "$1" > "${const_system_intel_pstate_turbo}"
-  log_all "Turbo value written to ${const_system_intel_pstate_turbo}"
+  if [ ${has_pstate_dir} ]; then
+    log_verbose "Write turbo_value '$1' to intel_pstate file: ${const_system_intel_pstate_turbo}"
+    printf -- "$1" > "${const_system_intel_pstate_turbo}"
+    log_all "Turbo value written to ${const_system_intel_pstate_turbo}"
+  else
+    log_verbose "Write turbo_value '$1' to acpi-cpufreq file: ${const_system_cpufreq_boost}"
+    printf -- "$1" > "${const_system_cpufreq_boost}"
+    log_all "Turbo value written to ${const_system_cpufreq_boost}"
+  fi
 }
 
 root_write_governor()
@@ -873,8 +883,13 @@ root_do_set()
   local cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
   local cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
   local cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
-  local cpu_turbo="$(cat ${const_system_intel_pstate_turbo} )"
-  local cpu_governor="$(cat ${const_system_scaling_governor} )"
+  local cpu_governor="$(cat "${const_system_scaling_governor}" )"
+  local cpu_turbo
+  if [ ${has_pstate_dir} ]; then
+    cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
+  else
+    cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
+  fi
 
   local sane_max="${const_system_cpu_max_value}"
   local sane_min="${const_system_cpu_min_value}"
