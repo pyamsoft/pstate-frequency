@@ -440,6 +440,7 @@ set_governor()
         # Increment count
         ((count++))
       done
+      unset count
     fi
 
     if [ -z "${value}" ]; then
