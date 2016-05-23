@@ -22,6 +22,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Export the LC as the default C so that we do not run into locale based quirks
+export LC_ALL=C
+
 # pstate-frequency
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
 readonly version="3.3.2"
