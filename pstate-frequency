@@ -430,9 +430,9 @@ set_governor()
   log_verbose "set_governor requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
     local value=""
-    local all_available_governors=$(cat "${const_system_cpu_available_governors}" )
+    local all_available_governors="$(cat "${const_system_cpu_available_governors}" )"
     if [ $(is_digits "$1") -eq 1 ]; then
-    local count=0
+      local count=0
       for available_gov in ${all_available_governors}; do
         if [ "${count}" -eq "$1" ]; then
           log_verbose "Value is a predefined governor name: ${available_gov}"
@@ -441,7 +441,7 @@ set_governor()
         fi
 
         # Increment count
-        ((count++))
+        count=$((${count} + 1))
       done
       unset count
     fi
