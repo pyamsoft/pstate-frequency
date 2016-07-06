@@ -61,9 +61,9 @@ readonly EXEC_MODE_SET=2
 __exec_mode="${EXEC_MODE_NONE}"
 
 # Get modes
-readonly const_get_type_current=0
-readonly const_get_type_real=1
-get_type="${const_get_type_current}"
+readonly GET_TYPE_CURRENT=0
+readonly GET_TYPE_REAL=1
+__exec_get_type="${GET_TYPE_CURRENT}"
 
 # Set commands
 readonly const_set_max_false=0
@@ -1001,11 +1001,11 @@ do_get_real()
 # Run a given --get function depending on the current type
 do_get()
 {
-  case "${get_type}" in
-    "${const_get_type_current}")
+  case "${__exec_get_type}" in
+    "${GET_TYPE_CURRENT}")
       do_get_current || return 1
       ;;
-    "${const_get_type_real}")
+    "${GET_TYPE_REAL}")
       do_get_real || return 1
       ;;
     *)
@@ -1426,12 +1426,12 @@ main()
                 long_option="governor"
                 ;;
               current)
-                log_verbose "Set get_type to current"
-                get_type="${const_get_type_current}"
+                log_verbose "Set __exec_get_type to current"
+                __exec_get_type="${GET_TYPE_CURRENT}"
                 ;;
               real)
-                log_verbose "Set get_type to real"
-                get_type="${const_get_type_real}"
+                log_verbose "Set __exec_get_type to real"
+                __exec_get_type="${GET_TYPE_REAL}"
                 ;;
               debug)
                 log_more_verbose
@@ -1494,12 +1494,12 @@ main()
             set_governor "${OPTARG}"
             ;;
           c)
-            log_verbose "Set get_type to current"
-            get_type="${const_get_type_current}"
+            log_verbose "Set __exec_get_type to current"
+            __exec_get_type="${GET_TYPE_CURRENT}"
             ;;
           r)
-            log_verbose "Set get_type to real"
-            get_type="${const_get_type_real}"
+            log_verbose "Set __exec_get_type to real"
+            __exec_get_type="${GET_TYPE_REAL}"
             ;;
           d)
             log_more_verbose
@@ -1561,7 +1561,7 @@ main()
   case "${__exec_mode}" in
     "${EXEC_MODE_GET}")
       log_verbose "__exec_mode: GET"
-      log_verbose "get_type: ${get_type}"
+      log_verbose "__exec_get_type: ${__exec_get_type}"
       do_get || return 1
       ;;
     "${EXEC_MODE_SET}")
