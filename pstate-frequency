@@ -128,7 +128,7 @@ set_x86_policy_arg=""
 log()
 {
   if [ "${log_level}" -ge "${const_log_level_normal}" ]; then
-    printf -- "$@\n"
+    printf -- "%s\n" "$*"
   fi
 }
 
@@ -138,7 +138,7 @@ log()
 log_verbose()
 {
   if [ "${log_level}" -ge "${const_log_level_verbose}" ]; then
-    printf -- "VERBOSE: $@\n"
+    printf -- "VERBOSE: %s\n" "$*"
   fi
 }
 
@@ -148,7 +148,7 @@ log_verbose()
 log_all()
 {
   if [ "${log_level}" -eq "${const_log_level_all}" ]; then
-    printf -- "DEBUG: $@\n"
+    printf -- "DEBUG: %s\n" "$*"
   fi
 }
 
@@ -158,32 +158,32 @@ log_all()
 log_quiet()
 {
   if [ "${log_level}" -ge "${const_log_level_quiet}" ]; then
-    printf -- "$@\n"
+    printf -- "%s\n" "$*"
   fi
 }
 
 # Error logging
 elog()
 {
-  log "ERROR: $@" 1>&2
+  log "ERROR: $*" 1>&2
 }
 
 # Verbose error logging
 elog_verbose()
 {
-  log_verbose "ERROR: $@" 1>&2
+  log_verbose "ERROR: $*" 1>&2
 }
 
 # All error logging
 elog_all()
 {
-  log_all "ERROR: $@" 1>&2
+  log_all "ERROR: $*" 1>&2
 }
 
 # Quiet error logging
 elog_quiet()
 {
-  log_quiet "ERROR: $@" 1>&2
+  log_quiet "ERROR: $*" 1>&2
 }
 
 # Check the environment path for the given binary, exit if it is not found
