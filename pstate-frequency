@@ -66,41 +66,42 @@ readonly GET_TYPE_REAL=1
 __exec_get_type="${GET_TYPE_CURRENT}"
 
 # Set commands
-readonly const_set_max_false=0
-readonly const_set_max_true=1
-set_max_type="${const_set_max_false}"
-set_max_arg=""
+readonly SET_MAX_FALSE=0
+readonly SET_MAX_TRUE=1
+__exec_set_max_type="${SET_MAX_FALSE}"
+__exec_set_max_arg=""
 
-readonly const_set_min_false=0
-readonly const_set_min_true=1
-set_min_type="${const_set_min_false}"
-set_min_arg=""
+readonly SET_MIN_FALSE=0
+readonly SET_MIN_TRUE=1
+__exec_set_min_type="${SET_MIN_FALSE}"
+__exec_set_min_arg=""
 
-readonly const_set_turbo_false=0
-readonly const_set_turbo_true=1
-set_turbo_type="${const_set_turbo_false}"
-set_turbo_arg=""
+readonly SET_TURBO_FALSE=0
+readonly SET_TURBO_TRUE=1
+__exec_set_turbo_type="${SET_TURBO_FALSE}"
+__exec_set_turbo_arg=""
 
-readonly const_set_governor_false=0
-readonly const_set_governor_true=1
-set_governor_type="${const_set_governor_false}"
-set_governor_arg=""
+readonly SET_GOVERNOR_FALSE=0
+readonly SET_GOVERNOR_TRUE=1
+__exec_set_governor_type="${SET_GOVERNOR_FALSE}"
+__exec_set_governor_arg=""
 
 # Plan modes
-readonly const_power_plan_auto=0
-readonly const_power_plan_powersave=1
-readonly const_power_plan_balanced=2
-readonly const_power_plan_performance=3
-readonly const_power_plan_max=4
+readonly POWER_PLAN_AUTO=0
+readonly POWER_PLAN_POWERSAVE=1
+readonly POWER_PLAN_BALANCED=2
+readonly POWER_PLAN_PERFORMANCE=3
+readonly POWER_PLAN_MAX=4
 
 # X86_perf_policy levels
-readonly const_set_x86_policy_false=0
-readonly const_set_x86_policy_true=1
-readonly const_x86_policy_powersave=0
-readonly const_x86_policy_normal=1
-readonly const_x86_policy_performance=2
-set_x86_policy_type="${const_set_x86_policy_false}"
-set_x86_policy_arg=""
+readonly X86_BINARY="x86_energy_perf_policy"
+readonly X86_POLICY_FALSE=0
+readonly X86_POLICY_TRUE=1
+readonly X86_POLICY_NAME_POWERSAVE=0
+readonly X86_POLICY_NAME_NORMAL=1
+readonly X86_POLICY_NAME_PERFORMANCE=2
+__x86_policy_type="${X86_POLICY_FALSE}"
+__x86_policy_arg=""
 
 # Supported option flags
 #
@@ -384,9 +385,9 @@ set_max()
       log_verbose "'${set_max__value}' is all digits"
       log_verbose "Bound value '${set_max__value}}' between ${set_max__fixed_min} and ${SYSTEM_CPU_MAX_VALUE}"
       set_max__value="$(set_variable_bounds "${set_max__value}" "${set_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}")"
-      set_max_type="${const_set_max_true}"
-      set_max_arg="${set_max__value}"
-      log_verbose "set_max_arg: '${set_max_arg}'"
+      __exec_set_max_type="${SET_MAX_TRUE}"
+      __exec_set_max_arg="${set_max__value}"
+      log_verbose "__exec_set_max_arg: '${__exec_set_max_arg}'"
 
       unset set_max__fixed_min
     else
@@ -442,9 +443,9 @@ set_min()
       log_verbose "Bound value '${set_min__value}' between ${SYSTEM_CPU_MIN_VALUE} and ${set_min__fixed_max}"
       set_min__value="$(set_variable_bounds "${set_min__value}" "${SYSTEM_CPU_MIN_VALUE}" "${set_min__fixed_max}")"
       unset fixed_max
-      set_min_type="${const_set_min_true}"
-      set_min_arg="${set_min__value}"
-      log_verbose "set_min_arg: '${set_min_arg}'"
+      __exec_set_min_type="${SET_MIN_TRUE}"
+      __exec_set_min_arg="${set_min__value}"
+      log_verbose "__exec_set_min_arg: '${__exec_set_min_arg}'"
     else
       elog_quiet "min argument '${set_min__value}' is not a number"
 
@@ -504,9 +505,9 @@ set_turbo()
       log_verbose "'${set_turbo__value}' is all digits"
       log_verbose "Bound value '${set_turbo__value}' between 0 and 1"
       set_turbo__value="$(set_variable_bounds "${set_turbo__value}" 0 1)"
-      set_turbo_type="${const_set_turbo_true}"
-      set_turbo_arg="${set_turbo__value}"
-      log_verbose "set_turbo_arg: '${set_turbo_arg}'"
+      __exec_set_turbo_type="${SET_TURBO_TRUE}"
+      __exec_set_turbo_arg="${set_turbo__value}"
+      log_verbose "__exec_set_turbo_arg: '${__exec_set_turbo_arg}'"
     else
       elog_quiet "turbo argument '${set_turbo__value}' is not a number"
 
@@ -575,9 +576,9 @@ set_governor()
       if [ ${set_governor__is_valid_governor} -ne 1 ]; then
         elog_quiet "Invalid governor specified, do not change"
       else
-        set_governor_type="${const_set_governor_true}"
-        set_governor_arg="${set_governor__value}"
-        log_verbose "set_governor_arg: '${set_governor_arg}'"
+        __exec_set_governor_type="${SET_GOVERNOR_TRUE}"
+        __exec_set_governor_arg="${set_governor__value}"
+        log_verbose "__exec_set_governor_arg: '${__exec_set_governor_arg}'"
       fi
 
       unset set_governor__is_valid_governor
@@ -635,16 +636,16 @@ set_x86()
       log_verbose "'${set_x86__value}' is not digits"
       if [ "${set_x86__value}" = "none" ]; then
         log_verbose "x86_policy_arg: None requested. Reset values"
-        set_x86_policy_type="${const_set_x86_policy_false}"
-        set_x86_policy_arg=""
+        __x86_policy_type="${X86_POLICY_FALSE}"
+        __x86_policy_arg=""
       elif [ "${set_x86__value}" != "powersave" ] \
         && [ "${set_x86__value}" != "normal" ] \
         && [ "${set_x86__value}" != "performance" ]; then
         elog_quiet "Invalid x86_perf_policy specified, do not change"
       else
-        set_x86_policy_type="${const_set_x86_policy_true}"
-        set_x86_policy_arg="${set_x86__value}"
-        log_verbose "set_x86_policy_arg: '${set_x86_policy_arg}'"
+        __x86_policy_type="${X86_POLICY_TRUE}"
+        __x86_policy_arg="${set_x86__value}"
+        log_verbose "__x86_policy_arg: '${__x86_policy_arg}'"
       fi
     else
       elog_quiet "x86 argument '${set_x86__value}' is a number"
@@ -680,20 +681,20 @@ set_power_plan()
 
     log_verbose "Check for special case arguments: auto, powersave, balanced, performance, max"
     if [ "${set_power_plan__input}" = "auto" ]; then
-      log_verbose "Argument was 'auto' set to ${const_power_plan_auto}"
-      set_power_plan__value="${const_power_plan_auto}"
+      log_verbose "Argument was 'auto' set to ${POWER_PLAN_AUTO}"
+      set_power_plan__value="${POWER_PLAN_AUTO}"
     elif [ "${set_power_plan__input}" = "powersave" ]; then
-      log_verbose "Argument was 'powersave' set to ${const_power_plan_powersave}"
-      set_power_plan__value="${const_power_plan_powersave}"
+      log_verbose "Argument was 'powersave' set to ${POWER_PLAN_POWERSAVE}"
+      set_power_plan__value="${POWER_PLAN_POWERSAVE}"
     elif [ "${set_power_plan__input}" = "balanced" ]; then
-      log_verbose "Argument was 'balanced' set to ${const_power_plan_balanced}"
-      set_power_plan__value="${const_power_plan_balanced}"
+      log_verbose "Argument was 'balanced' set to ${POWER_PLAN_BALANCED}"
+      set_power_plan__value="${POWER_PLAN_BALANCED}"
     elif [ "${set_power_plan__input}" = "performance" ]; then
-      log_verbose "Argument was 'performance' set to ${const_power_plan_performance}"
-      set_power_plan__value="${const_power_plan_performance}"
+      log_verbose "Argument was 'performance' set to ${POWER_PLAN_PERFORMANCE}"
+      set_power_plan__value="${POWER_PLAN_PERFORMANCE}"
     elif [ "${set_power_plan__input}" = "max" ]; then
-      log_verbose "Argument was 'max' set to ${const_power_plan_max}"
-      set_power_plan__value="${const_power_plan_max}"
+      log_verbose "Argument was 'max' set to ${POWER_PLAN_MAX}"
+      set_power_plan__value="${POWER_PLAN_MAX}"
     else
       log_verbose "Argument was not special, read as is"
       set_power_plan__value="${set_power_plan__input}"
@@ -703,19 +704,19 @@ set_power_plan()
     if [ "$(is_digits "${set_power_plan__value}")" -eq 1 ]; then
       log_verbose "'${set_power_plan__value}' is all digits"
       case "${set_power_plan__value}" in
-        "${const_power_plan_auto}")
+        "${POWER_PLAN_AUTO}")
           set_power_plan_auto
           ;;
-        "${const_power_plan_powersave}")
+        "${POWER_PLAN_POWERSAVE}")
           set_power_plan_powersave
           ;;
-        "${const_power_plan_balanced}")
+        "${POWER_PLAN_BALANCED}")
           set_power_plan_balanced
           ;;
-        "${const_power_plan_performance}")
+        "${POWER_PLAN_PERFORMANCE}")
           set_power_plan_performance
           ;;
-        "${const_power_plan_max}")
+        "${POWER_PLAN_MAX}")
           set_power_plan_max
           ;;
         *)
@@ -1025,10 +1026,10 @@ do_get()
 # Echoes out result, 0 is true, 1 is false
 root_do_set_has_arg()
 {
-  if [ "${set_max_type}" -eq 1 ] \
-    || [ "${set_min_type}" -eq 1 ] \
-    || [ "${set_turbo_type}" -eq 1 ] \
-    || [ "${set_governor_type}" -eq 1 ]; then
+  if [ "${__exec_set_max_type}" -eq 1 ] \
+    || [ "${__exec_set_min_type}" -eq 1 ] \
+    || [ "${__exec_set_turbo_type}" -eq 1 ] \
+    || [ "${__exec_set_governor_type}" -eq 1 ]; then
     printf -- 1
   else
     printf -- 0
@@ -1155,21 +1156,19 @@ root_write_x86_policy()
   if [ -n "${root_write_x86_policy__name}" ]; then
     log_verbose "x86_perf_policy was requested: '${root_write_x86_policy__name}'"
     # make constant
-    readonly x86_bin="x86_energy_perf_policy"
-
     root_write_x86_policy__result=
-    root_write_x86_policy__result=$(check_binary "${x86_bin}")
+    root_write_x86_policy__result=$(check_binary "${X86_BINARY}")
     root_write_x86_policy__result=$?
     if [ ${root_write_x86_policy__result} -eq 1 ]; then
       elog_quiet "Not setting x86_perf_policy even though it was requested"
     else
       log_verbose "Setting x86_perf_policy to '${root_write_x86_policy__name}'"
       if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
-        log_verbose "Log verbose output for ${x86_bin}"
-        "${x86_bin}" -v "${root_write_x86_policy__name}" || return 1
+        log_verbose "Log verbose output for ${X86_BINARY}"
+        "${X86_BINARY}" -v "${root_write_x86_policy__name}" || return 1
       else
-        log_verbose "Silent verbose output for ${x86_bin}"
-        "${x86_bin}" "${root_write_x86_policy__name}" > /dev/null || return 1
+        log_verbose "Silent verbose output for ${X86_BINARY}"
+        "${X86_BINARY}" "${root_write_x86_policy__name}" > /dev/null || return 1
       fi
     fi
 
@@ -1212,45 +1211,45 @@ root_do_set()
   fi
 
   log_verbose "Check if we are setting max"
-  if [ "${set_max_type}" -eq 1 ]; then
+  if [ "${__exec_set_max_type}" -eq 1 ]; then
     log_verbose "Set max to arg"
-    root_do_set__setting_cpu_max="${set_max_arg}"
+    root_do_set__setting_cpu_max="${__exec_set_max_arg}"
   else
     log_verbose "Set max to current system"
     root_do_set__setting_cpu_max="${root_do_set__cpu_max_value}"
   fi
 
   log_verbose "Check if we are setting min"
-  if [ "${set_min_type}" -eq 1 ]; then
+  if [ "${__exec_set_min_type}" -eq 1 ]; then
     log_verbose "Set min to arg"
-    root_do_set__setting_cpu_min="${set_min_arg}"
+    root_do_set__setting_cpu_min="${__exec_set_min_arg}"
   else
     log_verbose "Set min to current system"
     root_do_set__setting_cpu_min="${root_do_set__cpu_min_value}"
   fi
 
   log_verbose "Check if we are setting turbo"
-  if [ "${set_turbo_type}" -eq 1 ]; then
+  if [ "${__exec_set_turbo_type}" -eq 1 ]; then
     log_verbose "Set turbo to arg"
-    root_do_set__setting_cpu_turbo="${set_turbo_arg}"
+    root_do_set__setting_cpu_turbo="${__exec_set_turbo_arg}"
   else
     log_verbose "Set turbo to current system"
     root_do_set__setting_cpu_turbo="${root_do_set__cpu_turbo}"
   fi
 
   log_verbose "Check if we are setting governor"
-  if [ "${set_governor_type}" -eq 1 ]; then
+  if [ "${__exec_set_governor_type}" -eq 1 ]; then
     log_verbose "Set governor to arg"
-    root_do_set__setting_cpu_governor="${set_governor_arg}"
+    root_do_set__setting_cpu_governor="${__exec_set_governor_arg}"
   else
     log_verbose "Set governor to current system"
     root_do_set__setting_cpu_governor="${root_do_set__cpu_governor}"
   fi
 
   log_verbose "Check if we are setting x86_policy"
-  if [ "${set_x86_policy_type}" -eq 1 ]; then
+  if [ "${__x86_policy_type}" -eq 1 ]; then
     log_verbose "Set x86_policy to arg"
-    root_do_set__setting_x86_policy="${set_x86_policy_arg}"
+    root_do_set__setting_x86_policy="${__x86_policy_arg}"
   else
     log_verbose "Set x86_policy to none"
     root_do_set__setting_x86_policy=""
@@ -1566,11 +1565,11 @@ main()
       ;;
     "${EXEC_MODE_SET}")
       log_verbose "__exec_mode: SET"
-      log_verbose "set_max: ${set_max_type} [${set_max_arg}]"
-      log_verbose "set_min: ${set_min_type} [${set_min_arg}]"
-      log_verbose "set_turbo: ${set_turbo_type} [${set_turbo_arg}]"
-      log_verbose "set_governor: ${set_governor_type} [${set_governor_arg}]"
-      log_verbose "set_x86: ${set_x86_policy_type} [${set_x86_policy_arg}]"
+      log_verbose "set_max: ${__exec_set_max_type} [${__exec_set_max_arg}]"
+      log_verbose "set_min: ${__exec_set_min_type} [${__exec_set_min_arg}]"
+      log_verbose "set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]"
+      log_verbose "set_governor: ${__exec_set_governor_type} [${__exec_set_governor_arg}]"
+      log_verbose "set_x86: ${__x86_policy_type} [${__x86_policy_arg}]"
       do_set || return 1
       ;;
     *)
