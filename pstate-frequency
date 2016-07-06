@@ -1167,7 +1167,7 @@ root_write_x86_policy()
         "${x86_bin}" -v "${root_write_x86_policy__name}" || return 1
       else
         log_verbose "Silent verbose output for ${x86_bin}"
-        "${x86_bin}" "$root_write_x86_policy__name" > /dev/null || return 1
+        "${x86_bin}" "${root_write_x86_policy__name}" > /dev/null || return 1
       fi
     fi
 
@@ -1180,94 +1180,96 @@ root_write_x86_policy()
   return 0
 }
 
+##
+# Do the actual setting of CPU values once all prerequisites are filled
 root_do_set()
 {
   log_verbose "YOU ARE ROOT"
   log_verbose "Check that we are setting something"
   if [ "$(root_do_set_has_arg)" -eq 0 ]; then
     elog_quiet "Not setting any CPU options"
-    exit 5
+    return 1
   fi
 
-  local setting_cpu_max=""
-  local setting_cpu_min=""
-  local setting_cpu_turbo=""
-  local setting_cpu_governor=""
-  local setting_x86_policy=""
+  root_do_set__setting_cpu_max=
+  root_do_set__setting_cpu_min=
+  root_do_set__setting_cpu_turbo=
+  root_do_set__setting_cpu_governor=
+  root_do_set__setting_x86_policy=
+  root_do_set__cpu_max_freq="$(cat "${const_system_scaling_max_freq}" )"
+  root_do_set__cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
+  root_do_set__cpu_max_value=$(( root_do_set__cpu_max_freq * 100 / const_system_cpu_max_freq ))
+  root_do_set__cpu_min_value=$(( root_do_set__cpu_min_freq * 100 / const_system_cpu_max_freq ))
+  root_do_set__cpu_governor="$(cat "${const_system_scaling_governor}" )"
+  root_do_set__cpu_turbo=
 
-  local cpu_max_freq="$(cat "${const_system_scaling_max_freq}" )"
-  local cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
-  local cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
-  local cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
-  local cpu_governor="$(cat "${const_system_scaling_governor}" )"
-  local cpu_turbo
-  if [ $(has_pstate_dir) -eq 1 ]; then
-    cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
+    root_do_set__cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
   else
-    cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
+    root_do_set__cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
   fi
 
   log_verbose "Check if we are setting max"
   if [ "${set_max_type}" -eq 1 ]; then
     log_verbose "Set max to arg"
-    setting_cpu_max="${set_max_arg}"
+    root_do_set__setting_cpu_max="${set_max_arg}"
   else
     log_verbose "Set max to current system"
-    setting_cpu_max="${cpu_max_value}"
+    root_do_set__setting_cpu_max="${root_do_set__cpu_max_value}"
   fi
 
   log_verbose "Check if we are setting min"
   if [ "${set_min_type}" -eq 1 ]; then
     log_verbose "Set min to arg"
-    setting_cpu_min="${set_min_arg}"
+    root_do_set__setting_cpu_min="${set_min_arg}"
   else
     log_verbose "Set min to current system"
-    setting_cpu_min="${cpu_min_value}"
+    root_do_set__setting_cpu_min="${root_do_set__cpu_min_value}"
   fi
 
   log_verbose "Check if we are setting turbo"
   if [ "${set_turbo_type}" -eq 1 ]; then
     log_verbose "Set turbo to arg"
-    setting_cpu_turbo="${set_turbo_arg}"
+    root_do_set__setting_cpu_turbo="${set_turbo_arg}"
   else
     log_verbose "Set turbo to current system"
-    setting_cpu_turbo="${cpu_turbo}"
+    root_do_set__setting_cpu_turbo="${root_do_set__cpu_turbo}"
   fi
 
   log_verbose "Check if we are setting governor"
   if [ "${set_governor_type}" -eq 1 ]; then
     log_verbose "Set governor to arg"
-    setting_cpu_governor="${set_governor_arg}"
+    root_do_set__setting_cpu_governor="${set_governor_arg}"
   else
     log_verbose "Set governor to current system"
-    setting_cpu_governor="${cpu_governor}"
+    root_do_set__setting_cpu_governor="${root_do_set__cpu_governor}"
   fi
 
   log_verbose "Check if we are setting x86_policy"
   if [ "${set_x86_policy_type}" -eq 1 ]; then
     log_verbose "Set x86_policy to arg"
-    setting_x86_policy="${set_x86_policy_arg}"
+    root_do_set__setting_x86_policy="${set_x86_policy_arg}"
   else
     log_verbose "Set x86_policy to none"
-    setting_x86_policy=""
+    root_do_set__setting_x86_policy=""
   fi
 
   log_verbose "Check that min is not >= max"
-  if [ "${setting_cpu_min}" -ge "${setting_cpu_max}" ]; then
+  if [ "${root_do_set__setting_cpu_min}" -ge "${root_do_set__setting_cpu_max}" ]; then
     log_verbose "set min to just below max"
-    setting_cpu_min="$(( ${setting_cpu_max} - 1 ))"
+    root_do_set__setting_cpu_min="$(( root_do_set__setting_cpu_max - 1 ))"
   fi
 
   log_verbose "Check that max is not <= min"
-  if [ "${setting_cpu_max}" -le "${setting_cpu_min}" ]; then
+  if [ "${root_do_set__setting_cpu_max}" -le "${root_do_set__setting_cpu_min}" ]; then
     log_verbose "set max to just above min"
-    setting_cpu_max="$(( ${setting_cpu_min} + 1 ))"
+    root_do_set__setting_cpu_max="$(( root_do_set__setting_cpu_min + 1 ))"
   fi
 
-  log_verbose "setting_cpu_max: ${setting_cpu_max}"
-  log_verbose "setting_cpu_min: ${setting_cpu_min}"
-  log_verbose "setting_cpu_turbo: ${setting_cpu_turbo}"
-  log_verbose "setting_cpu_governor: ${setting_cpu_governor}"
+  log_verbose "setting_cpu_max: ${root_do_set__setting_cpu_max}"
+  log_verbose "setting_cpu_min: ${root_do_set__setting_cpu_min}"
+  log_verbose "setting_cpu_turbo: ${root_do_set__setting_cpu_turbo}"
+  log_verbose "setting_cpu_governor: ${root_do_set__setting_cpu_governor}"
 
   if [ "${execution_sleep}" -eq 1 ]; then
     log_verbose "Sleep for 2 seconds requested by user"
@@ -1280,37 +1282,37 @@ root_do_set()
   # is higher than the requested max. In this case, min will be set first, as
   # the logic above should guarantee that it is lower than the max
   log_verbose "Set actual values"
-  root_write_governor "${setting_cpu_governor}"
+  root_write_governor "${root_do_set__setting_cpu_governor}"
 
   # Because setting the governor may have changed CPU values, we re-read them
   # here before going through the apply logic
-  cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
-  cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
-  cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+  root_do_set__cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
+  root_do_set__cpu_max_value=$(( root_do_set__cpu_max_freq * 100 / const_system_cpu_max_freq ))
+  root_do_set__cpu_min_value=$(( root_do_set__cpu_min_freq * 100 / const_system_cpu_max_freq ))
 
   # Set max first if it is greater than the current CPU min
-  if [ "${setting_cpu_max}" -gt "${cpu_min_value}" ]; then
-    root_write_max "${setting_cpu_max}"
-    root_write_min "${setting_cpu_min}"
+  if [ "${root_do_set__setting_cpu_max}" -gt "${root_do_set__cpu_min_value}" ]; then
+    root_write_max "${root_do_set__setting_cpu_max}" || return 1
+    root_write_min "${root_do_set__setting_cpu_min}" || return 1
   else
-    root_write_min "${setting_cpu_min}"
-    root_write_max "${setting_cpu_max}"
+    root_write_min "${root_do_set__setting_cpu_min}" || return 1
+    root_write_max "${root_do_set__setting_cpu_max}" || return 1
   fi
-  root_write_turbo "${setting_cpu_turbo}"
-  root_write_x86_policy "${setting_x86_policy}"
+  root_write_turbo "${root_do_set__setting_cpu_turbo}" || return 1
+  root_write_x86_policy "${root_do_set__setting_x86_policy}" || return 1
 
-  unset cpu_max_freq
-  unset cpu_min_freq
-  unset cpu_max_value
-  unset cpu_min_value
-  unset cpu_turbo
-  unset cpu_governor
-
-  unset setting_cpu_max
-  unset setting_cpu_min
-  unset setting_cpu_turbo
-  unset setting_cpu_governor
-  unset setting_x86_policy
+  unset root_do_set__cpu_max_freq
+  unset root_do_set__cpu_min_freq
+  unset root_do_set__cpu_max_value
+  unset root_do_set__cpu_min_value
+  unset root_do_set__cpu_turbo
+  unset root_do_set__cpu_governor
+  unset root_do_set__setting_cpu_max
+  unset root_do_set__setting_cpu_min
+  unset root_do_set__setting_cpu_turbo
+  unset root_do_set__setting_cpu_governor
+  unset root_do_set__setting_x86_policy
+  return 0
 }
 
 do_set()
