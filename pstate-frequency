@@ -479,61 +479,76 @@ set_turbo()
 
 # Set the argument for cpu_governor
 # Can be set multiple times, final time overrides
+#
+# $1 user input for governor
 set_governor()
 {
+  set_governor__input="$1"
+
   log_verbose "set_governor requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
-    local value=""
-    local all_available_governors="$(cat "${const_system_cpu_available_governors}" )"
-    if [ $(is_digits "$1") -eq 1 ]; then
-      local count=0
-      for available_gov in ${all_available_governors}; do
-        if [ "${count}" -eq "$1" ]; then
+    set_governor__value=""
+    set_governor__all_available_governors="$(cat "${const_system_cpu_available_governors}" )"
+    if [ "$(is_digits "${set_governor__input}")" -eq 1 ]; then
+      set_governor__count=0
+      for available_gov in ${set_governor__all_available_governors}; do
+        if [ "${set_governor__count}" -eq "${set_governor__input}" ]; then
           log_verbose "Value is a predefined governor name: ${available_gov}"
-          value="${available_gov}"
+          set_governor__value="${available_gov}"
           break;
         fi
 
         # Increment count
-        count=$((${count} + 1))
+        set_governor__count=$(( set_governor__count + 1))
       done
-      unset count
+      unset set_governor__count
     fi
 
-    if [ -z "${value}" ]; then
+    if [ -z "${set_governor__value}" ]; then
       log_verbose "Value is not special, read as is"
-      value="$1"
+      set_governor__value="${set_governor__input}"
     fi
 
-    log_verbose "Check that '${value}' is not digits"
-    if [ ! $(is_digits "${value}") -eq 1 ]; then
-      log_verbose "'${value}' is not digits"
-      local is_valid_governor=0
-      for available_gov in ${all_available_governors}; do
-        if [ "${value}" = "${available_gov}" ]; then
-          is_valid_governor=1
+    log_verbose "Check that '${set_governor__value}' is not digits"
+    if [ ! "$(is_digits "${set_governor__value}")" -eq 1 ]; then
+      log_verbose "'${set_governor__value}' is not digits"
+      set_governor__is_valid_governor=0
+      for available_gov in ${set_governor__all_available_governors}; do
+        if [ "${set_governor__value}" = "${available_gov}" ]; then
+          set_governor__is_valid_governor=1
           break
         fi
       done
 
-      if [ ${is_valid_governor} -ne 1 ]; then
+      if [ ${set_governor__is_valid_governor} -ne 1 ]; then
         elog_quiet "Invalid governor specified, do not change"
       else
         set_governor_type="${const_set_governor_true}"
-        set_governor_arg="${value}"
+        set_governor_arg="${set_governor__value}"
         log_verbose "set_governor_arg: '${set_governor_arg}'"
       fi
-      unset is_valid_governor
+
+      unset set_governor__is_valid_governor
     else
-      elog_quiet "governor argument '${value}' is a number"
-      unset value
-      exit 2
+      elog_quiet "governor argument '${set_governor__value}' is a number"
+
+      unset set_governor__value
+      unset set_governor__input
+      unset set_governor__all_available_governors
+      return 1
     fi
-    unset value
+
+    unset set_governor__all_available_governors
+    unset set_governor__value
   else
     elog_quiet "Cannot set governor outside of SET operation mode"
-    exit 3
+
+    unset set_governor__input
+    return 1
   fi
+
+  unset set_governor__input
+  return 0
 }
 
 # Set the argument for x86_perf_policy
