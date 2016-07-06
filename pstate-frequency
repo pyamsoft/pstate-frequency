@@ -32,7 +32,6 @@ export LC_ALL=C
 readonly VERSION="3.3.3"
 
 # Options that do not handle an argument
-execution_delay=0 # Number of seconds to delay script
 execution_sleep=0 # Number of seconds to sleep in between setting values
 
 # Options that expect an argument
@@ -1365,10 +1364,14 @@ root_do_set()
 ##
 # Check that the set call is possible, and the user is root.
 # Once this is validated, do the set calls and then run do_get_current
+#
+# $1 flag to set an execution delay
 do_set()
 {
+  do_set__delay="$1"
+
   if [ "$(id -u)" -eq 0 ]; then
-    if [ "${execution_delay}" -eq 1 ]; then
+    if [ "${do_set__delay}" -eq 1 ]; then
       log_verbose "Delay for 5 seconds requested by user"
       sleep 5
     fi
@@ -1377,8 +1380,13 @@ do_set()
     do_get_current || return 1
   else
     elog_quiet "You must be root."
+
+    unset do_set__delay
     return 1
   fi
+
+  unset do_set__delay
+  return 0
 }
 
 ##
@@ -1413,6 +1421,7 @@ main()
 
   exec_get_type="${GET_TYPE_CURRENT}"
   exec_mode="${EXEC_MODE_NONE}"
+  execution_delay=0 # Whether or not to delay the script
 
   # Sanity check
   check_binary grep || return 1
@@ -1628,7 +1637,7 @@ main()
       log_verbose "set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]"
       log_verbose "set_governor: ${__exec_set_governor_type} [${__exec_set_governor_arg}]"
       log_verbose "set_x86: ${__x86_policy_type} [${__x86_policy_arg}]"
-      do_set || return 1
+      do_set "${execution_delay}" || return 1
       ;;
     *)
       print_usage
