@@ -357,13 +357,15 @@ set_variable_bounds()
 # Set the argument for cpu_max
 # Can be set multiple times, final time overrides
 #
-# $1 user input for max value
+# $1 execution mode
+# $2 user input for max value
 set_max()
 {
-  set_max__input="$1"
+  set_max__mode="$1"
+  set_max__input="$2"
 
   log_verbose "set_max requires SET operation __exec_mode"
-  if [ "${__exec_mode}" -eq "${EXEC_MODE_SET}" ]; then
+  if [ "${set_max__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_max__value=""
 
     log_verbose "Check for special case arguments: max, min"
@@ -394,6 +396,7 @@ set_max()
       elog_quiet "max argument '${set_max__value}' is not a number"
 
       unset set_max__value
+      unset set_max__mode
       unset set_max__input
       return 1
     fi
@@ -403,10 +406,12 @@ set_max()
     elog_quiet "Cannot set max outside of SET operation __exec_mode"
 
     unset set_max__input
+    unset set_max__mode
     return 1
   fi
 
   unset set_max__input
+  unset set_max__mode
   return 0
 }
 
@@ -670,13 +675,15 @@ set_x86()
 ##
 # Set the power plan based on argument
 #
-# $1 user input for power plan
+# $1 execution mode
+# $2 user input for power plan
 set_power_plan()
 {
-  set_power_plan__input="$1"
+  set_power_plan__mode="$1"
+  set_power_plan__input="$2"
 
   log_verbose "set_power_plan requires SET operation __exec_mode"
-  if [ "${__exec_mode}" -eq "${EXEC_MODE_SET}" ]; then
+  if [ "${set_power_plan__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_power_plan__value=""
 
     log_verbose "Check for special case arguments: auto, powersave, balanced, performance, max"
@@ -705,24 +712,25 @@ set_power_plan()
       log_verbose "'${set_power_plan__value}' is all digits"
       case "${set_power_plan__value}" in
         "${POWER_PLAN_AUTO}")
-          set_power_plan_auto
+          set_power_plan_auto "${set_power_plan__mode}" || return 1
           ;;
         "${POWER_PLAN_POWERSAVE}")
-          set_power_plan_powersave
+          set_power_plan_powersave "${set_power_plan__mode}" || return 1
           ;;
         "${POWER_PLAN_BALANCED}")
-          set_power_plan_balanced
+          set_power_plan_balanced "${set_power_plan__mode}" || return 1
           ;;
         "${POWER_PLAN_PERFORMANCE}")
-          set_power_plan_performance
+          set_power_plan_performance "${set_power_plan__mode}" || return 1
           ;;
         "${POWER_PLAN_MAX}")
-          set_power_plan_max
+          set_power_plan_max "${set_power_plan__mode}" || return 1
           ;;
         *)
           elog_quiet "Invalid power plan: ${set_power_plan__value}"
 
           unset set_power_plan__value
+          unset set_power_plan__mode
           unset set_power_plan__input
           return 1
           ;;
@@ -731,6 +739,7 @@ set_power_plan()
       elog_quiet "power plan argument '${set_power_plan__value}' is not a number"
 
       unset set_power_plan__value
+      unset set_power_plan__mode
       unset set_power_plan__input
       return 1
     fi
@@ -738,10 +747,12 @@ set_power_plan()
   else
     elog_quiet "Cannot set power plan outside of SET operation __exec_mode"
 
+    unset set_power_plan__mode
     unset set_power_plan__input
     return 1
   fi
 
+  unset set_power_plan__mode
   unset set_power_plan__input
   return 0
 }
@@ -783,23 +794,31 @@ is_power_supply_mains()
 
 ##
 # Sets the power plan based on the current plugged in status
+#
+# $1 execution mode
 set_power_plan_auto()
 {
+  set_power_plan_auto__mode="$1"
   log_verbose "Set power plan to: auto"
   if [ "$(is_power_supply_mains)" -eq 1 ]; then
-    set_power_plan_balanced || return 1
+    set_power_plan_balanced "${set_power_plan_auto__mode}" || return 1
   else
-    set_power_plan_powersave || return 1
+    set_power_plan_powersave "${set_power_plan_auto__mode}" || return 1
   fi
 
+  unset set_power_plan_auto__mode
   return 0
 }
 
 # Sets the power plan to a low power __exec_mode
+#
+# $1 execution mode
 set_power_plan_powersave()
 {
+  set_power_plan_powersave__mode="$1"
+
   log_verbose "Set power plan to: powersave"
-  set_max 0 || return 1
+  set_max "${set_power_plan_powersave__mode}" 0 || return 1
   set_min 0 || return 1
   set_governor powersave || return 1
   set_x86 0 || return 1
@@ -809,14 +828,19 @@ set_power_plan_powersave()
     set_turbo 0 || return 1
   fi
 
+  unset set_power_plan_powersave__mode
   return 0
 }
 
 # Sets the power plan to a balanced __exec_mode
+#
+# $1 execution mode
 set_power_plan_balanced()
 {
+  set_power_plan_balanced__mode="$1"
+
   log_verbose "Set power plan to: balanced"
-  set_max 100 || return 1
+  set_max "${set_power_plan_balanced__mode}" 100 || return 1
   set_min 0 || return 1
   set_x86 0 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
@@ -827,14 +851,19 @@ set_power_plan_balanced()
     set_turbo 0 || return 1
   fi
 
+  unset set_power_plan_balanced__mode
   return 0
 }
 
 # Sets the power plan to a performance __exec_mode
+#
+# $1 execution mode
 set_power_plan_performance()
 {
+  set_power_plan_performance__mode="$1"
+
   log_verbose "Set power plan to: performance"
-  set_max 100 || return 1
+  set_max "${set_power_plan_performance__mode}" 100 || return 1
   set_min 0 || return 1
   set_governor performance || return 1
   set_x86 1 || return 1
@@ -844,14 +873,19 @@ set_power_plan_performance()
     set_turbo 1 || return 1
   fi
 
+  unset set_power_plan_performance__mode
   return 0
 }
 
 # Sets the power plan to the max available performance __exec_mode
+#
+# $1 execution mode
 set_power_plan_max()
 {
+  set_power_plan_max__mode="$1"
+
   log_verbose "Set power plan to: performance"
-  set_max 100 || return 1
+  set_max "${set_power_plan_max__mode}" 100 || return 1
   set_min 100 || return 1
   set_governor performance || return 1
   set_x86 2 || return 1
@@ -861,17 +895,20 @@ set_power_plan_max()
     set_turbo 1 || return 1
   fi
 
+  unset set_power_plan_max__mode
   return 0
 }
 
 # Handle long options which take arguments
 #
-# $1 long option
-# $2 long option argument
+# $1 execution mode
+# $2 long option
+# $3 long option argument
 handle_long_option_argument()
 {
-  handle_long_option_argument__opt="$1"
-  handle_long_option_argument__input="$2"
+  handle_long_option_argument__mode="$1"
+  handle_long_option_argument__opt="$2"
+  handle_long_option_argument__input="$3"
 
   if [ "${handle_long_option_argument__input}" = '-' ]; then
     log_all "Skip '-' processing"
@@ -880,6 +917,7 @@ handle_long_option_argument()
     elog_verbose "argument: ${handle_long_option_argument__input}"
     elog_quiet "Illegal argument ${handle_long_option_argument__input}"
 
+    unset handle_long_option_argument__mode
     unset handle_long_option_argument__opt
     unset handle_long_option_argument__input
     return 1
@@ -890,11 +928,11 @@ handle_long_option_argument()
     case "${handle_long_option_argument__opt}" in
       plan)
         log_verbose "Long option: plan"
-        set_power_plan "${handle_long_option_argument__input}" || return 1
+        set_power_plan "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       max)
         log_verbose "Long option: max"
-        set_max "${handle_long_option_argument__input}" || return 1
+        set_max "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       min)
         log_verbose "Long option: min"
@@ -915,6 +953,7 @@ handle_long_option_argument()
       *)
         elog_quiet "Invalid option --${handle_long_option_argument__opt}" || return 1
 
+        unset handle_long_option_argument__mode
         unset handle_long_option_argument__opt
         unset handle_long_option_argument__input
         return 1
@@ -922,6 +961,7 @@ handle_long_option_argument()
     esac
   fi
 
+  unset handle_long_option_argument__mode
   unset handle_long_option_argument__opt
   unset handle_long_option_argument__input
   return 0
@@ -1474,11 +1514,11 @@ main()
             ;;
           p)
             log_verbose "Attempt to set plan"
-            set_power_plan "${OPTARG}"
+            set_power_plan "${__exec_mode}" "${OPTARG}"
             ;;
           m)
             log_verbose "Attempt to set max"
-            set_max "${OPTARG}"
+            set_max "${__exec_mode}" "${OPTARG}"
             ;;
           n)
             log_verbose "Attempt to set min"
@@ -1534,7 +1574,7 @@ main()
         fi
       else
         # This is a plain arg and should be handled by one of the options which takes an argument
-        handle_long_option_argument "${long_option}" "${optind_expanded}"
+        handle_long_option_argument "${__exec_mode}" "${long_option}" "${optind_expanded}"
 
         # Set back to null
         long_option=
