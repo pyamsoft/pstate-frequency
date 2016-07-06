@@ -744,29 +744,37 @@ set_power_plan()
 }
 
 # Check if the current power source is Mains
+#
+# Echoes out the result, 0 is false, 1 is true, decided by the type being Mains
+# and if it is online
 is_power_supply_mains()
 {
-  # For each power supply
-  for power_supply in "${const_system_power_supply_dir}"/*; do
+  for is_power_supply_mains__power_supply in "${const_system_power_supply_dir}"/*; do
     # Get the power_supply type
-    local type="$(cat ${power_supply}/type )"
+    is_power_supply_mains__type="$(cat "${is_power_supply_mains__power_supply}"/type )"
 
     # Check if the type is Mains
-    if [ "${type}" = "Mains" ]; then
+    if [ "${is_power_supply_mains__type}" = "Mains" ]; then
 
       # If Mains, check if the online file exists
-      if [ -e "${power_supply}"/online ]; then
+      if [ -e "${is_power_supply_mains__power_supply}"/online ]; then
 
         # If online exists, cat out the status
-        cat -- "${power_supply}"/online
-        return
+        cat -- "${is_power_supply_mains__power_supply}"/online
+
+        unset is_power_supply_mains__type
+        unset is_power_supply_mains__power_supply
+        return 0
       fi
     fi
+
+    unset is_power_supply_mains__type
+    unset is_power_supply_mains__power_supply
   done
 
   # We did not find any power supply listed as Mains, print 0 for false
   printf -- 0
-
+  return 0
 }
 
 # Sets the power plan based on the current plugged in status
