@@ -66,13 +66,6 @@ readonly SET_GOVERNOR_TRUE=1
 __exec_set_governor_type="${SET_GOVERNOR_FALSE}"
 __exec_set_governor_arg=""
 
-# Plan modes
-readonly POWER_PLAN_AUTO=0
-readonly POWER_PLAN_POWERSAVE=1
-readonly POWER_PLAN_BALANCED=2
-readonly POWER_PLAN_PERFORMANCE=3
-readonly POWER_PLAN_MAX=4
-
 # X86_perf_policy levels
 readonly X86_BINARY="x86_energy_perf_policy"
 readonly X86_POLICY_FALSE=0
@@ -679,6 +672,13 @@ set_x86()
 # $2 user input for power plan
 set_power_plan()
 {
+  # Plan modes
+  readonly POWER_PLAN_AUTO=0
+  readonly POWER_PLAN_POWERSAVE=1
+  readonly POWER_PLAN_BALANCED=2
+  readonly POWER_PLAN_PERFORMANCE=3
+  readonly POWER_PLAN_MAX=4
+
   set_power_plan__mode="$1"
   set_power_plan__input="$2"
 
