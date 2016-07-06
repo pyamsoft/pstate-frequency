@@ -547,13 +547,15 @@ set_turbo()
 # Set the argument for cpu_governor
 # Can be set multiple times, final time overrides
 #
-# $1 user input for governor
+# $1 execution mode
+# $2 user input for governor
 set_governor()
 {
-  set_governor__input="$1"
+  set_governor__mode="$1"
+  set_governor__input="$2"
 
   log_verbose "set_governor requires SET operation __exec_mode"
-  if [ "${__exec_mode}" -eq "${EXEC_MODE_SET}" ]; then
+  if [ "${set_governor__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_governor__value=""
     set_governor__all_available_governors="$(cat "${SYSTEM_CPU_GOVERNORS}" )"
 
@@ -602,6 +604,7 @@ set_governor()
 
       unset set_governor__value
       unset set_governor__input
+      unset set_governor__mode
       unset set_governor__all_available_governors
       return 1
     fi
@@ -612,9 +615,11 @@ set_governor()
     elog_quiet "Cannot set governor outside of SET operation __exec_mode"
 
     unset set_governor__input
+    unset set_governor__mode
     return 1
   fi
 
+  unset set_governor__mode
   unset set_governor__input
   return 0
 }
@@ -830,7 +835,7 @@ set_power_plan_powersave()
   log_verbose "Set power plan to: powersave"
   set_max "${set_power_plan_powersave__mode}" 0 || return 1
   set_min "${set_power_plan_powersave__mode}" 0 || return 1
-  set_governor powersave || return 1
+  set_governor "${set_power_plan_powersave__mode}" powersave || return 1
   set_x86 0 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_turbo "${set_power_plan_powersave__mode}" 1 || return 1
@@ -854,10 +859,10 @@ set_power_plan_balanced()
   set_min "${set_power_plan_balanced__mode}" 0 || return 1
   set_x86 0 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_governor powersave || return 1
+    set_governor "${set_power_plan_balanced__mode}" powersave || return 1
     set_turbo "${set_power_plan_balanced__mode}" 1 || return 1
   else
-    set_governor ondemand || return 1
+    set_governor "${set_power_plan_balanced__mode}" ondemand || return 1
     set_turbo "${set_power_plan_balanced__mode}" 0 || return 1
   fi
 
@@ -875,7 +880,7 @@ set_power_plan_performance()
   log_verbose "Set power plan to: performance"
   set_max "${set_power_plan_performance__mode}" 100 || return 1
   set_min "${set_power_plan_performance__mode}" 0 || return 1
-  set_governor performance || return 1
+  set_governor "${set_power_plan_performance__mode}" performance || return 1
   set_x86 1 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_turbo "${set_power_plan_performance__mode}" 0 || return 1
@@ -897,7 +902,7 @@ set_power_plan_max()
   log_verbose "Set power plan to: max"
   set_max "${set_power_plan_max__mode}" 100 || return 1
   set_min "${set_power_plan_max__mode}" 100 || return 1
-  set_governor performance || return 1
+  set_governor "${set_power_plan_max__mode}" performance || return 1
   set_x86 2 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_turbo "${set_power_plan_max__mode}" 0 || return 1
@@ -954,7 +959,7 @@ handle_long_option_argument()
         ;;
       governor)
         log_verbose "Long option: governor"
-        set_governor "${handle_long_option_argument__input}" || return 1
+        set_governor "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       x86)
         log_verbose "Long option: x86"
@@ -1540,7 +1545,7 @@ main()
             ;;
           g)
             log_verbose "Attempt to set governor"
-            set_governor "${OPTARG}"
+            set_governor "${__exec_mode}" "${OPTARG}"
             ;;
           c)
             log_verbose "Set __exec_get_type to current"
