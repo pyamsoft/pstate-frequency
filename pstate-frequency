@@ -122,6 +122,7 @@ set_x86_policy_arg=""
 # --delay
 # --sleep
 
+##
 # Normal log
 # Can be seen at
 # __log_level = normal, verbose, all
@@ -132,6 +133,7 @@ log()
   fi
 }
 
+##
 # Verbose log
 # Can be seen at
 # __log_level = verbose, all
@@ -142,6 +144,7 @@ log_verbose()
   fi
 }
 
+##
 # All log
 # Can be seen at
 # __log_level = all
@@ -152,6 +155,7 @@ log_all()
   fi
 }
 
+##
 # Quiet log
 # Can be seen at
 # __log_level = quiet, normal, verbose, all
@@ -162,31 +166,38 @@ log_quiet()
   fi
 }
 
+##
 # Error logging
 elog()
 {
   log "ERROR: $*" 1>&2
 }
 
+##
 # Verbose error logging
 elog_verbose()
 {
   log_verbose "ERROR: $*" 1>&2
 }
 
+##
 # All error logging
 elog_all()
 {
   log_all "ERROR: $*" 1>&2
 }
 
+##
 # Quiet error logging
 elog_quiet()
 {
   log_quiet "ERROR: $*" 1>&2
 }
 
+##
 # Check the environment path for the given binary, exit if it is not found
+#
+# $1 binary to check on the path
 check_binary()
 {
   check_binary__bin="$1"
@@ -223,6 +234,7 @@ check_binary()
   return 1
 }
 
+##
 # Print usage
 print_usage()
 {
@@ -258,26 +270,38 @@ print_usage()
   log "    --sleep          Sleep before setting CPU frequencies"
 }
 
+##
 # Check if the passed in variable is digits
 # Does not support negative numbers
+#
+# $1 input to check
+#
+# Echoes out result, 0 is true, 1 is false
 is_digits()
 {
-  case "$1" in
-    ([!0-9]*|'')
+  is_digits__input="$1"
+
+  case "${is_digits__input}" in
+    [!0-9]*|'')
       printf -- 0
       ;;
-    (*)
+    *)
       printf -- 1
       ;;
   esac
+
+  unset is_digits__input
+  return 0
 }
 
+##
 # Print version
 print_version()
 {
   log "pstate-frequency version ${version}"
 }
 
+##
 # Increase log verbosity
 log_more_verbose()
 {
@@ -287,6 +311,7 @@ log_more_verbose()
   fi
 }
 
+##
 # Decrease log verbosity
 log_less_verbose()
 {
@@ -296,20 +321,36 @@ log_less_verbose()
   fi
 }
 
+##
 # Guarantee the variable passed at $1
 # is >= $2 and <= $3
 # $1 is guaranteed to be a number
+#
+# $1 number to bound
+# $2 bottom bound
+# $3 top bound
+#
 set_variable_bounds()
 {
-  if [ "$1" -lt "$2" ]; then
-    printf -- "$2"
-  elif [ "$1" -gt "$3" ]; then
-    printf -- "$3"
+  set_variable_bounds__number="$1"
+  set_variable_bounds__bottom="$2"
+  set_variable_bounds__top="$3"
+
+  if [ "${set_variable_bounds__number}" -lt "${set_variable_bounds__bottom}" ]; then
+    printf -- "${set_variable_bounds__bottom}"
+  elif [ "${set_variable_bounds__number}" -gt "${set_variable_bounds__top}" ]; then
+    printf -- "${set_variable_bounds__top}"
   else
-    printf -- "$1"
+    printf -- "${set_variable_bounds__number}"
   fi
+
+  unset set_variable_bounds__number
+  unset set_variable_bounds__bottom
+  unset set_variable_bounds__top
+  return 0
 }
 
+##
 # Set the argument for cpu_max
 # Can be set multiple times, final time overrides
 #
@@ -366,6 +407,7 @@ set_max()
   return 0
 }
 
+##
 # Set the argument for cpu_min
 # Can be set multiple times, final time overrides
 #
@@ -420,6 +462,7 @@ set_min()
   return 0
 }
 
+##
 # Set the argument for cpu_turbo
 # Can be set multiple times, final time overrides
 #
@@ -482,6 +525,7 @@ set_turbo()
   return 0
 }
 
+##
 # Set the argument for cpu_governor
 # Can be set multiple times, final time overrides
 #
@@ -557,6 +601,7 @@ set_governor()
   return 0
 }
 
+##
 # Set the argument for x86_perf_policy
 # Can be set multiple times, final time overrides
 #
@@ -619,7 +664,10 @@ set_x86()
   return 0
 }
 
+##
 # Set the power plan based on argument
+#
+# $1 user input for power plan
 set_power_plan()
 {
   log_verbose "set_power_plan requires SET operation mode"
