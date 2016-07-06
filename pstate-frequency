@@ -47,12 +47,12 @@ execution_sleep=0 # Number of seconds to sleep in between setting values
 # Options that expect an argument
 
 # Log levels
-readonly const_log_level_off=0
-readonly const_log_level_quiet=1
-readonly const_log_level_normal=2
-readonly const_log_level_verbose=3
-readonly const_log_level_all=4
-__log_level="${const_log_level_normal}"
+readonly LOG_LEVEL_OFF=0
+readonly LOG_LEVEL_QUIET=1
+readonly LOG_LEVEL_NORMAL=2
+readonly LOG_LEVEL_VERBOSE=3
+readonly LOG_LEVEL_ALL=4
+__log_level="${LOG_LEVEL_NORMAL}"
 
 # Execution modes
 readonly const_mode_none=0
@@ -130,7 +130,7 @@ set_x86_policy_arg=""
 # __log_level = normal, verbose, all
 log()
 {
-  if [ "${__log_level}" -ge "${const_log_level_normal}" ]; then
+  if [ "${__log_level}" -ge "${LOG_LEVEL_NORMAL}" ]; then
     printf -- "%s\n" "$*"
   fi
 }
@@ -141,7 +141,7 @@ log()
 # __log_level = verbose, all
 log_verbose()
 {
-  if [ "${__log_level}" -ge "${const_log_level_verbose}" ]; then
+  if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
     printf -- "VERBOSE: %s\n" "$*"
   fi
 }
@@ -152,7 +152,7 @@ log_verbose()
 # __log_level = all
 log_all()
 {
-  if [ "${__log_level}" -eq "${const_log_level_all}" ]; then
+  if [ "${__log_level}" -eq "${LOG_LEVEL_ALL}" ]; then
     printf -- "DEBUG: %s\n" "$*"
   fi
 }
@@ -163,7 +163,7 @@ log_all()
 # __log_level = quiet, normal, verbose, all
 log_quiet()
 {
-  if [ "${__log_level}" -ge "${const_log_level_quiet}" ]; then
+  if [ "${__log_level}" -ge "${LOG_LEVEL_QUIET}" ]; then
     printf -- "%s\n" "$*"
   fi
 }
@@ -307,7 +307,7 @@ print_version()
 # Increase log verbosity
 log_more_verbose()
 {
-  if [ "${__log_level}" -lt "${const_log_level_all}" ]; then
+  if [ "${__log_level}" -lt "${LOG_LEVEL_ALL}" ]; then
     __log_level=$((__log_level + 1))
     log_all "__log_level more verbose"
   fi
@@ -317,7 +317,7 @@ log_more_verbose()
 # Decrease log verbosity
 log_less_verbose()
 {
-  if [ "${__log_level}" -gt "${const_log_level_off}" ]; then
+  if [ "${__log_level}" -gt "${LOG_LEVEL_OFF}" ]; then
     log_all "__log_level less verbose"
     __log_level=$((__log_level - 1))
   fi
@@ -1164,7 +1164,7 @@ root_write_x86_policy()
       elog_quiet "Not setting x86_perf_policy even though it was requested"
     else
       log_verbose "Setting x86_perf_policy to '${root_write_x86_policy__name}'"
-      if [ "${__log_level}" -ge "${const_log_level_verbose}" ]; then
+      if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
         log_verbose "Log verbose output for ${x86_bin}"
         "${x86_bin}" -v "${root_write_x86_policy__name}" || return 1
       else
