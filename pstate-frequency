@@ -31,9 +31,6 @@ export LC_ALL=C
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
 readonly VERSION="3.3.3"
 
-# Options that do not handle an argument
-execution_sleep=0 # Number of seconds to sleep in between setting values
-
 # Options that expect an argument
 
 # Log levels
@@ -95,7 +92,6 @@ __x86_policy_arg=""
 # -q | --quiet
 #
 # --delay
-# --sleep
 
 ##
 # Normal log
@@ -242,7 +238,6 @@ print_usage()
   log "    -g | --governor  Set the cpufreq governor"
   log "    -n | --min       Modify current CPU min frequency"
   log "    -t | --turbo     Modify curent CPU turbo boost state"
-  log "    --sleep          Sleep before setting CPU frequencies"
 }
 
 ##
@@ -1317,11 +1312,6 @@ root_do_set()
   log_verbose "setting_cpu_turbo: ${root_do_set__setting_cpu_turbo}"
   log_verbose "setting_cpu_governor: ${root_do_set__setting_cpu_governor}"
 
-  if [ "${execution_sleep}" -eq 1 ]; then
-    log_verbose "Sleep for 2 seconds requested by user"
-    sleep 2
-  fi
-
   # settings are applied as follows:
   # the governor is applied first incase it also affects other CPU settings
   # max is set next except in the case where the current system minimum value
@@ -1507,9 +1497,6 @@ main()
                 ;;
               delay)
                 execution_delay=1
-                ;;
-              sleep)
-                execution_sleep=1
                 ;;
               x86)
                 log_verbose "Attempt to set x86_perf_policy"
