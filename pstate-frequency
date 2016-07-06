@@ -419,13 +419,15 @@ set_max()
 # Set the argument for cpu_min
 # Can be set multiple times, final time overrides
 #
-# $1 user input for min value
+# $1 execution mode
+# $2 user input for min value
 set_min()
 {
-  set_min__input="$1"
+  set_min__mode="$1"
+  set_min__input="$2"
 
   log_verbose "set_min requires SET operation __exec_mode"
-  if [ "${__exec_mode}" -eq "${EXEC_MODE_SET}" ]; then
+  if [ "${set_min__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_min__value=""
 
     log_verbose "Check for special case arguments: max, min"
@@ -455,6 +457,7 @@ set_min()
       elog_quiet "min argument '${set_min__value}' is not a number"
 
       unset set_min__value
+      unset set_min__mode
       unset set_min__input
       return 1
     fi
@@ -462,10 +465,12 @@ set_min()
   else
     elog_quiet "Cannot set min outside of SET operation __exec_mode"
 
+    unset set_min__mode
     unset set_min__input
     return 1
   fi
 
+  unset set_min__mode
   unset set_min__input
   return 0
 }
@@ -819,7 +824,7 @@ set_power_plan_powersave()
 
   log_verbose "Set power plan to: powersave"
   set_max "${set_power_plan_powersave__mode}" 0 || return 1
-  set_min 0 || return 1
+  set_min "${set_power_plan_powersave__mode}" 0 || return 1
   set_governor powersave || return 1
   set_x86 0 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
@@ -841,7 +846,7 @@ set_power_plan_balanced()
 
   log_verbose "Set power plan to: balanced"
   set_max "${set_power_plan_balanced__mode}" 100 || return 1
-  set_min 0 || return 1
+  set_min "${set_power_plan_balanced__mode}" 0 || return 1
   set_x86 0 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_governor powersave || return 1
@@ -864,7 +869,7 @@ set_power_plan_performance()
 
   log_verbose "Set power plan to: performance"
   set_max "${set_power_plan_performance__mode}" 100 || return 1
-  set_min 0 || return 1
+  set_min "${set_power_plan_performance__mode}" 0 || return 1
   set_governor performance || return 1
   set_x86 1 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
@@ -884,9 +889,9 @@ set_power_plan_max()
 {
   set_power_plan_max__mode="$1"
 
-  log_verbose "Set power plan to: performance"
+  log_verbose "Set power plan to: max"
   set_max "${set_power_plan_max__mode}" 100 || return 1
-  set_min 100 || return 1
+  set_min "${set_power_plan_max__mode}" 100 || return 1
   set_governor performance || return 1
   set_x86 2 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
@@ -936,7 +941,7 @@ handle_long_option_argument()
         ;;
       min)
         log_verbose "Long option: min"
-        set_min "${handle_long_option_argument__input}" || return 1
+        set_min "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       turbo)
         log_verbose "Long option: turbo"
@@ -1522,7 +1527,7 @@ main()
             ;;
           n)
             log_verbose "Attempt to set min"
-            set_min "${OPTARG}"
+            set_min "${__exec_mode}" "${OPTARG}"
             ;;
           t)
             log_verbose "Attempt to set turbo"
