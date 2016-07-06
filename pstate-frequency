@@ -784,71 +784,81 @@ set_power_plan_auto()
 {
   log_verbose "Set power plan to: auto"
   if [ "$(is_power_supply_mains)" -eq 1 ]; then
-    set_power_plan_balanced
+    set_power_plan_balanced || return 1
   else
-    set_power_plan_powersave
+    set_power_plan_powersave || return 1
   fi
+
+  return 0
 }
 
 # Sets the power plan to a low power mode
 set_power_plan_powersave()
 {
   log_verbose "Set power plan to: powersave"
-  set_max 0
-  set_min 0
-  set_governor powersave
-  set_x86 0
+  set_max 0 || return 1
+  set_min 0 || return 1
+  set_governor powersave || return 1
+  set_x86 0 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_turbo 1
+    set_turbo 1 || return 1
   else
-    set_turbo 0
+    set_turbo 0 || return 1
   fi
+
+  return 0
 }
 
 # Sets the power plan to a balanced mode
 set_power_plan_balanced()
 {
   log_verbose "Set power plan to: balanced"
-  set_max 100
-  set_min 0
-  set_x86 0
+  set_max 100 || return 1
+  set_min 0 || return 1
+  set_x86 0 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_governor powersave
-    set_turbo 1
+    set_governor powersave || return 1
+    set_turbo 1 || return 1
   else
-    set_governor ondemand
-    set_turbo 0
+    set_governor ondemand || return 1
+    set_turbo 0 || return 1
   fi
+
+  return 0
 }
 
 # Sets the power plan to a performance mode
 set_power_plan_performance()
 {
   log_verbose "Set power plan to: performance"
-  set_max 100
-  set_min 0
-  set_governor performance
-  set_x86 1
+  set_max 100 || return 1
+  set_min 0 || return 1
+  set_governor performance || return 1
+  set_x86 1 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_turbo 0
+    set_turbo 0 || return 1
   else
-    set_turbo 1
+    set_turbo 1 || return 1
   fi
+
+  return 0
 }
 
 # Sets the power plan to the max available performance mode
 set_power_plan_max()
 {
   log_verbose "Set power plan to: performance"
-  set_max 100
-  set_min 100
-  set_governor performance
-  set_x86 2
+  set_max 100 || return 1
+  set_min 100 || return 1
+  set_governor performance || return 1
+  set_x86 2 || return 1
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_turbo 0
+    set_turbo 0 || return 1
   else
-    set_turbo 1
+    set_turbo 1 || return 1
   fi
+
+  return 0
 }
 
 # Handle long options which take arguments
@@ -877,30 +887,30 @@ handle_long_option_argument()
     case "${handle_long_option_argument__opt}" in
       plan)
         log_verbose "Long option: plan"
-        set_power_plan "${handle_long_option_argument__input}"
+        set_power_plan "${handle_long_option_argument__input}" || return 1
         ;;
       max)
         log_verbose "Long option: max"
-        set_max "${handle_long_option_argument__input}"
+        set_max "${handle_long_option_argument__input}" || return 1
         ;;
       min)
         log_verbose "Long option: min"
-        set_min "${handle_long_option_argument__input}"
+        set_min "${handle_long_option_argument__input}" || return 1
         ;;
       turbo)
         log_verbose "Long option: turbo"
-        set_turbo "${handle_long_option_argument__input}"
+        set_turbo "${handle_long_option_argument__input}" || return 1
         ;;
       governor)
         log_verbose "Long option: governor"
-        set_governor "${handle_long_option_argument__input}"
+        set_governor "${handle_long_option_argument__input}" || return 1
         ;;
       x86)
         log_verbose "Long option: x86"
-        set_x86 "${handle_long_option_argument__input}"
+        set_x86 "${handle_long_option_argument__input}" || return 1
         ;;
       *)
-        elog_quiet "Invalid option --${handle_long_option_argument__opt}"
+        elog_quiet "Invalid option --${handle_long_option_argument__opt}" || return 1
 
         unset handle_long_option_argument__opt
         unset handle_long_option_argument__input
@@ -914,68 +924,75 @@ handle_long_option_argument()
   return 0
 }
 
+##
+# Get the current state of the CPU from the pstate and scaling driver
+#
 do_get_current()
 {
-  local cpu_max_freq="$(cat "${const_system_scaling_max_freq}" )"
-  local cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
-  local cpu_governor="$(cat "${const_system_scaling_governor}" )"
-  local cpu_driver="$(cat "${const_system_scaling_driver}" )"
+  do_get_current__cpu_max_freq="$(cat "${const_system_scaling_max_freq}" )"
+  do_get_current__cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
+  do_get_current__cpu_governor="$(cat "${const_system_scaling_governor}" )"
+  do_get_current__cpu_driver="$(cat "${const_system_scaling_driver}" )"
 
-  local cpu_turbo
+  do_get_current__cpu_turbo
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
+    do_get_current__cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
   else
-    cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
+    do_get_current__cpu_turbo="$(cat "${const_system_cpufreq_boost}" )"
   fi
 
-  local cpu_max_value=$(( ${cpu_max_freq} * 100 / ${const_system_cpu_max_freq} ))
-  local cpu_min_value=$(( ${cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+  do_get_current__cpu_max_value=$(( do_get_current__cpu_max_freq * 100 / const_system_cpu_max_freq ))
+  do_get_current__cpu_min_value=$(( do_get_current__cpu_min_freq * 100 / const_system_cpu_max_freq ))
 
-  local cpu_turbo_onoff=""
-  if [ "${cpu_turbo}" -eq 1 ]; then
-    if [ $(has_pstate_dir) -eq 1 ]; then
-      cpu_turbo_onoff="OFF"
+  do_get_current__cpu_turbo_onoff=""
+  if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
+    if [ "$(has_pstate_dir)" -eq 1 ]; then
+      do_get_current__cpu_turbo_onoff="OFF"
     else
-      cpu_turbo_onoff="ON"
+      do_get_current__cpu_turbo_onoff="ON"
     fi
   else
-    if [ $(has_pstate_dir) -eq 1 ]; then
-      cpu_turbo_onoff="ON"
+    if [ "$(has_pstate_dir)" -eq 1 ]; then
+      do_get_current__cpu_turbo_onoff="ON"
     else
-      cpu_turbo_onoff="OFF"
+      do_get_current__cpu_turbo_onoff="OFF"
     fi
   fi
 
   print_version
-  log "    pstate::CPU_DRIVER   -> ${cpu_driver}"
-  log "    pstate::CPU_GOVERNOR -> ${cpu_governor}"
-  log "    pstate::TURBO        -> ${cpu_turbo} [${cpu_turbo_onoff}]"
-  log "    pstate::CPU_MIN      -> ${cpu_min_value}%% [${cpu_min_freq}KHz]"
-  log "    pstate::CPU_MAX      -> ${cpu_max_value}%% [${cpu_max_freq}KHz]"
+  log "    pstate::CPU_DRIVER   -> ${do_get_current__cpu_driver}"
+  log "    pstate::CPU_GOVERNOR -> ${do_get_current__cpu_governor}"
+  log "    pstate::TURBO        -> ${do_get_current__cpu_turbo} [${do_get_current__cpu_turbo_onoff}]"
+  log "    pstate::CPU_MIN      -> ${do_get_current__cpu_min_value}%% [${do_get_current__cpu_min_freq}KHz]"
+  log "    pstate::CPU_MAX      -> ${do_get_current__cpu_max_value}%% [${do_get_current__cpu_max_freq}KHz]"
 
-  unset cpu_turbo_onoff
-  unset cpu_max_freq
-  unset cpu_min_freq
-  unset cpu_max_value
-  unset cpu_min_value
-  unset cpu_turbo
-  unset cpu_governor
-  unset cpu_driver
+  unset do_get_current__cpu_turbo_onoff
+  unset do_get_current__cpu_max_freq
+  unset do_get_current__cpu_min_freq
+  unset do_get_current__cpu_max_value
+  unset do_get_current__cpu_min_value
+  unset do_get_current__cpu_turbo
+  unset do_get_current__cpu_governor
+  unset do_get_current__cpu_driver
+  return 0
 }
 
+##
+# Get the realtime frequencies of the CPU by reading from the procinfo
 do_get_real()
 {
-  local real_freqs="$(grep MHz /proc/cpuinfo | cut -c12-)"
-  local i=0
+  do_get_real__real_freqs="$(grep MHz /proc/cpuinfo | cut -c12-)"
+  do_get_real__i=0
 
   print_version
-  for freq in ${real_freqs}; do
-    log "    pstate::CPU[$i]   -> ${freq}MHz"
-    i=$(( $i + 1))
+  for do_get_real__freq in ${do_get_real__real_freqs}; do
+    log "    pstate::CPU[${do_get_real__i}]   -> ${do_get_real__freq}MHz"
+    do_get_real__i=$(( do_get_real__i + 1))
   done
 
-  unset i
-  unset real_freqs
+  unset do_get_real__i
+  unset do_get_real__real_freqs
+  return 0
 }
 
 do_get()
