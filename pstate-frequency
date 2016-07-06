@@ -743,6 +743,7 @@ set_power_plan()
   return 0
 }
 
+##
 # Check if the current power source is Mains
 #
 # Echoes out the result, 0 is false, 1 is true, decided by the type being Mains
@@ -777,11 +778,12 @@ is_power_supply_mains()
   return 0
 }
 
+##
 # Sets the power plan based on the current plugged in status
 set_power_plan_auto()
 {
   log_verbose "Set power plan to: auto"
-  if [ $(is_power_supply_mains) -eq 1 ]; then
+  if [ "$(is_power_supply_mains)" -eq 1 ]; then
     set_power_plan_balanced
   else
     set_power_plan_powersave
@@ -796,7 +798,7 @@ set_power_plan_powersave()
   set_min 0
   set_governor powersave
   set_x86 0
-  if [ $(has_pstate_dir) -eq 1 ]; then
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_turbo 1
   else
     set_turbo 0
@@ -810,7 +812,7 @@ set_power_plan_balanced()
   set_max 100
   set_min 0
   set_x86 0
-  if [ $(has_pstate_dir) -eq 1 ]; then
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_governor powersave
     set_turbo 1
   else
@@ -827,7 +829,7 @@ set_power_plan_performance()
   set_min 0
   set_governor performance
   set_x86 1
-  if [ $(has_pstate_dir) -eq 1 ]; then
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_turbo 0
   else
     set_turbo 1
@@ -842,7 +844,7 @@ set_power_plan_max()
   set_min 100
   set_governor performance
   set_x86 2
-  if [ $(has_pstate_dir) -eq 1 ]; then
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_turbo 0
   else
     set_turbo 1
