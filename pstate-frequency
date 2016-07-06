@@ -670,33 +670,37 @@ set_x86()
 # $1 user input for power plan
 set_power_plan()
 {
+  set_power_plan__input="$1"
+
   log_verbose "set_power_plan requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
-    local value=""
+    set_power_plan__value=""
+
     log_verbose "Check for special case arguments: auto, powersave, balanced, performance, max"
-    if [ "$1" = "auto" ]; then
+    if [ "${set_power_plan__input}" = "auto" ]; then
       log_verbose "Argument was 'auto' set to ${const_power_plan_auto}"
-      value="${const_power_plan_auto}"
-    elif [ "$1" = "powersave" ]; then
+      set_power_plan__value="${const_power_plan_auto}"
+    elif [ "${set_power_plan__input}" = "powersave" ]; then
       log_verbose "Argument was 'powersave' set to ${const_power_plan_powersave}"
-      value="${const_power_plan_powersave}"
-    elif [ "$1" = "balanced" ]; then
+      set_power_plan__value="${const_power_plan_powersave}"
+    elif [ "${set_power_plan__input}" = "balanced" ]; then
       log_verbose "Argument was 'balanced' set to ${const_power_plan_balanced}"
-      value="${const_power_plan_balanced}"
-    elif [ "$1" = "performance" ]; then
+      set_power_plan__value="${const_power_plan_balanced}"
+    elif [ "${set_power_plan__input}" = "performance" ]; then
       log_verbose "Argument was 'performance' set to ${const_power_plan_performance}"
-      value="${const_power_plan_performance}"
-    elif [ "$1" = "max" ]; then
+      set_power_plan__value="${const_power_plan_performance}"
+    elif [ "${set_power_plan__input}" = "max" ]; then
       log_verbose "Argument was 'max' set to ${const_power_plan_max}"
-      value="${const_power_plan_max}"
+      set_power_plan__value="${const_power_plan_max}"
     else
       log_verbose "Argument was not special, read as is"
-      value="$1"
+      set_power_plan__value="${set_power_plan__input}"
     fi
-    log_verbose "Check that '${value}' is all digits"
-    if [ $(is_digits "${value}") -eq 1 ]; then
-      log_verbose "'${value}' is all digits"
-      case "${value}" in
+
+    log_verbose "Check that '${set_power_plan__value}' is all digits"
+    if [ "$(is_digits "${set_power_plan__value}")" -eq 1 ]; then
+      log_verbose "'${set_power_plan__value}' is all digits"
+      case "${set_power_plan__value}" in
         "${const_power_plan_auto}")
           set_power_plan_auto
           ;;
@@ -713,20 +717,30 @@ set_power_plan()
           set_power_plan_max
           ;;
         *)
-          elog_quiet "Invalid power plan: ${value}"
-          exit 4
+          elog_quiet "Invalid power plan: ${set_power_plan__value}"
+
+          unset set_power_plan__value
+          unset set_power_plan__input
+          return 1
           ;;
       esac
     else
-      elog_quiet "power plan argument '${value}' is not a number"
-      unset value
-      exit 2
+      elog_quiet "power plan argument '${set_power_plan__value}' is not a number"
+
+      unset set_power_plan__value
+      unset set_power_plan__input
+      return 1
     fi
-    unset value
+    unset set_power_plan__value
   else
     elog_quiet "Cannot set power plan outside of SET operation mode"
-    exit 3
+
+    unset set_power_plan__input
+    return 1
   fi
+
+  unset set_power_plan__input
+  return 0
 }
 
 # Check if the current power source is Mains
