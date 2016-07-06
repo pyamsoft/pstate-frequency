@@ -1315,6 +1315,9 @@ root_do_set()
   return 0
 }
 
+##
+# Check that the set call is possible, and the user is root.
+# Once this is validated, do the set calls and then run do_get_current
 do_set()
 {
   if [ "$(id -u)" -eq 0 ]; then
@@ -1323,15 +1326,18 @@ do_set()
       sleep 5
     fi
 
-    root_do_set
-    do_get_current
+    root_do_set || return 1
+    do_get_current || return 1
   else
     elog_quiet "You must be root."
-    exit 6
+    return 1
   fi
 }
 
+##
 # Check that we have intel_pstate at the intel_pstate location
+#
+# Echoes out result
 has_pstate_dir()
 {
   if [ -d "${const_system_intel_pstate_dir}" ]; then
@@ -1339,20 +1345,227 @@ has_pstate_dir()
   else
     printf -- 0
   fi
+
+  return 0
+}
+
+##
+# The main function of the script
+#
+# $@ all command line args
+main()
+{
+  # Sanity check
+  check_binary grep || return 1
+  check_binary cat || return 1
+  check_binary cut || return 1
+  check_binary id || return 1
+  check_binary sleep || return 1
+
+  # While risky to call eval, this is one way to
+  # emulate the bash indirect_expansion ability
+  long_option=""
+  eval optind_expanded="\$${OPTIND}"
+  # shellcheck disable=SC2154
+  while [ -n "${optind_expanded}" ]; do
+    while getopts ":HVGSp:m:n:t:g:x:crdq-:" option; do
+
+      # Log if not long option
+      if [ "${option}" != '-' ]; then
+        log_verbose "parse short option: -${option} ${OPTARG}"
+      fi
+
+      # Set only on long option with arg
+      if [ -n "${long_option}" ]; then
+        elog_quiet "Long option --${long_option} expects argument"
+        return 1
+      fi
+
+      long_option=""
+      case "${option}" in
+        -)
+          log_verbose "parse long option: -${option}${OPTARG}"
+          case "${OPTARG}" in
+            help)
+              print_usage
+              return 0
+              ;;
+            version)
+              print_version
+              return 0
+              ;;
+            get)
+              log_verbose "Set operation mode to GET"
+              mode="${const_mode_get}"
+              ;;
+            set)
+              log_verbose "Set operation mode to SET"
+              mode="${const_mode_set}"
+              ;;
+            plan)
+              log_verbose "Attempt to set plan"
+              long_option="plan"
+              ;;
+            max)
+              log_verbose "Attempt to set max"
+              long_option="max"
+              ;;
+            min)
+              log_verbose "Attempt to set min"
+              long_option="min"
+              ;;
+            turbo)
+              log_verbose "Attempt to set turbo"
+              long_option="turbo"
+              ;;
+            governor)
+              log_verbose "Attempt to set governor"
+              long_option="governor"
+              ;;
+            current)
+              log_verbose "Set get_type to current"
+              get_type="${const_get_type_current}"
+              ;;
+            real)
+              log_verbose "Set get_type to real"
+              get_type="${const_get_type_real}"
+              ;;
+            debug)
+              log_more_verbose
+              ;;
+            quiet)
+              log_less_verbose
+              ;;
+            delay)
+              execution_delay=1
+              ;;
+            sleep)
+              execution_sleep=1
+              ;;
+            x86)
+              log_verbose "Attempt to set x86_perf_policy"
+              long_option="x86"
+              ;;
+            *)
+              # We must provide our own error message in this case
+              elog_quiet "Illegal option --${OPTARG}"
+              print_usage
+              return 1
+              ;;
+          esac
+          ;;
+        H)
+          print_usage
+          return 0
+          ;;
+        V)
+          print_version
+          return 0
+          ;;
+        G)
+          log_verbose "Set operation mode to GET"
+          mode="${const_mode_get}"
+          ;;
+        S)
+          log_verbose "Set operation mode to SET"
+          mode="${const_mode_set}"
+          ;;
+        p)
+          log_verbose "Attempt to set plan"
+          set_power_plan "${OPTARG}"
+          ;;
+        m)
+          log_verbose "Attempt to set max"
+          set_max "${OPTARG}"
+          ;;
+        n)
+          log_verbose "Attempt to set min"
+          set_min "${OPTARG}"
+          ;;
+        t)
+          log_verbose "Attempt to set turbo"
+          set_turbo "${OPTARG}"
+          ;;
+        g)
+          log_verbose "Attempt to set governor"
+          set_governor "${OPTARG}"
+          ;;
+        c)
+          log_verbose "Set get_type to current"
+          get_type="${const_get_type_current}"
+          ;;
+        r)
+          log_verbose "Set get_type to real"
+          get_type="${const_get_type_real}"
+          ;;
+        d)
+          log_more_verbose
+          ;;
+        q)
+          log_less_verbose
+          ;;
+        x)
+          log_verbose "Attempt to set x86_perf_policy"
+          set_x86 "${OPTARG}"
+          ;;
+        *)
+          elog_quiet "Illegal option -${OPTARG}"
+          print_usage
+          return 1
+          ;;
+      esac
+    done
+
+    # Re-establish the current OPTIND target
+    eval optind_expanded="\$${OPTIND}"
+    if [ -z "${optind_expanded}" ]; then
+      if [ -n "${long_option}" ]; then
+        elog_quiet "Long option --${long_option} expects argument"
+        return 1
+      else
+        break
+      fi
+    else
+      # This is a plain arg and should be handled by one of the options which takes an argument
+      handle_long_option_argument "${long_option}" "${optind_expanded}"
+
+      # Set back to null
+      long_option=
+    fi
+
+    # Shift the options
+    shift $OPTIND
+    OPTIND=1
+  done
+
+  case "${mode}" in
+    "${const_mode_get}")
+      log_verbose "MODE: GET"
+      log_verbose "get_type: ${get_type}"
+      do_get || return 1
+      ;;
+    "${const_mode_set}")
+      log_verbose "MODE: SET"
+      log_verbose "set_max: ${set_max_type} [${set_max_arg}]"
+      log_verbose "set_min: ${set_min_type} [${set_min_arg}]"
+      log_verbose "set_turbo: ${set_turbo_type} [${set_turbo_arg}]"
+      log_verbose "set_governor: ${set_governor_type} [${set_governor_arg}]"
+      log_verbose "set_x86: ${set_x86_policy_type} [${set_x86_policy_arg}]"
+      do_set || return 1
+      ;;
+    *)
+      print_usage
+      ;;
+  esac
+
+  log_all "Exit: Success"
+  return 0
 }
 
 # Set a sanitized PATH
 unset PATH
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-
-# Sanity check
-check_binary grep || exit 1
-check_binary cat || exit 1
-check_binary wc || exit 1
-check_binary cut || exit 1
-check_binary id || exit 1
-check_binary sleep || exit 1
 
 # System related vars
 readonly const_system_power_supply_dir="/sys/class/power_supply"
@@ -1362,11 +1575,11 @@ readonly const_system_scaling_min_freq="${const_system_cpu_dir}/cpu0/cpufreq/sca
 readonly const_system_scaling_governor="${const_system_cpu_dir}/cpu0/cpufreq/scaling_governor"
 readonly const_system_scaling_driver="${const_system_cpu_dir}/cpu0/cpufreq/scaling_driver"
 readonly const_system_cpu_available_governors="${const_system_cpu_dir}/cpu0/cpufreq/scaling_available_governors"
-readonly const_system_cpu_number="$(grep "processor" /proc/cpuinfo | wc -l)"
+readonly const_system_cpu_number="$(grep -c "processor" /proc/cpuinfo)"
 readonly const_system_cpu_max_freq="$(cat "${const_system_cpu_dir}/cpu0/cpufreq/cpuinfo_max_freq" )"
 readonly const_system_cpu_min_freq="$(cat "${const_system_cpu_dir}/cpu0/cpufreq/cpuinfo_min_freq" )"
 readonly const_system_cpu_max_value=100
-readonly const_system_cpu_min_value=$(( ${const_system_cpu_min_freq} * 100 / ${const_system_cpu_max_freq} ))
+readonly const_system_cpu_min_value=$(( const_system_cpu_min_freq * 100 / const_system_cpu_max_freq ))
 
 # intel_pstate related vars
 readonly const_system_intel_pstate_dir="${const_system_cpu_dir}/intel_pstate"
@@ -1377,203 +1590,7 @@ readonly const_system_intel_pstate_turbo="${const_system_intel_pstate_dir}/no_tu
 # acpi-cpufreq related vars
 readonly const_system_cpufreq_boost="${const_system_cpu_dir}/cpufreq/boost"
 
-# While risky to call eval, this is one way to
-# emulate the bash indirect_expansion ability
-long_option=""
-eval optind_expanded="\$${OPTIND}"
-while [ -n "${optind_expanded}" ]; do
-  while getopts ":HVGSp:m:n:t:g:x:crdq-:" option; do
-
-    # Log if not long option
-    if [ "${option}" != '-' ]; then
-      log_verbose "parse short option: -${option} ${OPTARG}"
-    fi
-
-    # Set only on long option with arg
-    if [ -n "${option_expects_argument}" ]; then
-      elog_quiet "Long option --${long_option} expects argument"
-      exit 2
-    fi
-
-    long_option=""
-    case "${option}" in
-      -)
-        log_verbose "parse long option: -${option}${OPTARG}"
-        case "${OPTARG}" in
-          help)
-            print_usage
-            exit 0
-            ;;
-          version)
-            print_version
-            exit 0
-            ;;
-          get)
-            log_verbose "Set operation mode to GET"
-            mode="${const_mode_get}"
-            ;;
-          set)
-            log_verbose "Set operation mode to SET"
-            mode="${const_mode_set}"
-            ;;
-          plan)
-            log_verbose "Attempt to set plan"
-            long_option="plan"
-            ;;
-          max)
-            log_verbose "Attempt to set max"
-            long_option="max"
-            ;;
-          min)
-            log_verbose "Attempt to set min"
-            long_option="min"
-            ;;
-          turbo)
-            log_verbose "Attempt to set turbo"
-            long_option="turbo"
-            ;;
-          governor)
-            log_verbose "Attempt to set governor"
-            long_option="governor"
-            ;;
-          current)
-            log_verbose "Set get_type to current"
-            get_type="${const_get_type_current}"
-            ;;
-          real)
-            log_verbose "Set get_type to real"
-            get_type="${const_get_type_real}"
-            ;;
-          debug)
-            log_more_verbose
-            ;;
-          quiet)
-            log_less_verbose
-            ;;
-          delay)
-            execution_delay=1
-            ;;
-          sleep)
-            execution_sleep=1
-            ;;
-          x86)
-            log_verbose "Attempt to set x86_perf_policy"
-            long_option="x86"
-            ;;
-          *)
-            # We must provide our own error message in this case
-            elog_quiet "Illegal option --${OPTARG}"
-            print_usage
-            exit 2
-            ;;
-        esac
-        ;;
-      H)
-        print_usage
-        exit 0
-        ;;
-      V)
-        print_version
-        exit 0
-        ;;
-      G)
-        log_verbose "Set operation mode to GET"
-        mode="${const_mode_get}"
-        ;;
-      S)
-        log_verbose "Set operation mode to SET"
-        mode="${const_mode_set}"
-        ;;
-      p)
-        log_verbose "Attempt to set plan"
-        set_power_plan "${OPTARG}"
-        ;;
-      m)
-        log_verbose "Attempt to set max"
-        set_max "${OPTARG}"
-        ;;
-      n)
-        log_verbose "Attempt to set min"
-        set_min "${OPTARG}"
-        ;;
-      t)
-        log_verbose "Attempt to set turbo"
-        set_turbo "${OPTARG}"
-        ;;
-      g)
-        log_verbose "Attempt to set governor"
-        set_governor "${OPTARG}"
-        ;;
-      c)
-        log_verbose "Set get_type to current"
-        get_type="${const_get_type_current}"
-        ;;
-      r)
-        log_verbose "Set get_type to real"
-        get_type="${const_get_type_real}"
-        ;;
-      d)
-        log_more_verbose
-        ;;
-      q)
-        log_less_verbose
-        ;;
-      x)
-        log_verbose "Attempt to set x86_perf_policy"
-        set_x86 "${OPTARG}"
-        ;;
-      *)
-        elog_quiet "Illegal option -${OPTARG}"
-        print_usage
-        exit 2
-        ;;
-    esac
-  done
-
-  # Re-establish the current OPTIND target
-  eval optind_expanded="\$${OPTIND}"
-  if [ -z "${optind_expanded}" ]; then
-    if [ -n "${long_option}" ]; then
-      elog_quiet "Long option --${long_option} expects argument"
-      exit 2
-    else
-      break
-    fi
-  else
-    # This is a plain arg and should be handled by one of the options which takes an argument
-    handle_long_option_argument "${long_option}" "${optind_expanded}"
-
-    # Set back to null
-    long_option=
-  fi
-
-  # Shift the options
-  shift $OPTIND
-  OPTIND=1
-done
-
-case "${mode}" in
-  "${const_mode_get}")
-    log_verbose "MODE: GET"
-    log_verbose "get_type: ${get_type}"
-    do_get || return 1
-    ;;
-  "${const_mode_set}")
-    log_verbose "MODE: SET"
-    log_verbose "set_max: ${set_max_type} [${set_max_arg}]"
-    log_verbose "set_min: ${set_min_type} [${set_min_arg}]"
-    log_verbose "set_turbo: ${set_turbo_type} [${set_turbo_arg}]"
-    log_verbose "set_governor: ${set_governor_type} [${set_governor_arg}]"
-    log_verbose "set_x86: ${set_x86_policy_type} [${set_x86_policy_arg}]"
-    do_set
-    ;;
-  *)
-    print_usage
-    ;;
-esac
-
-log_all "Exit: Success"
-exit 0
+main "$@" || exit 1
 
 # vim: set syntax=sh tabstop=2 softtabstop=2 shiftwidth=2 shiftround expandtab:
 
