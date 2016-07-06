@@ -45,11 +45,6 @@ readonly LOG_LEVEL_VERBOSE=3
 readonly LOG_LEVEL_ALL=4
 __log_level="${LOG_LEVEL_NORMAL}"
 
-# Get modes
-readonly GET_TYPE_CURRENT=0
-readonly GET_TYPE_REAL=1
-__exec_get_type="${GET_TYPE_CURRENT}"
-
 # Set commands
 readonly SET_MAX_FALSE=0
 readonly SET_MAX_TRUE=1
@@ -1045,9 +1040,13 @@ do_get_real()
 
 ##
 # Run a given --get function depending on the current type
+#
+# $1 execution get_type
 do_get()
 {
-  case "${__exec_get_type}" in
+  do_get__type="$1"
+
+  case "${do_get__type}" in
     "${GET_TYPE_CURRENT}")
       do_get_current || return 1
       ;;
@@ -1057,10 +1056,12 @@ do_get()
     *)
       elog_quiet "Invalid GET type"
 
+      unset do_get__type
       return 1
       ;;
   esac
 
+  unset do_get__type
   return 0
 }
 
@@ -1406,6 +1407,11 @@ main()
   readonly EXEC_MODE_GET=1
   readonly EXEC_MODE_SET=2
 
+  # Get modes
+  readonly GET_TYPE_CURRENT=0
+  readonly GET_TYPE_REAL=1
+
+  exec_get_type="${GET_TYPE_CURRENT}"
   exec_mode="${EXEC_MODE_NONE}"
 
   # Sanity check
@@ -1477,12 +1483,12 @@ main()
                 long_option="governor"
                 ;;
               current)
-                log_verbose "Set __exec_get_type to current"
-                __exec_get_type="${GET_TYPE_CURRENT}"
+                log_verbose "Set exec_get_type to current"
+                exec_get_type="${GET_TYPE_CURRENT}"
                 ;;
               real)
-                log_verbose "Set __exec_get_type to real"
-                __exec_get_type="${GET_TYPE_REAL}"
+                log_verbose "Set exec_get_type to real"
+                exec_get_type="${GET_TYPE_REAL}"
                 ;;
               debug)
                 log_more_verbose
@@ -1545,12 +1551,12 @@ main()
             set_governor "${exec_mode}" "${OPTARG}"
             ;;
           c)
-            log_verbose "Set __exec_get_type to current"
-            __exec_get_type="${GET_TYPE_CURRENT}"
+            log_verbose "Set exec_get_type to current"
+            exec_get_type="${GET_TYPE_CURRENT}"
             ;;
           r)
-            log_verbose "Set __exec_get_type to real"
-            __exec_get_type="${GET_TYPE_REAL}"
+            log_verbose "Set exec_get_type to real"
+            exec_get_type="${GET_TYPE_REAL}"
             ;;
           d)
             log_more_verbose
@@ -1612,8 +1618,8 @@ main()
   case "${exec_mode}" in
     "${EXEC_MODE_GET}")
       log_verbose "exec_mode: GET"
-      log_verbose "__exec_get_type: ${__exec_get_type}"
-      do_get || return 1
+      log_verbose "exec_get_type: ${exec_get_type}"
+      do_get "${exec_get_type}" || return 1
       ;;
     "${EXEC_MODE_SET}")
       log_verbose "exec_mode: SET"
