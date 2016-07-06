@@ -933,8 +933,8 @@ do_get_current()
   do_get_current__cpu_min_freq="$(cat "${const_system_scaling_min_freq}" )"
   do_get_current__cpu_governor="$(cat "${const_system_scaling_governor}" )"
   do_get_current__cpu_driver="$(cat "${const_system_scaling_driver}" )"
+  do_get_current__cpu_turbo=
 
-  do_get_current__cpu_turbo
   if [ "$(has_pstate_dir)" -eq 1 ]; then
     do_get_current__cpu_turbo="$(cat "${const_system_intel_pstate_turbo}" )"
   else
