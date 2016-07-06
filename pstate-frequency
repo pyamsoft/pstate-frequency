@@ -419,50 +419,62 @@ set_min()
 
 # Set the argument for cpu_turbo
 # Can be set multiple times, final time overrides
+#
+# $1 user input for turbo value
 set_turbo()
 {
+  set_turbo__input="$1"
+
   log_verbose "set_turbo requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
-    local value=""
+    set_turbo__value=""
     log_verbose "Check for special case arguments: on, off"
-    if [ "$1" = "on" ]; then
-      if [ $(has_pstate_dir) -eq 1 ]; then
+    if [ "${set_turbo__input}" = "on" ]; then
+      if [ "$(has_pstate_dir)" -eq 1 ]; then
         log_verbose "Argument was 'on' set to 0"
-        value="0"
+        set_turbo__value="0"
       else
         log_verbose "Argument was 'on' set to 1"
-        value="1"
+        set_turbo__value="1"
       fi
-    elif [ "$1" = "off" ]; then
-      if [ $(has_pstate_dir) -eq 1 ]; then
+    elif [ "${set_turbo__input}" = "off" ]; then
+      if [ "$(has_pstate_dir)" -eq 1 ]; then
         log_verbose "Argument was 'off' set to 1"
-        value="1"
+        set_turbo__value="1"
       else
         log_verbose "Argument was 'off' set to 0"
-        value="0"
+        set_turbo__value="0"
       fi
     else
       log_verbose "Argument was not special, read as is"
-      value="$1"
+      set_turbo__value="${set_turbo__input}"
     fi
-    log_verbose "Check that '${value}' is all digits"
-    if [ $(is_digits "${value}") -eq 1 ]; then
-      log_verbose "'${value}' is all digits"
-      log_verbose "Bound value '${value}' between 0 and 1"
-      value="$(set_variable_bounds "${value}" 0 1)"
+    log_verbose "Check that '${set_turbo__value}' is all digits"
+    if [ "$(is_digits "${set_turbo__value}")" -eq 1 ]; then
+      log_verbose "'${set_turbo__value}' is all digits"
+      log_verbose "Bound value '${set_turbo__value}' between 0 and 1"
+      set_turbo__value="$(set_variable_bounds "${set_turbo__value}" 0 1)"
       set_turbo_type="${const_set_turbo_true}"
-      set_turbo_arg="${value}"
+      set_turbo_arg="${set_turbo__value}"
       log_verbose "set_turbo_arg: '${set_turbo_arg}'"
     else
-      elog_quiet "turbo argument '${value}' is not a number"
-      unset value
-      exit 2
+      elog_quiet "turbo argument '${set_turbo__value}' is not a number"
+
+      unset set_turbo__input
+      unset set_turbo__value
+      return 1
     fi
-    unset value
+
+    unset set_turbo__value
   else
     elog_quiet "Cannot set turbo outside of SET operation mode"
-    exit 3
+
+    unset set_turbo__input
+    return 1
   fi
+
+  unset set_turbo__input
+  return 0
 }
 
 # Set the argument for cpu_governor
