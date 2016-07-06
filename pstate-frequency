@@ -50,7 +50,7 @@ readonly const_log_level_quiet=1
 readonly const_log_level_normal=2
 readonly const_log_level_verbose=3
 readonly const_log_level_all=4
-log_level="${const_log_level_normal}"
+__log_level="${const_log_level_normal}"
 
 # Execution modes
 readonly const_mode_none=0
@@ -124,40 +124,40 @@ set_x86_policy_arg=""
 
 # Normal log
 # Can be seen at
-# log_level = normal, verbose, all
+# __log_level = normal, verbose, all
 log()
 {
-  if [ "${log_level}" -ge "${const_log_level_normal}" ]; then
+  if [ "${__log_level}" -ge "${const_log_level_normal}" ]; then
     printf -- "%s\n" "$*"
   fi
 }
 
 # Verbose log
 # Can be seen at
-# log_level = verbose, all
+# __log_level = verbose, all
 log_verbose()
 {
-  if [ "${log_level}" -ge "${const_log_level_verbose}" ]; then
+  if [ "${__log_level}" -ge "${const_log_level_verbose}" ]; then
     printf -- "VERBOSE: %s\n" "$*"
   fi
 }
 
 # All log
 # Can be seen at
-# log_level = all
+# __log_level = all
 log_all()
 {
-  if [ "${log_level}" -eq "${const_log_level_all}" ]; then
+  if [ "${__log_level}" -eq "${const_log_level_all}" ]; then
     printf -- "DEBUG: %s\n" "$*"
   fi
 }
 
 # Quiet log
 # Can be seen at
-# log_level = quiet, normal, verbose, all
+# __log_level = quiet, normal, verbose, all
 log_quiet()
 {
-  if [ "${log_level}" -ge "${const_log_level_quiet}" ]; then
+  if [ "${__log_level}" -ge "${const_log_level_quiet}" ]; then
     printf -- "%s\n" "$*"
   fi
 }
@@ -189,22 +189,37 @@ elog_quiet()
 # Check the environment path for the given binary, exit if it is not found
 check_binary()
 {
-  if [ -z "$1" ]; then
-    elog_quiet "Must specify a path to a binary"
+  check_binary__bin="$1"
+  check_binary__old_ifs="${IFS}"
+  if [ -z "${check_binary__bin}" ]; then
+    error_msg "Must specify a path to a binary"
     return 1
   fi
 
-  local IFS=":"
-  for part in ${PATH}; do
-    local check="${part}/$1"
-    if [ -e "${check}" ]; then
-      unset check
+  IFS=":"
+  for check_binary__path in ${PATH}; do
+    check_binary__result=
+    check_binary__result="${check_binary__path}/${check_binary__bin}"
+    if [ -e "${check_binary__result}" ]; then
+      IFS="${check_binary__old_ifs}"
+
+      unset check_binary__result
+      unset check_binary__bin
+      unset check_binary__old_ifs
+      unset check_binary__path
       return 0
     fi
-    unset check
+
+    unset check_binary__result
   done
 
-  elog_quiet "Binary '$1' not found in \$PATH"
+  IFS="${check_binary__old_ifs}"
+  error_msg "Binary '${check_binary__bin}' not found in \$PATH"
+
+  unset check_binary__result
+  unset check_binary__bin
+  unset check_binary__old_ifs
+  unset check_binary__path
   return 1
 }
 
@@ -266,18 +281,18 @@ print_version()
 # Increase log verbosity
 log_more_verbose()
 {
-  if [ "${log_level}" -lt "${const_log_level_all}" ]; then
-    log_level=$((${log_level} + 1))
-    log_all "log_level more verbose"
+  if [ "${__log_level}" -lt "${const_log_level_all}" ]; then
+    __log_level=$((__log_level + 1))
+    log_all "__log_level more verbose"
   fi
 }
 
 # Decrease log verbosity
 log_less_verbose()
 {
-  if [ "${log_level}" -gt "${const_log_level_off}" ]; then
-    log_all "log_level less verbose"
-    log_level=$((${log_level} - 1))
+  if [ "${__log_level}" -gt "${const_log_level_off}" ]; then
+    log_all "__log_level less verbose"
+    __log_level=$((${__log_level} - 1))
   fi
 }
 
@@ -908,7 +923,7 @@ root_write_x86_policy()
       elog_quiet "Not setting x86_perf_policy even though it was requested"
     else
       log_verbose "Setting x86_perf_policy to '$1'"
-      if [ "${log_level}" -ge "${const_log_level_verbose}" ]; then
+      if [ "${__log_level}" -ge "${const_log_level_verbose}" ]; then
       "${x86_bin}" -v "$1"
       else
       "${x86_bin}" "$1" > /dev/null
