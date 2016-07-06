@@ -22,77 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -u
-
-# Export the LC as the default C so that we do not run into locale based quirks
-export LC_ALL=C
-
-# pstate-frequency
-# by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
-readonly VERSION="3.3.3"
-
-# Options that expect an argument
-
-# Log levels
-readonly LOG_LEVEL_OFF=0
-readonly LOG_LEVEL_QUIET=1
-readonly LOG_LEVEL_NORMAL=2
-readonly LOG_LEVEL_VERBOSE=3
-readonly LOG_LEVEL_ALL=4
-__log_level="${LOG_LEVEL_NORMAL}"
-
-# Set commands
-readonly SET_MAX_FALSE=0
-readonly SET_MAX_TRUE=1
-__exec_set_max_type="${SET_MAX_FALSE}"
-__exec_set_max_arg=""
-
-readonly SET_MIN_FALSE=0
-readonly SET_MIN_TRUE=1
-__exec_set_min_type="${SET_MIN_FALSE}"
-__exec_set_min_arg=""
-
-readonly SET_TURBO_FALSE=0
-readonly SET_TURBO_TRUE=1
-__exec_set_turbo_type="${SET_TURBO_FALSE}"
-__exec_set_turbo_arg=""
-
-readonly SET_GOVERNOR_FALSE=0
-readonly SET_GOVERNOR_TRUE=1
-__exec_set_governor_type="${SET_GOVERNOR_FALSE}"
-__exec_set_governor_arg=""
-
-# X86_perf_policy levels
-readonly X86_BINARY="x86_energy_perf_policy"
-readonly X86_POLICY_FALSE=0
-readonly X86_POLICY_TRUE=1
-readonly X86_POLICY_NAME_POWERSAVE=0
-readonly X86_POLICY_NAME_NORMAL=1
-readonly X86_POLICY_NAME_PERFORMANCE=2
-__x86_policy_type="${X86_POLICY_FALSE}"
-__x86_policy_arg=""
-
-# Supported option flags
-#
-# -H | --help
-# -V | --version
-# -G | --get
-# -S | --set
-#
-# -p | --plan
-# -m | --max
-# -n | --min
-# -t | --turbo
-# -g | --governor
-#
-# -c | --current
-# -r | --real
-#
-# -d | --debug
-# -q | --quiet
-#
-# --delay
-
 ##
 # Normal log
 # Can be seen at
@@ -1635,9 +1564,59 @@ main()
   return 0
 }
 
+set -u
+
 # Set a sanitized PATH
 unset PATH
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+# Export the LC as the default C so that we do not run into locale based quirks
+export LC_ALL=C
+
+# pstate-frequency
+# by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
+readonly VERSION="3.3.3"
+
+# Options that expect an argument
+
+# Log levels
+readonly LOG_LEVEL_OFF=0
+readonly LOG_LEVEL_QUIET=1
+readonly LOG_LEVEL_NORMAL=2
+readonly LOG_LEVEL_VERBOSE=3
+readonly LOG_LEVEL_ALL=4
+__log_level="${LOG_LEVEL_NORMAL}"
+
+# Set commands
+readonly SET_MAX_FALSE=0
+readonly SET_MAX_TRUE=1
+__exec_set_max_type="${SET_MAX_FALSE}"
+__exec_set_max_arg=""
+
+readonly SET_MIN_FALSE=0
+readonly SET_MIN_TRUE=1
+__exec_set_min_type="${SET_MIN_FALSE}"
+__exec_set_min_arg=""
+
+readonly SET_TURBO_FALSE=0
+readonly SET_TURBO_TRUE=1
+__exec_set_turbo_type="${SET_TURBO_FALSE}"
+__exec_set_turbo_arg=""
+
+readonly SET_GOVERNOR_FALSE=0
+readonly SET_GOVERNOR_TRUE=1
+__exec_set_governor_type="${SET_GOVERNOR_FALSE}"
+__exec_set_governor_arg=""
+
+# X86_perf_policy levels
+readonly X86_BINARY="x86_energy_perf_policy"
+readonly X86_POLICY_FALSE=0
+readonly X86_POLICY_TRUE=1
+readonly X86_POLICY_NAME_POWERSAVE=0
+readonly X86_POLICY_NAME_NORMAL=1
+readonly X86_POLICY_NAME_PERFORMANCE=2
+__x86_policy_type="${X86_POLICY_FALSE}"
+__x86_policy_arg=""
 
 
 # System related vars
