@@ -995,22 +995,32 @@ do_get_real()
   return 0
 }
 
+##
+# Run a given --get function depending on the current type
 do_get()
 {
   case "${get_type}" in
     "${const_get_type_current}")
-      do_get_current
+      do_get_current || return 1
       ;;
     "${const_get_type_real}")
-      do_get_real
+      do_get_real || return 1
       ;;
     *)
       elog_quiet "Invalid GET type"
-      exit 3
+
+      return 1
       ;;
   esac
+
+  return 0
 }
 
+##
+# Check whether a --set command can proceed.
+# In order to proceed, something must be requested to be set
+#
+# Echoes out result, 0 is true, 1 is false
 root_do_set_has_arg()
 {
   if [ "${set_max_type}" -eq 1 ] \
@@ -1021,99 +1031,153 @@ root_do_set_has_arg()
   else
     printf -- 0
   fi
+
+  return 0
 }
 
+##
+# Write the given max value to the system file for pstate if it exists, as well
+# as the scaling driver
+#
+# $1 max value
 root_write_max()
 {
-  if [ $(has_pstate_dir) -eq 1 ]; then
-    log_verbose "Write max_value '$1' to intel_pstate file: ${const_system_intel_pstate_max}"
-    printf -- "$1" > "${const_system_intel_pstate_max}"
+  root_write_max__max="$1"
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
+    log_verbose "Write max_value '${root_write_max__max}' to intel_pstate file: ${const_system_intel_pstate_max}"
+    printf -- "${root_write_max__max}" > "${const_system_intel_pstate_max}" || return 1
     log_all "Max value written to ${const_system_intel_pstate_max}"
   fi
 
-  local max_freq=$(( $1 * ${const_system_cpu_max_freq} / 100 ))
+  root_write___max_freq=$(( root_write_max__max * const_system_cpu_max_freq / 100 ))
+  for root_write___i in $(seq 0 $(( const_system_cpu_number - 1 )) ); do
+    root_write___target="${const_system_cpu_dir}/cpu${root_write___i}/cpufreq/scaling_max_freq"
+    log_verbose "Write freq: ${root_write___max_freq}KHz to file: ${root_write___target}"
+    printf -- "${root_write___max_freq}" > "${root_write___target}" || return 1
+    log_all "Max value written to ${root_write___target}"
 
-  for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
-    local target="${const_system_cpu_dir}/cpu${i}/cpufreq/scaling_max_freq"
-    log_verbose "Write freq: ${max_freq}KHz to file: ${target}"
-    printf -- "${max_freq}" > "${target}"
-    log_all "Max value written to ${target}"
-    unset target
+    unset root_write___target
+    unset root_write___i
   done
 
-  unset max_freq
+  unset root_write___max_freq
+  unset root_write_max__max
+  return 0
 }
 
+##
+# Write the given min value to the system file for pstate if it exists, as well
+# as the scaling driver
+#
+# $1 min value
 root_write_min()
 {
-  if [ $(has_pstate_dir) -eq 1 ]; then
-    log_verbose "Write min_value '$1' to intel_pstate file: ${const_system_intel_pstate_min}"
-    printf -- "$1" > "${const_system_intel_pstate_min}"
+  root_write_min__min="$1"
+
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
+    log_verbose "Write min_value '${root_write_min__min}' to intel_pstate file: ${const_system_intel_pstate_min}"
+    printf -- "${root_write_min__min}" > "${const_system_intel_pstate_min}" || return 1
     log_all "Min value written to ${const_system_intel_pstate_min}"
   fi
 
-  local min_freq=$(( $1 * ${const_system_cpu_max_freq} / 100 ))
+  root_write_min__min_freq=$(( root_write_min__min * const_system_cpu_max_freq / 100 ))
+  for root_write_min__i in $(seq 0 $(( const_system_cpu_number - 1 )) ); do
+    root_write_min__target="${const_system_cpu_dir}/cpu${root_write_min__i}/cpufreq/scaling_min_freq"
+    log_verbose "Write freq: ${root_write_min__min_freq}KHz to file: ${root_write_min__target}"
+    printf -- "${root_write_min__min_freq}" > "${root_write_min__target}" || return 1
+    log_all "Min value written to ${root_write_min__target}"
 
-  for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
-    local target="${const_system_cpu_dir}/cpu${i}/cpufreq/scaling_min_freq"
-    log_verbose "Write freq: ${min_freq}KHz to file: ${target}"
-    printf -- "${min_freq}" > "${target}"
-    log_all "Min value written to ${target}"
-    unset target
+    unset root_write_min__target
+    unset root_write_min__i
   done
 
-  unset max_freq
+  unset root_write_min__max_freq
+  unset root_write_min__min
+  return 0
 }
 
+##
+# Write the given turbo value to the system file for pstate if it exists, or
+# as the acpi-cpufreq boost if it exists
+#
+# $1 turbo value
 root_write_turbo()
 {
-  if [ $(has_pstate_dir) -eq 1 ]; then
-    log_verbose "Write turbo_value '$1' to intel_pstate file: ${const_system_intel_pstate_turbo}"
-    printf -- "$1" > "${const_system_intel_pstate_turbo}"
+  root_write_turbo__turbo="$1"
+
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
+    log_verbose "Write turbo_value '${root_write_turbo__turbo}' to intel_pstate file: ${const_system_intel_pstate_turbo}"
+    printf -- "${root_write_turbo__turbo}" > "${const_system_intel_pstate_turbo}" || return 1
     log_all "Turbo value written to ${const_system_intel_pstate_turbo}"
   else
-    log_verbose "Write turbo_value '$1' to acpi-cpufreq file: ${const_system_cpufreq_boost}"
-    printf -- "$1" > "${const_system_cpufreq_boost}"
+    log_verbose "Write turbo_value '${root_write_turbo__turbo}' to acpi-cpufreq file: ${const_system_cpufreq_boost}"
+    printf -- "${root_write_turbo__turbo}" > "${const_system_cpufreq_boost}" || return 1
     log_all "Turbo value written to ${const_system_cpufreq_boost}"
   fi
+
+  unset root_write_turbo__turbo
+  return 0
 }
 
+##
+# Write the given governor value to the scaling driver
+#
+# $1 governor value
 root_write_governor()
 {
-  log_verbose "Write cpu_governor '$1' to all CPUs"
-  for i in $(seq 0 $(( ${const_system_cpu_number} - 1 )) ); do
-    local target="${const_system_cpu_dir}/cpu${i}/cpufreq/scaling_governor"
-    log_verbose "Write governor: $1 to file: ${target}"
-    printf -- "$1" > "${target}"
-    log_all "Governor $1 written to ${target}"
-    unset target
+  root_write_governor__gov="$1"
+
+  log_verbose "Write cpu_governor '${root_write_governor__gov}' to all CPUs"
+  for root_write_governor__i in $(seq 0 $(( const_system_cpu_number - 1 )) ); do
+    root_write_governor__target="${const_system_cpu_dir}/cpu${root_write_governor__i}/cpufreq/scaling_governor"
+    log_verbose "Write governor: ${root_write_governor__gov} to file: ${root_write_governor__target}"
+    printf -- "${root_write_governor__gov}" > "${root_write_governor__target}" || return 1
+    log_all "Governor ${root_write_governor__gov} written to ${root_write_governor__target}"
+
+    unset root_write_governor__target
+    unset root_write_governor__i
   done
 
-  unset governor_name
+  unset root_write_governor__gov
+  return 0
 }
 
+##
+# Set the x86 policy if the x86_perf_policy binary exists and an x86 policy is requested
+#
+# $1 x86 policy name
 root_write_x86_policy()
 {
-  if [ -n "$1" ]; then
-    log_verbose "x86_perf_policy was requested: '$1'"
-    local x86_bin="x86_energy_perf_policy"
-    local x86_bin_result
-    x86_bin_result=$(check_binary "${x86_bin}")
-    if [ $? -eq 1 ]; then
+  root_write_x86_policy__name="$1"
+
+  if [ -n "${root_write_x86_policy__name}" ]; then
+    log_verbose "x86_perf_policy was requested: '${root_write_x86_policy__name}'"
+    # make constant
+    readonly x86_bin="x86_energy_perf_policy"
+
+    root_write_x86_policy__result=
+    root_write_x86_policy__result=$(check_binary "${x86_bin}")
+    root_write_x86_policy__result=$?
+    if [ ${root_write_x86_policy__result} -eq 1 ]; then
       elog_quiet "Not setting x86_perf_policy even though it was requested"
     else
-      log_verbose "Setting x86_perf_policy to '$1'"
+      log_verbose "Setting x86_perf_policy to '${root_write_x86_policy__name}'"
       if [ "${__log_level}" -ge "${const_log_level_verbose}" ]; then
-      "${x86_bin}" -v "$1"
+        log_verbose "Log verbose output for ${x86_bin}"
+        "${x86_bin}" -v "${root_write_x86_policy__name}" || return 1
       else
-      "${x86_bin}" "$1" > /dev/null
+        log_verbose "Silent verbose output for ${x86_bin}"
+        "${x86_bin}" "$root_write_x86_policy__name" > /dev/null || return 1
       fi
     fi
-    unset x86_bin_result
-    unset x86_bin
+
+    unset root_write_x86_policy__result
   else
     log_verbose "x86_perf_policy was not requested"
   fi
+
+  unset root_write_x86_policy__name
+  return 0
 }
 
 root_do_set()
@@ -1490,7 +1554,7 @@ case "${mode}" in
   "${const_mode_get}")
     log_verbose "MODE: GET"
     log_verbose "get_type: ${get_type}"
-    do_get
+    do_get || return 1
     ;;
   "${const_mode_set}")
     log_verbose "MODE: SET"
