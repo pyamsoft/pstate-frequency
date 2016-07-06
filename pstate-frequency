@@ -321,6 +321,7 @@ set_max()
   log_verbose "set_max requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
     set_max__value=""
+
     log_verbose "Check for special case arguments: max, min"
     if [ "${set_max__input}" = "max" ]; then
       log_verbose "Argument was 'max' set to ${const_system_cpu_max_value}"
@@ -376,6 +377,7 @@ set_min()
   log_verbose "set_min requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
     set_min__value=""
+
     log_verbose "Check for special case arguments: max, min"
     if [ "${set_min__input}" = "max" ]; then
       log_verbose "Argument was 'max' set to ${const_system_cpu_max_value}"
@@ -387,6 +389,7 @@ set_min()
       log_verbose "Argument was not special, read as is"
       set_min__value="${set_min__input}"
     fi
+
     log_verbose "Check that '${set_min__value}' is all digits"
     if [ "$(is_digits "${set_min__value}")" -eq 1 ]; then
       set_min__fixed_max="$(( const_system_cpu_max_value - 1 ))"
@@ -428,6 +431,7 @@ set_turbo()
   log_verbose "set_turbo requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
     set_turbo__value=""
+
     log_verbose "Check for special case arguments: on, off"
     if [ "${set_turbo__input}" = "on" ]; then
       if [ "$(has_pstate_dir)" -eq 1 ]; then
@@ -449,6 +453,7 @@ set_turbo()
       log_verbose "Argument was not special, read as is"
       set_turbo__value="${set_turbo__input}"
     fi
+
     log_verbose "Check that '${set_turbo__value}' is all digits"
     if [ "$(is_digits "${set_turbo__value}")" -eq 1 ]; then
       log_verbose "'${set_turbo__value}' is all digits"
@@ -489,6 +494,7 @@ set_governor()
   if [ "${mode}" -eq "${const_mode_set}" ]; then
     set_governor__value=""
     set_governor__all_available_governors="$(cat "${const_system_cpu_available_governors}" )"
+
     if [ "$(is_digits "${set_governor__input}")" -eq 1 ]; then
       set_governor__count=0
       for available_gov in ${set_governor__all_available_governors}; do
@@ -553,49 +559,64 @@ set_governor()
 
 # Set the argument for x86_perf_policy
 # Can be set multiple times, final time overrides
+#
+# $1 user input for x86 policy
 set_x86()
 {
+  set_x86__input="$1"
+
   log_verbose "set_x86 requires SET operation mode"
   if [ "${mode}" -eq "${const_mode_set}" ]; then
-    local value=""
+    set_x86__value=""
     log_verbose "Check for special case arguments: 0, 1, 2"
-    if [ "$1" = "0" ]; then
+    if [ "${set_x86__input}" = "0" ]; then
       log_verbose "Argument was '0' set to powersave"
-      value="powersave"
-    elif [ "$1" = "1" ]; then
+      set_x86__value="powersave"
+    elif [ "${set_x86__input}" = "1" ]; then
       log_verbose "Argument was '1' set to normal"
-      value="normal"
-    elif [ "$1" = "2" ]; then
+      set_x86__value="normal"
+    elif [ "${set_x86__input}" = "2" ]; then
       log_verbose "Argument was '2' set to performance"
-      value="performance"
+      set_x86__value="performance"
     else
       log_verbose "Argument was not special, read as is"
-      value="$1"
+      set_x86__value="${set_x86__input}"
     fi
-    log_verbose "Check that '${value}' is not digits"
-    if [ ! $(is_digits "${value}") -eq 1 ]; then
-      log_verbose "'${value}' is not digits"
-      if [ "${value}" = "none" ]; then
+
+    log_verbose "Check that '${set_x86__value}' is not digits"
+    if [ ! "$(is_digits "${set_x86__value}")" -eq 1 ]; then
+      log_verbose "'${set_x86__value}' is not digits"
+      if [ "${set_x86__value}" = "none" ]; then
         log_verbose "x86_policy_arg: None requested. Reset values"
         set_x86_policy_type="${const_set_x86_policy_false}"
         set_x86_policy_arg=""
-      elif [ "${value}" != "powersave" ] && [ "${value}" != "normal" ] && [ "${value}" != "performance" ]; then
+      elif [ "${set_x86__value}" != "powersave" ] \
+        && [ "${set_x86__value}" != "normal" ] \
+        && [ "${set_x86__value}" != "performance" ]; then
         elog_quiet "Invalid x86_perf_policy specified, do not change"
       else
         set_x86_policy_type="${const_set_x86_policy_true}"
-        set_x86_policy_arg="${value}"
+        set_x86_policy_arg="${set_x86__value}"
         log_verbose "set_x86_policy_arg: '${set_x86_policy_arg}'"
       fi
     else
-      elog_quiet "x86 argument '${value}' is a number"
-      unset value
-      exit 2
+      elog_quiet "x86 argument '${set_x86__value}' is a number"
+
+      unset set_x86__value
+      unset set_x86__input
+      return 1
     fi
-    unset value
+
+    unset set_x86__value
   else
     elog_quiet "Cannot set x86 outside of SET operation mode"
-    exit 3
+
+    unset set_x86__input
+    return 1
   fi
+
+  unset set_x86__input
+  return 0
 }
 
 # Set the power plan based on argument
