@@ -852,50 +852,66 @@ set_power_plan_max()
 }
 
 # Handle long options which take arguments
+#
+# $1 long option
+# $2 long option argument
 handle_long_option_argument()
 {
-  if [ "$1" = '-' ]; then
-    log_all "Skip '-' processing"
-  elif [ -z "${option_expects_argument}" ]; then
-    elog_verbose "option does not expect argument!"
-    elog_verbose "argument: $1"
-    elog_quiet "Illegal argument $1"
-    exit 2
-  else
-    log_verbose "option expects argument: ${option_expects_argument}"
-    log_verbose "argument: $1"
+  handle_long_option_argument__opt="$1"
+  handle_long_option_argument__input="$2"
 
-    case "${option_expects_argument}" in
+  if [ "${handle_long_option_argument__input}" = '-' ]; then
+    log_all "Skip '-' processing"
+  elif [ -z "${handle_long_option_argument__opt}" ]; then
+    elog_verbose "option does not expect argument!"
+    elog_verbose "argument: ${handle_long_option_argument__input}"
+    elog_quiet "Illegal argument ${handle_long_option_argument__input}"
+
+    unset handle_long_option_argument__opt
+    unset handle_long_option_argument__input
+    return 1
+  else
+    log_verbose "option expects argument: ${handle_long_option_argument__opt}"
+    log_verbose "argument: ${handle_long_option_argument__input}"
+
+    case "${handle_long_option_argument__opt}" in
       plan)
         log_verbose "Long option: plan"
-        set_power_plan "$1"
+        set_power_plan "${handle_long_option_argument__input}"
         ;;
       max)
         log_verbose "Long option: max"
-        set_max "$1"
+        set_max "${handle_long_option_argument__input}"
         ;;
       min)
         log_verbose "Long option: min"
-        set_min "$1"
+        set_min "${handle_long_option_argument__input}"
         ;;
       turbo)
         log_verbose "Long option: turbo"
-        set_turbo "$1"
+        set_turbo "${handle_long_option_argument__input}"
         ;;
       governor)
         log_verbose "Long option: governor"
-        set_governor "$1"
+        set_governor "${handle_long_option_argument__input}"
         ;;
       x86)
         log_verbose "Long option: x86"
-        set_x86 "$1"
+        set_x86 "${handle_long_option_argument__input}"
         ;;
       *)
-        elog_quiet "Invalid option --${option_expects_argument}"
-        exit 2
+        elog_quiet "Invalid option --${handle_long_option_argument__opt}"
+
+        unset handle_long_option_argument__opt
+        unset handle_long_option_argument__input
+        return 1
         ;;
     esac
   fi
+
+  unset handle_long_option_argument__opt
+  unset handle_long_option_argument__input
+  return 0
 }
 
 do_get_current()
@@ -1281,7 +1297,6 @@ readonly const_system_cpufreq_boost="${const_system_cpu_dir}/cpufreq/boost"
 # While risky to call eval, this is one way to
 # emulate the bash indirect_expansion ability
 long_option=""
-option_expects_argument=""
 eval optind_expanded="\$${OPTIND}"
 while [ -n "${optind_expanded}" ]; do
   while getopts ":HVGSp:m:n:t:g:x:crdq-:" option; do
@@ -1297,8 +1312,7 @@ while [ -n "${optind_expanded}" ]; do
       exit 2
     fi
 
-    option_expects_argument=""
-    long_option="${option_expects_argument}"
+    long_option=""
     case "${option}" in
       -)
         log_verbose "parse long option: -${option}${OPTARG}"
@@ -1321,28 +1335,23 @@ while [ -n "${optind_expanded}" ]; do
             ;;
           plan)
             log_verbose "Attempt to set plan"
-            option_expects_argument="plan"
-            long_option="${option_expects_argument}"
+            long_option="plan"
             ;;
           max)
             log_verbose "Attempt to set max"
-            option_expects_argument="max"
-            long_option="${option_expects_argument}"
+            long_option="max"
             ;;
           min)
             log_verbose "Attempt to set min"
-            option_expects_argument="min"
-            long_option="${option_expects_argument}"
+            long_option="min"
             ;;
           turbo)
             log_verbose "Attempt to set turbo"
-            option_expects_argument="turbo"
-            long_option="${option_expects_argument}"
+            long_option="turbo"
             ;;
           governor)
             log_verbose "Attempt to set governor"
-            option_expects_argument="governor"
-            long_option="${option_expects_argument}"
+            long_option="governor"
             ;;
           current)
             log_verbose "Set get_type to current"
@@ -1366,8 +1375,7 @@ while [ -n "${optind_expanded}" ]; do
             ;;
           x86)
             log_verbose "Attempt to set x86_perf_policy"
-            option_expects_argument="x86"
-            long_option="${option_expects_argument}"
+            long_option="x86"
             ;;
           *)
             # We must provide our own error message in this case
@@ -1442,7 +1450,7 @@ while [ -n "${optind_expanded}" ]; do
   # Re-establish the current OPTIND target
   eval optind_expanded="\$${OPTIND}"
   if [ -z "${optind_expanded}" ]; then
-    if [ -n "${option_expects_argument}" ]; then
+    if [ -n "${long_option}" ]; then
       elog_quiet "Long option --${long_option} expects argument"
       exit 2
     else
@@ -1450,11 +1458,10 @@ while [ -n "${optind_expanded}" ]; do
     fi
   else
     # This is a plain arg and should be handled by one of the options which takes an argument
-    handle_long_option_argument "${optind_expanded}"
+    handle_long_option_argument "${long_option}" "${optind_expanded}"
 
     # Set back to null
-    option_expects_argument=""
-    long_option="${option_expects_argument}"
+    long_option=
   fi
 
   # Shift the options
