@@ -31,15 +31,6 @@ export LC_ALL=C
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
 readonly VERSION="3.3.3"
 
-# Exit codes
-# 0 - Success
-# 1 - Missing Binary
-# 2 - Invalid option
-# 3 - Wrong operation __exec_mode
-# 4 - Invalid power plan
-# 5 - Missing essential requirement
-# 6 - Missing root
-
 # Options that do not handle an argument
 execution_delay=0 # Number of seconds to delay script
 execution_sleep=0 # Number of seconds to sleep in between setting values
@@ -53,12 +44,6 @@ readonly LOG_LEVEL_NORMAL=2
 readonly LOG_LEVEL_VERBOSE=3
 readonly LOG_LEVEL_ALL=4
 __log_level="${LOG_LEVEL_NORMAL}"
-
-# Execution modes
-readonly EXEC_MODE_NONE=0
-readonly EXEC_MODE_GET=1
-readonly EXEC_MODE_SET=2
-__exec_mode="${EXEC_MODE_NONE}"
 
 # Get modes
 readonly GET_TYPE_CURRENT=0
@@ -364,7 +349,7 @@ set_max()
   set_max__mode="$1"
   set_max__input="$2"
 
-  log_verbose "set_max requires SET operation __exec_mode"
+  log_verbose "set_max requires SET operation exec_mode"
   if [ "${set_max__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_max__value=""
 
@@ -403,7 +388,7 @@ set_max()
 
     unset set_max__value
   else
-    elog_quiet "Cannot set max outside of SET operation __exec_mode"
+    elog_quiet "Cannot set max outside of SET operation exec_mode"
 
     unset set_max__input
     unset set_max__mode
@@ -426,7 +411,7 @@ set_min()
   set_min__mode="$1"
   set_min__input="$2"
 
-  log_verbose "set_min requires SET operation __exec_mode"
+  log_verbose "set_min requires SET operation exec_mode"
   if [ "${set_min__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_min__value=""
 
@@ -463,7 +448,7 @@ set_min()
     fi
     unset set_min__value
   else
-    elog_quiet "Cannot set min outside of SET operation __exec_mode"
+    elog_quiet "Cannot set min outside of SET operation exec_mode"
 
     unset set_min__mode
     unset set_min__input
@@ -486,7 +471,7 @@ set_turbo()
   set_turbo__mode="$1"
   set_turbo__input="$2"
 
-  log_verbose "set_turbo requires SET operation __exec_mode"
+  log_verbose "set_turbo requires SET operation exec_mode"
   if [ "${set_turbo__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_turbo__value=""
 
@@ -531,7 +516,7 @@ set_turbo()
 
     unset set_turbo__value
   else
-    elog_quiet "Cannot set turbo outside of SET operation __exec_mode"
+    elog_quiet "Cannot set turbo outside of SET operation exec_mode"
 
     unset set_turbo__mode
     unset set_turbo__input
@@ -554,7 +539,7 @@ set_governor()
   set_governor__mode="$1"
   set_governor__input="$2"
 
-  log_verbose "set_governor requires SET operation __exec_mode"
+  log_verbose "set_governor requires SET operation exec_mode"
   if [ "${set_governor__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_governor__value=""
     set_governor__all_available_governors="$(cat "${SYSTEM_CPU_GOVERNORS}" )"
@@ -612,7 +597,7 @@ set_governor()
     unset set_governor__all_available_governors
     unset set_governor__value
   else
-    elog_quiet "Cannot set governor outside of SET operation __exec_mode"
+    elog_quiet "Cannot set governor outside of SET operation exec_mode"
 
     unset set_governor__input
     unset set_governor__mode
@@ -635,7 +620,7 @@ set_x86()
   set_x86__mode="$1"
   set_x86__input="$2"
 
-  log_verbose "set_x86 requires SET operation __exec_mode"
+  log_verbose "set_x86 requires SET operation exec_mode"
   if [ "${set_x86__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_x86__value=""
     log_verbose "Check for special case arguments: 0, 1, 2"
@@ -680,7 +665,7 @@ set_x86()
 
     unset set_x86__value
   else
-    elog_quiet "Cannot set x86 outside of SET operation __exec_mode"
+    elog_quiet "Cannot set x86 outside of SET operation exec_mode"
 
     unset set_x86__mode
     unset set_x86__input
@@ -702,7 +687,7 @@ set_power_plan()
   set_power_plan__mode="$1"
   set_power_plan__input="$2"
 
-  log_verbose "set_power_plan requires SET operation __exec_mode"
+  log_verbose "set_power_plan requires SET operation exec_mode"
   if [ "${set_power_plan__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_power_plan__value=""
 
@@ -765,7 +750,7 @@ set_power_plan()
     fi
     unset set_power_plan__value
   else
-    elog_quiet "Cannot set power plan outside of SET operation __exec_mode"
+    elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
     unset set_power_plan__mode
     unset set_power_plan__input
@@ -830,7 +815,7 @@ set_power_plan_auto()
   return 0
 }
 
-# Sets the power plan to a low power __exec_mode
+# Sets the power plan to a low power mode
 #
 # $1 execution mode
 set_power_plan_powersave()
@@ -852,7 +837,7 @@ set_power_plan_powersave()
   return 0
 }
 
-# Sets the power plan to a balanced __exec_mode
+# Sets the power plan to a balanced mode
 #
 # $1 execution mode
 set_power_plan_balanced()
@@ -875,7 +860,7 @@ set_power_plan_balanced()
   return 0
 }
 
-# Sets the power plan to a performance __exec_mode
+# Sets the power plan to a performance mode
 #
 # $1 execution mode
 set_power_plan_performance()
@@ -897,7 +882,7 @@ set_power_plan_performance()
   return 0
 }
 
-# Sets the power plan to the max available performance __exec_mode
+# Sets the power plan to the max available performance mode
 #
 # $1 execution mode
 set_power_plan_max()
@@ -1416,6 +1401,13 @@ has_pstate_dir()
 # $@ all command line args
 main()
 {
+  # Execution modes
+  readonly EXEC_MODE_NONE=0
+  readonly EXEC_MODE_GET=1
+  readonly EXEC_MODE_SET=2
+
+  exec_mode="${EXEC_MODE_NONE}"
+
   # Sanity check
   check_binary grep || return 1
   check_binary cat || return 1
@@ -1457,12 +1449,12 @@ main()
                 return 0
                 ;;
               get)
-                log_verbose "Set operation __exec_mode to GET"
-                __exec_mode="${EXEC_MODE_GET}"
+                log_verbose "Set operation exec_mode to GET"
+                exec_mode="${EXEC_MODE_GET}"
                 ;;
               set)
-                log_verbose "Set operation __exec_mode to SET"
-                __exec_mode="${EXEC_MODE_SET}"
+                log_verbose "Set operation exec_mode to SET"
+                exec_mode="${EXEC_MODE_SET}"
                 ;;
               plan)
                 log_verbose "Attempt to set plan"
@@ -1525,32 +1517,32 @@ main()
             return 0
             ;;
           G)
-            log_verbose "Set operation __exec_mode to GET"
-            __exec_mode="${EXEC_MODE_GET}"
+            log_verbose "Set operation exec_mode to GET"
+            exec_mode="${EXEC_MODE_GET}"
             ;;
           S)
-            log_verbose "Set operation __exec_mode to SET"
-            __exec_mode="${EXEC_MODE_SET}"
+            log_verbose "Set operation exec_mode to SET"
+            exec_mode="${EXEC_MODE_SET}"
             ;;
           p)
             log_verbose "Attempt to set plan"
-            set_power_plan "${__exec_mode}" "${OPTARG}"
+            set_power_plan "${exec_mode}" "${OPTARG}"
             ;;
           m)
             log_verbose "Attempt to set max"
-            set_max "${__exec_mode}" "${OPTARG}"
+            set_max "${exec_mode}" "${OPTARG}"
             ;;
           n)
             log_verbose "Attempt to set min"
-            set_min "${__exec_mode}" "${OPTARG}"
+            set_min "${exec_mode}" "${OPTARG}"
             ;;
           t)
             log_verbose "Attempt to set turbo"
-            set_turbo "${__exec_mode}" "${OPTARG}"
+            set_turbo "${exec_mode}" "${OPTARG}"
             ;;
           g)
             log_verbose "Attempt to set governor"
-            set_governor "${__exec_mode}" "${OPTARG}"
+            set_governor "${exec_mode}" "${OPTARG}"
             ;;
           c)
             log_verbose "Set __exec_get_type to current"
@@ -1568,7 +1560,7 @@ main()
             ;;
           x)
             log_verbose "Attempt to set x86_perf_policy"
-            set_x86 "${__exec_mode}" "${OPTARG}"
+            set_x86 "${exec_mode}" "${OPTARG}"
             ;;
           *)
             elog_quiet "Illegal option -${OPTARG}"
@@ -1594,7 +1586,7 @@ main()
         fi
       else
         # This is a plain arg and should be handled by one of the options which takes an argument
-        handle_long_option_argument "${__exec_mode}" "${long_option}" "${optind_expanded}"
+        handle_long_option_argument "${exec_mode}" "${long_option}" "${optind_expanded}"
 
         # Set back to null
         long_option=
@@ -1617,14 +1609,14 @@ main()
     done
   fi
 
-  case "${__exec_mode}" in
+  case "${exec_mode}" in
     "${EXEC_MODE_GET}")
-      log_verbose "__exec_mode: GET"
+      log_verbose "exec_mode: GET"
       log_verbose "__exec_get_type: ${__exec_get_type}"
       do_get || return 1
       ;;
     "${EXEC_MODE_SET}")
-      log_verbose "__exec_mode: SET"
+      log_verbose "exec_mode: SET"
       log_verbose "set_max: ${__exec_set_max_type} [${__exec_set_max_arg}]"
       log_verbose "set_min: ${__exec_set_min_type} [${__exec_set_min_arg}]"
       log_verbose "set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]"
