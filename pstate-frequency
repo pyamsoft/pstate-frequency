@@ -1047,7 +1047,8 @@ root_write_max()
   root_write___max_freq=$(( root_write_max__max * SYSTEM_CPU_MAX_FREQ \
     / 100 ))
   for root_write___i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
-    root_write___target="${SYSTEM_CPU_DIR}/cpu${root_write___i}/cpufreq/scaling_max_freq"
+    root_write___target="${SYSTEM_CPU_DIR}/cpu${root_write___i}\
+      /cpufreq/scaling_max_freq"
     log_verbose "Write freq: ${root_write___max_freq}KHz to \
       file: ${root_write___target}"
     printf -- "${root_write___max_freq}" \
@@ -1083,7 +1084,8 @@ root_write_min()
   root_write_min__min_freq=$(( root_write_min__min * SYSTEM_CPU_MAX_FREQ \
     / 100 ))
   for root_write_min__i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
-    root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq"
+    root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}\
+      /cpufreq/scaling_min_freq"
     log_verbose "Write freq: ${root_write_min__min_freq}KHz to \
       file: ${root_write_min__target}"
     printf -- "${root_write_min__min_freq}" \
@@ -1136,7 +1138,8 @@ root_write_governor()
 
   log_verbose "Write cpu_governor '${root_write_governor__gov}' to all CPUs"
   for root_write_governor__i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
-    root_write_governor__target="${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor"
+    root_write_governor__target="${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}\
+      /cpufreq/scaling_governor"
     log_verbose "Write governor: ${root_write_governor__gov} to \
       file: ${root_write_governor__target}"
     printf -- "${root_write_governor__gov}" \
@@ -1678,7 +1681,8 @@ readonly SYSTEM_SCALING_MAX_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_max_fre
 readonly SYSTEM_SCALING_MIN_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_freq"
 readonly SYSTEM_SCALING_GOVERNOR="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_governor"
 readonly SYSTEM_SCALING_DRIVER="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_driver"
-readonly SYSTEM_CPU_GOVERNORS="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_available_governors"
+readonly SYSTEM_CPU_GOVERNORS="${SYSTEM_CPU_DIR}/cpu0/cpufreq\
+  /scaling_available_governors"
 readonly SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
 readonly SYSTEM_CPU_MAX_FREQ="$(cat \
   "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq" )"
