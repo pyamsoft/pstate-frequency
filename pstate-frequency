@@ -627,7 +627,10 @@ set_power_plan()
   if [ "${set_power_plan__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_power_plan__value=""
 
-    log_verbose "Check for special case arguments: auto, powersave, balanced, performance, max"
+    log_verbose "$(cat << EOF
+Check for special case arguments: auto, powersave, balanced, performance, max
+EOF
+)"
     if [ "${set_power_plan__input}" = "auto" ]; then
       log_verbose "Argument was 'auto' set to ${POWER_PLAN_AUTO}"
       set_power_plan__value="${POWER_PLAN_AUTO}"
@@ -677,7 +680,10 @@ set_power_plan()
           ;;
       esac
     else
-      elog_quiet "power plan argument '${set_power_plan__value}' is not a number"
+      elog_quiet "$(cat << EOF
+power plan argument '${set_power_plan__value}' is not a number
+EOF
+)"
 
       unset set_power_plan__value
       unset set_power_plan__mode
@@ -707,7 +713,8 @@ is_power_supply_mains()
 {
   for is_power_supply_mains__power_supply in "${SYSTEM_POWER_SUPPLY_DIR}"/*; do
     # Get the power_supply type
-    is_power_supply_mains__type="$(cat "${is_power_supply_mains__power_supply}"/type )"
+    is_power_supply_mains__type="$(cat \
+      "${is_power_supply_mains__power_supply}"/type )"
 
     # Check if the type is Mains
     if [ "${is_power_supply_mains__type}" = "Mains" ]; then
@@ -869,30 +876,37 @@ handle_long_option_argument()
     case "${handle_long_option_argument__opt}" in
       plan)
         log_verbose "Long option: plan"
-        set_power_plan "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
+        set_power_plan "${handle_long_option_argument__mode}" \
+          "${handle_long_option_argument__input}" || return 1
         ;;
       max)
         log_verbose "Long option: max"
-        set_max "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
+        set_max "${handle_long_option_argument__mode}" \
+          "${handle_long_option_argument__input}" || return 1
         ;;
       min)
         log_verbose "Long option: min"
-        set_min "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
+        set_min "${handle_long_option_argument__mode}" \
+          "${handle_long_option_argument__input}" || return 1
         ;;
       turbo)
         log_verbose "Long option: turbo"
-        set_turbo "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
+        set_turbo "${handle_long_option_argument__mode}" \
+          "${handle_long_option_argument__input}" || return 1
         ;;
       governor)
         log_verbose "Long option: governor"
-        set_governor "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
+        set_governor "${handle_long_option_argument__mode}" \
+          "${handle_long_option_argument__input}" || return 1
         ;;
       x86)
         log_verbose "Long option: x86"
-        set_x86 "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
+        set_x86 "${handle_long_option_argument__mode}" \
+          "${handle_long_option_argument__input}" || return 1
         ;;
       *)
-        elog_quiet "Invalid option --${handle_long_option_argument__opt}" || return 1
+        elog_quiet "Invalid option --${handle_long_option_argument__opt}" \
+          || return 1
 
         unset handle_long_option_argument__mode
         unset handle_long_option_argument__opt
