@@ -138,35 +138,41 @@ check_binary()
 # Print usage
 print_usage()
 {
-  log "usage:"
-  log "pstate-frequency [verbose] [ACTION] [option(s)]"
-  log
-  log "verbose:"
-  log "    unprivileged:"
-  log "    -d | --debug     Print debugging messages to stdout (multiple)"
-  log "    -q | --quiet     Supress all non-error output (multiple)"
-  log
-  log
-  log "actions:"
-  log "    unprivileged:"
-  log "    -H | --help      Display this help and exit"
-  log "    -V | --version   Display application version and exit"
-  log "    -G | --get       Access current CPU values"
-  log "    --delay          Delay execution by 5 seconds"
-  log "    privileged:"
-  log "    -S | --set       Modify current CPU values"
-  log
-  log
-  log "options:"
-  log "    unprivileged:"
-  log "    -c | --current   Display the current user set CPU values"
-  log "    -r | --real      Display the real time CPU frequencies"
-  log "    privileged:"
-  log "    -p | --plan      Set a predefined power plan"
-  log "    -m | --max       Modify current CPU max frequency"
-  log "    -g | --governor  Set the cpufreq governor"
-  log "    -n | --min       Modify current CPU min frequency"
-  log "    -t | --turbo     Modify curent CPU turbo boost state"
+  print_version
+  log "$(cat << EOF
+
+usage:
+pstate-frequency [verbose] [ACTION] [option(s)]
+
+verbose:
+    unprivileged:
+    -d | --debug     Print debugging messages to stdout (multiple)
+    -q | --quiet     Supress all non-error output (multiple)
+
+
+actions:
+    unprivileged:
+    -H | --help      Display this help and exit
+    -V | --version   Display application version and exit
+    -G | --get       Access current CPU values
+    --delay          Delay execution by 5 seconds
+    privileged:
+    -S | --set       Modify current CPU values
+
+
+options:
+    unprivileged:
+    -c | --current   Display the current user set CPU values
+    -r | --real      Display the real time CPU frequencies
+    privileged:
+    -p | --plan      Set a predefined power plan
+    -m | --max       Modify current CPU max frequency
+    -g | --governor  Set the cpufreq governor
+    -n | --min       Modify current CPU min frequency
+    -t | --turbo     Modify curent CPU turbo boost state
+EOF
+)"
+  return 0
 }
 
 ##
