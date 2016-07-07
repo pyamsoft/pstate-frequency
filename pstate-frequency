@@ -1451,7 +1451,6 @@ main()
   if [ $# -gt 0 ]; then
     long_option=""
     eval optind_expanded="\$${OPTIND}"
-    # shellcheck disable=SC2154
     while [ -n "${optind_expanded}" ]; do
       while getopts ":HVGSp:m:n:t:g:x:crdq-:" option; do
 
