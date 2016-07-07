@@ -939,8 +939,10 @@ do_get_current()
     do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}" )"
   fi
 
-  do_get_current__cpu_max_value=$(( do_get_current__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ ))
-  do_get_current__cpu_min_value=$(( do_get_current__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ ))
+  do_get_current__cpu_max_value=$(( do_get_current__cpu_max_freq * 100 \
+    / SYSTEM_CPU_MAX_FREQ ))
+  do_get_current__cpu_min_value=$(( do_get_current__cpu_min_freq * 100 \
+    / SYSTEM_CPU_MAX_FREQ ))
 
   do_get_current__cpu_turbo_onoff=""
   if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
@@ -958,11 +960,17 @@ do_get_current()
   fi
 
   print_version
-  log "    pstate::CPU_DRIVER   -> ${do_get_current__cpu_driver}"
-  log "    pstate::CPU_GOVERNOR -> ${do_get_current__cpu_governor}"
-  log "    pstate::TURBO        -> ${do_get_current__cpu_turbo} [${do_get_current__cpu_turbo_onoff}]"
-  log "    pstate::CPU_MIN      -> ${do_get_current__cpu_min_value}%% [${do_get_current__cpu_min_freq}KHz]"
-  log "    pstate::CPU_MAX      -> ${do_get_current__cpu_max_value}%% [${do_get_current__cpu_max_freq}KHz]"
+  log "$(cat << EOF
+    pstate::CPU_DRIVER   -> ${do_get_current__cpu_driver}
+    pstate::CPU_GOVERNOR -> ${do_get_current__cpu_governor}
+    pstate::TURBO        -> ${do_get_current__cpu_turbo} \
+[${do_get_current__cpu_turbo_onoff}]
+    pstate::CPU_MIN      -> ${do_get_current__cpu_min_value}% \
+[${do_get_current__cpu_min_freq}KHz]
+    pstate::CPU_MAX      -> ${do_get_current__cpu_max_value}% \
+[${do_get_current__cpu_max_freq}KHz]
+EOF
+)"
 
   unset do_get_current__cpu_turbo_onoff
   unset do_get_current__cpu_max_freq
