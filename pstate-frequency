@@ -235,11 +235,9 @@ set_variable_bounds()
   set_variable_bounds__bottom="$2"
   set_variable_bounds__top="$3"
 
-  if [ "${set_variable_bounds__number}" \
-    -lt "${set_variable_bounds__bottom}" ]; then
+  if [ "${set_variable_bounds__number}" -lt "${set_variable_bounds__bottom}" ]; then
     printf -- "${set_variable_bounds__bottom}"
-  elif [ "${set_variable_bounds__number}" \
-    -gt "${set_variable_bounds__top}" ]; then
+  elif [ "${set_variable_bounds__number}" -gt "${set_variable_bounds__top}" ]; then
     printf -- "${set_variable_bounds__top}"
   else
     printf -- "${set_variable_bounds__number}"
@@ -283,10 +281,8 @@ set_max()
       set_max__fixed_min="$(( SYSTEM_CPU_MIN_VALUE + 1 ))"
 
       log_verbose "'${set_max__value}' is all digits"
-      log_verbose "Bound value '${set_max__value}}' between \
-        ${set_max__fixed_min} and ${SYSTEM_CPU_MAX_VALUE}"
-      set_max__value="$(set_variable_bounds "${set_max__value}" \
-        "${set_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}")"
+      log_verbose "Bound value '${set_max__value}}' between ${set_max__fixed_min} and ${SYSTEM_CPU_MAX_VALUE}"
+      set_max__value="$(set_variable_bounds "${set_max__value}" "${set_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}")"
       __exec_set_max_type="${SET_MAX_TRUE}"
       __exec_set_max_arg="${set_max__value}"
       log_verbose "__exec_set_max_arg: '${__exec_set_max_arg}'"
@@ -347,10 +343,8 @@ set_min()
       set_min__fixed_max="$(( SYSTEM_CPU_MAX_VALUE - 1 ))"
 
       log_verbose "'${set_min__value}' is all digits"
-      log_verbose "Bound value '${set_min__value}' between \
-        ${SYSTEM_CPU_MIN_VALUE} and ${set_min__fixed_max}"
-      set_min__value="$(set_variable_bounds "${set_min__value}" \
-        "${SYSTEM_CPU_MIN_VALUE}" "${set_min__fixed_max}")"
+      log_verbose "Bound value '${set_min__value}' between ${SYSTEM_CPU_MIN_VALUE} and ${set_min__fixed_max}"
+      set_min__value="$(set_variable_bounds "${set_min__value}" "${SYSTEM_CPU_MIN_VALUE}" "${set_min__fixed_max}")"
       unset fixed_max
       __exec_set_min_type="${SET_MIN_TRUE}"
       __exec_set_min_arg="${set_min__value}"
@@ -615,8 +609,7 @@ set_power_plan()
   if [ "${set_power_plan__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_power_plan__value=""
 
-    log_verbose "Check for special case arguments: auto, powersave, \
-      balanced, performance, max"
+    log_verbose "Check for special case arguments: auto, powersave, balanced, performance, max"
     if [ "${set_power_plan__input}" = "auto" ]; then
       log_verbose "Argument was 'auto' set to ${POWER_PLAN_AUTO}"
       set_power_plan__value="${POWER_PLAN_AUTO}"
@@ -666,8 +659,7 @@ set_power_plan()
           ;;
       esac
     else
-      elog_quiet "power plan argument '${set_power_plan__value}' \
-        is not a number"
+      elog_quiet "power plan argument '${set_power_plan__value}' is not a number"
 
       unset set_power_plan__value
       unset set_power_plan__mode
@@ -697,8 +689,7 @@ is_power_supply_mains()
 {
   for is_power_supply_mains__power_supply in "${SYSTEM_POWER_SUPPLY_DIR}"/*; do
     # Get the power_supply type
-    is_power_supply_mains__type="$(cat \
-      "${is_power_supply_mains__power_supply}"/type )"
+    is_power_supply_mains__type="$(cat "${is_power_supply_mains__power_supply}"/type )"
 
     # Check if the type is Mains
     if [ "${is_power_supply_mains__type}" = "Mains" ]; then
@@ -860,37 +851,30 @@ handle_long_option_argument()
     case "${handle_long_option_argument__opt}" in
       plan)
         log_verbose "Long option: plan"
-        set_power_plan "${handle_long_option_argument__mode}" \
-          "${handle_long_option_argument__input}" || return 1
+        set_power_plan "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       max)
         log_verbose "Long option: max"
-        set_max "${handle_long_option_argument__mode}" \
-          "${handle_long_option_argument__input}" || return 1
+        set_max "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       min)
         log_verbose "Long option: min"
-        set_min "${handle_long_option_argument__mode}" \
-          "${handle_long_option_argument__input}" || return 1
+        set_min "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       turbo)
         log_verbose "Long option: turbo"
-        set_turbo "${handle_long_option_argument__mode}" \
-          "${handle_long_option_argument__input}" || return 1
+        set_turbo "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       governor)
         log_verbose "Long option: governor"
-        set_governor "${handle_long_option_argument__mode}" \
-          "${handle_long_option_argument__input}" || return 1
+        set_governor "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       x86)
         log_verbose "Long option: x86"
-        set_x86 "${handle_long_option_argument__mode}" \
-          "${handle_long_option_argument__input}" || return 1
+        set_x86 "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
         ;;
       *)
-        elog_quiet "Invalid option --${handle_long_option_argument__opt}" \
-          || return 1
+        elog_quiet "Invalid option --${handle_long_option_argument__opt}" || return 1
 
         unset handle_long_option_argument__mode
         unset handle_long_option_argument__opt
@@ -923,10 +907,8 @@ do_get_current()
     do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}" )"
   fi
 
-  do_get_current__cpu_max_value=$(( do_get_current__cpu_max_freq * 100 \
-    / SYSTEM_CPU_MAX_FREQ ))
-  do_get_current__cpu_min_value=$(( do_get_current__cpu_min_freq * 100 \
-    / SYSTEM_CPU_MAX_FREQ ))
+  do_get_current__cpu_max_value=$(( do_get_current__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ ))
+  do_get_current__cpu_min_value=$(( do_get_current__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ ))
 
   do_get_current__cpu_turbo_onoff=""
   if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
@@ -946,12 +928,9 @@ do_get_current()
   print_version
   log "    pstate::CPU_DRIVER   -> ${do_get_current__cpu_driver}"
   log "    pstate::CPU_GOVERNOR -> ${do_get_current__cpu_governor}"
-  log "    pstate::TURBO        -> ${do_get_current__cpu_turbo} \
-    [${do_get_current__cpu_turbo_onoff}]"
-  log "    pstate::CPU_MIN      -> ${do_get_current__cpu_min_value}%% \
-    [${do_get_current__cpu_min_freq}KHz]"
-  log "    pstate::CPU_MAX      -> ${do_get_current__cpu_max_value}%% \
-    [${do_get_current__cpu_max_freq}KHz]"
+  log "    pstate::TURBO        -> ${do_get_current__cpu_turbo} [${do_get_current__cpu_turbo_onoff}]"
+  log "    pstate::CPU_MIN      -> ${do_get_current__cpu_min_value}%% [${do_get_current__cpu_min_freq}KHz]"
+  log "    pstate::CPU_MAX      -> ${do_get_current__cpu_max_value}%% [${do_get_current__cpu_max_freq}KHz]"
 
   unset do_get_current__cpu_turbo_onoff
   unset do_get_current__cpu_max_freq
@@ -1037,22 +1016,16 @@ root_write_max()
 {
   root_write_max__max="$1"
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    log_verbose "Write max_value '${root_write_max__max}' to \
-      intel_pstate file: ${SYSTEM_INTEL_PSTATE_MAX}"
-    printf -- "${root_write_max__max}" \
-      > "${SYSTEM_INTEL_PSTATE_MAX}" || return 1
+    log_verbose "Write max_value '${root_write_max__max}' to intel_pstate file: ${SYSTEM_INTEL_PSTATE_MAX}"
+    printf -- "${root_write_max__max}" > "${SYSTEM_INTEL_PSTATE_MAX}" || return 1
     log_all "Max value written to ${SYSTEM_INTEL_PSTATE_MAX}"
   fi
 
-  root_write___max_freq=$(( root_write_max__max * SYSTEM_CPU_MAX_FREQ \
-    / 100 ))
+  root_write___max_freq=$(( root_write_max__max * SYSTEM_CPU_MAX_FREQ / 100 ))
   for root_write___i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
-    root_write___target="${SYSTEM_CPU_DIR}/cpu${root_write___i}\
-      /cpufreq/scaling_max_freq"
-    log_verbose "Write freq: ${root_write___max_freq}KHz to \
-      file: ${root_write___target}"
-    printf -- "${root_write___max_freq}" \
-      > "${root_write___target}" || return 1
+    root_write___target="${SYSTEM_CPU_DIR}/cpu${root_write___i}/cpufreq/scaling_max_freq"
+    log_verbose "Write freq: ${root_write___max_freq}KHz to file: ${root_write___target}"
+    printf -- "${root_write___max_freq}" > "${root_write___target}" || return 1
     log_all "Max value written to ${root_write___target}"
 
     unset root_write___target
@@ -1074,22 +1047,16 @@ root_write_min()
   root_write_min__min="$1"
 
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    log_verbose "Write min_value '${root_write_min__min}' to \
-      intel_pstate file: ${SYSTEM_INTEL_PSTATE_MIN}"
-    printf -- "${root_write_min__min}" \
-      > "${SYSTEM_INTEL_PSTATE_MIN}" || return 1
+    log_verbose "Write min_value '${root_write_min__min}' to intel_pstate file: ${SYSTEM_INTEL_PSTATE_MIN}"
+    printf -- "${root_write_min__min}" > "${SYSTEM_INTEL_PSTATE_MIN}" || return 1
     log_all "Min value written to ${SYSTEM_INTEL_PSTATE_MIN}"
   fi
 
-  root_write_min__min_freq=$(( root_write_min__min * SYSTEM_CPU_MAX_FREQ \
-    / 100 ))
+  root_write_min__min_freq=$(( root_write_min__min * SYSTEM_CPU_MAX_FREQ / 100 ))
   for root_write_min__i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
-    root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}\
-      /cpufreq/scaling_min_freq"
-    log_verbose "Write freq: ${root_write_min__min_freq}KHz to \
-      file: ${root_write_min__target}"
-    printf -- "${root_write_min__min_freq}" \
-      > "${root_write_min__target}" || return 1
+    root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq"
+    log_verbose "Write freq: ${root_write_min__min_freq}KHz to file: ${root_write_min__target}"
+    printf -- "${root_write_min__min_freq}" > "${root_write_min__target}" || return 1
     log_all "Min value written to ${root_write_min__target}"
 
     unset root_write_min__target
@@ -1111,16 +1078,12 @@ root_write_turbo()
   root_write_turbo__turbo="$1"
 
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    log_verbose "Write turbo_value '${root_write_turbo__turbo}' to \
-      intel_pstate file: ${SYSTEM_INTEL_PSTATE_TURBO}"
-    printf -- "${root_write_turbo__turbo}" \
-      > "${SYSTEM_INTEL_PSTATE_TURBO}" || return 1
+    log_verbose "Write turbo_value '${root_write_turbo__turbo}' to intel_pstate file: ${SYSTEM_INTEL_PSTATE_TURBO}"
+    printf -- "${root_write_turbo__turbo}" > "${SYSTEM_INTEL_PSTATE_TURBO}" || return 1
     log_all "Turbo value written to ${SYSTEM_INTEL_PSTATE_TURBO}"
   else
-    log_verbose "Write turbo_value '${root_write_turbo__turbo}' to \
-      acpi-cpufreq file: ${SYSTEM_CPUFREQ_BOOST}"
-    printf -- "${root_write_turbo__turbo}" \
-      > "${SYSTEM_CPUFREQ_BOOST}" || return 1
+    log_verbose "Write turbo_value '${root_write_turbo__turbo}' to acpi-cpufreq file: ${SYSTEM_CPUFREQ_BOOST}"
+    printf -- "${root_write_turbo__turbo}" > "${SYSTEM_CPUFREQ_BOOST}" || return 1
     log_all "Turbo value written to ${SYSTEM_CPUFREQ_BOOST}"
   fi
 
@@ -1138,14 +1101,10 @@ root_write_governor()
 
   log_verbose "Write cpu_governor '${root_write_governor__gov}' to all CPUs"
   for root_write_governor__i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
-    root_write_governor__target="${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}\
-      /cpufreq/scaling_governor"
-    log_verbose "Write governor: ${root_write_governor__gov} to \
-      file: ${root_write_governor__target}"
-    printf -- "${root_write_governor__gov}" \
-      > "${root_write_governor__target}" || return 1
-    log_all "Governor ${root_write_governor__gov} written to \
-      ${root_write_governor__target}"
+    root_write_governor__target="${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor"
+    log_verbose "Write governor: ${root_write_governor__gov} to file: ${root_write_governor__target}"
+    printf -- "${root_write_governor__gov}" > "${root_write_governor__target}" || return 1
+    log_all "Governor ${root_write_governor__gov} written to ${root_write_governor__target}"
 
     unset root_write_governor__target
     unset root_write_governor__i
@@ -1156,8 +1115,7 @@ root_write_governor()
 }
 
 ##
-# Set the x86 policy if the x86_perf_policy binary
-# exists and an x86 policy is requested
+# Set the x86 policy if the x86_perf_policy binary exists and an x86 policy is requested
 #
 # $1 x86 policy name
 root_write_x86_policy()
@@ -1165,8 +1123,7 @@ root_write_x86_policy()
   root_write_x86_policy__name="$1"
 
   if [ -n "${root_write_x86_policy__name}" ]; then
-    log_verbose "x86_perf_policy was requested: \
-      '${root_write_x86_policy__name}'"
+    log_verbose "x86_perf_policy was requested: '${root_write_x86_policy__name}'"
     # make constant
     root_write_x86_policy__result=
     root_write_x86_policy__result=$(check_binary "${X86_BINARY}")
@@ -1174,15 +1131,13 @@ root_write_x86_policy()
     if [ ${root_write_x86_policy__result} -eq 1 ]; then
       elog_quiet "Not setting x86_perf_policy even though it was requested"
     else
-      log_verbose "Setting x86_perf_policy to \
-        '${root_write_x86_policy__name}'"
+      log_verbose "Setting x86_perf_policy to '${root_write_x86_policy__name}'"
       if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
         log_verbose "Log verbose output for ${X86_BINARY}"
         "${X86_BINARY}" -v "${root_write_x86_policy__name}" || return 1
       else
         log_verbose "Silent verbose output for ${X86_BINARY}"
-        "${X86_BINARY}" "${root_write_x86_policy__name}" > /dev/null \
-          || return 1
+        "${X86_BINARY}" "${root_write_x86_policy__name}" > /dev/null || return 1
       fi
     fi
 
@@ -1213,10 +1168,8 @@ root_do_set()
   root_do_set__setting_x86_policy=
   root_do_set__cpu_max_freq="$(cat "${SYSTEM_SCALING_MAX_FREQ}" )"
   root_do_set__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}" )"
-  root_do_set__cpu_max_value=$(( root_do_set__cpu_max_freq * 100 \
-    / SYSTEM_CPU_MAX_FREQ ))
-  root_do_set__cpu_min_value=$(( root_do_set__cpu_min_freq * 100 \
-    / SYSTEM_CPU_MAX_FREQ ))
+  root_do_set__cpu_max_value=$(( root_do_set__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ ))
+  root_do_set__cpu_min_value=$(( root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ ))
   root_do_set__cpu_governor="$(cat "${SYSTEM_SCALING_GOVERNOR}" )"
   root_do_set__cpu_turbo=
 
@@ -1272,15 +1225,13 @@ root_do_set()
   fi
 
   log_verbose "Check that min is not >= max"
-  if [ "${root_do_set__setting_cpu_min}" \
-    -ge "${root_do_set__setting_cpu_max}" ]; then
+  if [ "${root_do_set__setting_cpu_min}" -ge "${root_do_set__setting_cpu_max}" ]; then
     log_verbose "set min to just below max"
     root_do_set__setting_cpu_min="$(( root_do_set__setting_cpu_max - 1 ))"
   fi
 
   log_verbose "Check that max is not <= min"
-  if [ "${root_do_set__setting_cpu_max}" \
-    -le "${root_do_set__setting_cpu_min}" ]; then
+  if [ "${root_do_set__setting_cpu_max}" -le "${root_do_set__setting_cpu_min}" ]; then
     log_verbose "set max to just above min"
     root_do_set__setting_cpu_max="$(( root_do_set__setting_cpu_min + 1 ))"
   fi
@@ -1301,14 +1252,11 @@ root_do_set()
   # Because setting the governor may have changed CPU values, we re-read them
   # here before going through the apply logic
   root_do_set__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}" )"
-  root_do_set__cpu_max_value=$(( root_do_set__cpu_max_freq * 100 \
-    / SYSTEM_CPU_MAX_FREQ ))
-  root_do_set__cpu_min_value=$(( root_do_set__cpu_min_freq * 100 \
-    / SYSTEM_CPU_MAX_FREQ ))
+  root_do_set__cpu_max_value=$(( root_do_set__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ ))
+  root_do_set__cpu_min_value=$(( root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ ))
 
   # Set max first if it is greater than the current CPU min
-  if [ "${root_do_set__setting_cpu_max}" \
-    -gt "${root_do_set__cpu_min_value}" ]; then
+  if [ "${root_do_set__setting_cpu_max}" -gt "${root_do_set__cpu_min_value}" ]; then
     root_write_max "${root_do_set__setting_cpu_max}" || return 1
     root_write_min "${root_do_set__setting_cpu_min}" || return 1
   else
@@ -1568,10 +1516,8 @@ main()
           break
         fi
       else
-        # This is a plain arg and should be handled by
-        # one of the options which takes an argument
-        handle_long_option_argument "${exec_mode}" "${long_option}" \
-          "${optind_expanded}"
+        # This is a plain arg and should be handled by one of the options which takes an argument
+        handle_long_option_argument "${exec_mode}" "${long_option}" "${optind_expanded}"
 
         # Set back to null
         long_option=
@@ -1605,8 +1551,7 @@ main()
       log_verbose "set_max: ${__exec_set_max_type} [${__exec_set_max_arg}]"
       log_verbose "set_min: ${__exec_set_min_type} [${__exec_set_min_arg}]"
       log_verbose "set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]"
-      log_verbose "set_governor: ${__exec_set_governor_type} \
-        [${__exec_set_governor_arg}]"
+      log_verbose "set_governor: ${__exec_set_governor_type} [${__exec_set_governor_arg}]"
       log_verbose "set_x86: ${__x86_policy_type} [${__x86_policy_arg}]"
       do_set "${execution_delay}" || return 1
       ;;
@@ -1681,16 +1626,12 @@ readonly SYSTEM_SCALING_MAX_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_max_fre
 readonly SYSTEM_SCALING_MIN_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_freq"
 readonly SYSTEM_SCALING_GOVERNOR="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_governor"
 readonly SYSTEM_SCALING_DRIVER="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_driver"
-readonly SYSTEM_CPU_GOVERNORS="${SYSTEM_CPU_DIR}/cpu0/cpufreq\
-  /scaling_available_governors"
+readonly SYSTEM_CPU_GOVERNORS="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_available_governors"
 readonly SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
-readonly SYSTEM_CPU_MAX_FREQ="$(cat \
-  "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq" )"
-readonly SYSTEM_CPU_MIN_FREQ="$(cat \
-  "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq" )"
+readonly SYSTEM_CPU_MAX_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq" )"
+readonly SYSTEM_CPU_MIN_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq" )"
 readonly SYSTEM_CPU_MAX_VALUE=100
-readonly SYSTEM_CPU_MIN_VALUE=$(( SYSTEM_CPU_MIN_FREQ * 100 \
-  / SYSTEM_CPU_MAX_FREQ ))
+readonly SYSTEM_CPU_MIN_VALUE=$(( SYSTEM_CPU_MIN_FREQ * 100 / SYSTEM_CPU_MAX_FREQ ))
 
 # intel_pstate related vars
 readonly SYSTEM_INTEL_PSTATE_DIR="${SYSTEM_CPU_DIR}/intel_pstate"
