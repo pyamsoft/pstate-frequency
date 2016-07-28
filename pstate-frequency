@@ -125,7 +125,7 @@ check_binary()
   done
 
   IFS="${check_binary__old_ifs}"
-  error_msg "Binary '${check_binary__bin}' not found in \$PATH"
+  elog_quiet "Binary '${check_binary__bin}' not found in \$PATH"
 
   unset check_binary__result
   unset check_binary__bin
