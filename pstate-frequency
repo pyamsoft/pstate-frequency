@@ -170,6 +170,7 @@ options:
     -g | --governor  Set the cpufreq governor
     -n | --min       Modify current CPU min frequency
     -t | --turbo     Modify curent CPU turbo boost state
+    -x | --x86       Set the x86 policy, set to 'none' for no-op
 EOF
 )"
   return 0
