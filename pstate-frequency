@@ -1354,14 +1354,14 @@ root_do_set()
   # Set max first if it is greater than the current CPU min
   if [ "${root_do_set__setting_cpu_max}" \
     -gt "${root_do_set__cpu_min_value}" ]; then
-    root_write_max "${root_do_set__setting_cpu_max}" || return 1
-    root_write_min "${root_do_set__setting_cpu_min}" || return 1
+    root_write_max "${root_do_set__setting_cpu_max}"
+    root_write_min "${root_do_set__setting_cpu_min}"
   else
-    root_write_min "${root_do_set__setting_cpu_min}" || return 1
-    root_write_max "${root_do_set__setting_cpu_max}" || return 1
+    root_write_min "${root_do_set__setting_cpu_min}"
+    root_write_max "${root_do_set__setting_cpu_max}"
   fi
-  root_write_turbo "${root_do_set__setting_cpu_turbo}" || return 1
-  root_write_x86_policy "${root_do_set__setting_x86_policy}" || return 1
+  root_write_turbo "${root_do_set__setting_cpu_turbo}"
+  root_write_x86_policy "${root_do_set__setting_x86_policy}"
 
   unset root_do_set__cpu_max_freq
   unset root_do_set__cpu_min_freq
