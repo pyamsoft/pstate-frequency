@@ -103,7 +103,7 @@ check_binary()
   check_binary__bin="$1"
   check_binary__old_ifs="${IFS}"
   if [ -z "${check_binary__bin}" ]; then
-    error_msg "Must specify a path to a binary"
+    elog_quiet "Must specify a path to a binary"
     return 1
   fi
 
