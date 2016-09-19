@@ -20,6 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
+# NOTE
+#
+# Plans are currently directly sourced from the shell, meaning any and all
+# shell script is valid in these files.
+#
+# pstate-frequency expects there to only be variable declarations in a plan file,
+# but nothing is stopping pstate-frequency from sourcing a plan file which contains
+# code and then executing said code. Make sure that none of your custom created
+# plan file contain actual code in them or it will be executed.
+#
+# Because of the ability to execute arbitrary code, pstate-frequency only respects
+# one location by default, which is handled by the root user on normal systems
+
 # Plans should define the following
 #
 # EITHER
