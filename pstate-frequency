@@ -614,13 +614,6 @@ set_x86()
 # $2 user input for power plan
 set_power_plan()
 {
-  # Plan modes
-  readonly POWER_PLAN_AUTO=0
-  readonly POWER_PLAN_POWERSAVE=1
-  readonly POWER_PLAN_BALANCED=2
-  readonly POWER_PLAN_PERFORMANCE=3
-  readonly POWER_PLAN_MAX=4
-
   set_power_plan__mode="$1"
   set_power_plan__input="$2"
 
@@ -628,70 +621,20 @@ set_power_plan()
   if [ "${set_power_plan__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_power_plan__value=""
 
+    # Loop the config dir $(POWER_PLAN_CONFIG_DIR}
+    #
+    # Configs are in format <digit>-<name>.plan
+    #
+    # 00-auto.plan
+    # 01-powersave.plan
+
+    # set_power_plan__input can either be a number value or the name of a plan
     log_all "$(cat << EOF
-Check for special case arguments: auto, powersave, balanced, performance, max
-EOF
-)"
-    if [ "${set_power_plan__input}" = "auto" ]; then
-      log_verbose "Argument was 'auto' set to ${POWER_PLAN_AUTO}"
-      set_power_plan__value="${POWER_PLAN_AUTO}"
-    elif [ "${set_power_plan__input}" = "powersave" ]; then
-      log_verbose "Argument was 'powersave' set to ${POWER_PLAN_POWERSAVE}"
-      set_power_plan__value="${POWER_PLAN_POWERSAVE}"
-    elif [ "${set_power_plan__input}" = "balanced" ]; then
-      log_verbose "Argument was 'balanced' set to ${POWER_PLAN_BALANCED}"
-      set_power_plan__value="${POWER_PLAN_BALANCED}"
-    elif [ "${set_power_plan__input}" = "performance" ]; then
-      log_verbose "Argument was 'performance' set to ${POWER_PLAN_PERFORMANCE}"
-      set_power_plan__value="${POWER_PLAN_PERFORMANCE}"
-    elif [ "${set_power_plan__input}" = "max" ]; then
-      log_verbose "Argument was 'max' set to ${POWER_PLAN_MAX}"
-      set_power_plan__value="${POWER_PLAN_MAX}"
-    else
-      log_verbose "Argument was not special, read as is"
-      set_power_plan__value="${set_power_plan__input}"
-    fi
-
-    log_all "Check that '${set_power_plan__value}' is all digits"
-    if [ "$(is_digits "${set_power_plan__value}")" -eq 1 ]; then
-      log_all "'${set_power_plan__value}' is all digits"
-      case "${set_power_plan__value}" in
-        "${POWER_PLAN_AUTO}")
-          set_power_plan_auto "${set_power_plan__mode}" || return 1
-          ;;
-        "${POWER_PLAN_POWERSAVE}")
-          set_power_plan_powersave "${set_power_plan__mode}" || return 1
-          ;;
-        "${POWER_PLAN_BALANCED}")
-          set_power_plan_balanced "${set_power_plan__mode}" || return 1
-          ;;
-        "${POWER_PLAN_PERFORMANCE}")
-          set_power_plan_performance "${set_power_plan__mode}" || return 1
-          ;;
-        "${POWER_PLAN_MAX}")
-          set_power_plan_max "${set_power_plan__mode}" || return 1
-          ;;
-        *)
-          elog_quiet "Invalid power plan: ${set_power_plan__value}"
-
-          unset set_power_plan__value
-          unset set_power_plan__mode
-          unset set_power_plan__input
-          return 1
-          ;;
-      esac
-    else
-      elog_quiet "$(cat << EOF
-power plan argument '${set_power_plan__value}' is not a number
+Search the config directory ${POWER_PLAN_CONFIG_DIR} for power plan
+configrations
 EOF
 )"
 
-      unset set_power_plan__value
-      unset set_power_plan__mode
-      unset set_power_plan__input
-      return 1
-    fi
-    unset set_power_plan__value
   else
     elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
@@ -1754,6 +1697,9 @@ readonly SYSTEM_INTEL_PSTATE_TURBO="${SYSTEM_INTEL_PSTATE_DIR}/no_turbo"
 
 # acpi-cpufreq related vars
 readonly SYSTEM_CPUFREQ_BOOST="${SYSTEM_CPU_DIR}/cpufreq/boost"
+
+# configuration directory for power plan configs
+readonly POWER_PLAN_CONFIG_DIR="/etc/pstate-frequency.d/"
 
 main "$@" || exit 1
 
