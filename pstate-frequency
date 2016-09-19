@@ -642,91 +642,222 @@ Search the config directory ${POWER_PLAN_CONFIG_DIR} for power plan
 configrations
 EOF
 )"
-
-    readonly set_power_plan__prefix='??-'
-    readonly set_power_plan__suffix='.plan'
-    set_power_plan__i=0
-    set_power_plan__config=""
-    for set_power_plan__testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
-
-      # Strip all the fancy stuff from the file name to just get the plan name
-      set_power_plan__stripped="${set_power_plan__testconfig#$POWER_PLAN_CONFIG_DIR/}"
-      set_power_plan__stripped="${set_power_plan__stripped#$set_power_plan__prefix}"
-      set_power_plan__stripped="${set_power_plan__stripped%$set_power_plan__suffix}"
-      log_all "Found config: ${set_power_plan__testconfig}"
-      log_all "Stripped config: ${set_power_plan__stripped}"
-      log_all "Looking for config: ${set_power_plan__input}"
-
-      # If the argument is a number
-      if [ "${set_power_plan__input}" -eq "${set_power_plan__input}" ] \
-        2>/dev/null; then
-        log_all "Argument is number: ${set_power_plan__input}"
-
-        # If the count is also the number
-        if [ "${set_power_plan__input}" -eq "${set_power_plan__i}" ]; then
-          log_verbose "Located config: ${set_power_plan__testconfig}"
-          set_power_plan__config="${set_power_plan__testconfig}"
-          break
-        fi
-      elif [ "${set_power_plan__input}" = "${set_power_plan__stripped}" ]; then
-          log_verbose "Located config: ${set_power_plan__testconfig}"
-          set_power_plan__config="${set_power_plan__testconfig}"
-          break
-      fi
-
-      unset set_power_plan__testconfig
-    done
+    # Locate config with given input
+    readonly set_power_plan__config="$(locate_power_plan_config "${set_power_plan__input}")"
 
     # Fail if we don't find a config
     if [ -z "${set_power_plan__config}" ]; then
       elog_quiet "No power plan configuration found for argument: \
         ${set_power_plan__input}"
       unset set_power_plan__i
-      unset set_power_plan__config
       unset set_power_plan__mode
       unset set_power_plan__input
       return 1
     fi
 
     # Otherwise source the config and set a plan
-    #
-    # Plans should define the following
-    #
-    # EITHER
-    #
-    #   PLAN_AUTOMATIC [ 0 | 1 ]
-    #     Is the plan set based on current battery state
-    #
-    #   PLAN_AUTO_BATTERY [ plan number | plan name }
-    #     The identifier of the plan to run on battery
-    #
-    #   PLAN_AUTO_AC [ plan number | plan name }
-    #     The identifier of the plan to run on ac charger
-    #
-    # OR
-    #
-    #  PLAN_CPU_MAX [ "max" | "min" | number ]
-    #  PLAN_CPU_MIN [ "max" | "min" | number ]
-    #  PLAN_CPU_TURBO [ "max" | "min" | number ]
-    #  PLAN_CPU_GOVERNOR [ governor number | governor name ]
-    #  PLAN_CPU_X86 [ x86 number | x86 name ]
-    #
-    # If both are defined, the variables under PLAN_CPU take preference
-
+    execute_power_plan_config "${set_power_plan__mode}" "${set_power_plan__config}" \
+      "${set_power_plan__input}" || return 1
   else
     elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
     unset set_power_plan__i
-    unset set_power_plan__config
     unset set_power_plan__mode
     unset set_power_plan__input
     return 1
   fi
 
   unset set_power_plan__i
-  unset set_power_plan__config
   unset set_power_plan__mode
   unset set_power_plan__input
+  return 0
+}
+
+##
+# Locates a power plan config by the given name and echoes its file location
+#
+# $1 request plan name or number
+locate_power_plan_config()
+{
+  locate_power_plan_config__input="$1"
+  readonly __prefix='??-'
+  readonly __suffix='.plan'
+  __i=0
+  for __testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
+
+    # Strip all the fancy stuff from the file name to just get the plan name
+    __stripped="${__testconfig#$POWER_PLAN_CONFIG_DIR/}"
+    __stripped="${__stripped#$__prefix}"
+    __stripped="${__stripped%$__suffix}"
+
+    # If the argument is a number
+    if [ "${locate_power_plan_config__input}" -eq \
+      "${locate_power_plan_config__input}" ] 2>/dev/null; then
+
+      # If the count is also the number
+      if [ "${locate_power_plan_config__input}" -eq "${__i}" ]; then
+        printf -- "${__testconfig}"
+        unset locate_power_plan_config__input
+        return 0
+      fi
+    elif [ "${locate_power_plan_config__input}" = "${__stripped}" ]; then
+        printf -- "${__testconfig}"
+        unset locate_power_plan_config__input
+        return 0
+    fi
+
+    unset __testconfig
+  done
+
+  unset locate_power_plan_config__input
+  unset __i
+  return 0
+}
+
+##
+# Given a file location, source the file
+#
+# Plans should define the following
+#
+# EITHER
+#
+#   PLAN_AUTO_BATTERY [ plan number | plan name }
+#     The identifier of the plan to run on battery
+#
+#   PLAN_AUTO_AC [ plan number | plan name }
+#     The identifier of the plan to run on ac charger
+#
+# OR
+#
+#  PLAN_CPU_MAX [ "max" | "min" | number ]
+#  PLAN_CPU_MIN [ "max" | "min" | number ]
+#  PLAN_CPU_TURBO [ "on" | "off" | number ]
+#  PLAN_CPU_GOVERNOR [ governor number | governor name ]
+#  PLAN_CPU_X86 [ x86 number | x86 name ]
+#
+# If both are defined, the variables under PLAN_CPU take preference
+#
+# $1 execution mode
+# $2 plan file location
+# $3 plan name
+execute_power_plan_config()
+{
+  execute_power_plan_config__mode="$1"
+  execute_power_plan_config__location="$2"
+  execute_power_plan_config__name="$3"
+
+  # shellcheck source=/dev/null
+  . "${execute_power_plan_config__location}" || return 1
+
+  execute_power_plan_config__type=""
+
+  if [ -n "${PLAN_CPU_MAX}" ] || [ -n "${PLAN_CPU_MIN}" ] \
+    [ -n "${PLAN_CPU_TURBO}" ] || [ -n "${PLAN_CPU_GOVERNOR}" ] \
+    [ -n "${PLAN_CPU_X86}" ]; then
+    execute_power_plan_config__type="MANUAL"
+  elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BATTERY}" ]; then
+    execute_power_plan_config__type="AUTO"
+  else
+    elog_quiet "Invalid power plan file: ${execute_power_plan_config__location}"
+    return 1
+  fi
+
+  execute_power_plan_config__auto_ac="${PLAN_AUTO_AC}"
+  execute_power_plan_config__auto_bat="${PLAN_AUTO_BATTERY}"
+  execute_power_plan_config__cpu_max="${PLAN_CPU_MAX}"
+  execute_power_plan_config__cpu_min="${PLAN_CPU_MIN}"
+  execute_power_plan_config__cpu_turbo="${PLAN_CPU_TURBO}"
+  execute_power_plan_config__cpu_gov="${PLAN_CPU_GOVERNOR}"
+  execute_power_plan_config__cpu_x86="${PLAN_CPU_X86}"
+
+  unset PLAN_AUTOMATIC
+  unset PLAN_AUTO_AC
+  unset PLAN_AUTO_BATTERY
+
+  unset PLAN_CPU_MAX
+  unset PLAN_CPU_MIN
+  unset PLAN_CPU_TURBO
+  unset PLAN_CPU_GOVERNOR
+  unset PLAN_CPU_X86
+
+  if [ "${execute_power_plan_config__type}" = "MANUAL" ]; then
+    set_power_plan_manual "${execute_power_plan_config__mode}" \
+      "${execute_power_plan_config__name}" \
+      "${execute_power_plan_config__cpu_max}" \
+      "${execute_power_plan_config__cpu_min}" \
+      "${execute_power_plan_config__cpu_turbo}" \
+      "${execute_power_plan_config__cpu_gov}" \
+      "${execute_power_plan_config__cpu_x86}" || return 1
+  else
+    set_power_plan_automatic "${execute_power_plan_config__mode}" \
+      "${execute_power_plan_config__name}" \
+      "${execute_power_plan_config__auto_bat}" \
+      "${execute_power_plan_config__auto_ac}" || return 1
+  fi
+
+  unset execute_power_plan_config__auto_ac
+  unset execute_power_plan_config__auto_bat
+  unset execute_power_plan_config__cpu_max
+  unset execute_power_plan_config__cpu_min
+  unset execute_power_plan_config__cpu_turbo
+  unset execute_power_plan_config__cpu_gov
+  unset execute_power_plan_config__cpu_x86
+
+  unset execute_power_plan_config__type
+  unset execute_power_plan_config__name
+  unset execute_power_plan_config__location
+  unset execute_power_plan_config__mode
+  return 0
+}
+
+##
+# Sets a power plan based on automatic values
+#
+# The variables used in this function are sourced from files,
+#
+# $1 execution mode
+# $2 plan name
+# $3 Battery plan
+# $4 AC plan
+set_power_plan_automatic()
+{
+  set_power_plan_automatic__mode="$1"
+  set_power_plan_automatic__name="$2"
+  set_power_plan_automatic__bat="$3"
+  set_power_plan_automatic__ac="$4"
+  set_power_plan_automatic__arg=""
+
+  log_verbose "Set power plan to: ${set_power_plan_automatic__name}"
+  if [ "$(is_power_supply_mains)" -eq 1 ]; then
+    set_power_plan_automatic__config="$(locate_power_plan_config "${set_power_plan_automatic__ac}")"
+    set_power_plan_automatic__arg="${set_power_plan_automatic__ac}"
+  else
+    set_power_plan_automatic__config="$(locate_power_plan_config "${set_power_plan_automatic__bat}")"
+    set_power_plan_automatic__arg="${set_power_plan_automatic__bat}"
+  fi
+
+  # Fail if we don't find a config
+  if [ -z "${set_power_plan_automatic__config}" ]; then
+    elog_quiet "No power plan configuration found for auto config: ${set_power_plan_automatic__arg}"
+    unset set_power_plan_automatic__name
+    unset set_power_plan_automatic__bat
+    unset set_power_plan_automatic__ac
+    unset set_power_plan_automatic__arg
+    unset set_power_plan_automatic__mode
+    return 1
+  fi
+
+  # Execute the power plan config
+  execute_power_plan_config "${set_power_plan_automatic__mode}" \
+    "${set_power_plan_automatic__config}" \
+    "${set_power_plan_automatic__arg}" || return 1
+
+  unset set_power_plan_automatic__config
+  unset set_power_plan_automatic__name
+  unset set_power_plan_automatic__bat
+  unset set_power_plan_automatic__ac
+  unset set_power_plan_automatic__arg
+  unset set_power_plan_automatic__mode
   return 0
 }
 
@@ -767,111 +898,162 @@ is_power_supply_mains()
 }
 
 ##
+# Sets a power plan based on automatic values
+#
+# The variables used in this function are sourced from files,
+#
+# $1 execution mode
+# $2 plan name
+# $3 cpu max
+# $4 cpu min
+# $5 cpu turbo
+# $6 cpu gov
+# $7 cpu x86
+set_power_plan_manual()
+{
+  set_power_plan_manual__mode="$1"
+  set_power_plan_manual__name="$2"
+  set_power_plan_manual__max="$3"
+  set_power_plan_manual__min="$4"
+  set_power_plan_manual__turbo="$5"
+  set_power_plan_manual__gov="$6"
+  set_power_plan_manual__x86="$7"
+
+  log_verbose "Attempt manual plan setting: ${set_power_plan_manual__name}"
+
+  # Check validity of variables here, parse special arguments
+  set_max "${set_power_plan_manual__mode}" \
+    "${set_power_plan_manual__max}" || return 1
+  set_min "${set_power_plan_manual__mode}" \
+    "${set_power_plan_manual__min}" || return 1
+  set_governor "${set_power_plan_manual__mode}" \
+    "${set_power_plan_manual__gov}" || return 1
+  set_x86 "${set_power_plan_manual__mode}" \
+    "${set_power_plan_manual__x86}" || return 1
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
+    set_turbo "${set_power_plan_manual__mode}" \
+      "${set_power_plan_manual__turbo}" || return 1
+  else
+    set_turbo "${set_power_plan_manual__mode}" \
+      "${set_power_plan_manual__turbo}" || return 1
+  fi
+
+  unset set_power_plan_manual__mode
+  unset set_power_plan_manual__name
+  unset set_power_plan_manual__max
+  unset set_power_plan_manual__min
+  unset set_power_plan_manual__turbo
+  unset set_power_plan_manual__gov
+  unset set_power_plan_manual__x86
+  return 0
+}
+
+##
 # Sets the power plan based on the current plugged in status
 #
 # $1 execution mode
-set_power_plan_auto()
-{
-  set_power_plan_auto__mode="$1"
-  log_verbose "Set power plan to: auto"
-  if [ "$(is_power_supply_mains)" -eq 1 ]; then
-    set_power_plan_balanced "${set_power_plan_auto__mode}" || return 1
-  else
-    set_power_plan_powersave "${set_power_plan_auto__mode}" || return 1
-  fi
+# set_power_plan_auto()
+# {
+#   set_power_plan_auto__mode="$1"
+#   log_verbose "Set power plan to: auto"
+#   if [ "$(is_power_supply_mains)" -eq 1 ]; then
+#     set_power_plan_balanced "${set_power_plan_auto__mode}" || return 1
+#   else
+#     set_power_plan_powersave "${set_power_plan_auto__mode}" || return 1
+#   fi
 
-  unset set_power_plan_auto__mode
-  return 0
-}
+#   unset set_power_plan_auto__mode
+#   return 0
+# }
 
 # Sets the power plan to a low power mode
 #
 # $1 execution mode
-set_power_plan_powersave()
-{
-  set_power_plan_powersave__mode="$1"
+# set_power_plan_powersave()
+# {
+#   set_power_plan_powersave__mode="$1"
 
-  log_verbose "Set power plan to: powersave"
-  set_max "${set_power_plan_powersave__mode}" 0 || return 1
-  set_min "${set_power_plan_powersave__mode}" 0 || return 1
-  set_governor "${set_power_plan_powersave__mode}" powersave || return 1
-  set_x86 "${set_power_plan_powersave__mode}" 0 || return 1
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_turbo "${set_power_plan_powersave__mode}" 1 || return 1
-  else
-    set_turbo "${set_power_plan_powersave__mode}" 0 || return 1
-  fi
+#   log_verbose "Set power plan to: powersave"
+#   set_max "${set_power_plan_powersave__mode}" 0 || return 1
+#   set_min "${set_power_plan_powersave__mode}" 0 || return 1
+#   set_governor "${set_power_plan_powersave__mode}" powersave || return 1
+#   set_x86 "${set_power_plan_powersave__mode}" 0 || return 1
+#   if [ "$(has_pstate_dir)" -eq 1 ]; then
+#     set_turbo "${set_power_plan_powersave__mode}" 1 || return 1
+#   else
+#     set_turbo "${set_power_plan_powersave__mode}" 0 || return 1
+#   fi
 
-  unset set_power_plan_powersave__mode
-  return 0
-}
+#   unset set_power_plan_powersave__mode
+#   return 0
+# }
 
 # Sets the power plan to a balanced mode
 #
 # $1 execution mode
-set_power_plan_balanced()
-{
-  set_power_plan_balanced__mode="$1"
+# set_power_plan_balanced()
+# {
+#   set_power_plan_balanced__mode="$1"
 
-  log_verbose "Set power plan to: balanced"
-  set_max "${set_power_plan_balanced__mode}" 100 || return 1
-  set_min "${set_power_plan_balanced__mode}" 0 || return 1
-  set_x86 "${set_power_plan_balanced__mode}" 0 || return 1
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_governor "${set_power_plan_balanced__mode}" powersave || return 1
-    set_turbo "${set_power_plan_balanced__mode}" 1 || return 1
-  else
-    set_governor "${set_power_plan_balanced__mode}" ondemand || return 1
-    set_turbo "${set_power_plan_balanced__mode}" 0 || return 1
-  fi
+#   log_verbose "Set power plan to: balanced"
+#   set_max "${set_power_plan_balanced__mode}" 100 || return 1
+#   set_min "${set_power_plan_balanced__mode}" 0 || return 1
+#   set_x86 "${set_power_plan_balanced__mode}" 0 || return 1
+#   if [ "$(has_pstate_dir)" -eq 1 ]; then
+#     set_governor "${set_power_plan_balanced__mode}" powersave || return 1
+#     set_turbo "${set_power_plan_balanced__mode}" 1 || return 1
+#   else
+#     set_governor "${set_power_plan_balanced__mode}" ondemand || return 1
+#     set_turbo "${set_power_plan_balanced__mode}" 0 || return 1
+#   fi
 
-  unset set_power_plan_balanced__mode
-  return 0
-}
+#   unset set_power_plan_balanced__mode
+#   return 0
+# }
 
 # Sets the power plan to a performance mode
 #
 # $1 execution mode
-set_power_plan_performance()
-{
-  set_power_plan_performance__mode="$1"
+# set_power_plan_performance()
+# {
+#   set_power_plan_performance__mode="$1"
 
-  log_verbose "Set power plan to: performance"
-  set_max "${set_power_plan_performance__mode}" 100 || return 1
-  set_min "${set_power_plan_performance__mode}" 0 || return 1
-  set_governor "${set_power_plan_performance__mode}" performance || return 1
-  set_x86 "${set_power_plan_performance__mode}" 1 || return 1
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_turbo "${set_power_plan_performance__mode}" 0 || return 1
-  else
-    set_turbo "${set_power_plan_performance__mode}" 1 || return 1
-  fi
+#   log_verbose "Set power plan to: performance"
+#   set_max "${set_power_plan_performance__mode}" 100 || return 1
+#   set_min "${set_power_plan_performance__mode}" 0 || return 1
+#   set_governor "${set_power_plan_performance__mode}" performance || return 1
+#   set_x86 "${set_power_plan_performance__mode}" 1 || return 1
+#   if [ "$(has_pstate_dir)" -eq 1 ]; then
+#     set_turbo "${set_power_plan_performance__mode}" 0 || return 1
+#   else
+#     set_turbo "${set_power_plan_performance__mode}" 1 || return 1
+#   fi
 
-  unset set_power_plan_performance__mode
-  return 0
-}
+#   unset set_power_plan_performance__mode
+#   return 0
+# }
 
 # Sets the power plan to the max available performance mode
 #
 # $1 execution mode
-set_power_plan_max()
-{
-  set_power_plan_max__mode="$1"
+# set_power_plan_max()
+# {
+#   set_power_plan_max__mode="$1"
 
-  log_verbose "Set power plan to: max"
-  set_max "${set_power_plan_max__mode}" 100 || return 1
-  set_min "${set_power_plan_max__mode}" 100 || return 1
-  set_governor "${set_power_plan_max__mode}" performance || return 1
-  set_x86 "${set_power_plan_max__mode}" 2 || return 1
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_turbo "${set_power_plan_max__mode}" 0 || return 1
-  else
-    set_turbo "${set_power_plan_max__mode}" 1 || return 1
-  fi
+#   log_verbose "Set power plan to: max"
+#   set_max "${set_power_plan_max__mode}" 100 || return 1
+#   set_min "${set_power_plan_max__mode}" 100 || return 1
+#   set_governor "${set_power_plan_max__mode}" performance || return 1
+#   set_x86 "${set_power_plan_max__mode}" 2 || return 1
+#   if [ "$(has_pstate_dir)" -eq 1 ]; then
+#     set_turbo "${set_power_plan_max__mode}" 0 || return 1
+#   else
+#     set_turbo "${set_power_plan_max__mode}" 1 || return 1
+#   fi
 
-  unset set_power_plan_max__mode
-  return 0
-}
+#   unset set_power_plan_max__mode
+#   return 0
+# }
 
 # Handle long options which take arguments
 #
