@@ -610,6 +610,16 @@ set_x86()
 ##
 # Set the power plan based on argument
 #
+# KLUDGE: This is perhaps not the place for this kind of thing
+#         This function runs, as the root user, and blindly sources
+#         files from a given directory. This is a major security hole.
+#         However, by default, the script does not ship with any potentially
+#         harmful configurations. Rather, this may pose a danger to your
+#         system if someone is able to drop a file into the
+#         $POWER_PLAN_CONFIG_DIR which executes malicious code.
+#         However, if you find yourself in this kind of situation, you are
+#         most likely already compromised and have larger problems to address
+#
 # $1 execution mode
 # $2 user input for power plan
 set_power_plan()
@@ -619,8 +629,6 @@ set_power_plan()
 
   log_all "set_power_plan requires SET operation exec_mode"
   if [ "${set_power_plan__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    set_power_plan__value=""
-
     # Loop the config dir $(POWER_PLAN_CONFIG_DIR}
     #
     # Configs are in format <digit>-<name>.plan
@@ -635,14 +643,88 @@ configrations
 EOF
 )"
 
+    readonly set_power_plan__prefix='??-'
+    readonly set_power_plan__suffix='.plan'
+    set_power_plan__i=0
+    set_power_plan__config=""
+    for set_power_plan__testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
+
+      # Strip all the fancy stuff from the file name to just get the plan name
+      set_power_plan__stripped="${set_power_plan__testconfig#$POWER_PLAN_CONFIG_DIR/}"
+      set_power_plan__stripped="${set_power_plan__stripped#$set_power_plan__prefix}"
+      set_power_plan__stripped="${set_power_plan__stripped%$set_power_plan__suffix}"
+      log_all "Found config: ${set_power_plan__testconfig}"
+      log_all "Stripped config: ${set_power_plan__stripped}"
+      log_all "Looking for config: ${set_power_plan__input}"
+
+      # If the argument is a number
+      if [ "${set_power_plan__input}" -eq "${set_power_plan__input}" ] \
+        2>/dev/null; then
+        log_all "Argument is number: ${set_power_plan__input}"
+
+        # If the count is also the number
+        if [ "${set_power_plan__input}" -eq "${set_power_plan__i}" ]; then
+          log_verbose "Located config: ${set_power_plan__testconfig}"
+          set_power_plan__config="${set_power_plan__testconfig}"
+          break
+        fi
+      elif [ "${set_power_plan__input}" = "${set_power_plan__stripped}" ]; then
+          log_verbose "Located config: ${set_power_plan__testconfig}"
+          set_power_plan__config="${set_power_plan__testconfig}"
+          break
+      fi
+
+      unset set_power_plan__testconfig
+    done
+
+    # Fail if we don't find a config
+    if [ -z "${set_power_plan__config}" ]; then
+      elog_quiet "No power plan configuration found for argument: \
+        ${set_power_plan__input}"
+      unset set_power_plan__i
+      unset set_power_plan__config
+      unset set_power_plan__mode
+      unset set_power_plan__input
+      return 1
+    fi
+
+    # Otherwise source the config and set a plan
+    #
+    # Plans should define the following
+    #
+    # EITHER
+    #
+    #   PLAN_AUTOMATIC [ 0 | 1 ]
+    #     Is the plan set based on current battery state
+    #
+    #   PLAN_AUTO_BATTERY [ plan number | plan name }
+    #     The identifier of the plan to run on battery
+    #
+    #   PLAN_AUTO_AC [ plan number | plan name }
+    #     The identifier of the plan to run on ac charger
+    #
+    # OR
+    #
+    #  PLAN_CPU_MAX [ "max" | "min" | number ]
+    #  PLAN_CPU_MIN [ "max" | "min" | number ]
+    #  PLAN_CPU_TURBO [ "max" | "min" | number ]
+    #  PLAN_CPU_GOVERNOR [ governor number | governor name ]
+    #  PLAN_CPU_X86 [ x86 number | x86 name ]
+    #
+    # If both are defined, the variables under PLAN_CPU take preference
+
   else
     elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
+    unset set_power_plan__i
+    unset set_power_plan__config
     unset set_power_plan__mode
     unset set_power_plan__input
     return 1
   fi
 
+  unset set_power_plan__i
+  unset set_power_plan__config
   unset set_power_plan__mode
   unset set_power_plan__input
   return 0
