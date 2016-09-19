@@ -291,7 +291,7 @@ set_max()
 
       log_all "'${set_max__value}' is all digits"
       log_verbose "$(cat << EOF
-Bound value '${set_max__value}}' between \
+Bound value '${set_max__value}' between \
 ${set_max__fixed_min} and ${SYSTEM_CPU_MAX_VALUE}
 EOF
 )"
@@ -705,6 +705,9 @@ locate_power_plan_config()
         unset locate_power_plan_config__input
         return 0
     fi
+
+    # Increment __i
+    __i=$((__i + 1))
 
     unset __testconfig
   done
