@@ -749,14 +749,15 @@ execute_power_plan_config()
   execute_power_plan_config__location="$2"
   execute_power_plan_config__name="$3"
 
+  log_verbose "Sourcing config from location: ${execute_power_plan_config__location}"
   # shellcheck source=/dev/null
   . "${execute_power_plan_config__location}" || return 1
 
   execute_power_plan_config__type=""
 
   if [ -n "${PLAN_CPU_MAX}" ] || [ -n "${PLAN_CPU_MIN}" ] \
-    [ -n "${PLAN_CPU_TURBO}" ] || [ -n "${PLAN_CPU_GOVERNOR}" ] \
-    [ -n "${PLAN_CPU_X86}" ]; then
+    || [ -n "${PLAN_CPU_TURBO}" ] || [ -n "${PLAN_CPU_GOVERNOR}" ] \
+    || [ -n "${PLAN_CPU_X86}" ]; then
     execute_power_plan_config__type="MANUAL"
   elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BATTERY}" ]; then
     execute_power_plan_config__type="AUTO"
@@ -950,113 +951,6 @@ set_power_plan_manual()
   unset set_power_plan_manual__x86
   return 0
 }
-
-##
-# Sets the power plan based on the current plugged in status
-#
-# $1 execution mode
-# set_power_plan_auto()
-# {
-#   set_power_plan_auto__mode="$1"
-#   log_verbose "Set power plan to: auto"
-#   if [ "$(is_power_supply_mains)" -eq 1 ]; then
-#     set_power_plan_balanced "${set_power_plan_auto__mode}" || return 1
-#   else
-#     set_power_plan_powersave "${set_power_plan_auto__mode}" || return 1
-#   fi
-
-#   unset set_power_plan_auto__mode
-#   return 0
-# }
-
-# Sets the power plan to a low power mode
-#
-# $1 execution mode
-# set_power_plan_powersave()
-# {
-#   set_power_plan_powersave__mode="$1"
-
-#   log_verbose "Set power plan to: powersave"
-#   set_max "${set_power_plan_powersave__mode}" 0 || return 1
-#   set_min "${set_power_plan_powersave__mode}" 0 || return 1
-#   set_governor "${set_power_plan_powersave__mode}" powersave || return 1
-#   set_x86 "${set_power_plan_powersave__mode}" 0 || return 1
-#   if [ "$(has_pstate_dir)" -eq 1 ]; then
-#     set_turbo "${set_power_plan_powersave__mode}" 1 || return 1
-#   else
-#     set_turbo "${set_power_plan_powersave__mode}" 0 || return 1
-#   fi
-
-#   unset set_power_plan_powersave__mode
-#   return 0
-# }
-
-# Sets the power plan to a balanced mode
-#
-# $1 execution mode
-# set_power_plan_balanced()
-# {
-#   set_power_plan_balanced__mode="$1"
-
-#   log_verbose "Set power plan to: balanced"
-#   set_max "${set_power_plan_balanced__mode}" 100 || return 1
-#   set_min "${set_power_plan_balanced__mode}" 0 || return 1
-#   set_x86 "${set_power_plan_balanced__mode}" 0 || return 1
-#   if [ "$(has_pstate_dir)" -eq 1 ]; then
-#     set_governor "${set_power_plan_balanced__mode}" powersave || return 1
-#     set_turbo "${set_power_plan_balanced__mode}" 1 || return 1
-#   else
-#     set_governor "${set_power_plan_balanced__mode}" ondemand || return 1
-#     set_turbo "${set_power_plan_balanced__mode}" 0 || return 1
-#   fi
-
-#   unset set_power_plan_balanced__mode
-#   return 0
-# }
-
-# Sets the power plan to a performance mode
-#
-# $1 execution mode
-# set_power_plan_performance()
-# {
-#   set_power_plan_performance__mode="$1"
-
-#   log_verbose "Set power plan to: performance"
-#   set_max "${set_power_plan_performance__mode}" 100 || return 1
-#   set_min "${set_power_plan_performance__mode}" 0 || return 1
-#   set_governor "${set_power_plan_performance__mode}" performance || return 1
-#   set_x86 "${set_power_plan_performance__mode}" 1 || return 1
-#   if [ "$(has_pstate_dir)" -eq 1 ]; then
-#     set_turbo "${set_power_plan_performance__mode}" 0 || return 1
-#   else
-#     set_turbo "${set_power_plan_performance__mode}" 1 || return 1
-#   fi
-
-#   unset set_power_plan_performance__mode
-#   return 0
-# }
-
-# Sets the power plan to the max available performance mode
-#
-# $1 execution mode
-# set_power_plan_max()
-# {
-#   set_power_plan_max__mode="$1"
-
-#   log_verbose "Set power plan to: max"
-#   set_max "${set_power_plan_max__mode}" 100 || return 1
-#   set_min "${set_power_plan_max__mode}" 100 || return 1
-#   set_governor "${set_power_plan_max__mode}" performance || return 1
-#   set_x86 "${set_power_plan_max__mode}" 2 || return 1
-#   if [ "$(has_pstate_dir)" -eq 1 ]; then
-#     set_turbo "${set_power_plan_max__mode}" 0 || return 1
-#   else
-#     set_turbo "${set_power_plan_max__mode}" 1 || return 1
-#   fi
-
-#   unset set_power_plan_max__mode
-#   return 0
-# }
 
 # Handle long options which take arguments
 #
