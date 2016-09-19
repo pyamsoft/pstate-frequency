@@ -927,19 +927,61 @@ set_power_plan_manual()
 
   # Check validity of variables here, parse special arguments
   set_max "${set_power_plan_manual__mode}" \
-    "${set_power_plan_manual__max}" || return 1
+    "${set_power_plan_manual__max}" || {
+    elog_quiet "$(cat << EOF
+You did not specify a valid max in your power plan.
+While this will not cause failure in this version of pstate-frequency,
+this behavior may change in later versions.
+EOF
+)"
+  }
   set_min "${set_power_plan_manual__mode}" \
-    "${set_power_plan_manual__min}" || return 1
+    "${set_power_plan_manual__min}" || {
+    elog_quiet "$(cat << EOF
+You did not specify a valid min in your power plan.
+While this will not cause failure in this version of pstate-frequency,
+this behavior may change in later versions.
+EOF
+)"
+  }
   set_governor "${set_power_plan_manual__mode}" \
-    "${set_power_plan_manual__gov}" || return 1
+    "${set_power_plan_manual__gov}" || {
+    elog_quiet "$(cat << EOF
+You did not specify a valid governor in your power plan.
+While this will not cause failure in this version of pstate-frequency,
+this behavior may change in later versions.
+EOF
+)"
+  }
   set_x86 "${set_power_plan_manual__mode}" \
-    "${set_power_plan_manual__x86}" || return 1
+    "${set_power_plan_manual__x86}" || {
+    elog_quiet "$(cat << EOF
+You did not specify a valid x86 in your power plan.
+While this will not cause failure in this version of pstate-frequency,
+this behavior may change in later versions.
+EOF
+)"
+  }
   if [ "$(has_pstate_dir)" -eq 1 ]; then
     set_turbo "${set_power_plan_manual__mode}" \
-      "${set_power_plan_manual__turbo}" || return 1
+      "${set_power_plan_manual__turbo}" || {
+    elog_quiet "$(cat << EOF
+You did not specify a valid turbo in your power plan.
+While this will not cause failure in this version of pstate-frequency,
+this behavior may change in later versions.
+EOF
+)"
+  }
   else
     set_turbo "${set_power_plan_manual__mode}" \
-      "${set_power_plan_manual__turbo}" || return 1
+      "${set_power_plan_manual__turbo}" || {
+    elog_quiet "$(cat << EOF
+You did not specify a valid x86 in your power plan.
+While this will not cause failure in this version of pstate-frequency,
+this behavior may change in later versions.
+EOF
+)"
+  }
   fi
 
   unset set_power_plan_manual__mode
