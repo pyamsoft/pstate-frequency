@@ -36,6 +36,7 @@ ZSH_INSTALL_SRC="$(RES_DIR)/shell/zsh/zsh_completion"
 UDEV_INSTALL_SRC="$(RES_DIR)/udev/99-pstate-frequency.rules"
 SYSTEMD_SERVICE_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency.service"
 SYSTEMD_SERVICE_SLEEP_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency-sleep.service"
+POWER_PLAN_INSTALL_SRCDIR="$(RES_DIR)/plans/"
 
 SCRIPT_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/bin/$(NAME)"
 DOC_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/share/doc/$(NAME)/README.md"
@@ -45,14 +46,17 @@ ZSH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/zsh/site-functions/_$(NAME
 UDEV_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/udev/rules.d/99-$(NAME).rules"
 SYSTEMD_SERVICE_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME).service"
 SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)-sleep.service"
+POWER_PLAN_INSTALL_TARGETDIR="$(DESTDIR)/etc/pstate-frequency.d/"
 
 .PHONY: all install uninstall edit \
 	install-doc install-license install-script install-res \
 	install-bash install-zsh install-udev install-systemd \
 	install-systemd-pstate install-systemd-pstate-sleep \
+	install-power-plans \
 	uninstall-script uninstall-doc uninstall-license uninstall-res \
 	uninstall-bash uninstall-zsh uninstall-udev uninstall-systemd \
-	uninstall-systemd-pstate uninstall-systemd-pstate-sleep
+	uninstall-systemd-pstate uninstall-systemd-pstate-sleep \
+	uninstall-power-plans
 
 all:
 	@echo "Targets"
@@ -108,6 +112,9 @@ endif
 ifeq ($(INCLUDE_SYSTEMD_UNIT), 1)
 	@$(MAKE) install-systemd
 endif
+ifeq ($(INCLUDE_POWER_PLANS), 1)
+	@$(MAKE) install-power-plans
+endif
 
 install-bash:
 	@echo "  INSTALL  $(BASH_INSTALL_TARGET)"
@@ -137,6 +144,15 @@ install-systemd-pstate-sleep:
 	@echo "  INSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET))"
 	@install -Dm 644 "$(SYSTEMD_SERVICE_SLEEP_INSTALL_SRC)" "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
+
+install-power-plans:
+	@echo "  INSTALL  DIR: $(POWER_PLAN_INSTALL_TARGETDIR)"
+	@install -d "$(POWER_PLAN_INSTALL_TARGETDIR)"
+	@install -Dm 644 "$(POWER_PLAN_INSTALL_SRCDIR)/00-auto.plan" "$(POWER_PLAN_INSTALL_TARGETDIR)"
+	@install -Dm 644 "$(POWER_PLAN_INSTALL_SRCDIR)/01-powersave.plan" "$(POWER_PLAN_INSTALL_TARGETDIR)"
+	@install -Dm 644 "$(POWER_PLAN_INSTALL_SRCDIR)/02-balanced.plan" "$(POWER_PLAN_INSTALL_TARGETDIR)"
+	@install -Dm 644 "$(POWER_PLAN_INSTALL_SRCDIR)/03-performance.plan" "$(POWER_PLAN_INSTALL_TARGETDIR)"
+	@install -Dm 644 "$(POWER_PLAN_INSTALL_SRCDIR)/04-max.plan" "$(POWER_PLAN_INSTALL_TARGETDIR)"
 
 uninstall:
 	@echo "Uninstalling..."
@@ -176,6 +192,9 @@ endif
 ifeq ($(INCLUDE_SYSTEMD_UNIT), 1)
 	@$(MAKE) uninstall-systemd
 endif
+ifeq ($(INCLUDE_POWER_PLANS), 1)
+	@$(MAKE) uninstall-power-plans
+endif
 
 uninstall-bash:
 	@echo "  UNINSTALL  $(BASH_INSTALL_TARGET)"
@@ -200,4 +219,13 @@ uninstall-systemd-pstate:
 uninstall-systemd-pstate-sleep:
 	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 	@rm -f "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
+
+uninstall-power-plans:
+	@echo "  UNINSTALL  DIR: $(POWER_PLAN_INSTALL_TARGETDIR)"
+	@rm -f "$(POWER_PLAN_INSTALL_TARGETDIR)/00-auto.plan"
+	@rm -f "$(POWER_PLAN_INSTALL_TARGETDIR)/01-powersave.plan"
+	@rm -f "$(POWER_PLAN_INSTALL_TARGETDIR)/02-balanced.plan"
+	@rm -f "$(POWER_PLAN_INSTALL_TARGETDIR)/03-performance.plan"
+	@rm -f "$(POWER_PLAN_INSTALL_TARGETDIR)/04-max.plan"
+	@rmdir --ignore-fail-on-non-empty "$(POWER_PLAN_INSTALL_TARGETDIR)"
 

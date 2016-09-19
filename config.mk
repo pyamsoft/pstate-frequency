@@ -45,6 +45,15 @@ NAME=pstate-frequency
 PREFIX?=/usr/local
 
 ##
+# power plan files
+#
+# Include default power plans
+#
+# 0 NO | [1 YES]
+##
+INCLUDE_POWER_PLANS?=1
+
+##
 # bash-completion
 #
 # Include a bash completion file
