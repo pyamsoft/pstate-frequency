@@ -1650,23 +1650,23 @@ main()
             ;;
           p)
             log_all "Attempt to set plan"
-            set_power_plan "${exec_mode}" "${OPTARG}"
+            set_power_plan "${exec_mode}" "${OPTARG}" || return 1
             ;;
           m)
             log_all "Attempt to set max"
-            set_max "${exec_mode}" "${OPTARG}"
+            set_max "${exec_mode}" "${OPTARG}" || return 1
             ;;
           n)
             log_all "Attempt to set min"
-            set_min "${exec_mode}" "${OPTARG}"
+            set_min "${exec_mode}" "${OPTARG}" || return 1
             ;;
           t)
             log_all "Attempt to set turbo"
-            set_turbo "${exec_mode}" "${OPTARG}"
+            set_turbo "${exec_mode}" "${OPTARG}" || return 1
             ;;
           g)
             log_all "Attempt to set governor"
-            set_governor "${exec_mode}" "${OPTARG}"
+            set_governor "${exec_mode}" "${OPTARG}" || return 1
             ;;
           c)
             log_all "Set exec_get_type to current"
@@ -1684,7 +1684,7 @@ main()
             ;;
           x)
             log_all "Attempt to set x86_perf_policy"
-            set_x86 "${exec_mode}" "${OPTARG}"
+            set_x86 "${exec_mode}" "${OPTARG}" || return 1
             ;;
           *)
             elog_quiet "Illegal option -${OPTARG}"
