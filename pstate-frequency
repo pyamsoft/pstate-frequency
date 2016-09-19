@@ -724,7 +724,7 @@ locate_power_plan_config()
 #
 # EITHER
 #
-#   PLAN_AUTO_BATTERY [ plan number | plan name }
+#   PLAN_AUTO_BAT [ plan number | plan name }
 #     The identifier of the plan to run on battery
 #
 #   PLAN_AUTO_AC [ plan number | plan name }
@@ -759,7 +759,7 @@ execute_power_plan_config()
     || [ -n "${PLAN_CPU_TURBO}" ] || [ -n "${PLAN_CPU_GOVERNOR}" ] \
     || [ -n "${PLAN_CPU_X86}" ]; then
     execute_power_plan_config__type="MANUAL"
-  elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BATTERY}" ]; then
+  elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BAT}" ]; then
     execute_power_plan_config__type="AUTO"
   else
     elog_quiet "Invalid power plan file: ${execute_power_plan_config__location}"
@@ -767,7 +767,7 @@ execute_power_plan_config()
   fi
 
   execute_power_plan_config__auto_ac="${PLAN_AUTO_AC}"
-  execute_power_plan_config__auto_bat="${PLAN_AUTO_BATTERY}"
+  execute_power_plan_config__auto_bat="${PLAN_AUTO_BAT}"
   execute_power_plan_config__cpu_max="${PLAN_CPU_MAX}"
   execute_power_plan_config__cpu_min="${PLAN_CPU_MIN}"
   execute_power_plan_config__cpu_turbo="${PLAN_CPU_TURBO}"
@@ -776,7 +776,7 @@ execute_power_plan_config()
 
   unset PLAN_AUTOMATIC
   unset PLAN_AUTO_AC
-  unset PLAN_AUTO_BATTERY
+  unset PLAN_AUTO_BAT
 
   unset PLAN_CPU_MAX
   unset PLAN_CPU_MIN
