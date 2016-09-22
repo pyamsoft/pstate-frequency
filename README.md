@@ -126,7 +126,7 @@ Power Plans are convenience shortcuts which essentially alias to calling
 pstate-frequency with various options for --max, --min, --turbo, and  
 --governor. They are not necessary for operation, but are recommended.
 
-There are three default power plans:  
+There are five default power plans:  
 1. **powersave (1)** Sets the minimum and maximum scaling frequencies to the  
 lowest available and disables Turbo Boost.  
 2. **balanced (2)** Sets the minimum scaling frequency to the  
