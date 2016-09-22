@@ -26,7 +26,7 @@ file: config.mk.
 ### Optional Dependencies
 
 + x86_energy_perf_policy  
-This is used to set the CPU to normal performance policy upon suspend and
+This is used to set the CPU to normal performance policy upon suspend and  
 resume. It is used to currently work around an assumed bug whereby on resume  
 the system is set to performance policy on one core. It can help fix issues  
 where upon resume of the system, the CPU runs at frequencies higher than  
@@ -44,6 +44,7 @@ $ make edit
 While building, there are a couple of options that one may configure or  
 change:  
 + The directory to install to (defaults to /usr/local)  
++ Install a set of default power plans (defaults to Yes)  
 + Install bash completion (defaults to Yes)  
 + Install zsh completion (defaults to No)  
 + Install systemd related unit files (defaults to Yes)  
@@ -111,8 +112,9 @@ takes various flags as required arguments:
 + **-m --max** Adjust the maximum scaling frequency of the CPU  
 + **-n --min** Adjust the minimum scaling frequency of the CPU  
 + **-g --governor** Adjust the current CPU scaling governor  
-+ **-t --turbo** Adjust the current state of Turbo Boost (0 is ON, 1 is OFF)  
++ **-t --turbo** Adjust the current state of Turbo Boost  
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.  
++ **-x --x86** Adjust the x86 energy performance policy.  
 
 *By default, calling the -S option with no extra arguments will return an  
 error*
@@ -124,7 +126,7 @@ Power Plans are convenience shortcuts which essentially alias to calling
 pstate-frequency with various options for --max, --min, --turbo, and  
 --governor. They are not necessary for operation, but are recommended.
 
-There are three user recommended power plans:  
+There are three default power plans:  
 1. **powersave (1)** Sets the minimum and maximum scaling frequencies to the  
 lowest available and disables Turbo Boost.  
 2. **balanced (2)** Sets the minimum scaling frequency to the  
@@ -139,6 +141,17 @@ frequencies, and enables Turbo Boost.
 5. **auto (0)** If the computer's main powersource is online, then the  
 *balanced* plan is set. If the main powersource is offline, then the  
 *powersave* plan is set.  
+
+The power plans live in /etc/pstate-frequency.d/ and can be edited to change  
+how each performs. An example of the various available plan options can be  
+found in `res/plans/README`
+
+Note that the power plans are simple shell script files which are sourced  
+by pstate-frequency at run time, potentially as the root user. As such, please  
+make sure that the plans do not contain any malicious code, or really, anything  
+other than the accepted variables. pstate-frequency does not ship with plans  
+that execute any code and you are responsible for what you configure your own  
+plans to do.
 
 
 ### Understanding pstate-frequency
@@ -217,11 +230,18 @@ working udev rule for your system, please feel free to submit it to the
 main project as a pull request on GitHub.
 
 At this time, pstate-frequency does not make use of any of the new files  
-added to the pstate-driver in kernels 4 and up. The pstate-frequency program  
+added to the intel_pstate driver in kernels 4 and up. pstate-frequency  
 will only make use of the following sys files:  
+
+With the intel_pstate driver:
+
 + /sys/devices/system/cpu/intel_pstate/max_perf_pct  
 + /sys/devices/system/cpu/intel_pstate/min_perf_pct  
 + /sys/devices/system/cpu/intel_pstate/no_turbo  
+
+With acpi_cpufreq:
+
++ /sys/devices/system/cpu/cpufreq/boost  
 
 ## Development
 
