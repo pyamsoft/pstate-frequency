@@ -21,4 +21,4 @@
 # SOFTWARE.
 
 # Sets power states based on the current connected state of the AC Adapter
-ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="Mains", RUN+="/bin/sh -c 'pstate-frequency -qq -S -p udev'"
+ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="Mains", RUN+="/bin/sh -c 'pstate-frequency -qq -S -p auto'"
