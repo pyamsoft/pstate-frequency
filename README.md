@@ -207,18 +207,6 @@ pstate-frequency is only able to offer "suggestions" as to what
 frequency should be run, not make strict rules.
 
 
-##### x86_energy_perf_policy
-
-Additional control may be achieved through the use of the  
-x86_energy_perf_policy or equivalent binaries. Setting the  
-x86_energy_perf_policy to the 'normal' mode can help pstate-frequency  
-maintain stricter control of CPU frequencies, and this can sometimes  
-help in keeping frequencies under control after system suspend and resume.  
-There is a systemd unit included with pstate-frequency by default called  
-x86_energy_perf_policy-sleep.service which will set the policy to normal  
-upon system suspend/resume.
-
-
 ### Additional Notes
 
 If you are attempting to use the udev rule but pstate-frequency fails to  
