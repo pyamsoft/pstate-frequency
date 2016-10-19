@@ -23,7 +23,8 @@
 # Sets some 'performance' settings
 PLAN_CPU_MAX=100
 PLAN_CPU_MIN=0
-PLAN_CPU_GOVERNOR=performance
+PLAN_CPU_PSTATE_GOVERNOR=performance
+PLAN_CPU_CPUFREQ_GOVERNOR=performance
 
 # We set to powersave here to stop the CPU from eagerly entering Turbo Boost
 PLAN_CPU_X86=normal

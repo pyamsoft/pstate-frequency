@@ -23,7 +23,8 @@
 # Sets some 'balanced' settings
 PLAN_CPU_MAX=100
 PLAN_CPU_MIN=0
-PLAN_CPU_GOVERNOR=ondemand
+PLAN_CPU_PSTATE_GOVERNOR=powersave
+PLAN_CPU_CPUFREQ_GOVERNOR=ondemand
 
 # We set to powersave here to stop the CPU from eagerly entering Turbo Boost
 PLAN_CPU_X86=powersave
