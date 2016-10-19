@@ -735,7 +735,8 @@ locate_power_plan_config()
 #  PLAN_CPU_MAX [ "max" | "min" | number ]
 #  PLAN_CPU_MIN [ "max" | "min" | number ]
 #  PLAN_CPU_TURBO [ "on" | "off" | number ]
-#  PLAN_CPU_GOVERNOR [ governor number | governor name ]
+#  PLAN_CPU_CPUFREQ_GOVERNOR [ governor number | governor name ]
+#  PLAN_CPU_PSTATE_GOVERNOR [ governor number | governor name ]
 #  PLAN_CPU_X86 [ x86 number | x86 name ]
 #
 # If both are defined, the variables under PLAN_CPU take preference
@@ -750,14 +751,14 @@ execute_power_plan_config()
   execute_power_plan_config__name="$3"
 
   log_verbose "Sourcing config from location: ${execute_power_plan_config__location}"
+
   # shellcheck source=/dev/null
   . "${execute_power_plan_config__location}" || return 1
 
   execute_power_plan_config__type=""
-
   if [ -n "${PLAN_CPU_MAX}" ] || [ -n "${PLAN_CPU_MIN}" ] \
-    || [ -n "${PLAN_CPU_TURBO}" ] || [ -n "${PLAN_CPU_GOVERNOR}" ] \
-    || [ -n "${PLAN_CPU_X86}" ]; then
+    || [ -n "${PLAN_CPU_TURBO}" ] || [ -n "${PLAN_CPU_PSTATE_GOVERNOR}" ] \
+    || [ -n "${PLAN_CPU_CPUFREQ_GOVERNOR}" ] || [ -n "${PLAN_CPU_X86}" ]; then
     execute_power_plan_config__type="MANUAL"
   elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BAT}" ]; then
     execute_power_plan_config__type="AUTO"
@@ -771,8 +772,14 @@ execute_power_plan_config()
   execute_power_plan_config__cpu_max="${PLAN_CPU_MAX}"
   execute_power_plan_config__cpu_min="${PLAN_CPU_MIN}"
   execute_power_plan_config__cpu_turbo="${PLAN_CPU_TURBO}"
-  execute_power_plan_config__cpu_gov="${PLAN_CPU_GOVERNOR}"
   execute_power_plan_config__cpu_x86="${PLAN_CPU_X86}"
+
+  execute_power_plan_config__cpu_gov=
+  if [ "$(has_pstate_dir)" -eq 1 ]; then
+    execute_power_plan_config__cpu_gov="${PLAN_CPU_PSTATE_GOVERNOR}"
+  else
+    execute_power_plan_config__cpu_gov="${PLAN_CPU_CPUFREQ_GOVERNOR}"
+  fi
 
   unset PLAN_AUTOMATIC
   unset PLAN_AUTO_AC
@@ -781,7 +788,8 @@ execute_power_plan_config()
   unset PLAN_CPU_MAX
   unset PLAN_CPU_MIN
   unset PLAN_CPU_TURBO
-  unset PLAN_CPU_GOVERNOR
+  unset PLAN_CPU_PSTATE_GOVERNOR
+  unset PLAN_CPU_CPUFREQ_GOVERNOR
   unset PLAN_CPU_X86
 
   if [ "${execute_power_plan_config__type}" = "MANUAL" ]; then

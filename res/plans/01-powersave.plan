@@ -23,7 +23,8 @@
 # Sets all settings to lowest possible
 PLAN_CPU_MAX=0
 PLAN_CPU_MIN=0
-PLAN_CPU_GOVERNOR=powersave
+PLAN_CPU_PSTATE_GOVERNOR=powersave
+PLAN_CPU_CPUFREQ_GOVERNOR=powersave
 PLAN_CPU_X86=powersave
 
 # Note that using a number value for turbo may change the meaning when
