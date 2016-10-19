@@ -8,7 +8,7 @@ pkgname=pstate-frequency-git
 # shellcheck disable=SC2034
 pkgdesc="Easily control Intel p-state driver (git version)"
 # shellcheck disable=SC2034
-pkgver="3.4.0".r709.70bab39
+pkgver="3.5.1".r756.a3c8dcc
 # shellcheck disable=SC2034
 pkgrel=1
 # shellcheck disable=SC2034
@@ -36,9 +36,8 @@ source=(
         "${_gitname}::git+${url}"
         "00-fix-prefix.patch")
 # shellcheck disable=SC2034
-sha256sums=(
-        'SKIP'
-        'e5423df20c03ef19448a78a1ae39e630d90f63c6c4e0962296ad292665575f0d')
+sha256sums=('SKIP'
+            'e5423df20c03ef19448a78a1ae39e630d90f63c6c4e0962296ad292665575f0d')
 
 pkgver() {
   # shellcheck disable=SC2154
