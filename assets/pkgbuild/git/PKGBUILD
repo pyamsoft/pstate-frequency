@@ -10,7 +10,7 @@ pkgdesc="Easily control Intel p-state driver (git version)"
 # shellcheck disable=SC2034
 pkgver="3.4.0".r709.70bab39
 # shellcheck disable=SC2034
-pkgrel=2
+pkgrel=1
 # shellcheck disable=SC2034
 arch=('i686' 'x86_64')
 # shellcheck disable=SC2034
@@ -33,7 +33,7 @@ url="https://github.com/pyamsoft/pstate-frequency.git"
 ##
 # shellcheck disable=SC2034
 source=(
-        "${_gitname}::git+${url}#branch=dev"
+        "${_gitname}::git+${url}"
         "00-fix-prefix.patch")
 # shellcheck disable=SC2034
 sha256sums=(
