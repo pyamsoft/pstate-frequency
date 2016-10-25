@@ -244,12 +244,12 @@ set_variable_bounds()
 
   if [ "${set_variable_bounds__number}" \
     -lt "${set_variable_bounds__bottom}" ]; then
-    printf -- "${set_variable_bounds__bottom}"
+    printf -- "%s" "${set_variable_bounds__bottom}"
   elif [ "${set_variable_bounds__number}" \
     -gt "${set_variable_bounds__top}" ]; then
-    printf -- "${set_variable_bounds__top}"
+    printf -- "%s" "${set_variable_bounds__top}"
   else
-    printf -- "${set_variable_bounds__number}"
+    printf -- "%s" "${set_variable_bounds__number}"
   fi
 
   unset set_variable_bounds__number
@@ -696,12 +696,12 @@ locate_power_plan_config()
 
       # If the count is also the number
       if [ "${locate_power_plan_config__input}" -eq "${__i}" ]; then
-        printf -- "${__testconfig}"
+        printf -- "%s" "${__testconfig}"
         unset locate_power_plan_config__input
         return 0
       fi
     elif [ "${locate_power_plan_config__input}" = "${__stripped}" ]; then
-        printf -- "${__testconfig}"
+        printf -- "%s" "${__testconfig}"
         unset locate_power_plan_config__input
         return 0
     fi
@@ -1214,7 +1214,7 @@ Write max_value '${root_write_max__max}' to \
 intel_pstate file: ${SYSTEM_INTEL_PSTATE_MAX}
 EOF
 )"
-    printf -- "${root_write_max__max}" \
+    printf -- "%s" "${root_write_max__max}" \
       > "${SYSTEM_INTEL_PSTATE_MAX}" || return 1
     log_all "Max value written to ${SYSTEM_INTEL_PSTATE_MAX}"
   fi
@@ -1229,7 +1229,7 @@ EOF
 Write freq: ${root_write___max_freq}KHz to file: ${root_write___target}
 EOF
 )"
-    printf -- "${root_write___max_freq}" \
+    printf -- "%s" "${root_write___max_freq}" \
       > "${root_write___target}" || return 1
     log_all "Max value written to ${root_write___target}"
 
@@ -1257,7 +1257,7 @@ Write min_value '${root_write_min__min}' to \
 intel_pstate file: ${SYSTEM_INTEL_PSTATE_MIN}
 EOF
 )"
-    printf -- "${root_write_min__min}" \
+    printf -- "%s" "${root_write_min__min}" \
       > "${SYSTEM_INTEL_PSTATE_MIN}" || return 1
     log_all "Min value written to ${SYSTEM_INTEL_PSTATE_MIN}"
   fi
@@ -1272,7 +1272,7 @@ EOF
 Write freq: ${root_write_min__min_freq}KHz to file: ${root_write_min__target}
 EOF
 )"
-    printf -- "${root_write_min__min_freq}" \
+    printf -- "%s" "${root_write_min__min_freq}" \
       > "${root_write_min__target}" || return 1
     log_all "Min value written to ${root_write_min__target}"
 
@@ -1300,7 +1300,7 @@ Write turbo_value '${root_write_turbo__turbo}' to \
 intel_pstate file: ${SYSTEM_INTEL_PSTATE_TURBO}
 EOF
 )"
-    printf -- "${root_write_turbo__turbo}" \
+    printf -- "%s" "${root_write_turbo__turbo}" \
       > "${SYSTEM_INTEL_PSTATE_TURBO}" || return 1
     log_all "Turbo value written to ${SYSTEM_INTEL_PSTATE_TURBO}"
   else
@@ -1309,7 +1309,7 @@ Write turbo_value '${root_write_turbo__turbo}' to \
 acpi-cpufreq file: ${SYSTEM_CPUFREQ_BOOST}
 EOF
 )"
-    printf -- "${root_write_turbo__turbo}" \
+    printf -- "%s" "${root_write_turbo__turbo}" \
       > "${SYSTEM_CPUFREQ_BOOST}" || return 1
     log_all "Turbo value written to ${SYSTEM_CPUFREQ_BOOST}"
   fi
@@ -1337,7 +1337,7 @@ Write governor: ${root_write_governor__gov} to \
 file: ${root_write_governor__target}
 EOF
 )"
-    printf -- "${root_write_governor__gov}" \
+    printf -- "%s" "${root_write_governor__gov}" \
       > "${root_write_governor__target}" || return 1
     log_all "$(cat << EOF
 Governor ${root_write_governor__gov} written \
