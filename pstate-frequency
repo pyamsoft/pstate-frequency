@@ -1364,25 +1364,20 @@ root_write_x86_policy()
 
   if [ -n "${root_write_x86_policy__name}" ]; then
     log_verbose "x86_perf_policy requested: '${root_write_x86_policy__name}'"
-    # make constant
-    root_write_x86_policy__result=
-    root_write_x86_policy__result=$(check_binary "${X86_BINARY}")
-    root_write_x86_policy__result=$?
-    if [ ${root_write_x86_policy__result} -eq 1 ]; then
+    check_binary "${X86_BINARY}" || {
       elog_quiet "Not setting x86_perf_policy even though it was requested"
-    else
-      log_verbose "Setting x86_perf_policy: '${root_write_x86_policy__name}'"
-      if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
-        log_all "Log verbose output for ${X86_BINARY}"
-        "${X86_BINARY}" -v "${root_write_x86_policy__name}" || return 1
-      else
-        log_all "Silent verbose output for ${X86_BINARY}"
-        "${X86_BINARY}" "${root_write_x86_policy__name}" \
-          > /dev/null || return 1
-      fi
-    fi
+      return 1
+    }
 
-    unset root_write_x86_policy__result
+    log_verbose "Setting x86_perf_policy: '${root_write_x86_policy__name}'"
+    if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
+      log_all "Log verbose output for ${X86_BINARY}"
+      "${X86_BINARY}" -v "${root_write_x86_policy__name}" || return 1
+    else
+      log_all "Silent verbose output for ${X86_BINARY}"
+      "${X86_BINARY}" "${root_write_x86_policy__name}" \
+        > /dev/null || return 1
+    fi
   else
     log_verbose "x86_perf_policy was not requested"
   fi
