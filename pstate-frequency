@@ -188,7 +188,7 @@ is_digits()
   is_digits__input="$1"
 
   case "${is_digits__input}" in
-    [!0-9]*|'')
+    *[!0-9]*|'')
       printf -- 0
       ;;
     *)
