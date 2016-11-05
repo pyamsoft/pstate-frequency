@@ -1808,8 +1808,8 @@ EOF
 }
 
 # Set a sanitized PATH
-unset PATH
-PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+# Do not include /usr/local
+PATH="/usr/sbin:/usr/bin:/sbin:/bin"
 export PATH
 
 # Export the LC as the default C so that we do not run into locale based quirks
