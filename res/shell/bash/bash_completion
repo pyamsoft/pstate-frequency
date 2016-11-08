@@ -22,52 +22,57 @@
 
 _pstate-frequency()
 {
-  local cur prev short_actions shorts_options long_options long_actions plans
   COMPREPLY=()
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  prev="${COMP_WORDS[COMP_CWORD-1]}"
-  short_actions="-V -H -S -G -d -q"
-  long_actions="--quiet --version --help --set --get --quiet --color --delay"
-  short_set_options="-m -n -t -p -g -x"
-  short_get_options="-c -r"
-  long_set_options="--max --min --turbo --plan --governor --sleep --x86"
-  long_get_options="--current --real"
-  plans="powersave performance max-performance"
-  policies="powersave normal performance none"
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  local prev="${COMP_WORDS[COMP_CWORD-1]}"
+  local short_actions="-V -H -S -G -d -q"
+  local long_actions="--quiet --version --help --set --get --quiet --delay"
+  local short_set_options="-m -n -t -p -g -x"
+  local short_get_options="-c -r"
+  local long_set_options="--max --min --turbo --plan --governor --x86"
+  local long_get_options="--current --real"
+  local plans="auto powersave balanced performance max-performance"
+  local policies="powersave normal performance none"
+  local governors=""
   governors="$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors)"
 
   if [[ ${cur} = --* ]]; then
     if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
-      COMPREPLY=( $(compgen -W "${long_set_options}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${long_set_options}" -- "${cur}") )
     elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
-      COMPREPLY=( $(compgen -W "${long_get_options}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${long_get_options}" -- "${cur}") )
     elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
-      COMPREPLY=( $(compgen -W "${plans}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${plans}" -- "${cur}") )
     else
-      COMPREPLY=( $(compgen -W "${long_actions}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${long_actions}" -- "${cur}") )
     fi
-    return 0
   elif [[ ${cur} = * ]]; then
     if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
-      COMPREPLY=( $(compgen -W "${short_set_options}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${short_set_options}" -- "${cur}") )
     elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
-      COMPREPLY=( $(compgen -W "${short_get_options}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${short_get_options}" -- "${cur}") )
     elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
-      COMPREPLY=( $(compgen -W "${plans}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${plans}" -- "${cur}") )
     elif [[ ${prev} = "--governor" ]] || [[ ${prev} = "-g" ]]; then
-      COMPREPLY=( $(compgen -W "${governors}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${governors}" -- "${cur}") )
     elif [[ ${prev} = "--x86" ]] || [[ ${prev} = "-x" ]]; then
-      COMPREPLY=( $(compgen -W "${policies}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${policies}" -- "${cur}") )
     else
-      COMPREPLY=( $(compgen -W "${short_actions}" -- ${cur}) )
+      COMPREPLY=( $(compgen -W "${short_actions}" -- "${cur}") )
     fi
-    return 0
-  else
-    return 1
   fi
 
-  unset cur short_actions short_set_options short_get_options
-  unset long_get_options long_set_options long_actions plans prev governors
+  unset cur
+  unset prev
+  unset short_actions
+  unset long_actions
+  unset short_set_options
+  unset short_get_options
+  unset long_set_options
+  unset long_get_options
+  unset plans
+  unset policies
+  unset governors
 }
 
 complete -F _pstate-frequency pstate-frequency
