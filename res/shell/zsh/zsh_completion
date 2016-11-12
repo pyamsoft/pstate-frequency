@@ -59,10 +59,10 @@ _options()
      ":min freq between 0 and 100:"
  elif [ "$words[$index]" = "-t" ] || [ "$words[$index]" = "--turbo" ]; then
    _alternative \
-     ":turbo boost either 0 or 1:"
+     ":turbo boost either on or off:"
  elif [ "$words[$index]" = "-p" ] || [ "$words[$index]" = "--plan" ]; then
    _alternative \
-     ":power plan name or number:"
+     ":power plan name :"
  elif [ "$words[$index]" = "-x" ] || [ "$words[$index]" = "--x86" ]; then
    _alternative \
      ":energy perf policy powersave,normal,performance,none:"
