@@ -584,19 +584,20 @@ set_power_plan()
     # 00-auto.plan
     # 01-powersave.plan
 
-    # set_power_plan__input can either be a number value or the name of a plan
+    # set_power_plan__input is the name of a plan
     log_all "$(cat << EOF
 Search the config directory ${POWER_PLAN_CONFIG_DIR} for power plan
 configrations
 EOF
 )"
     # Locate config with given input
-    readonly set_power_plan__config="$(locate_power_plan_config "${set_power_plan__input}")"
+    readonly set_power_plan__config="$(locate_power_plan_config \
+      "${set_power_plan__input}")"
 
     # Fail if we don't find a config
     if [ -z "${set_power_plan__config}" ]; then
       elog_quiet "No power plan configuration found for argument: \
-        ${set_power_plan__input}"
+${set_power_plan__input}"
       unset set_power_plan__i
       unset set_power_plan__mode
       unset set_power_plan__input
@@ -604,8 +605,8 @@ EOF
     fi
 
     # Otherwise source the config and set a plan
-    execute_power_plan_config "${set_power_plan__mode}" "${set_power_plan__config}" \
-      "${set_power_plan__input}" || return 1
+    execute_power_plan_config "${set_power_plan__mode}" \
+      "${set_power_plan__config}" "${set_power_plan__input}" || return 1
   else
     elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
@@ -630,7 +631,6 @@ locate_power_plan_config()
   locate_power_plan_config__input="$1"
   readonly __prefix='??-'
   readonly __suffix='.plan'
-  __i=0
   for __testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
 
     # Strip all the fancy stuff from the file name to just get the plan name
@@ -638,34 +638,16 @@ locate_power_plan_config()
     __stripped="${__stripped#$__prefix}"
     __stripped="${__stripped%$__suffix}"
 
-    # If the argument is a number
-    if [ "${locate_power_plan_config__input}" -eq \
-      "${locate_power_plan_config__input}" ] 2>/dev/null; then
-      elog_quiet "$(cat << EOF
-Calling --plan with numerical input will be deprecated in the next version
-EOF
-)"
-
-      # If the count is also the number
-      if [ "${locate_power_plan_config__input}" -eq "${__i}" ]; then
-        printf -- "%s" "${__testconfig}"
-        unset locate_power_plan_config__input
-        return 0
-      fi
-    elif [ "${locate_power_plan_config__input}" = "${__stripped}" ]; then
+    if [ "${locate_power_plan_config__input}" = "${__stripped}" ]; then
         printf -- "%s" "${__testconfig}"
         unset locate_power_plan_config__input
         return 0
     fi
 
-    # Increment __i
-    __i=$((__i + 1))
-
     unset __testconfig
   done
 
   unset locate_power_plan_config__input
-  unset __i
   return 0
 }
 
@@ -702,7 +684,8 @@ execute_power_plan_config()
   execute_power_plan_config__location="$2"
   execute_power_plan_config__name="$3"
 
-  log_verbose "Sourcing config from location: ${execute_power_plan_config__location}"
+  log_verbose "Sourcing config from location: \
+${execute_power_plan_config__location}"
 
   # shellcheck source=/dev/null
   . "${execute_power_plan_config__location}" || return 1
@@ -715,7 +698,8 @@ execute_power_plan_config()
   elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BAT}" ]; then
     execute_power_plan_config__type="AUTO"
   else
-    elog_quiet "Invalid power plan file: ${execute_power_plan_config__location}"
+    elog_quiet "Invalid power plan file: \
+${execute_power_plan_config__location}"
     return 1
   fi
 
@@ -793,16 +777,19 @@ set_power_plan_automatic()
 
   log_verbose "Set power plan to: ${set_power_plan_automatic__name}"
   if [ "$(is_power_supply_mains)" -eq 1 ]; then
-    set_power_plan_automatic__config="$(locate_power_plan_config "${set_power_plan_automatic__ac}")"
+    set_power_plan_automatic__config="$(locate_power_plan_config \
+      "${set_power_plan_automatic__ac}")"
     set_power_plan_automatic__arg="${set_power_plan_automatic__ac}"
   else
-    set_power_plan_automatic__config="$(locate_power_plan_config "${set_power_plan_automatic__bat}")"
+    set_power_plan_automatic__config="$(locate_power_plan_config \
+      "${set_power_plan_automatic__bat}")"
     set_power_plan_automatic__arg="${set_power_plan_automatic__bat}"
   fi
 
   # Fail if we don't find a config
   if [ -z "${set_power_plan_automatic__config}" ]; then
-    elog_quiet "No power plan configuration found for auto config: ${set_power_plan_automatic__arg}"
+    elog_quiet "No power plan configuration found for auto config: \
+${set_power_plan_automatic__arg}"
     unset set_power_plan_automatic__name
     unset set_power_plan_automatic__bat
     unset set_power_plan_automatic__ac
