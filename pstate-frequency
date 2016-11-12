@@ -1143,7 +1143,8 @@ root_do_set_has_arg()
   if [ "${__exec_set_max_type}" -eq 1 ] \
     || [ "${__exec_set_min_type}" -eq 1 ] \
     || [ "${__exec_set_turbo_type}" -eq 1 ] \
-    || [ "${__exec_set_governor_type}" -eq 1 ]; then
+    || [ "${__exec_set_governor_type}" -eq 1 ] \
+    || [ "${__exec_set_x86_policy_type}" -eq 1 ]; then
     printf -- 1
   else
     printf -- 0
