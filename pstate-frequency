@@ -271,27 +271,8 @@ set_max()
 
   log_all "set_max requires SET operation exec_mode"
   if [ "${set_max__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    set_max__value=""
-
-    log_all "Check for special case arguments: max, min"
-    if [ "${set_max__input}" = "max" ]; then
-      elog_quiet "$(cat << EOF
-Calling --max with non numerical input will be deprecated in the next version
-EOF
-)"
-      log_verbose "Argument was 'max' set to ${SYSTEM_CPU_MAX_VALUE}"
-      set_max__value="${SYSTEM_CPU_MAX_VALUE}"
-    elif [ "${set_max__input}" = "min" ]; then
-      elog_quiet "$(cat << EOF
-Calling --max with non numerical input will be deprecated in the next version
-EOF
-)"
-      log_verbose "Argument was 'min' set to ${SYSTEM_CPU_MIN_VALUE}"
-      set_max__value="${SYSTEM_CPU_MIN_VALUE}"
-    else
-      log_verbose "Argument was not special, read as is"
-      set_max__value="${set_max__input}"
-    fi
+    log_verbose "Set max_value to '${set_max__input}'"
+    set_max__value="${set_max__input}"
 
     log_all "Check that '${set_max__value}' is all digits"
     if [ "$(is_digits "${set_max__value}")" -eq 1 ]; then
@@ -346,27 +327,8 @@ set_min()
 
   log_all "set_min requires SET operation exec_mode"
   if [ "${set_min__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    set_min__value=""
-
-    log_all "Check for special case arguments: max, min"
-    if [ "${set_min__input}" = "max" ]; then
-      elog_quiet "$(cat << EOF
-Calling --min with non numerical input will be deprecated in the next version
-EOF
-)"
-      log_verbose "Argument was 'max' set to ${SYSTEM_CPU_MAX_VALUE}"
-      set_min__value="${SYSTEM_CPU_MAX_VALUE}"
-    elif [ "${set_min__input}" = "min" ]; then
-      elog_quiet "$(cat << EOF
-Calling --min with non numerical input will be deprecated in the next version
-EOF
-)"
-      log_verbose "Argument was 'min' set to ${SYSTEM_CPU_MIN_VALUE}"
-      set_min__value="${SYSTEM_CPU_MIN_VALUE}"
-    else
-      log_verbose "Argument was not special, read as is"
-      set_min__value="${set_min__input}"
-    fi
+    log_verbose "Set min_value to '${set_min__input}'"
+    set_min__value="${set_min__input}"
 
     log_all "Check that '${set_min__value}' is all digits"
     if [ "$(is_digits "${set_min__value}")" -eq 1 ]; then
@@ -439,24 +401,21 @@ set_turbo()
         set_turbo__value="0"
       fi
     else
-      elog_quiet "$(cat << EOF
-Calling --turbo with numerical input will be deprecated in the next version
-EOF
-)"
-      log_verbose "Argument was not special, read as is"
-      set_turbo__value="${set_turbo__input}"
+      elog_quiet "turbo argument '${set_turbo__input}' is invalid"
+      unset set_turbo__input
+      unset set_turbo__mode
+      unset set_turbo__value
+      return 1
     fi
 
-    log_all "Check that '${set_turbo__value}' is all digits"
-    if [ "$(is_digits "${set_turbo__value}")" -eq 1 ]; then
-      log_all "'${set_turbo__value}' is all digits"
-      log_verbose "Bound value '${set_turbo__value}' between 0 and 1"
-      set_turbo__value="$(set_variable_bounds "${set_turbo__value}" 0 1)"
+    log_all "Check that '${set_turbo__value}' is valid"
+    if [ "${set_turbo__value}" -eq 1 ] || [ "${set_turbo__value}" -eq 0 ]; then
+      log_all "'${set_turbo__value}' is valid digit"
       __exec_set_turbo_type="${SET_TURBO_TRUE}"
       __exec_set_turbo_arg="${set_turbo__value}"
       log_all "__exec_set_turbo_arg: '${__exec_set_turbo_arg}'"
     else
-      elog_quiet "turbo argument '${set_turbo__value}' is not a number"
+      elog_quiet "turbo argument '${set_turbo__value}' is invalid"
 
       unset set_turbo__input
       unset set_turbo__mode
