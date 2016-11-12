@@ -38,20 +38,20 @@
 #
 # EITHER
 #
-#   PLAN_AUTO_BAT [ plan number | plan name }
+#   PLAN_AUTO_BAT [ plan name }
 #     The identifier of the plan to run on battery
 #
-#   PLAN_AUTO_AC [ plan number | plan name }
+#   PLAN_AUTO_AC [ plan name }
 #     The identifier of the plan to run on ac charger
 #
 # OR
 #
-#  PLAN_CPU_MAX [ "max" | "min" | number ]
-#  PLAN_CPU_MIN [ "max" | "min" | number ]
-#  PLAN_CPU_TURBO [ "on" | "off" | number ]
-#  PLAN_CPU_PSTATE_GOVERNOR [ governor number | governor name ]
-#  PLAN_CPU_CPUFREQ_GOVERNOR [ governor number | governor name ]
-#  PLAN_CPU_X86 [ x86 number | x86 name ]
+#  PLAN_CPU_MAX [ number ]
+#  PLAN_CPU_MIN [ number ]
+#  PLAN_CPU_TURBO [ "on" | "off" ]
+#  PLAN_CPU_PSTATE_GOVERNOR [ governor name ]
+#  PLAN_CPU_CPUFREQ_GOVERNOR [ governor name ]
+#  PLAN_CPU_X86 [ x86 name ]
 #
 # If both are defined, the variables under PLAN_CPU take preference
 
@@ -59,8 +59,8 @@ PLAN_AUTO_AC=performance
 PLAN_AUTO_BAT=powersave
 
 PLAN_CPU_MAX=100
-PLAN_CPU_MIN=min
+PLAN_CPU_MIN=0
 PLAN_CPU_TURBO=off
 PLAN_CPU_PSTATE_GOVERNOR=powersave
 PLAN_CPU_CPUFREQ_GOVERNOR=ondemand
-PLAN_CPU_X86=1
+PLAN_CPU_X86=normal
