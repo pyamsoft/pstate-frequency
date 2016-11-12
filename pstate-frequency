@@ -450,35 +450,13 @@ set_governor()
 
   log_all "set_governor requires SET operation exec_mode"
   if [ "${set_governor__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    set_governor__value=""
     set_governor__all_available_governors="$(cat "${SYSTEM_CPU_GOVERNORS}" )"
 
-    if [ "$(is_digits "${set_governor__input}")" -eq 1 ]; then
-      elog_quiet "$(cat << EOF
-Calling --governor with numerical input will be deprecated in the next version
-EOF
-)"
-      set_governor__count=0
-      for available_gov in ${set_governor__all_available_governors}; do
-        if [ "${set_governor__count}" -eq "${set_governor__input}" ]; then
-          log_verbose "Value is a predefined governor name: ${available_gov}"
-          set_governor__value="${available_gov}"
-          break;
-        fi
-
-        # Increment count
-        set_governor__count=$(( set_governor__count + 1))
-      done
-      unset set_governor__count
-    fi
-
-    if [ -z "${set_governor__value}" ]; then
-      log_verbose "Value is not special, read as is"
-      set_governor__value="${set_governor__input}"
-    fi
+    log_verbose "Set governor_value to '${set_governor__input}'"
+    set_governor__value="${set_governor__input}"
 
     log_all "Check that '${set_governor__value}' is not digits"
-    if [ ! "$(is_digits "${set_governor__value}")" -eq 1 ]; then
+    if [ "$(is_digits "${set_governor__value}")" -eq 0 ]; then
       log_all "'${set_governor__value}' is not digits"
       set_governor__is_valid_governor=0
       for available_gov in ${set_governor__all_available_governors}; do
