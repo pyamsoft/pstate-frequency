@@ -521,16 +521,16 @@ set_x86()
       log_all "'${set_x86__value}' is not digits"
       if [ "${set_x86__value}" = "none" ]; then
         log_verbose "x86_policy_arg: None requested. Reset values"
-        __x86_policy_type="${X86_POLICY_FALSE}"
-        __x86_policy_arg=""
+        __exec_set_x86_policy_type="${X86_POLICY_FALSE}"
+        __exec_set_x86_policy_arg=""
       elif [ "${set_x86__value}" != "powersave" ] \
         && [ "${set_x86__value}" != "normal" ] \
         && [ "${set_x86__value}" != "performance" ]; then
         elog_quiet "Invalid x86_perf_policy specified, do not change"
       else
-        __x86_policy_type="${X86_POLICY_TRUE}"
-        __x86_policy_arg="${set_x86__value}"
-        log_all "__x86_policy_arg: '${__x86_policy_arg}'"
+        __exec_set_x86_policy_type="${X86_POLICY_TRUE}"
+        __exec_set_x86_policy_arg="${set_x86__value}"
+        log_all "__exec_set_x86_policy_arg: '${__x86_policy_arg}'"
       fi
     else
       elog_quiet "x86 argument '${set_x86__value}' is a number"
@@ -1404,9 +1404,9 @@ root_do_set()
   fi
 
   log_all "Check if we are setting x86_policy"
-  if [ "${__x86_policy_type}" -eq 1 ]; then
+  if [ "${__exec_set_x86_policy_type}" -eq 1 ]; then
     log_all "Set x86_policy to arg"
-    root_do_set__setting_x86_policy="${__x86_policy_arg}"
+    root_do_set__setting_x86_policy="${__exec_set_x86_policy_arg}"
   else
     log_all "Set x86_policy to none"
     root_do_set__setting_x86_policy=""
@@ -1745,7 +1745,7 @@ set_max: ${__exec_set_max_type} [${__exec_set_max_arg}]
 set_min: ${__exec_set_min_type} [${__exec_set_min_arg}]
 set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]
 set_governor: ${__exec_set_governor_type} [${__exec_set_governor_arg}]
-set_x86: ${__x86_policy_type} [${__x86_policy_arg}]
+set_x86: ${__exec_set_x86_policy_type} [${__x86_policy_arg}]
 EOF
 )"
       do_set "${execution_delay}" || return 1
@@ -1810,8 +1810,8 @@ readonly X86_POLICY_TRUE=1
 readonly X86_POLICY_NAME_POWERSAVE=0
 readonly X86_POLICY_NAME_NORMAL=1
 readonly X86_POLICY_NAME_PERFORMANCE=2
-__x86_policy_type="${X86_POLICY_FALSE}"
-__x86_policy_arg=""
+__exec_set_x86_policy_type="${X86_POLICY_FALSE}"
+__exec_set_x86_policy_arg=""
 
 # Need cat for heredoc
 check_binary cat || exit 1
