@@ -513,36 +513,11 @@ set_x86()
 
   log_all "set_x86 requires SET operation exec_mode"
   if [ "${set_x86__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    set_x86__value=""
-    log_all "Check for special case arguments: 0, 1, 2"
-    if [ "${set_x86__input}" = "0" ]; then
-      elog_quiet "$(cat << EOF
-Calling --x86 with numerical input will be deprecated in the next version
-EOF
-)"
-      log_verbose "Argument was '0' set to powersave"
-      set_x86__value="powersave"
-    elif [ "${set_x86__input}" = "1" ]; then
-      elog_quiet "$(cat << EOF
-Calling --x86 with numerical input will be deprecated in the next version
-EOF
-)"
-      log_verbose "Argument was '1' set to normal"
-      set_x86__value="normal"
-    elif [ "${set_x86__input}" = "2" ]; then
-      elog_quiet "$(cat << EOF
-Calling --x86 with numerical input will be deprecated in the next version
-EOF
-)"
-      log_verbose "Argument was '2' set to performance"
-      set_x86__value="performance"
-    else
-      log_verbose "Argument was not special, read as is"
-      set_x86__value="${set_x86__input}"
-    fi
+    log_verbose "Set x86_value to '${set_x86__input}'"
+    set_x86__value="${set_x86__input}"
 
     log_all "Check that '${set_x86__value}' is not digits"
-    if [ ! "$(is_digits "${set_x86__value}")" -eq 1 ]; then
+    if [ "$(is_digits "${set_x86__value}")" -eq 0 ]; then
       log_all "'${set_x86__value}' is not digits"
       if [ "${set_x86__value}" = "none" ]; then
         log_verbose "x86_policy_arg: None requested. Reset values"
