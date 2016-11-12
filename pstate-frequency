@@ -275,9 +275,17 @@ set_max()
 
     log_all "Check for special case arguments: max, min"
     if [ "${set_max__input}" = "max" ]; then
+      elog_quiet "$(cat << EOF
+Calling --max with non numerical input will be deprecated in the next version
+EOF
+)"
       log_verbose "Argument was 'max' set to ${SYSTEM_CPU_MAX_VALUE}"
       set_max__value="${SYSTEM_CPU_MAX_VALUE}"
     elif [ "${set_max__input}" = "min" ]; then
+      elog_quiet "$(cat << EOF
+Calling --max with non numerical input will be deprecated in the next version
+EOF
+)"
       log_verbose "Argument was 'min' set to ${SYSTEM_CPU_MIN_VALUE}"
       set_max__value="${SYSTEM_CPU_MIN_VALUE}"
     else
@@ -342,9 +350,17 @@ set_min()
 
     log_all "Check for special case arguments: max, min"
     if [ "${set_min__input}" = "max" ]; then
+      elog_quiet "$(cat << EOF
+Calling --min with non numerical input will be deprecated in the next version
+EOF
+)"
       log_verbose "Argument was 'max' set to ${SYSTEM_CPU_MAX_VALUE}"
       set_min__value="${SYSTEM_CPU_MAX_VALUE}"
     elif [ "${set_min__input}" = "min" ]; then
+      elog_quiet "$(cat << EOF
+Calling --min with non numerical input will be deprecated in the next version
+EOF
+)"
       log_verbose "Argument was 'min' set to ${SYSTEM_CPU_MIN_VALUE}"
       set_min__value="${SYSTEM_CPU_MIN_VALUE}"
     else
@@ -423,6 +439,10 @@ set_turbo()
         set_turbo__value="0"
       fi
     else
+      elog_quiet "$(cat << EOF
+Calling --turbo with numerical input will be deprecated in the next version
+EOF
+)"
       log_verbose "Argument was not special, read as is"
       set_turbo__value="${set_turbo__input}"
     fi
@@ -475,6 +495,10 @@ set_governor()
     set_governor__all_available_governors="$(cat "${SYSTEM_CPU_GOVERNORS}" )"
 
     if [ "$(is_digits "${set_governor__input}")" -eq 1 ]; then
+      elog_quiet "$(cat << EOF
+Calling --governor with numerical input will be deprecated in the next version
+EOF
+)"
       set_governor__count=0
       for available_gov in ${set_governor__all_available_governors}; do
         if [ "${set_governor__count}" -eq "${set_governor__input}" ]; then
@@ -555,12 +579,24 @@ set_x86()
     set_x86__value=""
     log_all "Check for special case arguments: 0, 1, 2"
     if [ "${set_x86__input}" = "0" ]; then
+      elog_quiet "$(cat << EOF
+Calling --x86 with numerical input will be deprecated in the next version
+EOF
+)"
       log_verbose "Argument was '0' set to powersave"
       set_x86__value="powersave"
     elif [ "${set_x86__input}" = "1" ]; then
+      elog_quiet "$(cat << EOF
+Calling --x86 with numerical input will be deprecated in the next version
+EOF
+)"
       log_verbose "Argument was '1' set to normal"
       set_x86__value="normal"
     elif [ "${set_x86__input}" = "2" ]; then
+      elog_quiet "$(cat << EOF
+Calling --x86 with numerical input will be deprecated in the next version
+EOF
+)"
       log_verbose "Argument was '2' set to performance"
       set_x86__value="performance"
     else
@@ -693,6 +729,10 @@ locate_power_plan_config()
     # If the argument is a number
     if [ "${locate_power_plan_config__input}" -eq \
       "${locate_power_plan_config__input}" ] 2>/dev/null; then
+      elog_quiet "$(cat << EOF
+Calling --plan with numerical input will be deprecated in the next version
+EOF
+)"
 
       # If the count is also the number
       if [ "${locate_power_plan_config__input}" -eq "${__i}" ]; then
