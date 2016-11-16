@@ -126,18 +126,18 @@ pstate-frequency with various options for --max, --min, --turbo, and
 --governor. They are not necessary for operation, but are recommended.
 
 There are five default power plans:  
-1. **powersave (1)** Sets the minimum and maximum scaling frequencies to the  
+1. **powersave** Sets the minimum and maximum scaling frequencies to the  
 lowest available and disables Turbo Boost.  
-2. **balanced (2)** Sets the minimum scaling frequency to the  
+2. **balanced** Sets the minimum scaling frequency to the  
 lowest available, the maximum scaling frequency to the highest available  
 non-turbo frequency and disables Turbo Boost.  
-3. **performance (3)** Sets the minimum scaling frequency to the  
+3. **performance** Sets the minimum scaling frequency to the  
 lowest available, the maximum scaling frequency to the highest available  
 frequency and enables Turbo Boost.  
-4. **max (4)** Sets the minimum and maximum scaling frequencies  
+4. **max** Sets the minimum and maximum scaling frequencies  
 to the highest available frequency taking into account Turbo Boost  
 frequencies, and enables Turbo Boost.  
-5. **auto (0)** If the computer's main powersource is online, then the  
+5. **auto** If the computer's main powersource is online, then the  
 *balanced* plan is set. If the main powersource is offline, then the  
 *powersave* plan is set.  
 
