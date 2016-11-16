@@ -101,37 +101,20 @@ elog_quiet()
 check_binary()
 {
   check_binary__bin="$1"
-  check_binary__old_ifs="${IFS}"
   if [ -z "${check_binary__bin}" ]; then
     elog_quiet "Must specify a path to a binary"
+    unset check_binary__bin
     return 1
   fi
 
-  IFS=":"
-  for check_binary__path in ${PATH}; do
-    check_binary__result=
-    check_binary__result="${check_binary__path}/${check_binary__bin}"
-    if [ -e "${check_binary__result}" ]; then
-      IFS="${check_binary__old_ifs}"
-
-      unset check_binary__result
-      unset check_binary__bin
-      unset check_binary__old_ifs
-      unset check_binary__path
-      return 0
-    fi
-
-    unset check_binary__result
-  done
-
-  IFS="${check_binary__old_ifs}"
-  elog_quiet "Binary '${check_binary__bin}' not found in \$PATH"
-
-  unset check_binary__result
-  unset check_binary__bin
-  unset check_binary__old_ifs
-  unset check_binary__path
-  return 1
+  if command -v "${check_binary__bin}" > /dev/null 2>&1; then
+    unset check_binary__bin
+    return 0
+  else
+    elog_quiet "Binary '${check_binary__bin}' not found in \$PATH"
+    unset check_binary__bin
+    return 1
+  fi
 }
 
 ##
@@ -530,7 +513,7 @@ set_x86()
       else
         __exec_set_x86_policy_type="${X86_POLICY_TRUE}"
         __exec_set_x86_policy_arg="${set_x86__value}"
-        log_all "__exec_set_x86_policy_arg: '${__x86_policy_arg}'"
+        log_all "__exec_set_x86_policy_arg: '${__exec_set_x86_policy_arg}'"
       fi
     else
       elog_quiet "x86 argument '${set_x86__value}' is a number"
@@ -1733,7 +1716,7 @@ set_max: ${__exec_set_max_type} [${__exec_set_max_arg}]
 set_min: ${__exec_set_min_type} [${__exec_set_min_arg}]
 set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]
 set_governor: ${__exec_set_governor_type} [${__exec_set_governor_arg}]
-set_x86: ${__exec_set_x86_policy_type} [${__x86_policy_arg}]
+set_x86: ${__exec_set_x86_policy_type} [${__exec_set_x86_policy_arg}]
 EOF
 )"
       do_set "${execution_delay}" || return 1
