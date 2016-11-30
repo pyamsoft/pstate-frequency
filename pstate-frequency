@@ -670,7 +670,6 @@ execute_power_plan_config()
   log_verbose "Sourcing config from location: \
 ${execute_power_plan_config__location}"
 
-  # shellcheck source=/dev/null
   . "${execute_power_plan_config__location}" || return 1
 
   execute_power_plan_config__type=""
@@ -1142,25 +1141,34 @@ EOF
     log_all "Max value written to ${SYSTEM_INTEL_PSTATE_MAX}"
   fi
 
-  root_write___max_freq=$((root_write_max__max * SYSTEM_CPU_MAX_FREQ / 100))
-  for root_write___i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
-    root_write___target="$(cat << EOF
-${SYSTEM_CPU_DIR}/cpu${root_write___i}/cpufreq/scaling_max_freq
+  root_write_max__freq=$((root_write_max__max * SYSTEM_CPU_MAX_FREQ / 100))
+
+  # Bound frequency between system min and max
+  log_all "$(cat << EOF
+Bound ${root_write_max__freq} between ${SYSTEM_CPU_MIN_FREQ}
+and ${SYSTEM_CPU_MAX_FREQ}"
+EOF
+)"
+  root_write_max__freq=$(set_variable_bounds "${root_write_max__freq}" \
+    "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}")
+  for root_write_max__i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
+    root_write_max__target="$(cat << EOF
+${SYSTEM_CPU_DIR}/cpu${root_write_max__i}/cpufreq/scaling_max_freq
 EOF
 )"
     log_verbose "$(cat << EOF
-Write freq: ${root_write___max_freq}KHz to file: ${root_write___target}
+Write freq: ${root_write_max__freq}KHz to file: ${root_write_max__target}
 EOF
 )"
-    printf -- "%s" "${root_write___max_freq}" \
-      > "${root_write___target}" || return 1
-    log_all "Max value written to ${root_write___target}"
+    printf -- "%s" "${root_write_max__freq}" \
+      > "${root_write_max__target}" || return 1
+    log_all "Max value written to ${root_write_max__target}"
 
-    unset root_write___target
-    unset root_write___i
+    unset root_write_max__target
+    unset root_write_max__i
   done
 
-  unset root_write___max_freq
+  unset root_write_max__freq
   unset root_write_max__max
   return 0
 }
@@ -1185,17 +1193,26 @@ EOF
     log_all "Min value written to ${SYSTEM_INTEL_PSTATE_MIN}"
   fi
 
-  root_write_min__min_freq=$((root_write_min__min * SYSTEM_CPU_MAX_FREQ / 100))
+  root_write_min__freq=$((root_write_min__min * SYSTEM_CPU_MAX_FREQ / 100))
+
+  # Bound frequency between system min and max
+  log_all "$(cat << EOF
+Bound ${root_write_min__freq} between ${SYSTEM_CPU_MIN_FREQ}
+and ${SYSTEM_CPU_MAX_FREQ}"
+EOF
+)"
+  root_write_min__freq=$(set_variable_bounds "${root_write_min__freq}" \
+    "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}")
   for root_write_min__i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
     root_write_min__target="$(cat << EOF
 ${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq
 EOF
 )"
     log_verbose "$(cat << EOF
-Write freq: ${root_write_min__min_freq}KHz to file: ${root_write_min__target}
+Write freq: ${root_write_min__freq}KHz to file: ${root_write_min__target}
 EOF
 )"
-    printf -- "%s" "${root_write_min__min_freq}" \
+    printf -- "%s" "${root_write_min__freq}" \
       > "${root_write_min__target}" || return 1
     log_all "Min value written to ${root_write_min__target}"
 
@@ -1203,7 +1220,7 @@ EOF
     unset root_write_min__i
   done
 
-  unset root_write_min__max_freq
+  unset root_write_min__freq
   unset root_write_min__min
   return 0
 }
