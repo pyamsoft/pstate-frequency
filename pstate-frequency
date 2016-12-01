@@ -1000,16 +1000,17 @@ handle_long_option_argument()
     log_all "Skip '-' processing"
   elif [ -z "${handle_long_option_argument__opt}" ]; then
     elog_verbose "option does not expect argument!"
-    elog_verbose "argument: ${handle_long_option_argument__input}"
-    elog_quiet "Illegal argument ${handle_long_option_argument__input}"
+    elog_verbose "argument: %s" "${handle_long_option_argument__input}"
+    elog_quiet "Illegal argument %s" "${handle_long_option_argument__input}"
 
     unset handle_long_option_argument__mode
     unset handle_long_option_argument__opt
     unset handle_long_option_argument__input
     return 1
   else
-    log_verbose "option expects argument: ${handle_long_option_argument__opt}"
-    log_verbose "argument: ${handle_long_option_argument__input}"
+    log_verbose "option expects argument: %s" \
+      "${handle_long_option_argument__opt}"
+    log_verbose "argument: %s" "${handle_long_option_argument__input}"
 
     case "${handle_long_option_argument__opt}" in
       plan)
@@ -1043,8 +1044,8 @@ handle_long_option_argument()
           "${handle_long_option_argument__input}" || return 1
         ;;
       *)
-        elog_quiet "Invalid option --${handle_long_option_argument__opt}" \
-          || return 1
+        elog_quiet "Invalid option --%s" \
+          "${handle_long_option_argument__opt}" || return 1
 
         unset handle_long_option_argument__mode
         unset handle_long_option_argument__opt
