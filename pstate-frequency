@@ -1129,8 +1129,9 @@ do_get_real()
 
   print_version
   for do_get_real__freq in ${do_get_real__real_freqs}; do
-    log "    pstate::CPU[${do_get_real__i}]   -> ${do_get_real__freq}MHz"
-    do_get_real__i=$(( do_get_real__i + 1))
+    log "    pstate::CPU[%s]   -> %sMHz" "${do_get_real__i}" \
+      "${do_get_real__freq}"
+    do_get_real__i=$((do_get_real__i + 1))
   done
 
   unset do_get_real__i
