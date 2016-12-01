@@ -1098,16 +1098,16 @@ do_get_current()
 
   print_version
   log "$(cat << EOF
-    pstate::CPU_DRIVER   -> ${do_get_current__cpu_driver}
-    pstate::CPU_GOVERNOR -> ${do_get_current__cpu_governor}
-    pstate::TURBO        -> ${do_get_current__cpu_turbo} \
-[${do_get_current__cpu_turbo_onoff}]
-    pstate::CPU_MIN      -> ${do_get_current__cpu_min_value}% \
-[${do_get_current__cpu_min_freq}KHz]
-    pstate::CPU_MAX      -> ${do_get_current__cpu_max_value}% \
-[${do_get_current__cpu_max_freq}KHz]
+    pstate::CPU_DRIVER   -> %s
+    pstate::CPU_GOVERNOR -> %s
+    pstate::TURBO        -> %s [%s]
+    pstate::CPU_MIN      -> %s%% [%sKHz]
+    pstate::CPU_MAX      -> %s%% [%sKHz]
 EOF
-)"
+)" "${do_get_current__cpu_driver}" "${do_get_current__cpu_governor}" \
+  "${do_get_current__cpu_turbo}" "${do_get_current__cpu_turbo_onoff}" \
+  "${do_get_current__cpu_min_value}" "${do_get_current__cpu_min_freq}" \
+  "${do_get_current__cpu_max_value}" "${do_get_current__cpu_max_freq}"
 
   unset do_get_current__cpu_turbo_onoff
   unset do_get_current__cpu_max_freq
