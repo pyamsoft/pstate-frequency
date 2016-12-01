@@ -331,8 +331,8 @@ set_max()
       set_max__fixed_min="$(( SYSTEM_CPU_MIN_VALUE + 1 ))"
 
       log_all "'%s' is all digits" "${set_max__value}"
-      log_verbose "Bound value '%s' between %s and %s" \
-        "${set_max__value}" "${set_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}"
+      log_verbose "Bound value '%s' between %s and %s" "${set_max__value}" \
+        "${set_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}"
       set_max__value="$(set_variable_bounds "${set_max__value}" \
         "${set_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}")"
       __exec_set_max_type="${SET_MAX_TRUE}"
@@ -376,27 +376,24 @@ set_min()
 
   log_all "set_min requires SET operation exec_mode"
   if [ "${set_min__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    log_verbose "Set min_value to '${set_min__input}'"
+    log_verbose "Set min_value to '%s'" "${set_min__input}"
     set_min__value="${set_min__input}"
 
-    log_all "Check that '${set_min__value}' is all digits"
+    log_all "Check that '%s' is all digits" "${set_min__value}"
     if [ "$(is_digits "${set_min__value}")" -eq 1 ]; then
       set_min__fixed_max="$(( SYSTEM_CPU_MAX_VALUE - 1 ))"
 
-      log_all "'${set_min__value}' is all digits"
-      log_verbose "$(cat << EOF
-Bound value '${set_min__value}' between \
-${SYSTEM_CPU_MIN_VALUE} and ${set_min__fixed_max}
-EOF
-)"
+      log_all "'%s' is all digits" "${set_min__value}"
+      log_verbose "Bound value '%s' between %s and %s" "${set_min__value}" \
+        "${SYSTEM_CPU_MIN_VALUE}" "${set_min__fixed_max}"
       set_min__value="$(set_variable_bounds "${set_min__value}" \
         "${SYSTEM_CPU_MIN_VALUE}" "${set_min__fixed_max}")"
       unset fixed_max
       __exec_set_min_type="${SET_MIN_TRUE}"
       __exec_set_min_arg="${set_min__value}"
-      log_all "__exec_set_min_arg: '${__exec_set_min_arg}'"
+      log_all "__exec_set_min_arg: '%s'" "${__exec_set_min_arg}"
     else
-      elog_quiet "min argument '${set_min__value}' is not a number"
+      elog_quiet "min argument '%s' is not a number" "${set_min__value}"
 
       unset set_min__value
       unset set_min__mode
