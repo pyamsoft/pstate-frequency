@@ -1729,6 +1729,7 @@ main()
         optind_expanded=""
       fi
 
+      # Handle long options which expect arguments
       if [ -z "${optind_expanded}" ]; then
         if [ -n "${long_option}" ]; then
           elog_quiet "Long option --%s expects argument" "${long_option}"
