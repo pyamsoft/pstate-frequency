@@ -28,9 +28,18 @@
 # __log_level = normal, verbose, all
 log()
 {
-  if [ "${__log_level}" -ge "${LOG_LEVEL_NORMAL}" ]; then
-    printf -- "%s\n" "$*"
+  if [ "$#" -eq 0 ]; then
+    return 1
   fi
+
+  if [ "${__log_level}" -ge "${LOG_LEVEL_NORMAL}" ]; then
+    log__fmt="$1"
+    shift
+    printf -- "${log__fmt}\n" "$@"
+    unset log__fmt
+  fi
+
+  return 0
 }
 
 ##
@@ -39,9 +48,18 @@ log()
 # __log_level = verbose, all
 log_verbose()
 {
-  if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
-    printf -- "VERBOSE: %s\n" "$*"
+  if [ "$#" -eq 0 ]; then
+    return 1
   fi
+
+  if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
+    log__fmt="$1"
+    shift
+    printf -- "VERBOSE: ${log__fmt}\n" "$@"
+    unset log__fmt
+  fi
+
+  return 0
 }
 
 ##
@@ -50,9 +68,18 @@ log_verbose()
 # __log_level = all
 log_all()
 {
-  if [ "${__log_level}" -eq "${LOG_LEVEL_ALL}" ]; then
-    printf -- "DEBUG: %s\n" "$*"
+  if [ "$#" -eq 0 ]; then
+    return 1
   fi
+
+  if [ "${__log_level}" -eq "${LOG_LEVEL_ALL}" ]; then
+    log__fmt="$1"
+    shift
+    printf -- "DEBUG: ${log__fmt}\n" "$@"
+    unset log__fmt
+  fi
+
+  return 0
 }
 
 ##
@@ -61,37 +88,74 @@ log_all()
 # __log_level = quiet, normal, verbose, all
 log_quiet()
 {
-  if [ "${__log_level}" -ge "${LOG_LEVEL_QUIET}" ]; then
-    printf -- "%s\n" "$*"
+  if [ "$#" -eq 0 ]; then
+    return 1
   fi
+
+  if [ "${__log_level}" -ge "${LOG_LEVEL_QUIET}" ]; then
+    log__fmt="$1"
+    shift
+    printf -- "${log__fmt}\n" "$@"
+    unset log__fmt
+  fi
+
+  return 0
 }
 
 ##
 # Error logging
 elog()
 {
-  log "ERROR: $*" 1>&2
+  if [ "$#" -eq 0 ]; then
+    return 1
+  fi
+
+  elog__fmt="$1"
+  shift
+  log "ERROR: ${elog__fmt}" "$@" 1>&2
+  unset elog__fmt
 }
 
 ##
 # Verbose error logging
 elog_verbose()
 {
-  log_verbose "ERROR: $*" 1>&2
+  if [ "$#" -eq 0 ]; then
+    return 1
+  fi
+
+  elog__fmt="$1"
+  shift
+  log_verbose "ERROR: ${elog__fmt}" "$@" 1>&2
+  unset elog__fmt
 }
 
 ##
 # All error logging
 elog_all()
 {
-  log_all "ERROR: $*" 1>&2
+  if [ "$#" -eq 0 ]; then
+    return 1
+  fi
+
+  elog__fmt="$1"
+  shift
+  log_all "ERROR: ${elog__fmt}" "$@" 1>&2
+  unset elog__fmt
 }
 
 ##
 # Quiet error logging
 elog_quiet()
 {
-  log_quiet "ERROR: $*" 1>&2
+  if [ "$#" -eq 0 ]; then
+    return 1
+  fi
+
+  elog__fmt="$1"
+  shift
+  log_quiet "ERROR: ${elog__fmt}" "$@" 1>&2
+  unset elog__fmt
 }
 
 ##
@@ -111,7 +175,7 @@ check_binary()
     unset check_binary__bin
     return 0
   else
-    elog_quiet "Binary '${check_binary__bin}' not found in \$PATH"
+    elog_quiet "Binary '%s' not found in \$PATH" "${check_binary__bin}"
     unset check_binary__bin
     return 1
   fi
@@ -187,7 +251,7 @@ is_digits()
 # Print version
 print_version()
 {
-  log "pstate-frequency version ${VERSION}"
+  log "pstate-frequency version %s" "${VERSION}"
 }
 
 ##
@@ -225,16 +289,21 @@ set_variable_bounds()
   set_variable_bounds__bottom="$2"
   set_variable_bounds__top="$3"
 
+  set_variable_bounds__result=
   if [ "${set_variable_bounds__number}" \
     -lt "${set_variable_bounds__bottom}" ]; then
-    printf -- "%s" "${set_variable_bounds__bottom}"
+    set_variable_bounds__result="${set_variable_bounds__bottom}"
   elif [ "${set_variable_bounds__number}" \
     -gt "${set_variable_bounds__top}" ]; then
-    printf -- "%s" "${set_variable_bounds__top}"
+    set_variable_bounds__result="${set_variable_bounds__top}"
   else
-    printf -- "%s" "${set_variable_bounds__number}"
+    set_variable_bounds__result="${set_variable_bounds__number}"
   fi
 
+  # Echo out result
+  printf -- "%s" "${set_variable_bounds__result}"
+
+  unset set_variable_bounds__result
   unset set_variable_bounds__number
   unset set_variable_bounds__bottom
   unset set_variable_bounds__top
