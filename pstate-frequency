@@ -447,21 +447,21 @@ set_turbo()
         set_turbo__value="0"
       fi
     else
-      elog_quiet "turbo argument '${set_turbo__input}' is invalid"
+      elog_quiet "turbo argument '%s' is invalid" "${set_turbo__input}"
       unset set_turbo__input
       unset set_turbo__mode
       unset set_turbo__value
       return 1
     fi
 
-    log_all "Check that '${set_turbo__value}' is valid"
+    log_all "Check that '%s' is valid" "${set_turbo__value}"
     if [ "${set_turbo__value}" -eq 1 ] || [ "${set_turbo__value}" -eq 0 ]; then
-      log_all "'${set_turbo__value}' is valid digit"
+      log_all "'%s' is valid digit" "${set_turbo__value}"
       __exec_set_turbo_type="${SET_TURBO_TRUE}"
       __exec_set_turbo_arg="${set_turbo__value}"
-      log_all "__exec_set_turbo_arg: '${__exec_set_turbo_arg}'"
+      log_all "__exec_set_turbo_arg: '%s'" "${__exec_set_turbo_arg}"
     else
-      elog_quiet "turbo argument '${set_turbo__value}' is invalid"
+      elog_quiet "turbo argument '%s' is invalid" "${set_turbo__value}"
 
       unset set_turbo__input
       unset set_turbo__mode
