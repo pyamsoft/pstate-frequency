@@ -498,12 +498,12 @@ set_governor()
   if [ "${set_governor__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_governor__all_available_governors="$(cat "${SYSTEM_CPU_GOVERNORS}" )"
 
-    log_verbose "Set governor_value to '${set_governor__input}'"
+    log_verbose "Set governor_value to '%s'" "${set_governor__input}"
     set_governor__value="${set_governor__input}"
 
-    log_all "Check that '${set_governor__value}' is not digits"
+    log_all "Check that '%s' is not digits" "${set_governor__value}"
     if [ "$(is_digits "${set_governor__value}")" -eq 0 ]; then
-      log_all "'${set_governor__value}' is not digits"
+      log_all "'%s' is not digits" "${set_governor__value}"
       set_governor__is_valid_governor=0
       for available_gov in ${set_governor__all_available_governors}; do
         if [ "${set_governor__value}" = "${available_gov}" ]; then
@@ -517,12 +517,12 @@ set_governor()
       else
         __exec_set_governor_type="${SET_GOVERNOR_TRUE}"
         __exec_set_governor_arg="${set_governor__value}"
-        log_all "__exec_set_governor_arg: '${__exec_set_governor_arg}'"
+        log_all "__exec_set_governor_arg: '%s'" "${__exec_set_governor_arg}"
       fi
 
       unset set_governor__is_valid_governor
     else
-      elog_quiet "governor argument '${set_governor__value}' is a number"
+      elog_quiet "governor argument '%s' is a number" "${set_governor__value}"
 
       unset set_governor__value
       unset set_governor__input
@@ -559,12 +559,12 @@ set_x86()
 
   log_all "set_x86 requires SET operation exec_mode"
   if [ "${set_x86__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    log_verbose "Set x86_value to '${set_x86__input}'"
+    log_verbose "Set x86_value to '%s'" "${set_x86__input}"
     set_x86__value="${set_x86__input}"
 
-    log_all "Check that '${set_x86__value}' is not digits"
+    log_all "Check that '%s' is not digits" "${set_x86__value}"
     if [ "$(is_digits "${set_x86__value}")" -eq 0 ]; then
-      log_all "'${set_x86__value}' is not digits"
+      log_all "'%s' is not digits" "${set_x86__value}"
       if [ "${set_x86__value}" = "none" ]; then
         log_verbose "x86_policy_arg: None requested. Reset values"
         __exec_set_x86_policy_type="${X86_POLICY_FALSE}"
@@ -576,10 +576,11 @@ set_x86()
       else
         __exec_set_x86_policy_type="${X86_POLICY_TRUE}"
         __exec_set_x86_policy_arg="${set_x86__value}"
-        log_all "__exec_set_x86_policy_arg: '${__exec_set_x86_policy_arg}'"
+        log_all "__exec_set_x86_policy_arg: '%s'" \
+          "${__exec_set_x86_policy_arg}"
       fi
     else
-      elog_quiet "x86 argument '${set_x86__value}' is a number"
+      elog_quiet "x86 argument '%s' is a number" "${set_x86__value}"
 
       unset set_x86__value
       unset set_x86__mode
