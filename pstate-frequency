@@ -1282,27 +1282,26 @@ root_write_turbo()
 {
   root_write_turbo__turbo="$1"
 
+  root_write_turbo__type=""
+  root_write_turbo__target=""
   if [ "$(has_pstate_dir)" -eq 1 ]; then
-    log_verbose "$(cat << EOF
-Write turbo_value '${root_write_turbo__turbo}' to \
-intel_pstate file: ${SYSTEM_INTEL_PSTATE_TURBO}
-EOF
-)"
-    printf -- "%s" "${root_write_turbo__turbo}" \
-      > "${SYSTEM_INTEL_PSTATE_TURBO}" || return 1
-    log_all "Turbo value written to ${SYSTEM_INTEL_PSTATE_TURBO}"
+    root_write_turbo__type="intel_pstate"
+    root_write_turbo__target="${SYSTEM_INTEL_PSTATE_TURBO}"
   else
-    log_verbose "$(cat << EOF
-Write turbo_value '${root_write_turbo__turbo}' to \
-acpi-cpufreq file: ${SYSTEM_CPUFREQ_BOOST}
-EOF
-)"
-    printf -- "%s" "${root_write_turbo__turbo}" \
-      > "${SYSTEM_CPUFREQ_BOOST}" || return 1
-    log_all "Turbo value written to ${SYSTEM_CPUFREQ_BOOST}"
+    root_write_turbo__type="acpi-cpufreq"
+    root_write_turbo__target="${SYSTEM_CPUFREQ_BOOST}"
   fi
 
+  log_verbose "Write turbo_value '%s' to %s file: %s" \
+    "${root_write_turbo__turbo}" "${root_write_turbo__type}" \
+    "${root_write_turbo__target}"
+  printf -- "%s" "${root_write_turbo__turbo}" \
+    > "${SYSTEM_CPUFREQ_BOOST}" || return 1
+  log_all "Turbo value written to %s" "${root_write_turbo__target}"
+
   unset root_write_turbo__turbo
+  unset root_write_turbo__type
+  unset root_write_turbo__target
   return 0
 }
 
