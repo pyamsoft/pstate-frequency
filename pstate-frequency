@@ -632,19 +632,16 @@ set_power_plan()
     # 01-powersave.plan
 
     # set_power_plan__input is the name of a plan
-    log_all "$(cat << EOF
-Search the config directory ${POWER_PLAN_CONFIG_DIR} for power plan
-configrations
-EOF
-)"
+    log_all "Search the config directory '%s' for power plan configrations" \
+      "${POWER_PLAN_CONFIG_DIR}"
     # Locate config with given input
     readonly set_power_plan__config="$(locate_power_plan_config \
       "${set_power_plan__input}")"
 
     # Fail if we don't find a config
     if [ -z "${set_power_plan__config}" ]; then
-      elog_quiet "No power plan configuration found for argument: \
-${set_power_plan__input}"
+      elog_quiet "No power plan configuration found for argument: %s" \
+        "${set_power_plan__input}"
       unset set_power_plan__i
       unset set_power_plan__mode
       unset set_power_plan__input
@@ -731,8 +728,8 @@ execute_power_plan_config()
   execute_power_plan_config__location="$2"
   execute_power_plan_config__name="$3"
 
-  log_verbose "Sourcing config from location: \
-${execute_power_plan_config__location}"
+  log_verbose "Sourcing config from location: %s" \
+    "${execute_power_plan_config__location}"
 
   . "${execute_power_plan_config__location}" || return 1
 
@@ -744,8 +741,8 @@ ${execute_power_plan_config__location}"
   elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BAT}" ]; then
     execute_power_plan_config__type="AUTO"
   else
-    elog_quiet "Invalid power plan file: \
-${execute_power_plan_config__location}"
+    elog_quiet "Invalid power plan file: %s" \
+      "${execute_power_plan_config__location}"
     return 1
   fi
 
@@ -821,7 +818,7 @@ set_power_plan_automatic()
   set_power_plan_automatic__ac="$4"
   set_power_plan_automatic__arg=""
 
-  log_verbose "Set power plan to: ${set_power_plan_automatic__name}"
+  log_verbose "Set power plan to: %s" "${set_power_plan_automatic__name}"
   if [ "$(is_power_supply_mains)" -eq 1 ]; then
     set_power_plan_automatic__config="$(locate_power_plan_config \
       "${set_power_plan_automatic__ac}")"
@@ -834,8 +831,8 @@ set_power_plan_automatic()
 
   # Fail if we don't find a config
   if [ -z "${set_power_plan_automatic__config}" ]; then
-    elog_quiet "No power plan configuration found for auto config: \
-${set_power_plan_automatic__arg}"
+    elog_quiet "No power plan configuration found for auto config: %s" \
+      "${set_power_plan_automatic__arg}"
     unset set_power_plan_automatic__name
     unset set_power_plan_automatic__bat
     unset set_power_plan_automatic__ac
@@ -916,7 +913,8 @@ set_power_plan_manual()
   set_power_plan_manual__gov="$6"
   set_power_plan_manual__x86="$7"
 
-  log_verbose "Attempt manual plan setting: ${set_power_plan_manual__name}"
+  log_verbose "Attempt manual plan setting: %s" \
+    "${set_power_plan_manual__name}"
 
   # Check validity of variables here, parse special arguments
   set_max "${set_power_plan_manual__mode}" \
