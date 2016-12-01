@@ -1313,24 +1313,19 @@ root_write_governor()
 {
   root_write_governor__gov="$1"
 
-  log_verbose "Write cpu_governor '${root_write_governor__gov}' to all CPUs"
+  log_verbose "Write cpu_governor '%s' to all CPUs" \
+    "${root_write_governor__gov}"
   for root_write_governor__i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
     root_write_governor__target="$(cat << EOF
 ${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor
 EOF
 )"
-    log_verbose "$(cat << EOF
-Write governor: ${root_write_governor__gov} to \
-file: ${root_write_governor__target}
-EOF
-)"
+    log_verbose "Write governor: '%s' to file: %s" \
+      "${root_write_governor__gov}" "${root_write_governor__target}"
     printf -- "%s" "${root_write_governor__gov}" \
       > "${root_write_governor__target}" || return 1
-    log_all "$(cat << EOF
-Governor ${root_write_governor__gov} written \
-to ${root_write_governor__target}
-EOF
-)"
+    log_all "Governor '%s' written to %s" "${root_write_governor__gov}" \
+      "${root_write_governor__target}"
 
     unset root_write_governor__target
     unset root_write_governor__i
@@ -1350,20 +1345,21 @@ root_write_x86_policy()
   root_write_x86_policy__name="$1"
 
   if [ -n "${root_write_x86_policy__name}" ]; then
-    log_verbose "x86_perf_policy requested: '${root_write_x86_policy__name}'"
+    log_verbose "x86_perf_policy requested: '%s'" \
+      "${root_write_x86_policy__name}"
     check_binary "${X86_BINARY}" || {
       elog_quiet "Not setting x86_perf_policy even though it was requested"
       return 1
     }
 
-    log_verbose "Setting x86_perf_policy: '${root_write_x86_policy__name}'"
+    log_verbose "Setting x86_perf_policy: '%s'" \
+      "${root_write_x86_policy__name}"
     if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
-      log_all "Log verbose output for ${X86_BINARY}"
+      log_all "Log verbose output for %s" "${X86_BINARY}"
       "${X86_BINARY}" -v "${root_write_x86_policy__name}" || return 1
     else
-      log_all "Silent verbose output for ${X86_BINARY}"
-      "${X86_BINARY}" "${root_write_x86_policy__name}" \
-        > /dev/null || return 1
+      log_all "Silence output for %s" "${X86_BINARY}"
+      "${X86_BINARY}" "${root_write_x86_policy__name}" > /dev/null || return 1
     fi
   else
     log_verbose "x86_perf_policy was not requested"
@@ -1585,19 +1581,19 @@ main()
 
         # Log if not long option
         if [ "${option}" != '-' ]; then
-          log_verbose "parse short option: -${option}"
+          log_verbose "parse short option: -%s" "${option}"
         fi
 
         # Set only on long option with arg
         if [ -n "${long_option}" ]; then
-          elog_quiet "Long option --${long_option} expects argument"
+          elog_quiet "Long option --%s expects argument" "${long_option}"
           return 1
         fi
 
         long_option=""
         case "${option}" in
           -)
-            log_verbose "parse long option: -${option}${OPTARG}"
+            log_verbose "parse long option: -%s%s" "${option}" "${OPTARG}"
             case "${OPTARG}" in
               help)
                 print_usage
@@ -1658,7 +1654,7 @@ main()
                 ;;
               *)
                 # We must provide our own error message in this case
-                elog_quiet "Illegal option --${OPTARG}"
+                elog_quiet "Illegal option --%s" "${OPTARG}"
                 print_usage
                 return 1
                 ;;
@@ -1735,7 +1731,7 @@ main()
 
       if [ -z "${optind_expanded}" ]; then
         if [ -n "${long_option}" ]; then
-          elog_quiet "Long option --${long_option} expects argument"
+          elog_quiet "Long option --%s expects argument" "${long_option}"
           return 1
         else
           break
@@ -1770,7 +1766,7 @@ main()
   case "${exec_mode}" in
     "${EXEC_MODE_GET}")
       log_verbose "exec_mode: GET"
-      log_verbose "exec_get_type: ${exec_get_type}"
+      log_verbose "exec_get_type: %s" "${exec_get_type}"
       do_get "${exec_get_type}" || return 1
       ;;
     "${EXEC_MODE_SET}")
