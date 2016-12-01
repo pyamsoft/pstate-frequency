@@ -35,6 +35,7 @@ log()
   if [ "${__log_level}" -ge "${LOG_LEVEL_NORMAL}" ]; then
     log__fmt="$1"
     shift
+    # shellcheck disable=SC2059
     printf -- "${log__fmt}\n" "$@"
     unset log__fmt
   fi
@@ -55,6 +56,7 @@ log_verbose()
   if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
     log__fmt="$1"
     shift
+    # shellcheck disable=SC2059
     printf -- "VERBOSE: ${log__fmt}\n" "$@"
     unset log__fmt
   fi
@@ -75,6 +77,7 @@ log_all()
   if [ "${__log_level}" -eq "${LOG_LEVEL_ALL}" ]; then
     log__fmt="$1"
     shift
+    # shellcheck disable=SC2059
     printf -- "DEBUG: ${log__fmt}\n" "$@"
     unset log__fmt
   fi
@@ -95,6 +98,7 @@ log_quiet()
   if [ "${__log_level}" -ge "${LOG_LEVEL_QUIET}" ]; then
     log__fmt="$1"
     shift
+    # shellcheck disable=SC2059
     printf -- "${log__fmt}\n" "$@"
     unset log__fmt
   fi
@@ -731,6 +735,7 @@ execute_power_plan_config()
   log_verbose "Sourcing config from location: %s" \
     "${execute_power_plan_config__location}"
 
+    # shellcheck disable=SC1090
   . "${execute_power_plan_config__location}" || return 1
 
   execute_power_plan_config__type=""
