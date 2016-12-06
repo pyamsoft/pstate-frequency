@@ -1301,7 +1301,7 @@ root_write_turbo()
     "${root_write_turbo__turbo}" "${root_write_turbo__type}" \
     "${root_write_turbo__target}"
   printf -- "%s" "${root_write_turbo__turbo}" \
-    > "${SYSTEM_CPUFREQ_BOOST}" || return 1
+    > "${root_write_turbo__target}" || return 1
   log_all "Turbo value written to %s" "${root_write_turbo__target}"
 
   unset root_write_turbo__turbo
