@@ -1810,7 +1810,7 @@ export LC_ALL
 
 # pstate-frequency
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
-readonly VERSION="3.7.2"
+readonly VERSION="3.7.3"
 
 # Options that expect an argument
 
