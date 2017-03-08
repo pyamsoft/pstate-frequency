@@ -1297,12 +1297,16 @@ root_write_turbo()
     root_write_turbo__target="${SYSTEM_CPUFREQ_BOOST}"
   fi
 
-  log_verbose "Write turbo_value '%s' to %s file: %s" \
-    "${root_write_turbo__turbo}" "${root_write_turbo__type}" \
-    "${root_write_turbo__target}"
-  printf -- "%s" "${root_write_turbo__turbo}" \
-    > "${root_write_turbo__target}" || return 1
-  log_all "Turbo value written to %s" "${root_write_turbo__target}"
+  if [ -w "${root_write_turbo__target}" ]; then
+    log_verbose "Write turbo_value '%s' to %s file: %s" \
+      "${root_write_turbo__turbo}" "${root_write_turbo__type}" \
+      "${root_write_turbo__target}"
+    printf -- "%s" "${root_write_turbo__turbo}" \
+      > "${root_write_turbo__target}" || return 1
+    log_all "Turbo value written to %s" "${root_write_turbo__target}"
+  else
+    elog "Unable to write to %s, continue..." "${root_write_turbo__target}"
+  fi
 
   unset root_write_turbo__turbo
   unset root_write_turbo__type
@@ -1400,7 +1404,11 @@ root_do_set()
   if [ "$(has_pstate_dir)" -eq 1 ]; then
     root_do_set__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}" )"
   else
-    root_do_set__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}" )"
+    if [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
+      root_do_set__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}" )"
+    else
+      root_do_set__cpu_turbo=0
+    fi
   fi
 
   log_all "Check if we are setting max"
