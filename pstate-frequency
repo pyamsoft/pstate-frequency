@@ -1080,7 +1080,11 @@ do_get_current()
   if [ "$(has_pstate_dir)" -eq 1 ]; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}" )"
   else
-    do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}" )"
+    if [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
+      do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}" )"
+    else
+      do_get_current__cpu_turbo="0"
+    fi
   fi
 
   do_get_current__cpu_max_value=$((do_get_current__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ))
