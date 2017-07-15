@@ -26,7 +26,7 @@ PLAN_CPU_MIN=100
 PLAN_CPU_PSTATE_GOVERNOR=performance
 PLAN_CPU_CPUFREQ_GOVERNOR=performance
 
-# We set to powersave here to stop the CPU from eagerly entering Turbo Boost
+# Almost always go for highest frequency over anything else
 PLAN_CPU_X86=performance
 
 # Note that using a number value for turbo may change the meaning when
