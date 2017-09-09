@@ -573,10 +573,6 @@ set_x86()
         log_verbose "x86_policy_arg: None requested. Reset values"
         __exec_set_x86_policy_type="${X86_POLICY_FALSE}"
         __exec_set_x86_policy_arg=""
-      elif [ "${set_x86__value}" != "powersave" ] \
-        && [ "${set_x86__value}" != "normal" ] \
-        && [ "${set_x86__value}" != "performance" ]; then
-        elog_quiet "Invalid x86_perf_policy specified, do not change"
       else
         __exec_set_x86_policy_type="${X86_POLICY_TRUE}"
         __exec_set_x86_policy_arg="${set_x86__value}"
