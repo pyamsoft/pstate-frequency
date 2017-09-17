@@ -26,8 +26,10 @@ PLAN_CPU_MIN=0
 PLAN_CPU_PSTATE_GOVERNOR=powersave
 PLAN_CPU_CPUFREQ_GOVERNOR=ondemand
 
-# We set to powersave here to stop the CPU from eagerly entering Turbo Boost
-PLAN_CPU_X86=powersave
+# You can to powersave here to stop the CPU from eagerly entering Turbo Boost
+# Newer versions of x86_energy_perf_policy use "power"
+# We set to normal
+PLAN_CPU_X86=normal
 
 # Note that using a number value for turbo may change the meaning when
 # using intel_pstate as compared to acpi-cpufreq
