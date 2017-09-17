@@ -561,6 +561,7 @@ set_x86()
   set_x86__mode="$1"
   set_x86__input="$2"
 
+  log_quiet "This option has been deprecated and is set to be removed in 3.8.0"
   log_all "set_x86 requires SET operation exec_mode"
   if [ "${set_x86__mode}" -eq "${EXEC_MODE_SET}" ]; then
     log_verbose "Set x86_value to '%s'" "${set_x86__input}"
@@ -1810,7 +1811,7 @@ export LC_ALL
 
 # pstate-frequency
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
-readonly VERSION="3.7.4"
+readonly VERSION="3.7.5"
 
 # Options that expect an argument
 
