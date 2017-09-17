@@ -27,12 +27,11 @@ _pstate-frequency()
   local prev="${COMP_WORDS[COMP_CWORD-1]}"
   local short_actions="-V -H -S -G -d -q"
   local long_actions="--quiet --version --help --set --get --quiet --delay"
-  local short_set_options="-m -n -t -p -g -x"
+  local short_set_options="-m -n -t -p -g"
   local short_get_options="-c -r"
-  local long_set_options="--max --min --turbo --plan --governor --x86"
+  local long_set_options="--max --min --turbo --plan --governor"
   local long_get_options="--current --real"
   local plans="auto powersave balanced performance max-performance"
-  local policies="powersave normal performance none"
   local governors=""
   governors="$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors)"
 
@@ -55,8 +54,6 @@ _pstate-frequency()
       COMPREPLY=( $(compgen -W "${plans}" -- "${cur}") )
     elif [[ ${prev} = "--governor" ]] || [[ ${prev} = "-g" ]]; then
       COMPREPLY=( $(compgen -W "${governors}" -- "${cur}") )
-    elif [[ ${prev} = "--x86" ]] || [[ ${prev} = "-x" ]]; then
-      COMPREPLY=( $(compgen -W "${policies}" -- "${cur}") )
     else
       COMPREPLY=( $(compgen -W "${short_actions}" -- "${cur}") )
     fi
@@ -71,7 +68,6 @@ _pstate-frequency()
   unset long_set_options
   unset long_get_options
   unset plans
-  unset policies
   unset governors
 }
 
