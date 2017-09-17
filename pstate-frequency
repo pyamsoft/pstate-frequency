@@ -221,7 +221,6 @@ options:
     -g | --governor  Set the cpufreq governor
     -n | --min       Modify current CPU min frequency
     -t | --turbo     Modify curent CPU turbo boost state
-    -x | --x86       Set the x86 policy, set to 'none' for no-op
 EOF
 )"
   return 0
@@ -551,59 +550,6 @@ set_governor()
 }
 
 ##
-# Set the argument for x86_perf_policy
-# Can be set multiple times, final time overrides
-#
-# $1 execution mode
-# $2 user input for x86 policy
-set_x86()
-{
-  set_x86__mode="$1"
-  set_x86__input="$2"
-
-  log_quiet "This option has been deprecated and is set to be removed in 3.8.0"
-  log_all "set_x86 requires SET operation exec_mode"
-  if [ "${set_x86__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    log_verbose "Set x86_value to '%s'" "${set_x86__input}"
-    set_x86__value="${set_x86__input}"
-
-    log_all "Check that '%s' is not digits" "${set_x86__value}"
-    if [ "$(is_digits "${set_x86__value}")" -eq 0 ]; then
-      log_all "'%s' is not digits" "${set_x86__value}"
-      if [ "${set_x86__value}" = "none" ]; then
-        log_verbose "x86_policy_arg: None requested. Reset values"
-        __exec_set_x86_policy_type="${X86_POLICY_FALSE}"
-        __exec_set_x86_policy_arg=""
-      else
-        __exec_set_x86_policy_type="${X86_POLICY_TRUE}"
-        __exec_set_x86_policy_arg="${set_x86__value}"
-        log_all "__exec_set_x86_policy_arg: '%s'" \
-          "${__exec_set_x86_policy_arg}"
-      fi
-    else
-      elog_quiet "x86 argument '%s' is a number" "${set_x86__value}"
-
-      unset set_x86__value
-      unset set_x86__mode
-      unset set_x86__input
-      return 1
-    fi
-
-    unset set_x86__value
-  else
-    elog_quiet "Cannot set x86 outside of SET operation exec_mode"
-
-    unset set_x86__mode
-    unset set_x86__input
-    return 1
-  fi
-
-  unset set_x86__mode
-  unset set_x86__input
-  return 0
-}
-
-##
 # Set the power plan based on argument
 #
 # KLUDGE: This is perhaps not the place for this kind of thing
@@ -716,7 +662,6 @@ locate_power_plan_config()
 #  PLAN_CPU_TURBO [ "on" | "off" ]
 #  PLAN_CPU_PSTATE_GOVERNOR [ governor name ]
 #  PLAN_CPU_CPUFREQ_GOVERNOR [ governor name ]
-#  PLAN_CPU_X86 [ x86 name ]
 #
 # If both are defined, the variables under PLAN_CPU take preference
 #
@@ -738,7 +683,7 @@ execute_power_plan_config()
   execute_power_plan_config__type=""
   if [ -n "${PLAN_CPU_MAX}" ] || [ -n "${PLAN_CPU_MIN}" ] \
     || [ -n "${PLAN_CPU_TURBO}" ] || [ -n "${PLAN_CPU_PSTATE_GOVERNOR}" ] \
-    || [ -n "${PLAN_CPU_CPUFREQ_GOVERNOR}" ] || [ -n "${PLAN_CPU_X86}" ]; then
+    || [ -n "${PLAN_CPU_CPUFREQ_GOVERNOR}" ]; then
     execute_power_plan_config__type="MANUAL"
   elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BAT}" ]; then
     execute_power_plan_config__type="AUTO"
@@ -753,7 +698,6 @@ execute_power_plan_config()
   execute_power_plan_config__cpu_max="${PLAN_CPU_MAX}"
   execute_power_plan_config__cpu_min="${PLAN_CPU_MIN}"
   execute_power_plan_config__cpu_turbo="${PLAN_CPU_TURBO}"
-  execute_power_plan_config__cpu_x86="${PLAN_CPU_X86}"
 
   execute_power_plan_config__cpu_gov=
   if [ "$(has_pstate_dir)" -eq 1 ]; then
@@ -771,7 +715,6 @@ execute_power_plan_config()
   unset PLAN_CPU_TURBO
   unset PLAN_CPU_PSTATE_GOVERNOR
   unset PLAN_CPU_CPUFREQ_GOVERNOR
-  unset PLAN_CPU_X86
 
   if [ "${execute_power_plan_config__type}" = "MANUAL" ]; then
     set_power_plan_manual "${execute_power_plan_config__mode}" \
@@ -779,8 +722,7 @@ execute_power_plan_config()
       "${execute_power_plan_config__cpu_max}" \
       "${execute_power_plan_config__cpu_min}" \
       "${execute_power_plan_config__cpu_turbo}" \
-      "${execute_power_plan_config__cpu_gov}" \
-      "${execute_power_plan_config__cpu_x86}" || return 1
+      "${execute_power_plan_config__cpu_gov}" || return 1
   else
     set_power_plan_automatic "${execute_power_plan_config__mode}" \
       "${execute_power_plan_config__name}" \
@@ -794,7 +736,6 @@ execute_power_plan_config()
   unset execute_power_plan_config__cpu_min
   unset execute_power_plan_config__cpu_turbo
   unset execute_power_plan_config__cpu_gov
-  unset execute_power_plan_config__cpu_x86
 
   unset execute_power_plan_config__type
   unset execute_power_plan_config__name
@@ -904,7 +845,6 @@ is_power_supply_mains()
 # $4 cpu min
 # $5 cpu turbo
 # $6 cpu gov
-# $7 cpu x86
 set_power_plan_manual()
 {
   set_power_plan_manual__mode="$1"
@@ -913,7 +853,6 @@ set_power_plan_manual()
   set_power_plan_manual__min="$4"
   set_power_plan_manual__turbo="$5"
   set_power_plan_manual__gov="$6"
-  set_power_plan_manual__x86="$7"
 
   log_verbose "Attempt manual plan setting: %s" \
     "${set_power_plan_manual__name}"
@@ -946,36 +885,15 @@ this behavior may change in later versions.
 EOF
 )"
   }
-  set_x86 "${set_power_plan_manual__mode}" \
-    "${set_power_plan_manual__x86}" || {
-    elog_quiet "$(cat << EOF
-You did not specify a valid x86 in your power plan.
-While this will not cause failure in this version of pstate-frequency,
-this behavior may change in later versions.
-EOF
-)"
-  }
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
-    set_turbo "${set_power_plan_manual__mode}" \
-      "${set_power_plan_manual__turbo}" || {
-    elog_quiet "$(cat << EOF
+  set_turbo "${set_power_plan_manual__mode}" \
+    "${set_power_plan_manual__turbo}" || {
+  elog_quiet "$(cat << EOF
 You did not specify a valid turbo in your power plan.
 While this will not cause failure in this version of pstate-frequency,
 this behavior may change in later versions.
 EOF
 )"
   }
-  else
-    set_turbo "${set_power_plan_manual__mode}" \
-      "${set_power_plan_manual__turbo}" || {
-    elog_quiet "$(cat << EOF
-You did not specify a valid x86 in your power plan.
-While this will not cause failure in this version of pstate-frequency,
-this behavior may change in later versions.
-EOF
-)"
-  }
-  fi
 
   unset set_power_plan_manual__mode
   unset set_power_plan_manual__name
@@ -983,7 +901,6 @@ EOF
   unset set_power_plan_manual__min
   unset set_power_plan_manual__turbo
   unset set_power_plan_manual__gov
-  unset set_power_plan_manual__x86
   return 0
 }
 
@@ -1038,11 +955,6 @@ handle_long_option_argument()
       governor)
         log_verbose "Long option: governor"
         set_governor "${handle_long_option_argument__mode}" \
-          "${handle_long_option_argument__input}" || return 1
-        ;;
-      x86)
-        log_verbose "Long option: x86"
-        set_x86 "${handle_long_option_argument__mode}" \
           "${handle_long_option_argument__input}" || return 1
         ;;
       *)
@@ -1182,8 +1094,7 @@ root_do_set_has_arg()
   if [ "${__exec_set_max_type}" -eq 1 ] \
     || [ "${__exec_set_min_type}" -eq 1 ] \
     || [ "${__exec_set_turbo_type}" -eq 1 ] \
-    || [ "${__exec_set_governor_type}" -eq 1 ] \
-    || [ "${__exec_set_x86_policy_type}" -eq 1 ]; then
+    || [ "${__exec_set_governor_type}" -eq 1 ]; then
     printf -- 1
   else
     printf -- 0
@@ -1346,40 +1257,6 @@ EOF
 }
 
 ##
-# Set the x86 policy if the x86_perf_policy binary
-# exists and an x86 policy is requested
-#
-# $1 x86 policy name
-root_write_x86_policy()
-{
-  root_write_x86_policy__name="$1"
-
-  if [ -n "${root_write_x86_policy__name}" ]; then
-    log_verbose "x86_perf_policy requested: '%s'" \
-      "${root_write_x86_policy__name}"
-    check_binary "${X86_BINARY}" || {
-      elog_quiet "Not setting x86_perf_policy even though it was requested"
-      return 1
-    }
-
-    log_verbose "Setting x86_perf_policy: '%s'" \
-      "${root_write_x86_policy__name}"
-    if [ "${__log_level}" -ge "${LOG_LEVEL_VERBOSE}" ]; then
-      log_all "Log verbose output for %s" "${X86_BINARY}"
-      "${X86_BINARY}" -v "${root_write_x86_policy__name}" || return 1
-    else
-      log_all "Silence output for %s" "${X86_BINARY}"
-      "${X86_BINARY}" "${root_write_x86_policy__name}" > /dev/null || return 1
-    fi
-  else
-    log_verbose "x86_perf_policy was not requested"
-  fi
-
-  unset root_write_x86_policy__name
-  return 0
-}
-
-##
 # Do the actual setting of CPU values once all prerequisites are filled
 root_do_set()
 {
@@ -1394,7 +1271,6 @@ root_do_set()
   root_do_set__setting_cpu_min=
   root_do_set__setting_cpu_turbo=
   root_do_set__setting_cpu_governor=
-  root_do_set__setting_x86_policy=
   root_do_set__cpu_max_freq="$(cat "${SYSTEM_SCALING_MAX_FREQ}" )"
   root_do_set__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}" )"
   root_do_set__cpu_max_value=$((root_do_set__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ))
@@ -1448,15 +1324,6 @@ root_do_set()
     root_do_set__setting_cpu_governor="${root_do_set__cpu_governor}"
   fi
 
-  log_all "Check if we are setting x86_policy"
-  if [ "${__exec_set_x86_policy_type}" -eq 1 ]; then
-    log_all "Set x86_policy to arg"
-    root_do_set__setting_x86_policy="${__exec_set_x86_policy_arg}"
-  else
-    log_all "Set x86_policy to none"
-    root_do_set__setting_x86_policy=""
-  fi
-
   log_all "Check that min is not >= max"
   if [ "${root_do_set__setting_cpu_min}" \
     -ge "${root_do_set__setting_cpu_max}" ]; then
@@ -1500,7 +1367,6 @@ root_do_set()
     root_write_max "${root_do_set__setting_cpu_max}"
   fi
   root_write_turbo "${root_do_set__setting_cpu_turbo}"
-  root_write_x86_policy "${root_do_set__setting_x86_policy}"
 
   unset root_do_set__cpu_max_freq
   unset root_do_set__cpu_min_freq
@@ -1512,7 +1378,6 @@ root_do_set()
   unset root_do_set__setting_cpu_min
   unset root_do_set__setting_cpu_turbo
   unset root_do_set__setting_cpu_governor
-  unset root_do_set__setting_x86_policy
   return 0
 }
 
@@ -1591,7 +1456,7 @@ main()
     long_option=""
     eval optind_expanded="\$${OPTIND}"
     while [ -n "${optind_expanded}" ]; do
-      while getopts ":HVGSp:m:n:t:g:x:crdq-:" option; do
+      while getopts ":HVGSp:m:n:t:g:crdq-:" option; do
 
         # Log if not long option
         if [ "${option}" != '-' ]; then
@@ -1662,10 +1527,6 @@ main()
               delay)
                 execution_delay=1
                 ;;
-              x86)
-                log_all "Attempt to set x86_perf_policy"
-                long_option="x86"
-                ;;
               *)
                 # We must provide our own error message in this case
                 elog_quiet "Illegal option --%s" "${OPTARG}"
@@ -1723,10 +1584,6 @@ main()
             ;;
           q)
             log_less_verbose
-            ;;
-          x)
-            log_all "Attempt to set x86_perf_policy"
-            set_x86 "${exec_mode}" "${OPTARG}" || return 1
             ;;
           *)
             elog_quiet "Illegal option -${OPTARG}"
@@ -1791,7 +1648,6 @@ set_max: ${__exec_set_max_type} [${__exec_set_max_arg}]
 set_min: ${__exec_set_min_type} [${__exec_set_min_arg}]
 set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]
 set_governor: ${__exec_set_governor_type} [${__exec_set_governor_arg}]
-set_x86: ${__exec_set_x86_policy_type} [${__exec_set_x86_policy_arg}]
 EOF
 )"
       do_set "${execution_delay}" || return 1
@@ -1843,16 +1699,6 @@ readonly SET_GOVERNOR_FALSE=0
 readonly SET_GOVERNOR_TRUE=1
 __exec_set_governor_type="${SET_GOVERNOR_FALSE}"
 __exec_set_governor_arg=""
-
-# X86_perf_policy levels
-readonly X86_BINARY="x86_energy_perf_policy"
-readonly X86_POLICY_FALSE=0
-readonly X86_POLICY_TRUE=1
-readonly X86_POLICY_NAME_POWERSAVE=0
-readonly X86_POLICY_NAME_NORMAL=1
-readonly X86_POLICY_NAME_PERFORMANCE=2
-__exec_set_x86_policy_type="${X86_POLICY_FALSE}"
-__exec_set_x86_policy_arg=""
 
 # Need cat for heredoc
 check_binary cat || exit 1
