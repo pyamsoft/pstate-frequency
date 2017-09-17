@@ -23,16 +23,6 @@ You are also expected to read and understand the settings in the configuration
 file: config.mk.
 
 
-### Optional Dependencies
-
-+ x86_energy_perf_policy  
-This is used to set the CPU to normal performance policy upon suspend and  
-resume. It is used to currently work around an assumed bug whereby on resume  
-the system is set to performance policy on one core. It can help fix issues  
-where upon resume of the system, the CPU runs at frequencies higher than  
-that which is advertised to be available.
-
-
 ### Installation
 
 The installation follows a basic process:  
@@ -204,6 +194,24 @@ pstate-frequency software interface, the actual frequency that the CPU
 will run at is decided solely by the hardware itself.  
 pstate-frequency is only able to offer "suggestions" as to what  
 frequency should be run, not make strict rules.
+
+
+## Troubleshooting
+
+### Settings do not apply on resume
+
+Please make sure that you are using the `pstate-frequency-sleep.service`  
+to apply the script again when the system resumes from suspend. Also see  
+issue [17](https://github.com/pyamsoft/pstate-frequency/issues/17)  
+which explains why this may be happening.
+
+pstate-frequency no longer directly supports the x86_energy_perf_policy  
+binary, so it is required that users manually apply the x86_energy_perf_policy  
+binary after running pstate-frequency if the old behavior is needed.
+
+pstate-frequency dropped support for the x86_energy_perf_policy binary  
+because the abstraction gained via the script was too difficult to keep up  
+to date with various kernel versions and different machine configurations.
 
 
 ### Additional Notes
