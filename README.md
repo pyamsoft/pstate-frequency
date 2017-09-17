@@ -103,7 +103,6 @@ takes various flags as required arguments:
 + **-g --governor** Adjust the current CPU scaling governor  
 + **-t --turbo** Adjust the current state of Turbo Boost  
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.  
-+ **-x --x86** Adjust the x86 energy performance policy.  
 
 *By default, calling the -S option with no extra arguments will return an  
 error*
@@ -203,7 +202,6 @@ frequency should be run, not make strict rules.
 Please make sure that you are using the `pstate-frequency-sleep.service`  
 to apply the script again when the system resumes from suspend. Also see  
 issue [17](https://github.com/pyamsoft/pstate-frequency/issues/17)  
-which explains why this may be happening.
 
 pstate-frequency no longer directly supports the x86_energy_perf_policy  
 binary, so it is required that users manually apply the x86_energy_perf_policy  
