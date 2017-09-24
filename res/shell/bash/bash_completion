@@ -31,9 +31,20 @@ _pstate-frequency()
   local short_get_options="-c -r"
   local long_set_options="--max --min --turbo --plan --governor"
   local long_get_options="--current --real"
-  local plans="auto powersave balanced performance max-performance"
   local governors=""
   governors="$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors)"
+
+  local plans=""
+  local prefix='??-'
+  local suffix='.plan'
+  local POWER_PLAN_CONFIG_DIR="/etc/pstate-frequency.d"
+  for plan in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
+    # Strip all the fancy stuff from the file name to just get the plan name
+    stripped="${plan#$POWER_PLAN_CONFIG_DIR/}"
+    stripped="${stripped#$prefix}"
+    stripped="${stripped%$suffix}"
+    plans="$plans ${stripped}"
+  done
 
   if [[ ${cur} = --* ]]; then
     if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then

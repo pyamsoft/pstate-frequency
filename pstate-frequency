@@ -620,22 +620,23 @@ set_power_plan()
 locate_power_plan_config()
 {
   locate_power_plan_config__input="$1"
-  readonly __prefix='??-'
-  readonly __suffix='.plan'
-  for __testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
+  readonly local_power_plan_config__prefix='??-'
+  readonly local_power_plan_config__suffix='.plan'
+  for local_power_plan_config__testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
 
     # Strip all the fancy stuff from the file name to just get the plan name
-    __stripped="${__testconfig#$POWER_PLAN_CONFIG_DIR/}"
-    __stripped="${__stripped#$__prefix}"
-    __stripped="${__stripped%$__suffix}"
+    local_power_plan_config__stripped="${local_power_plan_config__testconfig#$POWER_PLAN_CONFIG_DIR/}"
+    local_power_plan_config__stripped="${local_power_plan_config__stripped#$local_power_plan_config__prefix}"
+    local_power_plan_config__stripped="${local_power_plan_config__stripped%$local_power_plan_config__suffix}"
 
-    if [ "${locate_power_plan_config__input}" = "${__stripped}" ]; then
-        printf -- "%s" "${__testconfig}"
+    if [ "${locate_power_plan_config__input}" = "${local_power_plan_config__stripped}" ]; then
+        printf -- "%s" "${local_power_plan_config__testconfig}"
         unset locate_power_plan_config__input
         return 0
     fi
 
-    unset __testconfig
+    unset local_power_plan_config__testconfig
+    unset local_power_plan_config__stripped
   done
 
   unset locate_power_plan_config__input
