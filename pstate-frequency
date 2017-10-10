@@ -804,8 +804,12 @@ is_power_supply_mains()
 {
   for is_power_supply_mains__power_supply in "${SYSTEM_POWER_SUPPLY_DIR}"/*; do
     # Get the power_supply type
-    is_power_supply_mains__type="$(cat \
-      "${is_power_supply_mains__power_supply}"/type )"
+    is_power_supply_mains__file="${is_power_supply_mains__power_supply}/type"
+    if [ ! -f "${is_power_supply_mains__file}" ]; then
+      # No file exists, skip
+      continue
+    fi
+    is_power_supply_mains__type="$(cat "${is_power_supply_mains__file}")"
 
     # Check if the type is Mains
     if [ "${is_power_supply_mains__type}" = "Mains" ]; then
@@ -816,12 +820,14 @@ is_power_supply_mains()
         # If online exists, cat out the status
         cat -- "${is_power_supply_mains__power_supply}"/online
 
+        unset is_power_supply_mains__file
         unset is_power_supply_mains__type
         unset is_power_supply_mains__power_supply
         return 0
       fi
     fi
 
+    unset is_power_supply_mains__file
     unset is_power_supply_mains__type
     unset is_power_supply_mains__power_supply
   done
