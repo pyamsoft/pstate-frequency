@@ -1045,18 +1045,25 @@ EOF
 # Get the realtime frequencies of the CPU by reading from the procinfo
 do_get_real()
 {
-  do_get_real__real_freqs="$(grep MHz /proc/cpuinfo | cut -c12-)"
-  do_get_real__i=0
-
   print_version
-  for do_get_real__freq in ${do_get_real__real_freqs}; do
-    log "    pstate::CPU[%s]   -> %sMHz" "${do_get_real__i}" \
-      "${do_get_real__freq}"
-    do_get_real__i=$((do_get_real__i + 1))
+  for do_get_real__cpu in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
+    do_get_real__freq_khz="$(cat "${SYSTEM_CPU_DIR}/policy${do_get_real__cpu}/scaling_cur_freq")"
+    do_get_real__freq_mhz="$(( do_get_real__freq_khz / 1000 ))"
+
+    do_get_real__spaces="    "
+    if [ "${do_get_real__cpu}" -gt 9 ]; then
+      do_get_real__spaces="   "
+    elif [ "${do_get_real__cpu}" -gt 99 ]; then
+      do_get_real__spaces="  "
+    fi
+    log "    pstate::CPU[%s]%s-> %sMHz" "${do_get_real__cpu}" \
+      "${do_get_real__spaces}" "${do_get_real__freq_mhz}"
   done
 
-  unset do_get_real__i
-  unset do_get_real__real_freqs
+  unset do_get_real__current_freq_khz
+  unset do_get_real__current_freq_mhz
+  unset do_get_real__spaces
+  unset do_get_real__cpu
   return 0
 }
 
