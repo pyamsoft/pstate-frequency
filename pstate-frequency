@@ -1248,7 +1248,7 @@ root_write_governor()
     "${root_write_governor__gov}"
   for root_write_governor__i in $(seq 0 $(( SYSTEM_CPU_NUMBER - 1 )) ); do
     root_write_governor__target="$(cat << EOF
-${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor
+${SYSTEM_CPU_DIR}/policy${root_write_governor__i}/scaling_governor
 EOF
 )"
     log_verbose "Write governor: '%s' to file: %s" \
@@ -1677,7 +1677,7 @@ export LC_ALL
 
 # pstate-frequency
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
-readonly __VERSION="3.9.0"
+readonly __VERSION="3.9.1"
 
 # Options that expect an argument
 
