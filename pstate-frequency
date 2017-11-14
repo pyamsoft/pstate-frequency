@@ -497,21 +497,26 @@ set_governor()
   if [ "${set_governor__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_governor__all_available_governors="$(cat "${SYSTEM_CPU_GOVERNORS}" )"
 
-    log_verbose "Set governor_value to '%s'" "${set_governor__input}"
-    set_governor__value="${set_governor__input}"
-
-    log_all "Check that '%s' is not digits" "${set_governor__value}"
-    if [ "$(is_digits "${set_governor__value}")" -eq 0 ]; then
-      log_all "'%s' is not digits" "${set_governor__value}"
-      set_governor__is_valid_governor=0
-      for available_gov in ${set_governor__all_available_governors}; do
-        if [ "${set_governor__value}" = "${available_gov}" ]; then
-          set_governor__is_valid_governor=1
+    log_all "Check that '%s' is not digits" "${set_governor__input}"
+    if [ "$(is_digits "${set_governor__input}")" -eq 0 ]; then
+      log_all "'%s' is not digits" "${set_governor__input}"
+      set_governor__value=""
+      for try_gov in $(printf -- "%s" "${set_governor__input}" | tr ',' ' '); do
+        log_verbose "Check if %s is a valid governor" "${try_gov}"
+        for available_gov in ${set_governor__all_available_governors}; do
+          if [ "${try_gov}" = "${available_gov}" ]; then
+            set_governor__value="${try_gov}"
+            break
+          fi
+        done
+        unset try_gov
+        if [ -n "${set_governor__value}" ]; then
+          log_verbose "Governor has been found: %s" "${set_governor__value}"
           break
         fi
       done
 
-      if [ ${set_governor__is_valid_governor} -ne 1 ]; then
+      if [ -z "${set_governor__value}" ]; then
         elog_quiet "Invalid governor specified, do not change"
       else
         __exec_set_governor_type="${SET_GOVERNOR_TRUE}"
@@ -519,11 +524,10 @@ set_governor()
         log_all "__exec_set_governor_arg: '%s'" "${__exec_set_governor_arg}"
       fi
 
-      unset set_governor__is_valid_governor
-    else
-      elog_quiet "governor argument '%s' is a number" "${set_governor__value}"
-
       unset set_governor__value
+    else
+      elog_quiet "governor argument '%s' is a number" "${set_governor__input}"
+
       unset set_governor__input
       unset set_governor__mode
       unset set_governor__all_available_governors
@@ -531,7 +535,6 @@ set_governor()
     fi
 
     unset set_governor__all_available_governors
-    unset set_governor__value
   else
     elog_quiet "Cannot set governor outside of SET operation exec_mode"
 
