@@ -773,7 +773,7 @@ set_power_plan_automatic()
   fi
 
   log_verbose "Set power plan to: %s" "${set_power_plan_automatic__name}"
-  if is_ac_powered; then
+  if is_battery_powered; then
     set_power_plan_automatic__config="$(locate_power_plan_config \
       "${set_power_plan_automatic__ac}")"
     set_power_plan_automatic__arg="${set_power_plan_automatic__ac}"
@@ -814,49 +814,49 @@ set_power_plan_automatic()
 #
 # Echoes out the result, 0 is false, 1 is true, decided by the type being Mains
 # and if it is online
-is_ac_powered()
+is_battery_powered()
 {
-  for is_ac_powered__power_supply in "${SYSTEM_POWER_SUPPLY_DIR}"/*; do
+  for is_battery_powered__power_supply in "${SYSTEM_POWER_SUPPLY_DIR}"/*; do
     # Get the power_supply type
-    is_ac_powered__file="${is_ac_powered__power_supply}/type"
-    if [ ! -f "${is_ac_powered__file}" ]; then
-      elog_verbose "No type file exists: %s" "${is_ac_powered__file}"
+    is_battery_powered__file="${is_battery_powered__power_supply}/type"
+    if [ ! -f "${is_battery_powered__file}" ]; then
+      elog_verbose "No type file exists: %s" "${is_battery_powered__file}"
       # No file exists, skip
       continue
     fi
-    elog_verbose "Check power supply type: %s" "${is_ac_powered__file}"
-    is_ac_powered__type="$(cat "${is_ac_powered__file}")"
+    elog_verbose "Check power supply type: %s" "${is_battery_powered__file}"
+    is_battery_powered__type="$(cat "${is_battery_powered__file}")"
 
     # Check if the type is Mains
-    if [ "${is_ac_powered__type}" = "Mains" ]; then
+    if [ "${is_battery_powered__type}" = "Mains" ]; then
 
       # If Mains, check if the online file exists
-      if [ -e "${is_ac_powered__power_supply}"/online ]; then
+      if [ -e "${is_battery_powered__power_supply}"/online ]; then
 
         # If online exists, cat out the status
-        is_ac_powered__online="$(cat "${is_ac_powered__power_supply}/online" )"
-        log_verbose "Is Mains online? %s" "${is_ac_powered__online}"
+        is_battery_powered__online="$(cat "${is_battery_powered__power_supply}/online" )"
+        log_verbose "Is Mains online? %s" "${is_battery_powered__online}"
 
-        if [ "$(is_digits "${is_ac_powered__online}")" -eq 0 ]; then
-          elog_verbose "Online state was NaN, default to 1: %s" "${is_ac_powered__power_supply}"
-          is_ac_powered__online=1
+        if [ "$(is_digits "${is_battery_powered__online}")" -eq 0 ]; then
+          elog_verbose "Online state was NaN, default to 1: %s" "${is_battery_powered__power_supply}"
+          is_battery_powered__online=1
         fi
 
-        unset is_ac_powered__file
-        unset is_ac_powered__type
-        unset is_ac_powered__power_supply
-        return "${is_ac_powered__online}"
+        unset is_battery_powered__file
+        unset is_battery_powered__type
+        unset is_battery_powered__power_supply
+        return "${is_battery_powered__online}"
       fi
     fi
 
-    unset is_ac_powered__file
-    unset is_ac_powered__type
-    unset is_ac_powered__power_supply
+    unset is_battery_powered__file
+    unset is_battery_powered__type
+    unset is_battery_powered__power_supply
   done
 
-  # We did not find any power supply listed as Mains, print 0 for false
-  log_verbose "No Mains power supply found, default to 1"
-  return 1
+  # We did not find any power supply listed as Mains, return 0 for AC mode
+  log_verbose "No Mains power supply found, default to 0"
+  return 0
 }
 
 ##
