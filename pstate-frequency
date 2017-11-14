@@ -758,6 +758,17 @@ set_power_plan_automatic()
   set_power_plan_automatic__ac="$4"
   set_power_plan_automatic__arg=""
 
+  if [ "${set_power_plan_automatic__ac}" = "${set_power_plan_automatic__name}" ] \
+    || [ "${set_power_plan_automatic__bat}" = "${set_power_plan_automatic__name}" ]; then
+    elog_quiet "Automatic power plan cannot self reference"
+    unset set_power_plan_automatic__name
+    unset set_power_plan_automatic__bat
+    unset set_power_plan_automatic__ac
+    unset set_power_plan_automatic__arg
+    unset set_power_plan_automatic__mode
+    return 1
+  fi
+
   log_verbose "Set power plan to: %s" "${set_power_plan_automatic__name}"
   if is_ac_powered; then
     set_power_plan_automatic__config="$(locate_power_plan_config \
