@@ -17,7 +17,7 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Sets all settings to lowest possible
-PLAN_CPU_MAX=0
+PLAN_CPU_MAX=50
 PLAN_CPU_MIN=0
 PLAN_CPU_PSTATE_GOVERNOR=powersave
 PLAN_CPU_CPUFREQ_GOVERNOR=powersave,schedutil,ondemand
