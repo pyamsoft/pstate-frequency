@@ -855,8 +855,8 @@ is_battery_powered()
   done
 
   # We did not find any power supply listed as Mains, return 0 for AC mode
-  log_verbose "No Mains power supply found, default to 0"
-  return 0
+  log_verbose "No Mains power supply found, default to 1"
+  return 1
 }
 
 ##
