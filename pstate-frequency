@@ -166,17 +166,34 @@ check_binary()
 {
   check_binary__bin="$1"
   if [ -z "${check_binary__bin}" ]; then
-    elog_quiet "Must specify a path to a binary"
+    # Can't assume we have printf here
+    echo "Must specify a path to a binary"
     unset check_binary__bin
     return 1
   fi
 
-  if command -v "${check_binary__bin}" > /dev/null 2>&1; then
+  check_binary__found=0
+  check_binary__path="$(echo "${PATH}" | tr ':' ' ')"
+  for check_binary__loc in ${check_binary__path}; do
+    if [ -x "${check_binary__loc}/${check_binary__bin}" ]; then
+      check_binary__found=1
+      break
+    fi
+  done
+
+  if [ "${check_binary__found}" -eq 1 ]; then
     unset check_binary__bin
+    unset check_binary__found
+    unset check_binary__path
+    unset check_binary__loc
     return 0
   else
-    elog_quiet "Binary '%s' not found in \$PATH" "${check_binary__bin}"
+    # Can't assume we have printf here
+    echo "Binary '${check_binary__bin}' not found in \$PATH"
     unset check_binary__bin
+    unset check_binary__found
+    unset check_binary__path
+    unset check_binary__loc
     return 1
   fi
 }
