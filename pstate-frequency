@@ -32,7 +32,7 @@ log()
     log__fmt="$1"
     shift
     # shellcheck disable=SC2059
-    printf -- "${log__fmt}\n" "$@"
+    printf -- "${log__fmt}\\n" "$@"
     unset log__fmt
   fi
 
@@ -53,7 +53,7 @@ log_verbose()
     log__fmt="$1"
     shift
     # shellcheck disable=SC2059
-    printf -- "VERBOSE: ${log__fmt}\n" "$@"
+    printf -- "VERBOSE: ${log__fmt}\\n" "$@"
     unset log__fmt
   fi
 
@@ -74,7 +74,7 @@ log_all()
     log__fmt="$1"
     shift
     # shellcheck disable=SC2059
-    printf -- "DEBUG: ${log__fmt}\n" "$@"
+    printf -- "DEBUG: ${log__fmt}\\n" "$@"
     unset log__fmt
   fi
 
@@ -95,7 +95,7 @@ log_quiet()
     log__fmt="$1"
     shift
     # shellcheck disable=SC2059
-    printf -- "${log__fmt}\n" "$@"
+    printf -- "${log__fmt}\\n" "$@"
     unset log__fmt
   fi
 
