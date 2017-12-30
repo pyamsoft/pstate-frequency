@@ -24,7 +24,7 @@ provides=('pstate-frequency')
 # shellcheck disable=SC2034
 conflicts=('pstate-frequency')
 # shellcheck disable=SC2034
-license=('MIT')
+license=('GPLv2')
 url="https://github.com/pyamsoft/pstate-frequency.git"
 
 ##
