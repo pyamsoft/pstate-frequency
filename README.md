@@ -99,7 +99,11 @@ to calling with the --current option*
 The *-S --set* option can only be called by a user with root permissions, and  
 takes various flags as required arguments:  
 + **-m --max** Adjust the maximum scaling frequency of the CPU  
+               Can be specified as a plain number or in the syntax `+<number>`  
+               which will resolve to the minimum CPU frequency + `number`  
 + **-n --min** Adjust the minimum scaling frequency of the CPU  
+               Can be specified as a plain number or in the syntax `+<number>`  
+               which will resolve to the minimum CPU frequency + `number`  
 + **-g --governor** Adjust the current CPU scaling governor  
 + **-t --turbo** Adjust the current state of Turbo Boost  
 + **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.  
