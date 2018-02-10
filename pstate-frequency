@@ -409,12 +409,32 @@ set_min()
       __exec_set_min_arg="${set_min__value}"
       log_all "__exec_set_min_arg: '%s'" "${__exec_set_min_arg}"
     else
-      elog_quiet "min argument '%s' is not a number" "${set_min__value}"
+      # Check if the min starts with a '+'
+      case "${set_min__input}" in
+        +*)
+          log_verbose "min argument is passed as + and number"
+          # Remove the plus sign from the input
+          set_min__number="${set_min__input#?}"
 
-      unset set_min__value
-      unset set_min__mode
-      unset set_min__input
-      return 1
+          # If it is not digits, the recursive call with simply fail.
+          # Add it to the system cpu min
+          if [ "$(is_digits "${set_min__number}")" -eq 1 ]; then
+            set_min__number=$(( SYSTEM_CPU_MIN_VALUE + set_min__number ))
+          fi
+
+          # Recursively call ourselves again with new number value
+          set_min "${set_min__mode}" "${set_min__number}" || return 1
+          unset set_min__number
+          ;;
+        *)
+          elog_quiet "min argument '%s' is not a number" "${set_min__value}"
+
+          unset set_min__value
+          unset set_min__mode
+          unset set_min__input
+          return 1
+          ;;
+      esac
     fi
     unset set_min__value
   else
