@@ -357,12 +357,32 @@ set_max()
 
       unset set_max__fixed_min
     else
-      elog_quiet "max argument '%s' is not a number" "${set_max__value}"
+      # Check if the max starts with a '+'
+      case "${set_max__input}" in
+        +*)
+          log_verbose "max argument is passed as + and number"
+          # Remove the plus sign from the input
+          set_max__number="${set_max__input#?}"
 
-      unset set_max__value
-      unset set_max__mode
-      unset set_max__input
-      return 1
+          # If it is not digits, the recursive call with simply fail.
+          # Add it to the system cpu min
+          if [ "$(is_digits "${set_max__number}")" -eq 1 ]; then
+            set_max__number=$(( SYSTEM_CPU_MIN_VALUE + set_max__number ))
+          fi
+
+          # Recursively call ourselves again with new number value
+          set_max "${set_max__mode}" "${set_max__number}" || return 1
+          unset set_max__number
+          ;;
+        *)
+          elog_quiet "max argument '%s' is not a number" "${set_max__value}"
+
+          unset set_max__value
+          unset set_max__mode
+          unset set_max__input
+          return 1
+          ;;
+      esac
     fi
 
     unset set_max__value
