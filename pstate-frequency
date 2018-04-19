@@ -245,7 +245,7 @@ EOF
 #
 # $1 input to check
 #
-# Echoes out result, 0 is true, 1 is false
+# Echoes out result, 1 is true, 0 is false
 is_digits()
 {
   is_digits__input="$1"
@@ -503,15 +503,13 @@ set_turbo()
         set_turbo__value="0"
       fi
     else
-      elog_quiet "turbo argument '%s' is invalid" "${set_turbo__input}"
-      unset set_turbo__input
-      unset set_turbo__mode
-      unset set_turbo__value
-      return 1
+      log_verbose "Parse raw argument" "${set_turbo__input}"
+      set_turbo__value="${set_turbo__input}"
     fi
 
     log_all "Check that '%s' is valid" "${set_turbo__value}"
-    if [ "${set_turbo__value}" -eq 1 ] || [ "${set_turbo__value}" -eq 0 ]; then
+    if [ "$(is_digits "${set_turbo__value}")" -eq 1 ] && \
+      ([ "${set_turbo__value}" -eq 1 ] || [ "${set_turbo__value}" -eq 0 ]); then
       log_all "'%s' is valid digit" "${set_turbo__value}"
       __exec_set_turbo_type="${SET_TURBO_TRUE}"
       __exec_set_turbo_arg="${set_turbo__value}"
