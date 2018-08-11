@@ -112,7 +112,7 @@ elog()
 
   elog__fmt="$1"
   shift
-  log "ERROR: ${elog__fmt}" "$@" 1>&2
+  log "\\033[0;31mERROR: ${elog__fmt}\\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -126,7 +126,7 @@ elog_verbose()
 
   elog__fmt="$1"
   shift
-  log_verbose "ERROR: ${elog__fmt}" "$@" 1>&2
+  log_verbose "\\033[0;31mERROR: ${elog__fmt}\\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -140,7 +140,7 @@ elog_all()
 
   elog__fmt="$1"
   shift
-  log_all "ERROR: ${elog__fmt}" "$@" 1>&2
+  log_all "\\033[0;31mERROR: ${elog__fmt}\\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -154,7 +154,7 @@ elog_quiet()
 
   elog__fmt="$1"
   shift
-  log_quiet "ERROR: ${elog__fmt}" "$@" 1>&2
+  log_quiet "\\033[0;31mERROR: ${elog__fmt}\\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -1755,7 +1755,7 @@ export LC_ALL
 
 # pstate-frequency
 # by: pyamsoft <pyam(dot)soft(at)gmail(dot)com>
-readonly __VERSION="3.10.0"
+readonly __VERSION="3.10.1"
 
 # Options that expect an argument
 
