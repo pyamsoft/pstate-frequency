@@ -1789,7 +1789,9 @@ __exec_set_governor_type="${SET_GOVERNOR_FALSE}"
 __exec_set_governor_arg=""
 
 # Need cat for heredoc
+# Need grep for CPU number
 check_binary cat || exit 1
+check_binary grep || exit 1
 
 # System related vars
 readonly SYSTEM_POWER_SUPPLY_DIR="/sys/class/power_supply"
