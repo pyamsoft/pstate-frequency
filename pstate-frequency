@@ -509,7 +509,8 @@ set_turbo()
 
     log_all "Check that '%s' is valid" "${set_turbo__value}"
     if [ "$(is_digits "${set_turbo__value}")" -eq 1 ] && \
-      ([ "${set_turbo__value}" -eq 1 ] || [ "${set_turbo__value}" -eq 0 ]); then
+      { [ "${set_turbo__value}" -eq 1 ] || \
+        [ "${set_turbo__value}" -eq 0 ]; }; then
       log_all "'%s' is valid digit" "${set_turbo__value}"
       __exec_set_turbo_type="${SET_TURBO_TRUE}"
       __exec_set_turbo_arg="${set_turbo__value}"
