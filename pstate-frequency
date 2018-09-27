@@ -1793,9 +1793,23 @@ __exec_set_governor_arg=""
 check_binary cat || exit 1
 check_binary grep || exit 1
 
+
+# Check system sanity
+# Some container based systems will not have CPU related info and therefore
+# will not work with pstate-frequency
+readonly SYSTEM_CPU_DIR="/sys/devices/system/cpu"
+readonly CPUINFO_MAX_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq"
+readonly CPUINFO_MIN_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq"
+if [ ! -f "${CPUINFO_MAX_FREQ_FILE}" ] || \
+   [ ! -r "${CPUINFO_MAX_FREQ_FILE}" ] || \
+   [ ! -f "${CPUINFO_MIN_FREQ_FILE}" ] || \
+   [ ! -r "${CPUINFO_MIN_FREQ_FILE}" ]; then
+  elog_quiet "pstate-frequency is not supported on your system."
+  exit 2
+fi
+
 # System related vars
 readonly SYSTEM_POWER_SUPPLY_DIR="/sys/class/power_supply"
-readonly SYSTEM_CPU_DIR="/sys/devices/system/cpu"
 readonly SYSTEM_SCALING_MAX_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_max_freq"
 readonly SYSTEM_SCALING_MIN_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_freq"
 readonly SYSTEM_SCALING_GOVERNOR="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_governor"
