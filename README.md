@@ -249,9 +249,6 @@ https://github.com/pyamsoft/pstate-frequency
 
 ## Issues
 
-Questions or issues should be either posted in the issue section of this  
-repository, or directed by email to pyamsoft @ pyam(dot)soft(at)gmail(dot)com
-
 Check the issues page on GitHub for any notes about outstanding or existing  
 issues. If you encounter a problem with pstate-frequency of which no such  
 issue already exists please feel free to help the developer by creating an  
