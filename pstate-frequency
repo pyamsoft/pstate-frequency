@@ -675,23 +675,23 @@ set_power_plan()
 locate_power_plan_config()
 {
   locate_power_plan_config__input="$1"
-  readonly local_power_plan_config__prefix='??-'
-  readonly local_power_plan_config__suffix='.plan'
-  for local_power_plan_config__testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
+  readonly locate_power_plan_config__prefix='??-'
+  readonly locate_power_plan_config__suffix='.plan'
+  for locate_power_plan_config__testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
 
     # Strip all the fancy stuff from the file name to just get the plan name
-    local_power_plan_config__stripped="${local_power_plan_config__testconfig#$POWER_PLAN_CONFIG_DIR/}"
-    local_power_plan_config__stripped="${local_power_plan_config__stripped#$local_power_plan_config__prefix}"
-    local_power_plan_config__stripped="${local_power_plan_config__stripped%$local_power_plan_config__suffix}"
+    locate_power_plan_config__just_name="$(basename "${locate_power_plan_config__testconfig}" '.plan')"
+    locate_power_plan_config__name="$(printf -- '%s' "${locate_power_plan_config__just_name}" | tr '-' ' ' | awk '{ print $2 }')"
 
-    if [ "${locate_power_plan_config__input}" = "${local_power_plan_config__stripped}" ]; then
-        printf -- "%s" "${local_power_plan_config__testconfig}"
+    if [ "${locate_power_plan_config__input}" = "${locate_power_plan_config__name}" ]; then
+        printf -- "%s" "${locate_power_plan_config__testconfig}"
         unset locate_power_plan_config__input
         return 0
     fi
 
-    unset local_power_plan_config__testconfig
-    unset local_power_plan_config__stripped
+    unset locate_power_plan_config__testconfig
+    unset locate_power_plan_config__just_name
+    unset locate_power_plan_config__name
   done
 
   unset locate_power_plan_config__input
