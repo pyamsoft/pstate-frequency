@@ -675,8 +675,6 @@ set_power_plan()
 locate_power_plan_config()
 {
   locate_power_plan_config__input="$1"
-  readonly locate_power_plan_config__prefix='??-'
-  readonly locate_power_plan_config__suffix='.plan'
   for locate_power_plan_config__testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
 
     # Strip all the fancy stuff from the file name to just get the plan name
