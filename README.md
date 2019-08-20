@@ -247,6 +247,9 @@ pstate-frequency is developed in the Open on Github at:
 https://github.com/pyamsoft/pstate-frequency
 ```
 
+Thanks to [edo1](https://github.com/edo1) for a systemd service file that allows picking a plan instead of relying on a hardcoded one.  
+[Pull Request](https://github.com/pyamsoft/pstate-frequency/pull/35)
+
 ## Issues
 
 Check the issues page on GitHub for any notes about outstanding or existing  
