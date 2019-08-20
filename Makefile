@@ -31,6 +31,7 @@ BASH_INSTALL_SRC="$(RES_DIR)/shell/bash/bash_completion"
 ZSH_INSTALL_SRC="$(RES_DIR)/shell/zsh/zsh_completion"
 UDEV_INSTALL_SRC="$(RES_DIR)/udev/99-pstate-frequency.rules"
 SYSTEMD_SERVICE_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency.service"
+SYSTEMD_SERVICE_AT_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency@.service"
 SYSTEMD_SERVICE_SLEEP_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency-sleep.service"
 POWER_PLAN_INSTALL_SRCDIR="$(RES_DIR)/plans/"
 
@@ -41,6 +42,7 @@ BASH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/bash-completion/completio
 ZSH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/zsh/site-functions/_$(NAME)"
 UDEV_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/udev/rules.d/99-$(NAME).rules"
 SYSTEMD_SERVICE_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME).service"
+SYSTEMD_SERVICE_AT_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)@.service"
 SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)-sleep.service"
 
 # If you decide to change this location, also update the script POWER_PLAN_CONFIG_DIR
@@ -132,12 +134,18 @@ install-udev:
 
 install-systemd:
 	@$(MAKE) install-systemd-pstate
+	@$(MAKE) install-systemd-pstate-at
 	@$(MAKE) install-systemd-pstate-sleep
 
 install-systemd-pstate:
 	@echo "  INSTALL  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_INSTALL_TARGET))"
 	@install -Dm 644 "$(SYSTEMD_SERVICE_INSTALL_SRC)" "$(SYSTEMD_SERVICE_INSTALL_TARGET)"
+
+install-systemd-pstate-at:
+	@echo "  INSTALL  $(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_AT_INSTALL_TARGET))"
+	@install -Dm 644 "$(SYSTEMD_SERVICE_AT_INSTALL_SRC)" "$(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
 
 install-systemd-pstate-sleep:
 	@echo "  INSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
@@ -209,11 +217,16 @@ uninstall-udev:
 
 uninstall-systemd:
 	@$(MAKE) uninstall-systemd-pstate
+	@$(MAKE) uninstall-systemd-pstate-at
 	@$(MAKE) uninstall-systemd-pstate-sleep
 
 uninstall-systemd-pstate:
 	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
 	@rm -f "$(SYSTEMD_SERVICE_INSTALL_TARGET)"
+
+uninstall-systemd-pstate-at:
+	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
+	@rm -f "$(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
 
 uninstall-systemd-pstate-sleep:
 	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
