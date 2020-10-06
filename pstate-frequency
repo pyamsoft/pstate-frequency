@@ -248,11 +248,11 @@ option:
                                     <time> is passed to sleep(1)
 
     [set]
-    -p <name>        | --plan <name>        | --plan=<name>         Set a predefined power plan <name>
-    -g <name>        | --governor <name>    | --governor=<name>     Set the cpufreq governor <name>
-    -m [+|-]<number> | --max [+|-]<number>  | --max=[+|-]<number>   Modify current CPU max frequency <number|offset>
-    -n [+|-]<number> | --min [+|-]<number>  | --min=[+|-]<number>   Modify current CPU min frequency <number|offset>
-    -t <on|off|0|1>  | --turbo <on|off|0|1> | --turbo=<on|off|0|1>  Modify current CPU turbo boost <number|name>
+    -p <name>       | --plan <name>        | --plan=<name>          Set a predefined power plan <name>
+    -g <name>       | --governor <name>    | --governor=<name>      Set the cpufreq governor <name>
+    -m [+]<number>  | --max [+]<number>    | --max=[+]<number>      Modify current CPU max frequency <number|offset>
+    -n [+]<number>  | --min [+]<number>    | --min=[+]<number>      Modify current CPU min frequency <number|offset>
+    -t <on|off|0|1> | --turbo <on|off|0|1> | --turbo=<on|off|0|1>   Modify current CPU turbo boost <number|name>
 EOF
 )"
   return 0

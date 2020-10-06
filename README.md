@@ -7,41 +7,40 @@ minimum and maximum scaling frequencies and the state of turbo boost.
 
 ### Requirements
 
-+ The intel_pstate (included in kernel 3.9 and upwards) OR
-the acpi-cpufreq driver.  
-Other CPU scaling drivers are not supported and so
-the behavior of the pstate-frequency script when running with an unsupported
-CPU driver is undefined.
+- The intel_pstate (included in kernel 3.9 and upwards) OR
+  the acpi-cpufreq driver.  
+  Other CPU scaling drivers are not supported and so the behavior of
+  the pstate-frequency script when running with an unsupported CPU driver is undefined.
 
-+ coreutils  
-The standard GNU tools for things like cat, wc, grep, and cut. These are
-generally expected on all modern Linux based systems. If you are in a
-situation where your machine does not have these basic tools, support cannot
-be offered at this time.
+- coreutils  
+  The standard GNU tools for things like cat, wc, grep, and cut. These are
+  generally expected on all modern Linux based systems. If you are in a
+  situation where your machine does not have these basic tools, support cannot
+  be offered at this time.
 
-+ Reading Comprehension and Understanding  
-You are also expected to read and understand the settings in the configuration
-file: config.mk.
-
+- Reading Comprehension and Understanding  
+  You are also expected to read and understand the settings in the configuration
+  file: config.mk.
 
 ### Installation
 
-The installation follows a basic process:  
+The installation follows a basic process:
+
 ```
 $ make edit
 # make install
 ```
 
 While building, there are a couple of options that one may configure or
-change:  
-+ The directory to install to (defaults to /usr/local)
-+ Install a set of default power plans (defaults to Yes)
-+ Install bash completion (defaults to Yes)
-+ Install zsh completion (defaults to No)
-+ Install systemd related unit files (defaults to Yes)
-+ Install udev rules for automatic frequency setting (defaults to Yes)
-+ Install this README as documentation (defaults to Yes)
+change:
 
+- The directory to install to (defaults to /usr/local)
+- Install a set of default power plans (defaults to Yes)
+- Install bash completion (defaults to Yes)
+- Install zsh completion (defaults to No)
+- Install systemd related unit files (defaults to Yes)
+- Install udev rules for automatic frequency setting (defaults to Yes)
+- Install this README as documentation (defaults to Yes)
 
 #### Distribution Specific Installations
 
@@ -49,10 +48,10 @@ At this time, only ArchLinux is officially supported via the Arch User
 Repository (AUR).
 
 pstate-frequency comes with a PKGBUILD provided in the assets directory.  
-The *stable/PKGBUILD* will pull the latest released version from GitHub
+The _stable/PKGBUILD_ will pull the latest released version from GitHub
 and compile it for ArchLinux.  
-The *git/PKGBUILD* will pull the latest version from the dev repository on
-GitHub and compile it for ArchLinux.  
+The _git/PKGBUILD_ will pull the latest version from the dev repository on
+GitHub and compile it for ArchLinux.
 
 Debian package management and RedHat package management based distributions
 are currently unofficially supported through the **checkinstall** program
@@ -63,11 +62,10 @@ Any other package management based distributions can look to using
 **checkinstall** but are otherwise entirely unsupported by the developer at
 this time.
 
-
 ### Versioning
 
 The versioning is rather arbitrary. The scheme is as follows:  
-        X.Y.Z
+ X.Y.Z
 
 X is the major version number, it will only be updated when the program is
 significantly updated. Y is the minor version number, it will be updated when
@@ -81,37 +79,53 @@ When called without any options, the program will display something like
 the following:  
 [![Example Run](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_run.png)](https://github.com/pyamsoft/pstate-frequency)
 
-When called with the *-G --get* option, the program will display something
+When called with the _-G --get_ option, the program will display something
 like the following:  
 [![Example Get](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_get.png)](https://github.com/pyamsoft/pstate-frequency)
 
-When called with the *-S --set* option, the program will display something
+When called with the _-S --set_ option, the program will display something
 like the following:  
 [![Example Set](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_set.png)](https://github.com/pyamsoft/pstate-frequency)
 
-The *-G --get* option can be called by a normal user and can take various
-flags as optional arguments:  
-+ **-c --current** Display the current user-requested CPU values
-+ **-r --real** Display real-time CPU frequencies
+The _-G --get_ option can be called by a normal user and can take various
+flags as optional arguments:
 
-*By default, the calling the -G option with no extra arguments is equivalent
-to calling with the --current option*
+- **-c --current** Display the current user-requested CPU values
+- **-r --real** Display real-time CPU frequencies
+- **--loop** Continually display realtime CPU frequencies.  
+    Expects a delay which will be used to timeout calls between loops.
+    The time value is passed directly to `sleep(1)`
 
-The *-S --set* option can only be called by a user with root permissions, and
-takes various flags as required arguments:  
-+ **-m --max** Adjust the maximum scaling frequency of the CPU  
-               Can be specified as a plain number or in the syntax `+<number>`  
-               which will resolve to the minimum CPU frequency + `number`
-+ **-n --min** Adjust the minimum scaling frequency of the CPU  
-               Can be specified as a plain number or in the syntax `+<number>`  
-               which will resolve to the minimum CPU frequency + `number`
-+ **-g --governor** Adjust the current CPU scaling governor
-+ **-t --turbo** Adjust the current state of Turbo Boost
-+ **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.
+_By default, the calling the -G option with no extra arguments is equivalent
+to calling with the --current option_
 
-*By default, calling the -S option with no extra arguments will return an
-error*
+The _-S --set_ option can only be called by a user with root permissions, and
+takes various flags as required arguments:
 
+- **--delay** Delays the execution of the set commands by 5 seconds.  
+    This is naive but useful for system startup where various bits of the machine
+    may not be ready until a certain amount of time has passed.  
+
+    It it mainly used in the systemd unit.
+- **-m --max** Adjust the maximum scaling frequency of the CPU  
+    Can be specified as a plain number or in the syntax `+<number>`
+    which will resolve to the minimum CPU frequency + `number`
+- **-n --min** Adjust the minimum scaling frequency of the CPU  
+    Can be specified as a plain number or in the syntax `+<number>`
+    which will resolve to the minimum CPU frequency + `number`
+- **-g --governor** Adjust the current CPU scaling governor.
+    Must be the name of a valid CPU governor
+- **-t --turbo** Adjust the current state of Turbo Boost.  
+    Can be specified as `on` `off` `0` or `1`. `0` and `1` are
+    passed directly to the CPU driver turbo file, while `on` and `off`
+    interpreted in the context of the current CPU driver.
+    `intel_pstate` backend treats `1` as OFF and `0` as ON,
+    while `acpi_cpufreq` uses the reverse.
+- **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.  
+    Must be specified as a plan name inside of `/etc/pstate-frequency.d/`
+
+_By default, calling the -S option with no extra arguments will return an
+error_
 
 ##### Power Plans
 
@@ -119,21 +133,22 @@ Power Plans are convenience shortcuts which essentially alias to calling
 pstate-frequency with various options for --max, --min, --turbo, and
 --governor. They are not necessary for operation, but are recommended.
 
-There are five default power plans:  
+There are five default power plans:
+
 1. **powersave** Sets the minimum and maximum scaling frequencies to the
-lowest available and disables Turbo Boost.
+   lowest available and disables Turbo Boost.
 2. **balanced** Sets the minimum scaling frequency to the
-lowest available, the maximum scaling frequency to the highest available
-non-turbo frequency and disables Turbo Boost.
+   lowest available, the maximum scaling frequency to the highest available
+   non-turbo frequency and disables Turbo Boost.
 3. **performance** Sets the minimum scaling frequency to the
-lowest available, the maximum scaling frequency to the highest available
-frequency and enables Turbo Boost.
+   lowest available, the maximum scaling frequency to the highest available
+   frequency and enables Turbo Boost.
 4. **max** Sets the minimum and maximum scaling frequencies
-to the highest available frequency taking into account Turbo Boost
-frequencies, and enables Turbo Boost.
+   to the highest available frequency taking into account Turbo Boost
+   frequencies, and enables Turbo Boost.
 5. **auto** If the computer's main powersource is online, then the
-*balanced* plan is set. If the main powersource is offline, then the
-*powersave* plan is set.
+   _balanced_ plan is set. If the main powersource is offline, then the
+   _powersave_ plan is set.
 
 The power plans live in /etc/pstate-frequency.d/ and can be edited to change
 how each performs. An example of the various available plan options can be
@@ -146,7 +161,6 @@ other than the accepted variables. pstate-frequency does not ship with plans
 that execute any code and you are responsible for what you configure your own
 plans to do.
 
-
 ### Understanding pstate-frequency
 
 pstate-frequency is just a convenient frontend for pre-existing software.
@@ -155,7 +169,6 @@ or modules to affect system performance. Any problems with the system which
 may have indirectly resulted from the usage of pstate-frequency, but are not
 related to the output or input handling in pstate-frequency itself, should be
 presented to the respective authors.
-
 
 ##### Intel thermald
 
@@ -178,27 +191,25 @@ if a user wishes to use pstate-frequency to control turbo boost is to
 comment out or remove the intel_pstate line in the default thermald
 configuration file: **/etc/thermald/thermal-cpu-cdev-order.xml**.
 
-
 #### pstate-frequency doesn't work
 
 Sometimes you will notice that even when a frequency is requested using
 pstate-frequency, the CPU will still run at higher, or lower
 frequencies. This is explained by the kernel documentation snippet
-below:  
+below:
 
-*For contemporary Intel processors, the frequency is controlled by the
+_For contemporary Intel processors, the frequency is controlled by the
 processor itself and the P-states exposed to software are related to
-performance levels.  The idea that frequency can be set to a single
+performance levels. The idea that frequency can be set to a single
 frequency is fiction for Intel Core processors. Even if the scaling
 driver selects a single P state the actual frequency the processor
-will run at is selected by the processor itself.*
+will run at is selected by the processor itself._
 
 This means that although a certain value may be requested through the
 pstate-frequency software interface, the actual frequency that the CPU
 will run at is decided solely by the hardware itself.
 pstate-frequency is only able to offer "suggestions" as to what
 frequency should be run, not make strict rules.
-
 
 ## Troubleshooting
 
@@ -216,7 +227,6 @@ pstate-frequency dropped support for the x86_energy_perf_policy binary
 because the abstraction gained via the script was too difficult to keep up
 to date with various kernel versions and different machine configurations.
 
-
 ### Additional Notes
 
 If you are attempting to use the udev rule but pstate-frequency fails to
@@ -229,21 +239,22 @@ main project as a pull request on GitHub.
 
 At this time, pstate-frequency does not make use of any of the new files
 added to the intel_pstate driver in kernels 4 and up. pstate-frequency
-will only make use of the following sys files:  
+will only make use of the following sys files:
 
 With the intel_pstate driver:
 
-+ /sys/devices/system/cpu/intel_pstate/max_perf_pct
-+ /sys/devices/system/cpu/intel_pstate/min_perf_pct
-+ /sys/devices/system/cpu/intel_pstate/no_turbo
+- /sys/devices/system/cpu/intel_pstate/max_perf_pct
+- /sys/devices/system/cpu/intel_pstate/min_perf_pct
+- /sys/devices/system/cpu/intel_pstate/no_turbo
 
 With acpi_cpufreq:
 
-+ /sys/devices/system/cpu/cpufreq/boost
+- /sys/devices/system/cpu/cpufreq/boost
 
 ## Development
 
 pstate-frequency is developed in the Open on Github at:
+
 ```
 https://github.com/pyamsoft/pstate-frequency
 ```
