@@ -77,15 +77,15 @@ will be updated generally whenever a bug is fixed or patched.
 The binary by default is named **pstate-frequency**  
 When called without any options, the program will display something like
 the following:  
-[![Example Run](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_run.png)](https://github.com/pyamsoft/pstate-frequency)
+[![Example Run](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/main/assets/img/pstate-frequency_example_run.png)](https://github.com/pyamsoft/pstate-frequency)
 
 When called with the _-G --get_ option, the program will display something
 like the following:  
-[![Example Get](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_get.png)](https://github.com/pyamsoft/pstate-frequency)
+[![Example Get](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/main/assets/img/pstate-frequency_example_get.png)](https://github.com/pyamsoft/pstate-frequency)
 
 When called with the _-S --set_ option, the program will display something
 like the following:  
-[![Example Set](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/master/assets/img/pstate-frequency_example_set.png)](https://github.com/pyamsoft/pstate-frequency)
+[![Example Set](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/main/assets/img/pstate-frequency_example_set.png)](https://github.com/pyamsoft/pstate-frequency)
 
 The _-G --get_ option can be called by a normal user and can take various
 flags as optional arguments:
