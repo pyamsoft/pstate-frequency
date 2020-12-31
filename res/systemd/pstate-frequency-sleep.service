@@ -25,7 +25,7 @@ StopWhenUnneeded=yes
 Type=simple
 RemainAfterExit=yes
 ExecStart=/bin/true
-ExecStop=/bin/sh -c "pstate-frequency -dd -S -p auto"
+ExecStop=/bin/sh -c "pstate-frequency -S -p auto"
 
 [Install]
 WantedBy=sleep.target
