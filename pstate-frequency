@@ -1116,7 +1116,15 @@ do_get_real_work() {
     elif [ "${do_get_real_work__cpu}" -gt 99 ]; then
       do_get_real_work__spaces="  "
     fi
-    log "    pstate::CPU[%s]%s-> %sMHz" "${do_get_real_work__cpu}" "${do_get_real_work__spaces}" \
+
+    if [ "${do_get_real_work__freq_mhz}" -lt 100 ]; then
+      do_get_real_work__freq_spaces="   "
+    elif [ "${do_get_real_work__freq_mhz}" -lt 1000 ]; then
+      do_get_real_work__freq_spaces="  "
+    else
+      do_get_real_work__freq_spaces=" "
+    fi
+    log "    pstate::CPU[%s]%s->%s %sMHz" "${do_get_real_work__cpu}" "${do_get_real_work__spaces}" "${do_get_real_work__freq_spaces}" \
       "${do_get_real_work__freq_mhz}"
   done
 
