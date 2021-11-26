@@ -29,6 +29,7 @@ DOC_INSTALL_SRC="README.md"
 LICENSE_INSTALL_SRC="LICENSE"
 BASH_INSTALL_SRC="$(RES_DIR)/shell/bash/bash_completion"
 ZSH_INSTALL_SRC="$(RES_DIR)/shell/zsh/zsh_completion"
+FISH_INSTALL_SRC="$(RES_DIR)/shell/fish/completions.fish"
 UDEV_INSTALL_SRC="$(RES_DIR)/udev/99-pstate-frequency.rules"
 SYSTEMD_SERVICE_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency.service"
 SYSTEMD_SERVICE_AT_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency@.service"
@@ -40,6 +41,7 @@ DOC_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/share/doc/$(NAME)/README.md"
 LICENSE_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/share/doc/$(NAME)/LICENSE"
 BASH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/bash-completion/completions/$(NAME)"
 ZSH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/zsh/site-functions/_$(NAME)"
+FISH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/fish/completions/$(NAME).fish"
 UDEV_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/udev/rules.d/99-$(NAME).rules"
 SYSTEMD_SERVICE_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME).service"
 SYSTEMD_SERVICE_AT_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)@.service"
@@ -51,8 +53,8 @@ POWER_PLAN_INSTALL_TARGETDIR="$(DESTDIR)/etc/pstate-frequency.d/"
 
 .PHONY: all install uninstall edit \
 	install-doc install-license install-script install-res \
-	install-bash install-zsh install-udev install-systemd \
-	install-systemd-pstate install-systemd-pstate-sleep \
+	install-bash install-zsh install-fish install-udev \
+	install-systemd install-systemd-pstate install-systemd-pstate-sleep \
 	install-power-plans \
 	uninstall-script uninstall-doc uninstall-license uninstall-res \
 	uninstall-bash uninstall-zsh uninstall-udev uninstall-systemd \
@@ -107,6 +109,9 @@ endif
 ifeq ($(INCLUDE_ZSH_COMPLETION), 1)
 	@$(MAKE) install-zsh
 endif
+ifeq ($(INCLUDE_FISH_COMPLETION), 1)
+	@$(MAKE) install-fish
+endif
 ifeq ($(INCLUDE_UDEV_RULE), 1)
 	@$(MAKE) install-udev
 endif
@@ -126,6 +131,11 @@ install-zsh:
 	@echo "  INSTALL  $(ZSH_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(ZSH_INSTALL_TARGET))"
 	@install -Dm 644 "$(ZSH_INSTALL_SRC)" "$(ZSH_INSTALL_TARGET)"
+
+install-fish:
+	@echo "  INSTALL  $(FISH_INSTALL_TARGET)"
+	@mkdir -p "$(shell dirname $(FISH_INSTALL_TARGET))"
+	@install -Dm 644 "$(FISH_INSTALL_SRC)" "$(FISH_INSTALL_TARGET)"
 
 install-udev:
 	@echo "  INSTALL  $(UDEV_INSTALL_TARGET)"
