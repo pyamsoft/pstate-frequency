@@ -68,6 +68,15 @@ INCLUDE_BASH_COMPLETION?=1
 INCLUDE_ZSH_COMPLETION?=0
 
 ##
+# fish-completion
+#
+# Include a fish completion file
+#
+# [0 NO] | 1 YES
+##
+INCLUDE_FISH_COMPLETION?=0
+
+##
 # systemd services
 #
 # Include a systemd unit
