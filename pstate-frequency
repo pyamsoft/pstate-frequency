@@ -633,7 +633,9 @@ set_power_plan() {
     log_all "Search the config directory '%s' for power plan configrations" \
       "${POWER_PLAN_CONFIG_DIR}"
     # Locate config with given input
-    readonly set_power_plan__config="$(locate_power_plan_config "${set_power_plan__input}")"
+    set_power_plan__config=
+    set_power_plan__config="$(locate_power_plan_config "${set_power_plan__input}")"
+    readonly set_power_plan__config
 
     # Fail if we don't find a config
     if [ -z "${set_power_plan__config}" ]; then
@@ -1809,9 +1811,19 @@ readonly SYSTEM_SCALING_MIN_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_fre
 readonly SYSTEM_SCALING_GOVERNOR="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_governor"
 readonly SYSTEM_SCALING_DRIVER="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_driver"
 readonly SYSTEM_CPU_GOVERNORS="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_available_governors"
-readonly SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
-readonly SYSTEM_CPU_MAX_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq")"
-readonly SYSTEM_CPU_MIN_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq")"
+
+SYSTEM_CPU_NUMBER=
+SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
+readonly SYSTEM_CPU_NUMBER
+
+SYSTEM_CPU_MAX_FREQ=
+SYSTEM_CPU_MAX_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq")"
+readonly SYSTEM_CPU_MAX_FREQ
+
+SYSTEM_CPU_MIN_FREQ=
+SYSTEM_CPU_MIN_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq")"
+readonly SYSTEM_CPU_MIN_FREQ
+
 readonly SYSTEM_CPU_MAX_VALUE=100
 readonly SYSTEM_CPU_MIN_VALUE=$((SYSTEM_CPU_MIN_FREQ * 100 / SYSTEM_CPU_MAX_FREQ))
 
