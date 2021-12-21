@@ -28,7 +28,7 @@ move_cursor_upwards() {
   fi
 
   # shellcheck disable=SC2059
-  printf -- "\\033[${move_cursor_upwards__lines}A\r"
+  printf -- "\033[${move_cursor_upwards__lines}A\r"
 
   unset move_cursor_upwards__lines
   return 0
@@ -47,7 +47,7 @@ log() {
     log__fmt="$1"
     shift
     # shellcheck disable=SC2059
-    printf -- "${log__fmt}\\n" "$@"
+    printf -- "${log__fmt}\n" "$@"
     unset log__fmt
   fi
 
@@ -67,7 +67,7 @@ log_verbose() {
     log__fmt="$1"
     shift
     # shellcheck disable=SC2059
-    printf -- "VERBOSE: ${log__fmt}\\n" "$@"
+    printf -- "VERBOSE: ${log__fmt}\n" "$@"
     unset log__fmt
   fi
 
@@ -87,7 +87,7 @@ log_all() {
     log__fmt="$1"
     shift
     # shellcheck disable=SC2059
-    printf -- "DEBUG: ${log__fmt}\\n" "$@"
+    printf -- "DEBUG: ${log__fmt}\n" "$@"
     unset log__fmt
   fi
 
@@ -107,7 +107,7 @@ log_quiet() {
     log__fmt="$1"
     shift
     # shellcheck disable=SC2059
-    printf -- "${log__fmt}\\n" "$@"
+    printf -- "${log__fmt}\n" "$@"
     unset log__fmt
   fi
 
@@ -123,7 +123,7 @@ elog() {
 
   elog__fmt="$1"
   shift
-  log "\\033[0;31mERROR: ${elog__fmt}\\033[0m" "$@" 1>&2
+  log "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -136,7 +136,7 @@ elog_verbose() {
 
   elog__fmt="$1"
   shift
-  log_verbose "\\033[0;31mERROR: ${elog__fmt}\\033[0m" "$@" 1>&2
+  log_verbose "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -149,7 +149,7 @@ elog_all() {
 
   elog__fmt="$1"
   shift
-  log_all "\\033[0;31mERROR: ${elog__fmt}\\033[0m" "$@" 1>&2
+  log_all "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -162,7 +162,7 @@ elog_quiet() {
 
   elog__fmt="$1"
   shift
-  log_quiet "\\033[0;31mERROR: ${elog__fmt}\\033[0m" "$@" 1>&2
+  log_quiet "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
