@@ -473,7 +473,7 @@ set_turbo() {
 
     log_all "Check for special case arguments: on, off"
     if [ "${set_turbo__input}" = "on" ]; then
-      if [ "$(has_pstate_dir)" -eq 1 ]; then
+      if has_pstate_dir; then
         log_verbose "Argument was 'on' set to 0"
         set_turbo__value="0"
       else
@@ -481,7 +481,7 @@ set_turbo() {
         set_turbo__value="1"
       fi
     elif [ "${set_turbo__input}" = "off" ]; then
-      if [ "$(has_pstate_dir)" -eq 1 ]; then
+      if has_pstate_dir; then
         log_verbose "Argument was 'off' set to 1"
         set_turbo__value="1"
       else
@@ -734,7 +734,7 @@ execute_power_plan_config() {
   execute_power_plan_config__cpu_turbo="${PLAN_CPU_TURBO}"
 
   execute_power_plan_config__cpu_gov=
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
+  if has_pstate_dir; then
     execute_power_plan_config__cpu_gov="${PLAN_CPU_PSTATE_GOVERNOR}"
   else
     execute_power_plan_config__cpu_gov="${PLAN_CPU_CPUFREQ_GOVERNOR}"
@@ -1038,7 +1038,7 @@ do_get_current() {
   do_get_current__cpu_driver="$(cat "${SYSTEM_SCALING_DRIVER}")"
   do_get_current__cpu_turbo=
 
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
+  if has_pstate_dir; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
   else
     if [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
@@ -1053,13 +1053,13 @@ do_get_current() {
 
   do_get_current__cpu_turbo_onoff=""
   if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
-    if [ "$(has_pstate_dir)" -eq 1 ]; then
+    if has_pstate_dir; then
       do_get_current__cpu_turbo_onoff="OFF"
     else
       do_get_current__cpu_turbo_onoff="ON"
     fi
   else
-    if [ "$(has_pstate_dir)" -eq 1 ]; then
+    if has_pstate_dir; then
       do_get_current__cpu_turbo_onoff="ON"
     else
       do_get_current__cpu_turbo_onoff="OFF"
@@ -1194,7 +1194,7 @@ root_do_set_has_arg() {
 # $1 max value
 root_write_max() {
   root_write_max__max="$1"
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
+  if has_pstate_dir; then
     log_verbose "Write max_value '%s' to intel_pstate file: %s" "${root_write_max__max}" \
       "${SYSTEM_INTEL_PSTATE_MAX}"
     printf -- "%s" "${root_write_max__max}" >"${SYSTEM_INTEL_PSTATE_MAX}" || return 1
@@ -1236,7 +1236,7 @@ EOF
 root_write_min() {
   root_write_min__min="$1"
 
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
+  if has_pstate_dir; then
     log_verbose "Write min_value '%s' to intel_pstate file: %s" "${root_write_min__min}" \
       "${SYSTEM_INTEL_PSTATE_MIN}"
     printf -- "%s" "${root_write_min__min}" >"${SYSTEM_INTEL_PSTATE_MIN}" || return 1
@@ -1280,7 +1280,7 @@ root_write_turbo() {
 
   root_write_turbo__type=""
   root_write_turbo__target=""
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
+  if has_pstate_dir; then
     root_write_turbo__type="intel_pstate"
     root_write_turbo__target="${SYSTEM_INTEL_PSTATE_TURBO}"
   else
@@ -1352,7 +1352,7 @@ root_do_set() {
   root_do_set__cpu_governor="$(cat "${SYSTEM_SCALING_GOVERNOR}")"
   root_do_set__cpu_turbo=
 
-  if [ "$(has_pstate_dir)" -eq 1 ]; then
+  if has_pstate_dir; then
     root_do_set__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
   else
     if [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
@@ -1484,13 +1484,13 @@ do_set() {
 #
 # Echoes out result
 has_pstate_dir() {
-  if [ -d "${SYSTEM_INTEL_PSTATE_DIR}" ]; then
-    printf -- 1
+  if [ -e "${SYSTEM_INTEL_PSTATE_DIR}" ] && [ -d "${SYSTEM_INTEL_PSTATE_DIR}" ]; then
+    # Return 0 means true
+    return 0
   else
-    printf -- 0
+    # Return non-0 means false
+    return 1
   fi
-
-  return 0
 }
 
 ##
