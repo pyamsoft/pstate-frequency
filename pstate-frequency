@@ -1071,11 +1071,11 @@ do_get_current() {
   print_version
   log "$(
     cat <<EOF
-    pstate::CPU_DRIVER   -> %s
-    pstate::CPU_GOVERNOR -> %s
-    pstate::TURBO        -> %s [%s]
-    pstate::CPU_MIN      -> %s%% [%sMHz]
-    pstate::CPU_MAX      -> %s%% [%sMHz]
+    CPU_DRIVER   -> %s
+    CPU_GOVERNOR -> %s
+    TURBO        -> %s [%s]
+    CPU_MIN      -> %s%% [%sMHz]
+    CPU_MAX      -> %s%% [%sMHz]
 EOF
   )" "${do_get_current__cpu_driver}" "${do_get_current__cpu_governor}" \
     "${do_get_current__cpu_turbo}" "${do_get_current__cpu_turbo_onoff}" \
