@@ -21,6 +21,8 @@
 ##
 # Move cursor lines upwards and set to beginning of line
 # $1 lines upwards
+#
+# DEPRECATED
 move_cursor_upwards() {
   move_cursor_upwards__lines="$1"
   if [ -z "${move_cursor_upwards__lines}" ] || [ "${move_cursor_upwards__lines}" -le 0 ]; then
@@ -261,7 +263,7 @@ is_digits() {
 ##
 # Print version
 print_version() {
-  log "pstate-frequency version %s" "${__VERSION}"
+  log "pstate-frequency <%s>" "${__VERSION}"
 }
 
 ##
@@ -1104,6 +1106,7 @@ do_get_real_work() {
       "${SYSTEM_CPU_DIR}/cpu${do_get_real_work__cpu}/cpufreq/scaling_cur_freq")"
     do_get_real_work__freq_mhz="$((do_get_real_work__freq_khz / 1000))"
 
+    # There MUST be a better way to do this. If you have a >999 CPU core count, well then shucks.
     do_get_real_work__spaces="    "
     if [ "${do_get_real_work__cpu}" -gt 9 ]; then
       do_get_real_work__spaces="   "
@@ -1111,6 +1114,7 @@ do_get_real_work() {
       do_get_real_work__spaces="  "
     fi
 
+    # If your CPU is super fast, well congratulations!
     if [ "${do_get_real_work__freq_mhz}" -lt 100 ]; then
       do_get_real_work__freq_spaces="   "
     elif [ "${do_get_real_work__freq_mhz}" -lt 1000 ]; then
@@ -1122,6 +1126,8 @@ do_get_real_work() {
       "${do_get_real_work__freq_mhz}"
   done
 
+  # THIS IS DEPRECATED AND SHOULD BE REMOVED IN THE NEXT VERSION BUMP
+  # If you want to loop pstate-frequency results, use `watch -n 5 pstate-frequency -Gr`
   if [ -n "${__exec_get_loop_delay}" ]; then
     while :; do
       # Wait for a little bit
@@ -1180,16 +1186,14 @@ do_get() {
 # Check whether a --set command can proceed.
 # In order to proceed, something must be requested to be set
 #
-# Echoes out result, 0 is true, 1 is false
-root_do_set_has_arg() {
+# Returns true or false based on if something is requested to be --set
+is_set_command_possible() {
   if [ "${__exec_set_max_type}" -eq 1 ] || [ "${__exec_set_min_type}" -eq 1 ] ||
     [ "${__exec_set_turbo_type}" -eq 1 ] || [ "${__exec_set_governor_type}" -eq 1 ]; then
-    printf -- 1
+    return 0
   else
-    printf -- 0
+    return 1
   fi
-
-  return 0
 }
 
 ##
@@ -1341,7 +1345,7 @@ EOF
 root_do_set() {
   log_verbose "YOU ARE ROOT"
   log_all "Check that we are setting something"
-  if [ "$(root_do_set_has_arg)" -eq 0 ]; then
+  if ! is_set_command_possible; then
     elog_quiet "Not setting any CPU options"
     return 1
   fi
@@ -1365,7 +1369,7 @@ root_do_set() {
     root_do_set__setting_cpu_governor="${root_do_set__cpu_governor}"
   fi
 
-  log_verbose "setting_cpu_governor: ${root_do_set__setting_cpu_governor}"
+  log_verbose "ROOT: setting_cpu_governor: ${root_do_set__setting_cpu_governor}"
 
   # Apply the governor first
   root_write_governor "${root_do_set__setting_cpu_governor}"
@@ -1438,6 +1442,10 @@ root_do_set() {
     log_all "set max to just above min"
     root_do_set__setting_cpu_max="$((root_do_set__setting_cpu_min + 1))"
   fi
+
+  log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
+  log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
+  log_verbose "ROOT: setting_cpu_turbo: ${root_do_set__setting_cpu_turbo}"
 
   # Set max first if it is greater than the current CPU min
   if [ "${root_do_set__setting_cpu_max}" -gt "${root_do_set__cpu_min_value}" ]; then
