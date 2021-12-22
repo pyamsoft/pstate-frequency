@@ -1202,6 +1202,7 @@ is_set_command_possible() {
 # $1 max value
 root_write_max() {
   root_write_max__max="$1"
+
   if has_intel_pstate_dir; then
     log_verbose "Write max_value '%s' to intel_pstate file: %s" "${root_write_max__max}" \
       "${SYSTEM_INTEL_PSTATE_MAX}"
@@ -1218,11 +1219,7 @@ root_write_max() {
     "${SYSTEM_CPU_MAX_FREQ}")"
 
   for root_write_max__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
-    root_write_max__target="$(
-      cat <<EOF
-${SYSTEM_CPU_DIR}/cpu${root_write_max__i}/cpufreq/scaling_max_freq
-EOF
-    )"
+    root_write_max__target="${SYSTEM_CPU_DIR}/cpu${root_write_max__i}/cpufreq/scaling_max_freq"
     log_verbose "Write freq: %sKHz to file: %s" "${root_write_max__freq}" \
       "${root_write_max__target}"
     printf -- "%s" "${root_write_max__freq}" >"${root_write_max__target}" || return 1
@@ -1261,11 +1258,7 @@ root_write_min() {
     "${SYSTEM_CPU_MAX_FREQ}")"
 
   for root_write_min__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
-    root_write_min__target="$(
-      cat <<EOF
-${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq
-EOF
-    )"
+    root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq"
     log_verbose "Write freq: %sKHz to file: %s" "${root_write_min__freq}" \
       "${root_write_min__target}"
     printf -- "%s" "${root_write_min__freq}" >"${root_write_min__target}" || return 1
@@ -1322,11 +1315,7 @@ root_write_governor() {
 
   log_verbose "Write cpu_governor '%s' to all CPUs" "${root_write_governor__gov}"
   for root_write_governor__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
-    root_write_governor__target="$(
-      cat <<EOF
-${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor
-EOF
-    )"
+    root_write_governor__target="${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor"
     log_verbose "Write governor: '%s' to file: %s" "${root_write_governor__gov}" \
       "${root_write_governor__target}"
     printf -- "%s" "${root_write_governor__gov}" >"${root_write_governor__target}" || return 1
