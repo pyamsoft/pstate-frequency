@@ -16,6 +16,12 @@
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+##
+# DEPRECATED
+#
+# NOTE: This service file will be deprecated in favor of the pstate-frequency@.service
+#       Please migrate to using pstate-frequency@auto.service to keep behavior.
+
 [Unit]
 Description=Program to manage CPU frequencies
 After=basic.target
