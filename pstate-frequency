@@ -1032,26 +1032,28 @@ handle_long_option_argument() {
 # Get the current state of the CPU from the pstate and scaling driver
 #
 do_get_current() {
-  do_get_current__cpu_max_freq="$(cat "${SYSTEM_SCALING_MAX_FREQ}")"
-  do_get_current__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}")"
+  do_get_current__cpu_max_freq_khz="$(cat "${SYSTEM_SCALING_MAX_FREQ}")"
+  do_get_current__cpu_max_freq_mhz="$((do_get_current__cpu_max_freq_khz / 1000))"
+
+  do_get_current__cpu_min_freq_khz="$(cat "${SYSTEM_SCALING_MIN_FREQ}")"
+  do_get_current__cpu_min_freq_mhz="$((do_get_current__cpu_min_freq_khz / 1000))"
+
   do_get_current__cpu_governor="$(cat "${SYSTEM_SCALING_GOVERNOR}")"
   do_get_current__cpu_driver="$(cat "${SYSTEM_SCALING_DRIVER}")"
   do_get_current__cpu_turbo=
 
   if has_intel_pstate_dir; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
+  elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
+    do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
   else
-    if [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
-      do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
-    else
-      do_get_current__cpu_turbo="0"
-    fi
+    do_get_current__cpu_turbo="0"
   fi
 
-  do_get_current__cpu_max_value=$((do_get_current__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ))
-  do_get_current__cpu_min_value=$((do_get_current__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
+  do_get_current__cpu_max_value=$((do_get_current__cpu_max_freq_khz * 100 / SYSTEM_CPU_MAX_FREQ))
+  do_get_current__cpu_min_value=$((do_get_current__cpu_min_freq_khz * 100 / SYSTEM_CPU_MAX_FREQ))
 
-  do_get_current__cpu_turbo_onoff=""
+  do_get_current__cpu_turbo_onoff=
   if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
     if has_intel_pstate_dir; then
       do_get_current__cpu_turbo_onoff="OFF"
@@ -1072,17 +1074,19 @@ do_get_current() {
     pstate::CPU_DRIVER   -> %s
     pstate::CPU_GOVERNOR -> %s
     pstate::TURBO        -> %s [%s]
-    pstate::CPU_MIN      -> %s%% [%sKHz]
-    pstate::CPU_MAX      -> %s%% [%sKHz]
+    pstate::CPU_MIN      -> %s%% [%sMHz]
+    pstate::CPU_MAX      -> %s%% [%sMHz]
 EOF
   )" "${do_get_current__cpu_driver}" "${do_get_current__cpu_governor}" \
     "${do_get_current__cpu_turbo}" "${do_get_current__cpu_turbo_onoff}" \
-    "${do_get_current__cpu_min_value}" "${do_get_current__cpu_min_freq}" \
-    "${do_get_current__cpu_max_value}" "${do_get_current__cpu_max_freq}"
+    "${do_get_current__cpu_min_value}" "${do_get_current__cpu_min_freq_mhz}" \
+    "${do_get_current__cpu_max_value}" "${do_get_current__cpu_max_freq_mhz}"
 
   unset do_get_current__cpu_turbo_onoff
-  unset do_get_current__cpu_max_freq
-  unset do_get_current__cpu_min_freq
+  unset do_get_current__cpu_max_freq_khz
+  unset do_get_current__cpu_min_freq_khz
+  unset do_get_current__cpu_max_freq_mhz
+  unset do_get_current__cpu_min_freq_mhz
   unset do_get_current__cpu_max_value
   unset do_get_current__cpu_min_value
   unset do_get_current__cpu_turbo
@@ -1376,14 +1380,12 @@ root_do_set() {
   if has_intel_pstate_dir; then
     log_all "Source existing CPU turbo from intel_pstate"
     root_do_set__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
+  elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
+    log_all "Source existing CPU turbo from acpi-cpufreq"
+    root_do_set__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
   else
-    if [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
-      log_all "Source existing CPU turbo from acpi-cpufreq"
-      root_do_set__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
-    else
-      log_all "No existing CPU turbo found, set 0 for no-op"
-      root_do_set__cpu_turbo=0
-    fi
+    log_all "No existing CPU turbo found, set 0 for no-op"
+    root_do_set__cpu_turbo=0
   fi
 
   readonly root_do_set__cpu_max_freq
