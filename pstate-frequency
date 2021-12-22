@@ -179,28 +179,13 @@ check_binary() {
     return 1
   fi
 
-  check_binary__found=0
-  check_binary__path="$(echo "${PATH}" | tr ':' ' ')"
-  for check_binary__loc in ${check_binary__path}; do
-    if [ -x "${check_binary__loc}/${check_binary__bin}" ]; then
-      check_binary__found=1
-      break
-    fi
-  done
-
-  if [ "${check_binary__found}" -eq 1 ]; then
+  if command -v "${check_binary__bin}" > /dev/null 2>&1; then
     unset check_binary__bin
-    unset check_binary__found
-    unset check_binary__path
-    unset check_binary__loc
     return 0
   else
     # Can't assume we have printf here
     echo "Binary '${check_binary__bin}' not found in \$PATH"
     unset check_binary__bin
-    unset check_binary__found
-    unset check_binary__path
-    unset check_binary__loc
     return 1
   fi
 }
@@ -234,6 +219,8 @@ option:
     [get]
     -c | --current                  Display the current user set CPU values
     -r | --real                     Display the real time CPU frequencies
+
+    (DEPRECATED)
     --loop <time> | --loop=<time>   Continually query real time CPU frequencies with a delay of <time> between loops.
                                     <time> is passed to sleep(1)
 
