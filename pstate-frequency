@@ -1498,6 +1498,7 @@ has_pstate_dir() {
 #
 # $@ all command line args
 main() {
+
   # Execution modes
   readonly EXEC_MODE_NONE=0
   readonly EXEC_MODE_GET=1
@@ -1596,6 +1597,7 @@ main() {
             execution_delay=1
             ;;
           loop)
+            elog "Warning: The long option --loop is deprecated and will be removed in the next version."
             long_option="loop"
             ;;
           *)
@@ -1738,7 +1740,7 @@ export LC_ALL
 
 # pstate-frequency
 # by: pyamsoft <developer(dot)pyamsoft(at)gmail(dot)com>
-readonly __VERSION="3.11.0"
+readonly __VERSION="3.12.0"
 
 # Options that expect an argument
 
@@ -1774,22 +1776,10 @@ readonly SET_GOVERNOR_TRUE=1
 __exec_set_governor_type="${SET_GOVERNOR_FALSE}"
 __exec_set_governor_arg=""
 
-# Need cat for heredoc
-# Need grep for CPU number
-check_binary cat || exit 1
-check_binary grep || exit 1
-
 # Check system sanity
 # Some container based systems will not have CPU related info and therefore
 # will not work with pstate-frequency
 readonly SYSTEM_CPU_DIR="/sys/devices/system/cpu"
-readonly CPUINFO_MAX_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq"
-readonly CPUINFO_MIN_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq"
-if [ ! -f "${CPUINFO_MAX_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MAX_FREQ_FILE}" ] ||
-  [ ! -f "${CPUINFO_MIN_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MIN_FREQ_FILE}" ]; then
-  elog_quiet "pstate-frequency is not supported on your system."
-  exit 2
-fi
 
 # System related vars
 readonly SYSTEM_POWER_SUPPLY_DIR="/sys/class/power_supply"
@@ -1798,21 +1788,6 @@ readonly SYSTEM_SCALING_MIN_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_fre
 readonly SYSTEM_SCALING_GOVERNOR="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_governor"
 readonly SYSTEM_SCALING_DRIVER="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_driver"
 readonly SYSTEM_CPU_GOVERNORS="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_available_governors"
-
-SYSTEM_CPU_NUMBER=
-SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
-readonly SYSTEM_CPU_NUMBER
-
-SYSTEM_CPU_MAX_FREQ=
-SYSTEM_CPU_MAX_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq")"
-readonly SYSTEM_CPU_MAX_FREQ
-
-SYSTEM_CPU_MIN_FREQ=
-SYSTEM_CPU_MIN_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq")"
-readonly SYSTEM_CPU_MIN_FREQ
-
-readonly SYSTEM_CPU_MAX_VALUE=100
-readonly SYSTEM_CPU_MIN_VALUE=$((SYSTEM_CPU_MIN_FREQ * 100 / SYSTEM_CPU_MAX_FREQ))
 
 # intel_pstate related vars
 readonly SYSTEM_INTEL_PSTATE_DIR="${SYSTEM_CPU_DIR}/intel_pstate"
@@ -1826,6 +1801,43 @@ readonly SYSTEM_CPUFREQ_BOOST="${SYSTEM_CPU_DIR}/cpufreq/boost"
 # configuration directory for power plan configs
 readonly POWER_PLAN_CONFIG_DIR="/etc/pstate-frequency.d/"
 
-main "$@" || exit 1
+# Must run this before we attempt to read from system CPU directories
+#
+# Check that we can actually run, these CPU freq files must be present
+readonly CPUINFO_MAX_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq"
+readonly CPUINFO_MIN_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq"
+if [ ! -f "${CPUINFO_MAX_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MAX_FREQ_FILE}" ] ||
+  [ ! -f "${CPUINFO_MIN_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MIN_FREQ_FILE}" ]; then
+  elog_quiet "pstate-frequency is not supported on your system."
 
-# vim: set syntax=sh tabstop=2 softtabstop=2 shiftwidth=2 shiftround expandtab:
+  # Exit code 2 means system unsupported
+  exit 2
+fi
+
+# These variables are pulled from the currently running system and require coreutils
+#
+# Need cat for heredoc
+# Need grep for CPU number
+check_binary cat || exit 1
+check_binary grep || exit 1
+
+SYSTEM_CPU_NUMBER=
+SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
+readonly SYSTEM_CPU_NUMBER
+
+SYSTEM_CPU_MAX_FREQ=
+SYSTEM_CPU_MAX_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq")"
+readonly SYSTEM_CPU_MAX_FREQ
+
+SYSTEM_CPU_MIN_FREQ=
+SYSTEM_CPU_MIN_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq")"
+readonly SYSTEM_CPU_MIN_FREQ
+
+# Read the system to figure out the min frequency
+readonly SYSTEM_CPU_MAX_VALUE=100
+readonly SYSTEM_CPU_MIN_VALUE=$((SYSTEM_CPU_MIN_FREQ * 100 / SYSTEM_CPU_MAX_FREQ))
+
+# Exit 0 is success, exit 1 is some failure.
+main "$@" || exit 1
+exit 0
+
