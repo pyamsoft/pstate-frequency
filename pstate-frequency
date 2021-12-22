@@ -1098,6 +1098,7 @@ EOF
 ##
 # Get the realtime frequencies of the CPU by reading from the procinfo
 do_get_real_work() {
+  # CPUs in sysfs start at 0 and end at N-1
   for do_get_real_work__cpu in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     do_get_real_work__freq_khz="$(cat \
       "${SYSTEM_CPU_DIR}/cpu${do_get_real_work__cpu}/cpufreq/scaling_cur_freq")"
@@ -1117,7 +1118,7 @@ do_get_real_work() {
     else
       do_get_real_work__freq_spaces=" "
     fi
-    log "    pstate::CPU[%s]%s->%s %sMHz" "${do_get_real_work__cpu}" "${do_get_real_work__spaces}" "${do_get_real_work__freq_spaces}" \
+    log "    CPU[%s]%s->%s %sMHz" "${do_get_real_work__cpu}" "${do_get_real_work__spaces}" "${do_get_real_work__freq_spaces}" \
       "${do_get_real_work__freq_mhz}"
   done
 
