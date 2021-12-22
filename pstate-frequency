@@ -1500,9 +1500,6 @@ main() {
   execution_delay=0 # Whether or not to delay the script
 
   # Sanity check
-  check_binary grep || return 1
-  check_binary cat || return 1
-  check_binary cut || return 1
   check_binary id || return 1
   check_binary sleep || return 1
 
