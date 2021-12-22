@@ -148,7 +148,7 @@ install-systemd:
 	@$(MAKE) install-systemd-pstate-sleep
 
 install-systemd-pstate:
-	@echo "  INSTALL  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
+	@echo "  INSTALL (DEPRECATED)  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_INSTALL_TARGET))"
 	@install -Dm 644 "$(SYSTEMD_SERVICE_INSTALL_SRC)" "$(SYSTEMD_SERVICE_INSTALL_TARGET)"
 
