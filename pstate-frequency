@@ -337,10 +337,8 @@ set_max() {
 
       log_all "'%s' is all digits" "${set_max__value}"
 
-      log_verbose "Bound value '%s' between %s and %s" "${set_max__value}" "${set_max__fixed_min}" \
-        "${SYSTEM_CPU_MAX_VALUE}"
-      set_max__value="$(set_variable_bounds "${set_max__value}" "${set_max__fixed_min}" \
-        "${SYSTEM_CPU_MAX_VALUE}")"
+      log_verbose "Bound value '%s' between %s and %s" "${set_max__value}" "${set_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}"
+      set_max__value="$(set_variable_bounds "${set_max__value}" "${set_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}")"
 
       __exec_set_max_type="${SET_MAX_TRUE}"
       __exec_set_max_arg="${set_max__value}"
@@ -411,10 +409,8 @@ set_min() {
 
       log_all "'%s' is all digits" "${set_min__value}"
 
-      log_verbose "Bound value '%s' between %s and %s" "${set_min__value}" \
-        "${SYSTEM_CPU_MIN_VALUE}" "${set_min__fixed_max}"
-      set_min__value="$(set_variable_bounds "${set_min__value}" "${SYSTEM_CPU_MIN_VALUE}" \
-        "${set_min__fixed_max}")"
+      log_verbose "Bound value '%s' between %s and %s" "${set_min__value}" "${SYSTEM_CPU_MIN_VALUE}" "${set_min__fixed_max}"
+      set_min__value="$(set_variable_bounds "${set_min__value}" "${SYSTEM_CPU_MIN_VALUE}" "${set_min__fixed_max}")"
 
       __exec_set_min_type="${SET_MIN_TRUE}"
       __exec_set_min_arg="${set_min__value}"
@@ -621,8 +617,7 @@ set_power_plan() {
     # 01-powersave.plan
 
     # set_power_plan__input is the name of a plan
-    log_all "Search the config directory '%s' for power plan configrations" \
-      "${POWER_PLAN_CONFIG_DIR}"
+    log_all "Search the config directory '%s' for power plan configrations" "${POWER_PLAN_CONFIG_DIR}"
     # Locate config with given input
     set_power_plan__config=
     set_power_plan__config="$(locate_power_plan_config "${set_power_plan__input}")"
@@ -638,8 +633,7 @@ set_power_plan() {
     fi
 
     # Otherwise source the config and set a plan
-    execute_power_plan_config "${set_power_plan__mode}" "${set_power_plan__config}" \
-      "${set_power_plan__input}" || return 1
+    execute_power_plan_config "${set_power_plan__mode}" "${set_power_plan__config}" "${set_power_plan__input}" || return 1
   else
     elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
@@ -664,8 +658,7 @@ locate_power_plan_config() {
   for locate_power_plan_config__testconfig in "${POWER_PLAN_CONFIG_DIR}"/*.plan; do
 
     # Strip all the fancy stuff from the file name to just get the plan name
-    locate_power_plan_config__just_name="$(basename "${locate_power_plan_config__testconfig}" \
-      '.plan')"
+    locate_power_plan_config__just_name="$(basename "${locate_power_plan_config__testconfig}" '.plan')"
     locate_power_plan_config__name="$(printf -- '%s' "${locate_power_plan_config__just_name}" |
       tr '-' ' ' | awk '{ print $2 }')"
 
@@ -756,12 +749,15 @@ execute_power_plan_config() {
 
   if [ "${execute_power_plan_config__type}" = "MANUAL" ]; then
     set_power_plan_manual "${execute_power_plan_config__mode}" \
-      "${execute_power_plan_config__name}" "${execute_power_plan_config__cpu_max}" \
-      "${execute_power_plan_config__cpu_min}" "${execute_power_plan_config__cpu_turbo}" \
+      "${execute_power_plan_config__name}" \
+      "${execute_power_plan_config__cpu_max}" \
+      "${execute_power_plan_config__cpu_min}" \
+      "${execute_power_plan_config__cpu_turbo}" \
       "${execute_power_plan_config__cpu_gov}" || return 1
   else
     set_power_plan_automatic "${execute_power_plan_config__mode}" \
-      "${execute_power_plan_config__name}" "${execute_power_plan_config__auto_bat}" \
+      "${execute_power_plan_config__name}" \
+      "${execute_power_plan_config__auto_bat}" \
       "${execute_power_plan_config__auto_ac}" || return 1
   fi
 
@@ -807,19 +803,16 @@ set_power_plan_automatic() {
   log_verbose "Set power plan to: %s" "${set_power_plan_automatic__name}"
   set_power_plan_automatic__arg=
   if is_battery_powered; then
-    set_power_plan_automatic__config="$(locate_power_plan_config \
-      "${set_power_plan_automatic__bat}")"
+    set_power_plan_automatic__config="$(locate_power_plan_config "${set_power_plan_automatic__bat}")"
     set_power_plan_automatic__arg="${set_power_plan_automatic__bat}"
   else
-    set_power_plan_automatic__config="$(locate_power_plan_config \
-      "${set_power_plan_automatic__ac}")"
+    set_power_plan_automatic__config="$(locate_power_plan_config "${set_power_plan_automatic__ac}")"
     set_power_plan_automatic__arg="${set_power_plan_automatic__ac}"
   fi
 
   # Fail if we don't find a config
   if [ -z "${set_power_plan_automatic__config}" ]; then
-    elog_quiet "No power plan configuration found for auto config: %s" \
-      "${set_power_plan_automatic__arg}"
+    elog_quiet "No power plan configuration found for auto config: %s" "${set_power_plan_automatic__arg}"
     unset set_power_plan_automatic__name
     unset set_power_plan_automatic__bat
     unset set_power_plan_automatic__ac
@@ -830,7 +823,8 @@ set_power_plan_automatic() {
 
   # Execute the power plan config
   execute_power_plan_config "${set_power_plan_automatic__mode}" \
-    "${set_power_plan_automatic__config}" "${set_power_plan_automatic__arg}" || return 1
+    "${set_power_plan_automatic__config}" \
+    "${set_power_plan_automatic__arg}" || return 1
 
   unset set_power_plan_automatic__config
   unset set_power_plan_automatic__name
@@ -868,8 +862,7 @@ is_battery_powered() {
         log_verbose "Is Mains online? %s" "${is_battery_powered__online}"
 
         if ! is_digits "${is_battery_powered__online}"; then
-          elog_verbose "Online state was NaN, default to 1: %s" \
-            "${is_battery_powered__power_supply}"
+          elog_verbose "Online state was NaN, default to 1: %s" "${is_battery_powered__power_supply}"
           is_battery_powered__online=1
         fi
 
@@ -989,8 +982,7 @@ handle_long_option_argument() {
       ;;
     plan)
       log_verbose "Long option: plan"
-      set_power_plan "${handle_long_option_argument__mode}" \
-        "${handle_long_option_argument__input}" || return 1
+      set_power_plan "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
       ;;
     max)
       log_verbose "Long option: max"
@@ -1009,8 +1001,7 @@ handle_long_option_argument() {
       ;;
     governor)
       log_verbose "Long option: governor"
-      set_governor "${handle_long_option_argument__mode}" \
-        "${handle_long_option_argument__input}" || return 1
+      set_governor "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
       ;;
     *)
       elog_quiet "Invalid option --%s" "${handle_long_option_argument__opt}" || return 1
@@ -1079,9 +1070,12 @@ do_get_current() {
     CPU_MAX      -> %s%% [%sMHz]
 EOF
   )" "${do_get_current__cpu_driver}" "${do_get_current__cpu_governor}" \
-    "${do_get_current__cpu_turbo}" "${do_get_current__cpu_turbo_onoff}" \
-    "${do_get_current__cpu_min_value}" "${do_get_current__cpu_min_freq_mhz}" \
-    "${do_get_current__cpu_max_value}" "${do_get_current__cpu_max_freq_mhz}"
+    "${do_get_current__cpu_turbo}" \
+    "${do_get_current__cpu_turbo_onoff}" \
+    "${do_get_current__cpu_min_value}" \
+    "${do_get_current__cpu_min_freq_mhz}" \
+    "${do_get_current__cpu_max_value}" \
+    "${do_get_current__cpu_max_freq_mhz}"
 
   unset do_get_current__cpu_turbo_onoff
   unset do_get_current__cpu_max_freq_khz
@@ -1101,8 +1095,7 @@ EOF
 do_get_real_work() {
   # CPUs in sysfs start at 0 and end at N-1
   for do_get_real_work__cpu in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
-    do_get_real_work__freq_khz="$(cat \
-      "${SYSTEM_CPU_DIR}/cpu${do_get_real_work__cpu}/cpufreq/scaling_cur_freq")"
+    do_get_real_work__freq_khz="$(cat "${SYSTEM_CPU_DIR}/cpu${do_get_real_work__cpu}/cpufreq/scaling_cur_freq")"
     do_get_real_work__freq_mhz="$((do_get_real_work__freq_khz / 1000))"
 
     # There MUST be a better way to do this. If you have a >999 CPU core count, well then shucks.
@@ -1121,7 +1114,10 @@ do_get_real_work() {
     else
       do_get_real_work__freq_spaces=" "
     fi
-    log "    CPU[%s]%s->%s %sMHz" "${do_get_real_work__cpu}" "${do_get_real_work__spaces}" "${do_get_real_work__freq_spaces}" \
+    log "    CPU[%s]%s->%s %sMHz" \
+      "${do_get_real_work__cpu}" \
+      "${do_get_real_work__spaces}" \
+      "${do_get_real_work__freq_spaces}" \
       "${do_get_real_work__freq_mhz}"
   done
 
@@ -1204,8 +1200,7 @@ root_write_max() {
   root_write_max__max="$1"
 
   if has_intel_pstate_dir; then
-    log_verbose "Write max_value '%s' to intel_pstate file: %s" "${root_write_max__max}" \
-      "${SYSTEM_INTEL_PSTATE_MAX}"
+    log_verbose "Write max_value '%s' to intel_pstate file: %s" "${root_write_max__max}" "${SYSTEM_INTEL_PSTATE_MAX}"
     printf -- "%s" "${root_write_max__max}" >"${SYSTEM_INTEL_PSTATE_MAX}" || return 1
     log_all "Max value written to %s" "${SYSTEM_INTEL_PSTATE_MAX}"
   fi
@@ -1213,15 +1208,12 @@ root_write_max() {
   root_write_max__freq=$((root_write_max__max * SYSTEM_CPU_MAX_FREQ / 100))
 
   # Bound frequency between system min and max
-  log_all "Bound %s between %s and %s" "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" \
-    "${SYSTEM_CPU_MAX_FREQ}"
-  root_write_max__freq="$(set_variable_bounds "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" \
-    "${SYSTEM_CPU_MAX_FREQ}")"
+  log_all "Bound %s between %s and %s" "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}"
+  root_write_max__freq="$(set_variable_bounds "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}")"
 
   for root_write_max__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_max__target="${SYSTEM_CPU_DIR}/cpu${root_write_max__i}/cpufreq/scaling_max_freq"
-    log_verbose "Write freq: %sKHz to file: %s" "${root_write_max__freq}" \
-      "${root_write_max__target}"
+    log_verbose "Write freq: %sKHz to file: %s" "${root_write_max__freq}" "${root_write_max__target}"
     printf -- "%s" "${root_write_max__freq}" >"${root_write_max__target}" || return 1
     log_all "Max value written to %s" "${root_write_max__target}"
 
@@ -1243,8 +1235,7 @@ root_write_min() {
   root_write_min__min="$1"
 
   if has_intel_pstate_dir; then
-    log_verbose "Write min_value '%s' to intel_pstate file: %s" "${root_write_min__min}" \
-      "${SYSTEM_INTEL_PSTATE_MIN}"
+    log_verbose "Write min_value '%s' to intel_pstate file: %s" "${root_write_min__min}" "${SYSTEM_INTEL_PSTATE_MIN}"
     printf -- "%s" "${root_write_min__min}" >"${SYSTEM_INTEL_PSTATE_MIN}" || return 1
     log_all "Min value written to %s" "${SYSTEM_INTEL_PSTATE_MIN}"
   fi
@@ -1252,15 +1243,12 @@ root_write_min() {
   root_write_min__freq=$((root_write_min__min * SYSTEM_CPU_MAX_FREQ / 100))
 
   # Bound frequency between system min and max
-  log_all "Bound %s between %s and %s" "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" \
-    "${SYSTEM_CPU_MAX_FREQ}"
-  root_write_min__freq="$(set_variable_bounds "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" \
-    "${SYSTEM_CPU_MAX_FREQ}")"
+  log_all "Bound %s between %s and %s" "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}"
+  root_write_min__freq="$(set_variable_bounds "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}")"
 
   for root_write_min__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq"
-    log_verbose "Write freq: %sKHz to file: %s" "${root_write_min__freq}" \
-      "${root_write_min__target}"
+    log_verbose "Write freq: %sKHz to file: %s" "${root_write_min__freq}" "${root_write_min__target}"
     printf -- "%s" "${root_write_min__freq}" >"${root_write_min__target}" || return 1
     log_all "Min value written to %s" "${root_write_min__target}"
 
@@ -1292,8 +1280,7 @@ root_write_turbo() {
   fi
 
   if [ -w "${root_write_turbo__target}" ]; then
-    log_verbose "Write turbo_value '%s' to %s file: %s" "${root_write_turbo__turbo}" \
-      "${root_write_turbo__type}" "${root_write_turbo__target}"
+    log_verbose "Write turbo_value '%s' to %s file: %s" "${root_write_turbo__turbo}" "${root_write_turbo__type}" "${root_write_turbo__target}"
     printf -- "%s" "${root_write_turbo__turbo}" >"${root_write_turbo__target}" || return 1
     log_all "Turbo value written to %s" "${root_write_turbo__target}"
   else
@@ -1316,11 +1303,9 @@ root_write_governor() {
   log_verbose "Write cpu_governor '%s' to all CPUs" "${root_write_governor__gov}"
   for root_write_governor__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_governor__target="${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor"
-    log_verbose "Write governor: '%s' to file: %s" "${root_write_governor__gov}" \
-      "${root_write_governor__target}"
+    log_verbose "Write governor: '%s' to file: %s" "${root_write_governor__gov}" "${root_write_governor__target}"
     printf -- "%s" "${root_write_governor__gov}" >"${root_write_governor__target}" || return 1
-    log_all "Governor '%s' written to %s" "${root_write_governor__gov}" \
-      "${root_write_governor__target}"
+    log_all "Governor '%s' written to %s" "${root_write_governor__gov}" "${root_write_governor__target}"
 
     unset root_write_governor__target
     unset root_write_governor__i
