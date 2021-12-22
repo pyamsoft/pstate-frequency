@@ -231,7 +231,7 @@ uninstall-systemd:
 	@$(MAKE) uninstall-systemd-pstate-sleep
 
 uninstall-systemd-pstate:
-	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_INSTALL_TARGET)"
+	@echo "  UNINSTALL (DEPRECATED) $(SYSTEMD_SERVICE_INSTALL_TARGET)"
 	@rm -f "$(SYSTEMD_SERVICE_INSTALL_TARGET)"
 
 uninstall-systemd-pstate-at:
