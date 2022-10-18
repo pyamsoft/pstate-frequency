@@ -721,6 +721,8 @@ execute_power_plan_config() {
   execute_power_plan_config__cpu_gov=
   if has_intel_pstate_dir; then
     execute_power_plan_config__cpu_gov="${PLAN_CPU_PSTATE_GOVERNOR}"
+  elif has_amd_pstate_dir; then
+    execute_power_plan_config__cpu_gov="${PLAN_CPU_PSTATE_GOVERNOR}"
   else
     execute_power_plan_config__cpu_gov="${PLAN_CPU_CPUFREQ_GOVERNOR}"
   fi
@@ -1453,6 +1455,8 @@ do_set() {
 ##
 # Check that we have intel_pstate at the intel_pstate location
 #
+# https://www.kernel.org/doc/html/v6.0/admin-guide/pm/intel_pstate.html
+#
 # Returns true or false based on if intel_pstate directory exists
 has_intel_pstate_dir() {
   if [ -e "${SYSTEM_INTEL_PSTATE_DIR}" ] && [ -d "${SYSTEM_INTEL_PSTATE_DIR}" ]; then
@@ -1466,6 +1470,8 @@ has_intel_pstate_dir() {
 
 ##
 # Check that we have amd_pstate at the amd_pstate location
+#
+# https://www.kernel.org/doc/html/v6.0/admin-guide/pm/amd-pstate.html
 #
 # Returns true or false based on if amd_pstate directory exists
 has_amd_pstate_dir() {
