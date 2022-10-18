@@ -1450,6 +1450,12 @@ has_intel_pstate_dir() {
 ##
 # The main function of the script
 #
+# Supported CPU drivers
+# acpi-cpufreq
+# intel_pstate (on supported kernels)
+#
+# NOTE: amd_pstate is not a supported driver because the sysfs interface it exposes is readonly, so there is nothing we can do.
+#
 # $@ all command line args
 main() {
 
