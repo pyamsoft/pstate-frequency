@@ -213,6 +213,11 @@ option:
 
     (DEPRECATED)
     -t <0|1> | --turbo <0|1> | --turbo=<0|1>                        Modify current CPU turbo boost <number>
+
+system:
+    [set]
+    --delay                                                         Delay execution of "set" commands by 5 seconds
+            <Used to work around a boot issue where values are set too early and can be overwritten by another system component.>
 EOF
   )"
   return 0
