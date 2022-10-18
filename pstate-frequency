@@ -18,6 +18,10 @@
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+# pstate-frequency
+# by: pyamsoft <developer(dot)pyamsoft(at)gmail(dot)com>
+readonly __VERSION="3.13.0"
+
 ##
 # Normal log
 # Can be seen at
@@ -1691,10 +1695,6 @@ EOF
 # Export the LC as the default C so that we do not run into locale based quirks
 LC_ALL=C
 export LC_ALL
-
-# pstate-frequency
-# by: pyamsoft <developer(dot)pyamsoft(at)gmail(dot)com>
-readonly __VERSION="3.12.0"
 
 # Options that expect an argument
 
