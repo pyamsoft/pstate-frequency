@@ -460,18 +460,24 @@ set_turbo() {
     log_all "Check for special case arguments: on, off"
     if [ "${set_turbo__input}" = "on" ]; then
       if has_intel_pstate_dir; then
-        log_verbose "Argument was 'on' set to 0"
+        log_verbose "intel_pstate Argument was 'on' set to 0"
+        set_turbo__value="0"
+      elif has_amd_pstate_dir; then
+        log_verbose "intel_pstate Argument was 'on' set to 0"
         set_turbo__value="0"
       else
-        log_verbose "Argument was 'on' set to 1"
+        log_verbose "acpi-cpufreq Argument was 'on' set to 1"
         set_turbo__value="1"
       fi
     elif [ "${set_turbo__input}" = "off" ]; then
       if has_intel_pstate_dir; then
-        log_verbose "Argument was 'off' set to 1"
+        log_verbose "intel_pstate Argument was 'off' set to 1"
+        set_turbo__value="1"
+      elif has_amd_pstate_dir; then
+        log_verbose "amd_pstate Argument was 'off' set to 1"
         set_turbo__value="1"
       else
-        log_verbose "Argument was 'off' set to 0"
+        log_verbose "acpi-cpufreq Argument was 'off' set to 0"
         set_turbo__value="0"
       fi
     else
