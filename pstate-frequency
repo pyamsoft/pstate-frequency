@@ -1020,6 +1020,8 @@ do_get_current() {
 
   if has_intel_pstate_dir; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
+  elif has_amd_pstate_dir; then
+    do_get_current__cpu_turbo="$(cat "${SYSTEM_AMD_PSTATE_TURBO}")"
   elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
   else
@@ -1033,11 +1035,15 @@ do_get_current() {
   if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
     if has_intel_pstate_dir; then
       do_get_current__cpu_turbo_onoff="OFF"
+    elif has_amd_pstate_dir; then
+      do_get_current__cpu_turbo_onoff="OFF"
     else
       do_get_current__cpu_turbo_onoff="ON"
     fi
   else
     if has_intel_pstate_dir; then
+      do_get_current__cpu_turbo_onoff="ON"
+    elif has_amd_pstate_dir; then
       do_get_current__cpu_turbo_onoff="ON"
     else
       do_get_current__cpu_turbo_onoff="OFF"
@@ -1172,6 +1178,10 @@ root_write_max() {
     log_verbose "Write max_value '%s' to intel_pstate file: %s" "${root_write_max__max}" "${SYSTEM_INTEL_PSTATE_MAX}"
     printf -- "%s" "${root_write_max__max}" >"${SYSTEM_INTEL_PSTATE_MAX}" || return 1
     log_all "Max value written to %s" "${SYSTEM_INTEL_PSTATE_MAX}"
+  elif has_amd_pstate_dir; then
+    log_verbose "Write max_value '%s' to amd_pstate file: %s" "${root_write_max__max}" "${SYSTEM_AMD_PSTATE_MAX}"
+    printf -- "%s" "${root_write_max__max}" >"${SYSTEM_AMD_PSTATE_MAX}" || return 1
+    log_all "Max value written to %s" "${SYSTEM_AMD_PSTATE_MAX}"
   fi
 
   root_write_max__freq=$((root_write_max__max * SYSTEM_CPU_MAX_FREQ / 100))
@@ -1207,6 +1217,10 @@ root_write_min() {
     log_verbose "Write min_value '%s' to intel_pstate file: %s" "${root_write_min__min}" "${SYSTEM_INTEL_PSTATE_MIN}"
     printf -- "%s" "${root_write_min__min}" >"${SYSTEM_INTEL_PSTATE_MIN}" || return 1
     log_all "Min value written to %s" "${SYSTEM_INTEL_PSTATE_MIN}"
+  elif has_amd_pstate_dir; then
+    log_verbose "Write min_value '%s' to amd_pstate file: %s" "${root_write_min__min}" "${SYSTEM_AMD_PSTATE_MIN}"
+    printf -- "%s" "${root_write_min__min}" >"${SYSTEM_AMD_PSTATE_MIN}" || return 1
+    log_all "Min value written to %s" "${SYSTEM_AMD_PSTATE_MIN}"
   fi
 
   root_write_min__freq=$((root_write_min__min * SYSTEM_CPU_MAX_FREQ / 100))
