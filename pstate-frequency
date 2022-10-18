@@ -222,6 +222,18 @@ system:
     [set]
     --delay                                                         Delay execution of "set" commands by 5 seconds
             <Used to work around a boot issue where values are set too early and can be overwritten by another system component.>
+
+
+examples:
+
+    # pstate-frequency -S -m 80 -t off
+    Running as root, Set the Max frequency to 80% and the Turbo "off"
+
+    # pstate-frequency -S -n 50 -m +30 -t on
+    Running as root, Set the Min frequency to 50%, the Max frequency to the absolute Min + 30%, and the Turbo "on"
+
+    $ pstate-frequency -G -r
+    Running as a normal user, get the realtime CPU frequencies
 EOF
   )"
   return 0
