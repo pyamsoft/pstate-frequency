@@ -1455,6 +1455,7 @@ has_intel_pstate_dir() {
 # intel_pstate (on supported kernels)
 #
 # NOTE: amd_pstate is not a supported driver because the sysfs interface it exposes is readonly, so there is nothing we can do.
+#       https://www.kernel.org/doc/html/v6.0/admin-guide/pm/amd-pstate.html#user-space-interface-in-sysfs
 #
 # $@ all command line args
 main() {
