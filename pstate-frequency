@@ -209,7 +209,10 @@ option:
     -g <name>       | --governor <name>    | --governor=<name>      Set the cpufreq governor <name>
     -m [+]<number>  | --max [+]<number>    | --max=[+]<number>      Modify current CPU max frequency <number|offset>
     -n [+]<number>  | --min [+]<number>    | --min=[+]<number>      Modify current CPU min frequency <number|offset>
-    -t <on|off|0|1> | --turbo <on|off|0|1> | --turbo=<on|off|0|1>   Modify current CPU turbo boost <number|name>
+    -t <on|off> | --turbo <on|off> | --turbo=<on|off>               Modify current CPU turbo boost <"on"|"off">
+
+    (DEPRECATED)
+    -t <0|1> | --turbo <0|1> | --turbo=<0|1>                        Modify current CPU turbo boost <number>
 EOF
   )"
   return 0
@@ -467,7 +470,9 @@ set_turbo() {
         set_turbo__value="0"
       fi
     else
+      # DEPRECATED: In the future, this will be dropped in favor of only using 'on' or 'off'
       log_verbose "Parse raw argument" "${set_turbo__input}"
+      elog "Warning: Passing raw number values to --turbo is DEPRECATED: Please use 'on' or 'off'"
       set_turbo__value="${set_turbo__input}"
     fi
 
