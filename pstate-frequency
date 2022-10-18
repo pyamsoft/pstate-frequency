@@ -1329,6 +1329,9 @@ root_do_set() {
   if has_intel_pstate_dir; then
     log_all "Source existing CPU turbo from intel_pstate"
     root_do_set__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
+  elif has_amd_pstate_dir; then
+    log_all "Source existing CPU turbo from amd_pstate"
+    root_do_set__cpu_turbo="$(cat "${SYSTEM_AMD_PSTATE_TURBO}")"
   elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
     log_all "Source existing CPU turbo from acpi-cpufreq"
     root_do_set__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
