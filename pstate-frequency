@@ -1238,18 +1238,17 @@ root_write_min() {
 root_write_turbo() {
   root_write_turbo__turbo="$1"
 
-  root_write_turbo__type=""
   root_write_turbo__target=""
   if has_intel_pstate_dir; then
-    root_write_turbo__type="intel_pstate"
     root_write_turbo__target="${SYSTEM_INTEL_PSTATE_TURBO}"
+  elif has_amd_pstate_dir; then
+    root_write_turbo__target="${SYSTEM_AMD_PSTATE_TURBO}"
   else
-    root_write_turbo__type="acpi-cpufreq"
     root_write_turbo__target="${SYSTEM_CPUFREQ_BOOST}"
   fi
 
   if [ -w "${root_write_turbo__target}" ]; then
-    log_verbose "Write turbo_value '%s' to %s file: %s" "${root_write_turbo__turbo}" "${root_write_turbo__type}" "${root_write_turbo__target}"
+    log_verbose "Write turbo_value '%s' to file: %s" "${root_write_turbo__turbo}" "${root_write_turbo__target}"
     printf -- "%s" "${root_write_turbo__turbo}" >"${root_write_turbo__target}" || return 1
     log_all "Turbo value written to %s" "${root_write_turbo__target}"
   else
@@ -1257,7 +1256,6 @@ root_write_turbo() {
   fi
 
   unset root_write_turbo__turbo
-  unset root_write_turbo__type
   unset root_write_turbo__target
   return 0
 }
