@@ -1450,6 +1450,25 @@ has_intel_pstate_dir() {
 }
 
 ##
+# Check that we have amd_pstate at the amd_pstate location
+#
+# Returns true or false based on if amd_pstate directory exists
+has_amd_pstate_dir() {
+  # Feature flagged off
+  if [ "${_IS_AMD_PSTATE_ENABLED}" -eq 0 ]; then
+    return 1
+  fi
+
+  if [ -e "${SYSTEM_AMD_PSTATE_DIR}" ] && [ -d "${SYSTEM_AMD_PSTATE_DIR}" ]; then
+    # Return 0 means true
+    return 0
+  else
+    # Return non-0 means false
+    return 1
+  fi
+}
+
+##
 # The main function of the script
 #
 # $@ all command line args
@@ -1740,6 +1759,13 @@ readonly SYSTEM_INTEL_PSTATE_DIR="${SYSTEM_CPU_DIR}/intel_pstate"
 readonly SYSTEM_INTEL_PSTATE_MAX="${SYSTEM_INTEL_PSTATE_DIR}/max_perf_pct"
 readonly SYSTEM_INTEL_PSTATE_MIN="${SYSTEM_INTEL_PSTATE_DIR}/min_perf_pct"
 readonly SYSTEM_INTEL_PSTATE_TURBO="${SYSTEM_INTEL_PSTATE_DIR}/no_turbo"
+
+# amd_pstate related vars
+readonly _IS_AMD_PSTATE_ENABLED=0
+readonly SYSTEM_AMD_PSTATE_DIR="${SYSTEM_CPU_DIR}/amd_pstate"
+readonly SYSTEM_AMD_PSTATE_MAX="${SYSTEM_AMD_PSTATE_DIR}/max_perf_pct"
+readonly SYSTEM_AMD_PSTATE_MIN="${SYSTEM_AMD_PSTATE_DIR}/min_perf_pct"
+readonly SYSTEM_AMD_PSTATE_TURBO="${SYSTEM_AMD_PSTATE_DIR}/no_turbo"
 
 # acpi-cpufreq related vars
 readonly SYSTEM_CPUFREQ_BOOST="${SYSTEM_CPU_DIR}/cpufreq/boost"
