@@ -19,24 +19,6 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 ##
-# Move cursor lines upwards and set to beginning of line
-# $1 lines upwards
-#
-# DEPRECATED
-move_cursor_upwards() {
-  move_cursor_upwards__lines="$1"
-  if [ -z "${move_cursor_upwards__lines}" ] || [ "${move_cursor_upwards__lines}" -le 0 ]; then
-    return 1
-  fi
-
-  # shellcheck disable=SC2059
-  printf -- "\033[${move_cursor_upwards__lines}A\r"
-
-  unset move_cursor_upwards__lines
-  return 0
-}
-
-##
 # Normal log
 # Can be seen at
 # __log_level = normal, verbose, all
@@ -221,10 +203,6 @@ option:
     [get]
     -c | --current                  Display the current user set CPU values
     -r | --real                     Display the real time CPU frequencies
-
-    (DEPRECATED)
-    --loop <time> | --loop=<time>   Continually query real time CPU frequencies with a delay of <time> between loops.
-                                    <time> is passed to sleep(1)
 
     [set]
     -p <name>       | --plan <name>        | --plan=<name>          Set a predefined power plan <name>
@@ -976,10 +954,6 @@ handle_long_option_argument() {
     log_verbose "argument: %s" "${handle_long_option_argument__input}"
 
     case "${handle_long_option_argument__opt}" in
-    loop)
-      log_verbose "Long option: loop"
-      __exec_get_loop_delay="${handle_long_option_argument__input}"
-      ;;
     plan)
       log_verbose "Long option: plan"
       set_power_plan "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
@@ -1120,21 +1094,6 @@ do_get_real_work() {
       "${do_get_real_work__freq_spaces}" \
       "${do_get_real_work__freq_mhz}"
   done
-
-  # THIS IS DEPRECATED AND SHOULD BE REMOVED IN THE NEXT VERSION BUMP
-  # If you want to loop pstate-frequency results, use `watch -n 5 pstate-frequency -Gr`
-  if [ -n "${__exec_get_loop_delay}" ]; then
-    while :; do
-      # Wait for a little bit
-      sleep "${__exec_get_loop_delay}" >/dev/null 2>&1 || sleep 1s || return 1
-
-      # Put cursor back on top
-      move_cursor_upwards "${SYSTEM_CPU_NUMBER}" || return 1
-
-      # Move the cursor back to the top of the printout, which is SYSTEM_CPU_NUMBER lines long
-      do_get_real_work || return 1
-    done
-  fi
 
   unset do_get_real__current_freq_khz
   unset do_get_real__current_freq_mhz
@@ -1580,10 +1539,6 @@ main() {
           delay)
             execution_delay=1
             ;;
-          loop)
-            elog "Warning: The long option --loop is deprecated and will be removed in the next version."
-            long_option="loop"
-            ;;
           *)
             # We must provide our own error message in this case
             elog_quiet "Illegal option --%s" "${OPTARG}"
@@ -1735,9 +1690,6 @@ readonly LOG_LEVEL_NORMAL=2
 readonly LOG_LEVEL_VERBOSE=3
 readonly LOG_LEVEL_ALL=4
 __log_level="${LOG_LEVEL_NORMAL}"
-
-# Get commands
-__exec_get_loop_delay=""
 
 # Set commands
 readonly SET_MAX_FALSE=0
