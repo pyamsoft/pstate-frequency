@@ -26,6 +26,12 @@ license=('GPL2')
 # shellcheck disable=SC2034
 url="https://github.com/pyamsoft/pstate-frequency"
 # shellcheck disable=SC2034
+backup=('etc/pstate-frequency.d/00-auto.plan'
+        'etc/pstate-frequency.d/01-powersave.plan'
+        'etc/pstate-frequency.d/02-balanced.plan'
+        'etc/pstate-frequency.d/03-performance.plan'
+        'etc/pstate-frequency.d/04-max.plan')
+# shellcheck disable=SC2034
 source=(
         "${url}/archive/${pkgver}.zip"
         "00-fix-prefix.patch")
