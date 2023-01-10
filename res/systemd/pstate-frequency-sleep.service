@@ -18,12 +18,11 @@
 
 [Unit]
 Description=Run pstate-frequency on system resume
-After=suspend.target
+After=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 
 [Service]
 Type=simple
 ExecStart=/bin/sh -c "pstate-frequency -S -p auto"
 
 [Install]
-WantedBy=suspend.target
-
+WantedBy=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
