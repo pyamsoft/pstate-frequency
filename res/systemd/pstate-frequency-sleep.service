@@ -17,16 +17,13 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 [Unit]
-Description=Run pstate-frequency on sleep/resume
-Before=sleep.target
-StopWhenUnneeded=yes
+Description=Run pstate-frequency on system resume
+After=suspend.target
 
 [Service]
 Type=simple
-RemainAfterExit=yes
-ExecStart=/bin/true
-ExecStop=/bin/sh -c "pstate-frequency -S -p auto"
+ExecStart=/bin/sh -c "pstate-frequency -S -p auto"
 
 [Install]
-WantedBy=sleep.target
+WantedBy=suspend.target
 
