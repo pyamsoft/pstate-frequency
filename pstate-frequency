@@ -1768,8 +1768,8 @@ readonly POWER_PLAN_CONFIG_DIR="/etc/pstate-frequency.d/"
 # Must run this before we attempt to read from system CPU directories
 #
 # Check that we can actually run, these CPU freq files must be present
-readonly CPUINFO_MAX_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq"
-readonly CPUINFO_MIN_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq"
+readonly CPUINFO_MAX_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_max_freq"
+readonly CPUINFO_MIN_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_freq"
 if [ ! -f "${CPUINFO_MAX_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MAX_FREQ_FILE}" ] ||
   [ ! -f "${CPUINFO_MIN_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MIN_FREQ_FILE}" ]; then
   elog_quiet "pstate-frequency is not supported on your system."
@@ -1790,11 +1790,11 @@ SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
 readonly SYSTEM_CPU_NUMBER
 
 SYSTEM_CPU_MAX_FREQ=
-SYSTEM_CPU_MAX_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq")"
+SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
 readonly SYSTEM_CPU_MAX_FREQ
 
 SYSTEM_CPU_MIN_FREQ=
-SYSTEM_CPU_MIN_FREQ="$(cat "${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq")"
+SYSTEM_CPU_MIN_FREQ="$(cat "${CPUINFO_MIN_FREQ_FILE}")"
 readonly SYSTEM_CPU_MIN_FREQ
 
 # Read the system to figure out the min frequency
