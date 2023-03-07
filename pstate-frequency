@@ -480,7 +480,7 @@ set_turbo() {
         log_verbose "intel_pstate Argument was 'on' set to 0"
         set_turbo__value="0"
       else
-        log_verbose "acpi-cpufreq Argument was 'on' set to 1"
+        log_verbose "acpi-cpufreq|amd_pstate Argument was 'on' set to 1"
         set_turbo__value="1"
       fi
     elif [ "${set_turbo__input}" = "off" ]; then
@@ -488,7 +488,7 @@ set_turbo() {
         log_verbose "intel_pstate Argument was 'off' set to 1"
         set_turbo__value="1"
       else
-        log_verbose "acpi-cpufreq Argument was 'off' set to 0"
+        log_verbose "acpi-cpufreq|amd_pstate Argument was 'off' set to 0"
         set_turbo__value="0"
       fi
     else
@@ -1252,7 +1252,7 @@ root_write_min() {
 
 ##
 # Write the given turbo value to the system file for pstate if it exists, or
-# as the acpi-cpufreq boost if it exists
+# as the acpi-cpufreq|amd_pstate boost if it exists
 #
 # $1 turbo value
 root_write_turbo() {
@@ -1340,7 +1340,7 @@ root_do_set() {
     log_all "Source existing CPU turbo from intel_pstate"
     root_do_set__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
   elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
-    log_all "Source existing CPU turbo from acpi-cpufreq"
+    log_all "Source existing CPU turbo from acpi-cpufreq|amd_pstate"
     root_do_set__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
   else
     log_all "No existing CPU turbo found, set 0 for no-op"
@@ -1472,9 +1472,10 @@ has_intel_pstate_dir() {
 #
 # Supported CPU drivers
 # acpi-cpufreq
+# amd_pstate (on supported kernels)
 # intel_pstate (on supported kernels)
 #
-# NOTE: amd_pstate is not a supported driver because the sysfs interface it exposes is readonly, so there is nothing we can do.
+# NOTE: amd_pstate is not a write driver because the sysfs interface it exposes is readonly, so there is nothing we can do.
 #       https://www.kernel.org/doc/html/v6.0/admin-guide/pm/amd-pstate.html#user-space-interface-in-sysfs
 #
 # $@ all command line args
@@ -1762,7 +1763,7 @@ readonly SYSTEM_INTEL_PSTATE_MAX="${SYSTEM_INTEL_PSTATE_DIR}/max_perf_pct"
 readonly SYSTEM_INTEL_PSTATE_MIN="${SYSTEM_INTEL_PSTATE_DIR}/min_perf_pct"
 readonly SYSTEM_INTEL_PSTATE_TURBO="${SYSTEM_INTEL_PSTATE_DIR}/no_turbo"
 
-# acpi-cpufreq related vars
+# acpi-cpufreq|amd_pstate related vars
 readonly SYSTEM_CPUFREQ_BOOST="${SYSTEM_CPU_DIR}/cpufreq/boost"
 
 # configuration directory for power plan configs
