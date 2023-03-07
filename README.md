@@ -8,7 +8,8 @@ minimum and maximum scaling frequencies and the state of turbo boost.
 ### Requirements
 
 - The intel_pstate (included in kernel 3.9 and upwards) OR
-  the acpi-cpufreq driver.  
+  the amd_pstate driver in "passive" mode (included in kernel 5.17) OR
+  the acpi-cpufreq driver (you have this).  
   Other CPU scaling drivers are not supported and so the behavior of
   the pstate-frequency script when running with an unsupported CPU driver is undefined.
 
@@ -120,7 +121,7 @@ takes various flags as required arguments:
     passed directly to the CPU driver turbo file, while `on` and `off`
     interpreted in the context of the current CPU driver.
     `intel_pstate` backend treats `1` as OFF and `0` as ON,
-    while `acpi_cpufreq` uses the reverse.
+    while `acpi-cpufreq` and `amd_pstate` uses the reverse.
 - **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.  
     Must be specified as a plan name inside of `/etc/pstate-frequency.d/`
 
@@ -247,7 +248,7 @@ With the intel_pstate driver:
 - /sys/devices/system/cpu/intel_pstate/min_perf_pct
 - /sys/devices/system/cpu/intel_pstate/no_turbo
 
-With acpi_cpufreq:
+With acpi-cpufreq OR amd_pstate:
 
 - /sys/devices/system/cpu/cpufreq/boost
 
