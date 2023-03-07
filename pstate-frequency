@@ -1334,13 +1334,7 @@ root_do_set() {
   # Apply the governor first
   root_write_governor "${root_do_set__setting_cpu_governor}"
 
-  # Current variables
-  root_do_set__cpu_max_freq="$(cat "${SYSTEM_SCALING_MAX_FREQ}")"
-  root_do_set__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}")"
-  root_do_set__cpu_max_value=$((root_do_set__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ))
-  root_do_set__cpu_min_value=$((root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
-  root_do_set__cpu_turbo=
-
+  # Then apply turbo
   log_all "Source existing CPU turbo"
   if has_intel_pstate_dir; then
     log_all "Source existing CPU turbo from intel_pstate"
@@ -1352,17 +1346,34 @@ root_do_set() {
     log_all "No existing CPU turbo found, set 0 for no-op"
     root_do_set__cpu_turbo=0
   fi
+  readonly root_do_set__cpu_turbo
+
+  log_all "Check if we are setting turbo"
+  if [ "${__exec_set_turbo_type}" -eq 1 ]; then
+    log_all "Set turbo to arg"
+    root_do_set__setting_cpu_turbo="${__exec_set_turbo_arg}"
+  else
+    log_all "Set turbo to current system"
+    root_do_set__setting_cpu_turbo="${root_do_set__cpu_turbo}"
+  fi
+
+  # Set the turbo first, as it may change the values of the cpuinfo_max or cpuinfo_min frequencies
+  log_verbose "ROOT: setting_cpu_turbo: ${root_do_set__setting_cpu_turbo}"
+  root_write_turbo "${root_do_set__setting_cpu_turbo}"
+
+  # Re-read the system cpuinfo files in case turbo changes these
+  SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
+
+  # Current variables
+  root_do_set__cpu_max_freq="$(cat "${SYSTEM_SCALING_MAX_FREQ}")"
+  root_do_set__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}")"
+  root_do_set__cpu_max_value=$((root_do_set__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ))
+  root_do_set__cpu_min_value=$((root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
 
   readonly root_do_set__cpu_max_freq
   readonly root_do_set__cpu_min_freq
   readonly root_do_set__cpu_max_value
   readonly root_do_set__cpu_min_value
-  readonly root_do_set__cpu_turbo
-
-  # Active variables
-  root_do_set__setting_cpu_max=
-  root_do_set__setting_cpu_min=
-  root_do_set__setting_cpu_turbo=
 
   log_all "Check if we are setting max"
   if [ "${__exec_set_max_type}" -eq 1 ]; then
@@ -1382,15 +1393,6 @@ root_do_set() {
     root_do_set__setting_cpu_min="${root_do_set__cpu_min_value}"
   fi
 
-  log_all "Check if we are setting turbo"
-  if [ "${__exec_set_turbo_type}" -eq 1 ]; then
-    log_all "Set turbo to arg"
-    root_do_set__setting_cpu_turbo="${__exec_set_turbo_arg}"
-  else
-    log_all "Set turbo to current system"
-    root_do_set__setting_cpu_turbo="${root_do_set__cpu_turbo}"
-  fi
-
   log_all "Check that min is not >= max"
   if [ "${root_do_set__setting_cpu_min}" -ge "${root_do_set__setting_cpu_max}" ]; then
     log_all "set min to just below max"
@@ -1405,7 +1407,6 @@ root_do_set() {
 
   log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
   log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
-  log_verbose "ROOT: setting_cpu_turbo: ${root_do_set__setting_cpu_turbo}"
 
   # Set max first if it is greater than the current CPU min
   if [ "${root_do_set__setting_cpu_max}" -gt "${root_do_set__cpu_min_value}" ]; then
@@ -1415,7 +1416,6 @@ root_do_set() {
     root_write_min "${root_do_set__setting_cpu_min}"
     root_write_max "${root_do_set__setting_cpu_max}"
   fi
-  root_write_turbo "${root_do_set__setting_cpu_turbo}"
 
   unset root_do_set__setting_cpu_max
   unset root_do_set__setting_cpu_min
@@ -1794,7 +1794,6 @@ readonly SYSTEM_CPU_NUMBER
 
 SYSTEM_CPU_MAX_FREQ=
 SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
-readonly SYSTEM_CPU_MAX_FREQ
 
 SYSTEM_CPU_MIN_FREQ=
 SYSTEM_CPU_MIN_FREQ="$(cat "${CPUINFO_MIN_FREQ_FILE}")"
