@@ -1025,6 +1025,9 @@ handle_long_option_argument() {
 # Get the current state of the CPU from the pstate and scaling driver
 #
 do_get_current() {
+  # Re-read the system cpuinfo files in case turbo changes these
+  SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
+
   do_get_current__cpu_max_freq_khz="$(cat "${SYSTEM_SCALING_MAX_FREQ}")"
   do_get_current__cpu_max_freq_mhz="$((do_get_current__cpu_max_freq_khz / 1000))"
 
