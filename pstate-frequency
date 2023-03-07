@@ -20,7 +20,7 @@
 
 # pstate-frequency
 # by: pyamsoft <developer(dot)pyamsoft(at)gmail(dot)com>
-readonly __VERSION="3.13.3"
+readonly __VERSION="3.13.4"
 
 ##
 # Normal log
@@ -125,19 +125,6 @@ elog_verbose() {
   elog__fmt="$1"
   shift
   log_verbose "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
-  unset elog__fmt
-}
-
-##
-# All error logging
-elog_all() {
-  if [ "$#" -eq 0 ]; then
-    return 1
-  fi
-
-  elog__fmt="$1"
-  shift
-  log_all "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -1316,105 +1303,102 @@ root_do_set() {
   # is higher than the requested max. In this case, min will be set first, as
   # the logic above should guarantee that it is lower than the max
 
-  root_do_set__cpu_governor="$(cat "${SYSTEM_SCALING_GOVERNOR}")"
-  readonly root_do_set__cpu_governor
-
   root_do_set__setting_cpu_governor=
   log_all "Check if we are setting governor"
   if [ "${__exec_set_governor_type}" -eq 1 ]; then
     log_all "Set governor to arg"
     root_do_set__setting_cpu_governor="${__exec_set_governor_arg}"
-  else
-    log_all "Set governor to current system"
-    root_do_set__setting_cpu_governor="${root_do_set__cpu_governor}"
   fi
 
-  log_verbose "ROOT: setting_cpu_governor: ${root_do_set__setting_cpu_governor}"
+  # If this is set from changing governor or turbo, we must re-read cpuinfo_ files
+  root_do_set__reread_cpu=0
 
   # Apply the governor first
-  root_write_governor "${root_do_set__setting_cpu_governor}"
+  if [ -n "${root_do_set__setting_cpu_governor}" ]; then
+    log_verbose "ROOT: setting_cpu_governor: ${root_do_set__setting_cpu_governor}"
+    root_write_governor "${root_do_set__setting_cpu_governor}"
+
+    # Flag for re-reading
+    root_do_set__reread_cpu=1
+  fi
 
   # Then apply turbo
-  log_all "Source existing CPU turbo"
-  if has_intel_pstate_dir; then
-    log_all "Source existing CPU turbo from intel_pstate"
-    root_do_set__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
-  elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
-    log_all "Source existing CPU turbo from acpi-cpufreq|amd_pstate"
-    root_do_set__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
-  else
-    log_all "No existing CPU turbo found, set 0 for no-op"
-    root_do_set__cpu_turbo=0
-  fi
-  readonly root_do_set__cpu_turbo
-
   log_all "Check if we are setting turbo"
   if [ "${__exec_set_turbo_type}" -eq 1 ]; then
     log_all "Set turbo to arg"
     root_do_set__setting_cpu_turbo="${__exec_set_turbo_arg}"
-  else
-    log_all "Set turbo to current system"
-    root_do_set__setting_cpu_turbo="${root_do_set__cpu_turbo}"
   fi
 
   # Set the turbo first, as it may change the values of the cpuinfo_max or cpuinfo_min frequencies
-  log_verbose "ROOT: setting_cpu_turbo: ${root_do_set__setting_cpu_turbo}"
-  root_write_turbo "${root_do_set__setting_cpu_turbo}"
+  if [ -n "${root_do_set__setting_cpu_turbo}" ]; then
+    log_verbose "ROOT: setting_cpu_turbo: ${root_do_set__setting_cpu_turbo}"
+    root_write_turbo "${root_do_set__setting_cpu_turbo}"
 
-  # Re-read the system cpuinfo files in case turbo changes these
-  SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
+    # Flag for re-reading
+    root_do_set__reread_cpu=1
+  fi
 
-  # Current variables
-  root_do_set__cpu_max_freq="$(cat "${SYSTEM_SCALING_MAX_FREQ}")"
-  root_do_set__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}")"
-  root_do_set__cpu_max_value=$((root_do_set__cpu_max_freq * 100 / SYSTEM_CPU_MAX_FREQ))
-  root_do_set__cpu_min_value=$((root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
-
-  readonly root_do_set__cpu_max_freq
-  readonly root_do_set__cpu_min_freq
-  readonly root_do_set__cpu_max_value
-  readonly root_do_set__cpu_min_value
+  if [ "${root_do_set__reread_cpu}" -eq 1 ]; then
+    log_verbose "Re-read system cpuinfo_ since turbo/governor may have changed frequency range."
+    # Re-read the system cpuinfo files in case turbo changes these
+    SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
+  fi
 
   log_all "Check if we are setting max"
   if [ "${__exec_set_max_type}" -eq 1 ]; then
     log_all "Set max to arg"
     root_do_set__setting_cpu_max="${__exec_set_max_arg}"
-  else
-    log_all "Set max to current system"
-    root_do_set__setting_cpu_max="${root_do_set__cpu_max_value}"
   fi
 
   log_all "Check if we are setting min"
   if [ "${__exec_set_min_type}" -eq 1 ]; then
     log_all "Set min to arg"
     root_do_set__setting_cpu_min="${__exec_set_min_arg}"
-  else
-    log_all "Set min to current system"
-    root_do_set__setting_cpu_min="${root_do_set__cpu_min_value}"
   fi
 
-  log_all "Check that min is not >= max"
-  if [ "${root_do_set__setting_cpu_min}" -ge "${root_do_set__setting_cpu_max}" ]; then
-    log_all "set min to just below max"
-    root_do_set__setting_cpu_min="$((root_do_set__setting_cpu_max - 1))"
+  if [ -n "${root_do_set__setting_cpu_max}" ]; then
+    log_all "Check that min is not >= max"
+    if [ -n "${root_do_set__setting_cpu_min}" ]; then
+      if [ "${root_do_set__setting_cpu_min}" -ge "${root_do_set__setting_cpu_max}" ]; then
+        log_all "set min to just below max"
+        root_do_set__setting_cpu_min="$((root_do_set__setting_cpu_max - 1))"
+      fi
+    fi
   fi
 
-  log_all "Check that max is not <= min"
-  if [ "${root_do_set__setting_cpu_max}" -le "${root_do_set__setting_cpu_min}" ]; then
-    log_all "set max to just above min"
-    root_do_set__setting_cpu_max="$((root_do_set__setting_cpu_min + 1))"
-  fi
+  if [ -n "${root_do_set__setting_cpu_max}" ] && [ -n "${root_do_set__setting_cpu_min}" ]; then
+    log_all "Check that max is not <= min"
+    if [ "${root_do_set__setting_cpu_max}" -le "${root_do_set__setting_cpu_min}" ]; then
+      log_all "set max to just above min"
+      root_do_set__setting_cpu_max="$((root_do_set__setting_cpu_min + 1))"
+    fi
 
-  log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
-  log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
+    # Current variables
+    root_do_set__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}")"
+    root_do_set__cpu_min_value=$((root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
+    readonly root_do_set__cpu_min_freq
+    readonly root_do_set__cpu_min_value
 
-  # Set max first if it is greater than the current CPU min
-  if [ "${root_do_set__setting_cpu_max}" -gt "${root_do_set__cpu_min_value}" ]; then
+    # Set max first if it is greater than the current CPU min
+    if [ "${root_do_set__setting_cpu_max}" -gt "${root_do_set__cpu_min_value}" ]; then
+      log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
+      root_write_max "${root_do_set__setting_cpu_max}"
+
+      log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
+      root_write_min "${root_do_set__setting_cpu_min}"
+    else
+      log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
+      root_write_min "${root_do_set__setting_cpu_min}"
+
+      log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
+      root_write_max "${root_do_set__setting_cpu_max}"
+    fi
+  elif [ -n "${root_do_set__setting_cpu_max}" ]; then
+    log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
     root_write_max "${root_do_set__setting_cpu_max}"
+  elif [ -n "${root_do_set__setting_cpu_min}" ]; then
+    log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
     root_write_min "${root_do_set__setting_cpu_min}"
-  else
-    root_write_min "${root_do_set__setting_cpu_min}"
-    root_write_max "${root_do_set__setting_cpu_max}"
   fi
 
   unset root_do_set__setting_cpu_max
