@@ -1768,8 +1768,8 @@ readonly POWER_PLAN_CONFIG_DIR="/etc/pstate-frequency.d/"
 # Must run this before we attempt to read from system CPU directories
 #
 # Check that we can actually run, these CPU freq files must be present
-readonly CPUINFO_MAX_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_max_freq"
-readonly CPUINFO_MIN_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_freq"
+readonly CPUINFO_MAX_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_max_freq"
+readonly CPUINFO_MIN_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq"
 if [ ! -f "${CPUINFO_MAX_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MAX_FREQ_FILE}" ] ||
   [ ! -f "${CPUINFO_MIN_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MIN_FREQ_FILE}" ]; then
   elog_quiet "pstate-frequency is not supported on your system."
