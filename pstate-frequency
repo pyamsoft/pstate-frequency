@@ -20,7 +20,7 @@
 
 # pstate-frequency
 # by: pyamsoft <developer(dot)pyamsoft(at)gmail(dot)com>
-readonly __VERSION="3.13.0"
+readonly __VERSION="3.13.1"
 
 ##
 # Normal log
