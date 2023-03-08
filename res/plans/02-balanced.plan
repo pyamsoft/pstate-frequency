@@ -21,7 +21,4 @@ PLAN_CPU_MAX=100
 PLAN_CPU_MIN=0
 PLAN_CPU_PSTATE_GOVERNOR=powersave
 PLAN_CPU_CPUFREQ_GOVERNOR=schedutil,ondemand
-
-# Note that using a number value for turbo may change the meaning when
-# using intel_pstate as compared to acpi-cpufreq
 PLAN_CPU_TURBO=on

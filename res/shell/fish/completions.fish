@@ -1,7 +1,7 @@
 # fish completions for pstate-frequency
 
 
-set -l noopt "not __fish_contains_opt -s G -s S -s c -s r -s p -s g -s m -s n -s t get set loop plan governor max min turbo"
+set -l noopt "not __fish_contains_opt -s G -s S -s c -s r -s p -s g -s m -s n -s t get set plan governor max min turbo"
 
 # Disable file completions
 complete -f -c pstate-frequency
@@ -14,7 +14,6 @@ set -l get_layer "__fish_contains_opt -s G get"
 complete -f -c pstate-frequency -n "$noopt" -s G -l "get" -d "Access current CPU values"
 complete -f -c pstate-frequency -n "$get_layer" -s c -l current -d "Display the current user set CPU values"
 complete -f -c pstate-frequency -n "$get_layer" -s r -l real -d "Display the real time CPU frequences"
-complete -f -c pstate-frequency -n "$get_layer" -l loop -r -d "Continually query real time CPU frequencies with a delay of <time> between loops."
 
 # [set] options
 set -l set_layer "__fish_contains_opt -s S set"
