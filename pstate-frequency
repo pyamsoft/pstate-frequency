@@ -1548,28 +1548,63 @@ main() {
           ;;
         p)
           main__opt_plan=1
-          main__opt_plan_arg="${OPTARG}"
-          log_all "Attempt to set --plan:${main__opt_plan_arg}"
+
+          # -p expects an argument
+          if [ -n "${OPTARG}" ]; then
+            main__opt_plan_arg="${OPTARG}"
+            log_all "Attempt to set -p:${main__opt_plan_arg}"
+          else
+            elog_quiet "Short option -p expects argument"
+            return 1
+          fi
           ;;
         m)
           main__opt_max=1
-          main__opt_max_arg="${OPTARG}"
-          log_all "Attempt to set --max:${main__opt_max_arg}"
+
+          # -m expects an argument
+          if [ -n "${OPTARG}" ]; then
+            main__opt_max_arg="${OPTARG}"
+            log_all "Attempt to set -m:${main__opt_max_arg}"
+          else
+            elog_quiet "Short option -m expects argument"
+            return 1
+          fi
           ;;
         n)
           main__opt_min=1
-          main__opt_min_arg="${OPTARG}"
-          log_all "Attempt to set --min:${main__opt_min_arg}"
+
+          # -n expects an argument
+          if [ -n "${OPTARG}" ]; then
+            main__opt_min_arg="${OPTARG}"
+            log_all "Attempt to set -n:${main__opt_min_arg}"
+          else
+            elog_quiet "Short option -n expects argument"
+            return 1
+          fi
           ;;
         t)
           main__opt_turbo=1
-          main__opt_turbo_arg="${OPTARG}"
-          log_all "Attempt to set --turbo:${main__opt_turbo_arg}"
+
+          # -t expects an argument
+          if [ -n "${OPTARG}" ]; then
+            main__opt_turbo_arg="${OPTARG}"
+            log_all "Attempt to set -t:${main__opt_turbo_arg}"
+          else
+            elog_quiet "Short option -t expects argument"
+            return 1
+          fi
           ;;
         g)
           main__opt_governor=1
-          main__opt_governor_arg="${OPTARG}"
-          log_all "Attempt to set --governor:${main__opt_governor_arg}"
+
+          # -g expects an argument
+          if [ -n "${OPTARG}" ]; then
+            main__opt_governor_arg="${OPTARG}"
+            log_all "Attempt to set -g:${main__opt_governor_arg}"
+          else
+            elog_quiet "Short option -g expects argument"
+            return 1
+          fi
           ;;
         c)
           log_all "Set exec_get_type to current"
