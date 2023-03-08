@@ -1119,8 +1119,8 @@ root_write_min() {
 
   # Bound our value before converting it to frequencies
   root_write_min__fixed_max="$((SYSTEM_CPU_MAX_VALUE - 1))"
-  log_verbose "Bound value '%s' between %s and %s" "${root_write_min__value}" "${SYSTEM_CPU_MIN_VALUE}" "${root_write_min__fixed_max}"
-  root_write_min__value="$(set_variable_bounds "${root_write_min__value}" "${SYSTEM_CPU_MIN_VALUE}" "${root_write_min__fixed_max}")"
+  log_verbose "Bound value '%s' between %s and %s" "${root_write_min__min}" "${SYSTEM_CPU_MIN_VALUE}" "${root_write_min__fixed_max}"
+  root_write_min__min="$(set_variable_bounds "${root_write_min__min}" "${SYSTEM_CPU_MIN_VALUE}" "${root_write_min__fixed_max}")"
   unset root_write_min__fixed_max
 
   if has_intel_pstate_dir; then
