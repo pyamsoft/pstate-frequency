@@ -1524,7 +1524,7 @@ main() {
             ;;
           *)
             # We must provide our own error message in this case
-            elog_quiet "Illegal option --%s" "${OPTARG}"
+            elog_quiet "Illegal long option --%s" "${OPTARG} (may need argument)\n"
             print_usage
             return 1
             ;;
@@ -1621,7 +1621,7 @@ main() {
           log_less_verbose
           ;;
         *)
-          elog_quiet "Illegal option -${OPTARG}"
+          elog_quiet "Illegal short option -${OPTARG} (may need argument)\n"
           print_usage
           return 1
           ;;
