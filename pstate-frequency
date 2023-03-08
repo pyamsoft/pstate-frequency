@@ -20,7 +20,7 @@
 
 # pstate-frequency
 # by: pyamsoft <developer(dot)pyamsoft(at)gmail(dot)com>
-readonly __VERSION="3.13.4"
+readonly __VERSION="3.14.0"
 
 ##
 # Normal log
@@ -201,9 +201,6 @@ option:
     -m [+]<number>  | --max [+]<number>    | --max=[+]<number>      Modify current CPU max frequency <number|offset>
     -n [+]<number>  | --min [+]<number>    | --min=[+]<number>      Modify current CPU min frequency <number|offset>
     -t <on|off> | --turbo <on|off> | --turbo=<on|off>               Modify current CPU turbo boost <"on"|"off">
-
-    (DEPRECATED)
-    -t <0|1> | --turbo <0|1> | --turbo=<0|1>                        Modify current CPU turbo boost <number>
 
 system:
     [set]
@@ -459,49 +456,31 @@ set_turbo() {
 
   log_all "set_turbo requires SET operation exec_mode"
   if [ "${set_turbo__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    set_turbo__value=""
 
     log_all "Check for special case arguments: on, off"
     if [ "${set_turbo__input}" = "on" ]; then
       if has_intel_pstate_dir; then
         log_verbose "intel_pstate Argument was 'on' set to 0"
-        set_turbo__value="0"
+        __exec_set_turbo_arg="0"
       else
         log_verbose "acpi-cpufreq|amd_pstate Argument was 'on' set to 1"
-        set_turbo__value="1"
+        __exec_set_turbo_arg="1"
       fi
     elif [ "${set_turbo__input}" = "off" ]; then
       if has_intel_pstate_dir; then
         log_verbose "intel_pstate Argument was 'off' set to 1"
-        set_turbo__value="1"
+        __exec_set_turbo_arg="1"
       else
         log_verbose "acpi-cpufreq|amd_pstate Argument was 'off' set to 0"
-        set_turbo__value="0"
+        __exec_set_turbo_arg="0"
       fi
     else
-      # DEPRECATED: In the future, this will be dropped in favor of only using 'on' or 'off'
-      log_verbose "Parse raw argument" "${set_turbo__input}"
-      elog "Warning: Passing raw number values to --turbo is DEPRECATED: Please use 'on' or 'off'"
-      set_turbo__value="${set_turbo__input}"
-    fi
-
-    log_all "Check that '%s' is valid" "${set_turbo__value}"
-    if is_digits "${set_turbo__value}" &&
-      { [ "${set_turbo__value}" -eq 1 ] || [ "${set_turbo__value}" -eq 0 ]; }; then
-      log_all "'%s' is valid digit" "${set_turbo__value}"
-      __exec_set_turbo_type="${SET_TURBO_TRUE}"
-      __exec_set_turbo_arg="${set_turbo__value}"
-      log_all "__exec_set_turbo_arg: '%s'" "${__exec_set_turbo_arg}"
-    else
-      elog_quiet "turbo argument '%s' is invalid" "${set_turbo__value}"
+      elog_quiet "turbo argument '%s' is invalid" "${set_turbo__input}"
 
       unset set_turbo__input
       unset set_turbo__mode
-      unset set_turbo__value
       return 1
     fi
-
-    unset set_turbo__value
   else
     elog_quiet "Cannot set turbo outside of SET operation exec_mode"
 
@@ -509,6 +488,10 @@ set_turbo() {
     unset set_turbo__input
     return 1
   fi
+
+  # We are doing turbo work
+  __exec_set_turbo_type="${SET_TURBO_TRUE}"
+  log_all "__exec_set_turbo_arg: '%s'" "${__exec_set_turbo_arg}"
 
   unset set_turbo__mode
   unset set_turbo__input
