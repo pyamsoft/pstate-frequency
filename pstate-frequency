@@ -925,72 +925,6 @@ EOF
   return 0
 }
 
-# Handle long options which take arguments
-#
-# $1 execution mode
-# $2 long option
-# $3 long option argument
-handle_long_option_argument() {
-  handle_long_option_argument__mode="$1"
-  handle_long_option_argument__opt="$2"
-  handle_long_option_argument__input="$3"
-
-  if [ "${handle_long_option_argument__input}" = '-' ]; then
-    log_all "Skip '-' processing"
-  elif [ -z "${handle_long_option_argument__opt}" ]; then
-    elog_verbose "option does not expect argument!"
-    elog_verbose "argument: %s" "${handle_long_option_argument__input}"
-    elog_quiet "Illegal argument %s" "${handle_long_option_argument__input}"
-
-    unset handle_long_option_argument__mode
-    unset handle_long_option_argument__opt
-    unset handle_long_option_argument__input
-    return 1
-  else
-    log_verbose "option expects argument: %s" "${handle_long_option_argument__opt}"
-    log_verbose "argument: %s" "${handle_long_option_argument__input}"
-
-    case "${handle_long_option_argument__opt}" in
-    plan)
-      log_verbose "Long option: plan"
-      set_power_plan "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
-      ;;
-    max)
-      log_verbose "Long option: max"
-      set_max "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" ||
-        return 1
-      ;;
-    min)
-      log_verbose "Long option: min"
-      set_min "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" ||
-        return 1
-      ;;
-    turbo)
-      log_verbose "Long option: turbo"
-      set_turbo "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" ||
-        return 1
-      ;;
-    governor)
-      log_verbose "Long option: governor"
-      set_governor "${handle_long_option_argument__mode}" "${handle_long_option_argument__input}" || return 1
-      ;;
-    *)
-      elog_quiet "Invalid option --%s" "${handle_long_option_argument__opt}" || return 1
-
-      unset handle_long_option_argument__mode
-      unset handle_long_option_argument__opt
-      unset handle_long_option_argument__input
-      return 1
-      ;;
-    esac
-  fi
-
-  unset handle_long_option_argument__mode
-  unset handle_long_option_argument__opt
-  unset handle_long_option_argument__input
-  return 0
-}
-
 ##
 # Get the current state of the CPU from the pstate and scaling driver
 #
@@ -1468,23 +1402,28 @@ main() {
   # While risky to call eval, this is one way to
   # emulate the bash indirect_expansion ability
   if [ $# -gt 0 ]; then
-    long_option=""
-    eval optind_expanded="\$${OPTIND}"
-    while [ -n "${optind_expanded}" ]; do
+    # Power plans
+    main__opt_plan=0
+    main__opt_plan_arg=""
+
+    # Max CPU
+    main__opt_max=0
+    main__opt_max_arg=""
+
+    # Min CPU
+    main__opt_min=0
+    main__opt_min_arg=""
+
+    # Turbo CPU
+    main__opt_turbo=0
+    main__opt_turbo_arg=""
+
+    # Governor CPU
+    main__opt_governor=0
+    main__opt_governor_arg=""
+
+    while [ "${OPTIND}" -le "$#" ]; do
       while getopts ":HVGSp:m:n:t:g:crdq-:" option; do
-
-        # Log if not long option
-        if [ "${option}" != '-' ]; then
-          log_verbose "parse short option: -%s" "${option}"
-        fi
-
-        # Set only on long option with arg
-        if [ -n "${long_option}" ]; then
-          elog_quiet "Long option --%s expects argument" "${long_option}"
-          return 1
-        fi
-
-        long_option=""
         case "${option}" in
         -)
           log_verbose "parse long option: -%s%s" "${option}" "${OPTARG}"
@@ -1506,24 +1445,69 @@ main() {
             exec_mode="${EXEC_MODE_SET}"
             ;;
           plan)
-            log_all "Attempt to set plan"
-            long_option="plan"
+            main__opt_plan=1
+
+            # --plan expects an argument
+            if [ $# -ge ${OPTIND} ]; then
+              eval main__opt_plan_arg="\$${OPTIND}"
+              log_all "Attempt to set --plan:${main__opt_plan_arg}"
+              shift
+            else
+              elog_quiet "Long option --plan expects argument"
+              return 1
+            fi
             ;;
           max)
-            log_all "Attempt to set max"
-            long_option="max"
+            main__opt_max=1
+
+            # --max expects an argument
+            if [ $# -ge ${OPTIND} ]; then
+              eval main__opt_max_arg="\$${OPTIND}"
+              log_all "Attempt to set --max:${main__opt_max_arg}"
+              shift
+            else
+              elog_quiet "Long option --max expects argument"
+              return 1
+            fi
             ;;
           min)
-            log_all "Attempt to set min"
-            long_option="min"
+            main__opt_min=1
+
+            # --min expects an argument
+            if [ $# -ge ${OPTIND} ]; then
+              eval main__opt_min_arg="\$${OPTIND}"
+              log_all "Attempt to set --min:${main__opt_min_arg}"
+              shift
+            else
+              elog_quiet "Long option --min expects argument"
+              return 1
+            fi
             ;;
           turbo)
-            log_all "Attempt to set turbo"
-            long_option="turbo"
+            main__opt_turbo=1
+
+            # --turbo expects an argument
+            if [ $# -ge ${OPTIND} ]; then
+              eval main__opt_turbo_arg="\$${OPTIND}"
+              log_all "Attempt to set --turbo:${main__opt_turbo_arg}"
+              shift
+            else
+              elog_quiet "Long option --turbo expects argument"
+              return 1
+            fi
             ;;
           governor)
-            log_all "Attempt to set governor"
-            long_option="governor"
+            main__opt_governor=1
+
+            # --governor expects an argument
+            if [ $# -ge ${OPTIND} ]; then
+              eval main__opt_governor_arg="\$${OPTIND}"
+              log_all "Attempt to set --governor:${main__opt_governor_arg}"
+              shift
+            else
+              elog_quiet "Long option --governor expects argument"
+              return 1
+            fi
             ;;
           current)
             log_all "Set exec_get_type to current"
@@ -1567,24 +1551,29 @@ main() {
           exec_mode="${EXEC_MODE_SET}"
           ;;
         p)
-          log_all "Attempt to set plan"
-          set_power_plan "${exec_mode}" "${OPTARG}" || return 1
+          main__opt_plan=1
+          main__opt_plan_arg="${OPTARG}"
+          log_all "Attempt to set --plan:${main__opt_plan_arg}"
           ;;
         m)
-          log_all "Attempt to set max"
-          set_max "${exec_mode}" "${OPTARG}" || return 1
+          main__opt_max=1
+          main__opt_max_arg="${OPTARG}"
+          log_all "Attempt to set --max:${main__opt_max_arg}"
           ;;
         n)
-          log_all "Attempt to set min"
-          set_min "${exec_mode}" "${OPTARG}" || return 1
+          main__opt_min=1
+          main__opt_min_arg="${OPTARG}"
+          log_all "Attempt to set --min:${main__opt_min_arg}"
           ;;
         t)
-          log_all "Attempt to set turbo"
-          set_turbo "${exec_mode}" "${OPTARG}" || return 1
+          main__opt_turbo=1
+          main__opt_turbo_arg="${OPTARG}"
+          log_all "Attempt to set --turbo:${main__opt_turbo_arg}"
           ;;
         g)
-          log_all "Attempt to set governor"
-          set_governor "${exec_mode}" "${OPTARG}" || return 1
+          main__opt_governor=1
+          main__opt_governor_arg="${OPTARG}"
+          log_all "Attempt to set --governor:${main__opt_governor_arg}"
           ;;
         c)
           log_all "Set exec_get_type to current"
@@ -1608,30 +1597,6 @@ main() {
         esac
       done
 
-      # Re-establish the current OPTIND target
-      if [ $# -ge ${OPTIND} ]; then
-        eval optind_expanded="\$${OPTIND}"
-      else
-        optind_expanded=""
-      fi
-
-      # Handle long options which expect arguments
-      if [ -z "${optind_expanded}" ]; then
-        if [ -n "${long_option}" ]; then
-          elog_quiet "Long option --%s expects argument" "${long_option}"
-          return 1
-        else
-          break
-        fi
-      else
-        # This is a plain arg and should be handled by
-        # one of the options which takes an argument
-        handle_long_option_argument "${exec_mode}" "${long_option}" "${optind_expanded}"
-
-        # Set back to null
-        long_option=
-      fi
-
       option_shift_count="${OPTIND}"
       while [ "$#" -lt "${option_shift_count}" ]; do
         option_shift_count=$((option_shift_count - 1))
@@ -1648,6 +1613,48 @@ main() {
       unset option_shift_count
     done
   fi
+
+  # Process the plan first as it sets other values
+  if [ "${main__opt_plan}" -ne 0 ]; then
+    log_verbose "--plan requested with argument: ${main__opt_plan_arg}"
+    set_power_plan "${exec_mode}" "${main__opt_plan_arg}" || return 1
+  fi
+
+  # Then override governor
+  if [ "${main__opt_governor}" -ne 0 ]; then
+    log_verbose "--governor requested with argument: ${main__opt_governor_arg}"
+    set_governor "${exec_mode}" "${main__opt_governor_arg}" || return 1
+  fi
+
+  # Followed by turbo
+  if [ "${main__opt_turbo}" -ne 0 ]; then
+    log_verbose "--turbo requested with argument: ${main__opt_turbo_arg}"
+    set_turbo "${exec_mode}" "${main__opt_turbo_arg}" || return 1
+  fi
+
+  # And then max and min
+  if [ "${main__opt_max}" -ne 0 ]; then
+    log_verbose "--max requested with argument: ${main__opt_max_arg}"
+    set_max "${exec_mode}" "${main__opt_max_arg}" || return 1
+  fi
+
+  if [ "${main__opt_min}" -ne 0 ]; then
+    log_verbose "--min requested with argument: ${main__opt_min_arg}"
+    set_min "${exec_mode}" "${main__opt_min_arg}" || return 1
+  fi
+
+  # Unset all the flags
+  unset main__opt_turbo
+  unset main__opt_governor
+  unset main__opt_max
+  unset main__opt_min
+  unset main__opt_plan
+
+  unset main__opt_turbo_arg
+  unset main__opt_governor_arg
+  unset main__opt_max_arg
+  unset main__opt_min_arg
+  unset main__opt_plan_arg
 
   case "${exec_mode}" in
   "${EXEC_MODE_GET}")
