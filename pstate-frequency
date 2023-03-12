@@ -1774,7 +1774,8 @@ readonly SYSTEM_CPUFREQ_BOOST="${SYSTEM_CPU_DIR}/cpufreq/boost"
 # configuration directory for power plan configs
 readonly POWER_PLAN_CONFIG_DIR="/etc/pstate-frequency.d/"
 
-# amd-pstate holds its MAX CPU frequency in a different file, the cpuinfo_max_freq file changes based on if turbo is off or on, which is a little weird for interactive changes
+# amd-pstate holds its MAX CPU frequency in a different file, the cpuinfo_max_freq file
+# changes based on if turbo is off or on, which is a little weird for interactive changes
 if [ -r "${SYSTEM_CPU_DIR}/cpu0/cpufreq/amd_pstate_max_freq" ]; then
   CPUINFO_MAX_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/amd_pstate_max_freq"
 else
