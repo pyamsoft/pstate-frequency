@@ -278,7 +278,7 @@ GPLv2
 ```
   The GPLv2 License
 
-    Copyright (C) 2022  Peter Kenji Yamanaka
+    Copyright (C) 2023  pyamsoft
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
