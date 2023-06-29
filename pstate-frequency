@@ -154,7 +154,7 @@ check_binary() {
     return 1
   fi
 
-  if command -v "${check_binary__bin}" > /dev/null 2>&1; then
+  if command -v "${check_binary__bin}" >/dev/null 2>&1; then
     unset check_binary__bin
     return 0
   else
@@ -1822,4 +1822,3 @@ readonly SYSTEM_CPU_MIN_VALUE=$((SYSTEM_CPU_MIN_FREQ * 100 / SYSTEM_CPU_MAX_FREQ
 # Exit 0 is success, exit 1 is some failure.
 main "$@" || exit 1
 exit 0
-

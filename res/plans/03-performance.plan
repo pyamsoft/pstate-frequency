@@ -22,4 +22,3 @@ PLAN_CPU_MIN=0
 PLAN_CPU_PSTATE_GOVERNOR=performance
 PLAN_CPU_CPUFREQ_GOVERNOR=performance,schedutil,ondemand
 PLAN_CPU_TURBO=on
-

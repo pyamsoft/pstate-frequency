@@ -20,4 +20,3 @@
 # On AC executes balanced plan
 PLAN_AUTO_AC=balanced
 PLAN_AUTO_BAT=powersave
-

@@ -16,11 +16,10 @@
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-_pstate-frequency()
-{
+_pstate-frequency() {
   COMPREPLY=()
   local cur="${COMP_WORDS[COMP_CWORD]}"
-  local prev="${COMP_WORDS[COMP_CWORD-1]}"
+  local prev="${COMP_WORDS[COMP_CWORD - 1]}"
   local short_actions="-V -H -S -G -d -q"
   local long_actions="--quiet --version --help --set --get --quiet --delay"
   local short_set_options="-m -n -t -p -g"
@@ -44,25 +43,25 @@ _pstate-frequency()
 
   if [[ ${cur} = --* ]]; then
     if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
-      COMPREPLY=( $(compgen -W "${long_set_options}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${long_set_options}" -- "${cur}"))
     elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
-      COMPREPLY=( $(compgen -W "${long_get_options}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${long_get_options}" -- "${cur}"))
     elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
-      COMPREPLY=( $(compgen -W "${plans}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${plans}" -- "${cur}"))
     else
-      COMPREPLY=( $(compgen -W "${long_actions}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${long_actions}" -- "${cur}"))
     fi
   elif [[ ${cur} = * ]]; then
     if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
-      COMPREPLY=( $(compgen -W "${short_set_options}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${short_set_options}" -- "${cur}"))
     elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
-      COMPREPLY=( $(compgen -W "${short_get_options}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${short_get_options}" -- "${cur}"))
     elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
-      COMPREPLY=( $(compgen -W "${plans}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${plans}" -- "${cur}"))
     elif [[ ${prev} = "--governor" ]] || [[ ${prev} = "-g" ]]; then
-      COMPREPLY=( $(compgen -W "${governors}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${governors}" -- "${cur}"))
     else
-      COMPREPLY=( $(compgen -W "${short_actions}" -- "${cur}") )
+      COMPREPLY=($(compgen -W "${short_actions}" -- "${cur}"))
     fi
   fi
 
