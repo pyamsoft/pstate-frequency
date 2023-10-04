@@ -1430,12 +1430,22 @@ main() {
             return 0
             ;;
           get)
-            log_verbose "Set operation exec_mode to GET"
-            exec_mode="${EXEC_MODE_GET}"
+            if [ "${exec_mode}" = "${EXEC_MODE_SET}" ]; then
+              elog_quiet "Cannot use --get mode when already in --set mode"
+              return 1
+            else
+              log_all "Set operation exec_mode to GET"
+              exec_mode="${EXEC_MODE_GET}"
+            fi
             ;;
           set)
-            log_verbose "Set operation exec_mode to SET"
-            exec_mode="${EXEC_MODE_SET}"
+            if [ "${exec_mode}" = "${EXEC_MODE_GET}" ]; then
+              elog_quiet "Cannot use --set mode when already in --get mode"
+              return 1
+            else
+              log_all "Set operation exec_mode to SET"
+              exec_mode="${EXEC_MODE_SET}"
+            fi
             ;;
           plan)
             main__opt_plan=1
@@ -1536,12 +1546,22 @@ main() {
           return 0
           ;;
         G)
-          log_all "Set operation exec_mode to GET"
-          exec_mode="${EXEC_MODE_GET}"
+          if [ "${exec_mode}" = "${EXEC_MODE_SET}" ]; then
+            elog_quiet "Cannot use --get mode when already in --set mode"
+            return 1
+          else
+            log_all "Set operation exec_mode to GET"
+            exec_mode="${EXEC_MODE_GET}"
+          fi
           ;;
         S)
-          log_all "Set operation exec_mode to SET"
-          exec_mode="${EXEC_MODE_SET}"
+          if [ "${exec_mode}" = "${EXEC_MODE_GET}" ]; then
+            elog_quiet "Cannot use --set mode when already in --get mode"
+            return 1
+          else
+            log_all "Set operation exec_mode to SET"
+            exec_mode="${EXEC_MODE_SET}"
+          fi
           ;;
         p)
           main__opt_plan=1
