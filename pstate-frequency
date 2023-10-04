@@ -179,7 +179,6 @@ logging:
     -d | --debug     Print debugging messages to stdout (multiple)
     -q | --quiet     Supress all non-error output (multiple)
 
-
 action:
     [general]
     -H | --help      Display this help and exit
@@ -188,7 +187,6 @@ action:
     [command]
     -G | --get       Access current CPU values
     -S | --set       Modify current CPU values
-
 
 option:
     [get]
@@ -216,9 +214,8 @@ examples:
     # pstate-frequency -S -n 50 -m +30 -t on
     Running as root, Set the Min frequency to 50%%, the Max frequency to the absolute Min + 30%%, and the Turbo "on"
 
-    $ pstate-frequency -G -r
+    \$ pstate-frequency -G -r
     Running as a normal user, get the realtime CPU frequencies
-
 EOF
   )"
   return 0
