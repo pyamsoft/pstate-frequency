@@ -56,7 +56,7 @@ GitHub and compile it for ArchLinux.
 
 Debian package management and RedHat package management based distributions
 are currently unofficially supported through the **checkinstall** program
-and this is the recommended way to install the package until an actual deb
+and this is the recommended way to install the package until an actual
 package can be constructed.
 
 Any other package management based distributions can look to using
@@ -75,7 +75,7 @@ will be updated generally whenever a bug is fixed or patched.
 
 ### Usage
 
-The binary by default is named **pstate-frequency**  
+The script by default is named **pstate-frequency**  
 When called without any options, the program will display something like
 the following:  
 [![Example Run](https://raw.githubusercontent.com/pyamsoft/pstate-frequency/main/assets/img/pstate-frequency_example_run.png)](https://github.com/pyamsoft/pstate-frequency)
@@ -93,9 +93,6 @@ flags as optional arguments:
 
 - **-c --current** Display the current user-requested CPU values
 - **-r --real** Display real-time CPU frequencies
-- **--loop** Continually display realtime CPU frequencies.  
-    Expects a delay which will be used to timeout calls between loops.
-    The time value is passed directly to `sleep(1)`
 
 _By default, the calling the -G option with no extra arguments is equivalent
 to calling with the --current option_
@@ -107,7 +104,8 @@ takes various flags as required arguments:
     This is naive but useful for system startup where various bits of the machine
     may not be ready until a certain amount of time has passed.  
 
-    It it mainly used in the systemd unit.
+    _It is mainly used in the systemd unit_
+
 - **-m --max** Adjust the maximum scaling frequency of the CPU  
     Can be specified as a plain number or in the syntax `+<number>`
     which will resolve to the minimum CPU frequency + `number`
@@ -117,8 +115,7 @@ takes various flags as required arguments:
 - **-g --governor** Adjust the current CPU scaling governor.
     Must be the name of a valid CPU governor
 - **-t --turbo** Adjust the current state of Turbo Boost.  
-    Can be specified as `on` `off` `0` or `1`. `0` and `1` are
-    passed directly to the CPU driver turbo file, while `on` and `off`
+    Can be specified as `on` or `off`. Options are
     interpreted in the context of the current CPU driver.
     `intel_pstate` backend treats `1` as OFF and `0` as ON,
     while `acpi-cpufreq` and `amd_pstate` uses the reverse.
@@ -220,14 +217,6 @@ Please make sure that you are using the `pstate-frequency-sleep.service`
 to apply the script again when the system resumes from suspend. Also see
 issue [17](https://github.com/pyamsoft/pstate-frequency/issues/17)
 
-pstate-frequency no longer directly supports the x86_energy_perf_policy
-binary, so it is required that users manually apply the x86_energy_perf_policy
-binary after running pstate-frequency if the old behavior is needed.
-
-pstate-frequency dropped support for the x86_energy_perf_policy binary
-because the abstraction gained via the script was too difficult to keep up
-to date with various kernel versions and different machine configurations.
-
 ### Additional Notes
 
 If you are attempting to use the udev rule but pstate-frequency fails to
@@ -254,7 +243,7 @@ With acpi-cpufreq OR amd_pstate:
 
 ## Development
 
-pstate-frequency is developed in the Open on Github at:
+pstate-frequency is developed in the open on Github at:
 
 ```
 https://github.com/pyamsoft/pstate-frequency
