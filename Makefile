@@ -43,8 +43,8 @@ BASH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/bash-completion/completio
 ZSH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/zsh/site-functions/_$(NAME)"
 FISH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/fish/completions/$(NAME).fish"
 UDEV_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/udev/rules.d/99-$(NAME).rules"
-SYSTEMD_SERVICE_AT_INSTALL_TARGET="$(DESTDIR)/usr/lib/systemd/system/$(NAME)@.service"
-SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/usr/lib/systemd/system/$(NAME)-sleep.service"
+SYSTEMD_SERVICE_AT_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)@.service"
+SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)-sleep.service"
 
 # If you decide to change this location, also update the script POWER_PLAN_CONFIG_DIR
 # or pstate-frequency will not look in the correct directory
