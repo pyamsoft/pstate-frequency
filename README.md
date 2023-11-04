@@ -115,10 +115,8 @@ takes various flags as required arguments:
 - **-g --governor** Adjust the current CPU scaling governor.
     Must be the name of a valid CPU governor
 - **-t --turbo** Adjust the current state of Turbo Boost.  
-    Can be specified as `on` or `off`. Options are
-    interpreted in the context of the current CPU driver.
-    `intel_pstate` backend treats `1` as OFF and `0` as ON,
-    while `acpi-cpufreq` and `amd_pstate` uses the reverse.
+    Can be specified as `on` or `off`. Adjusts turbo boost for
+    all cores.
 - **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.  
     Must be specified as a plan name inside of `/etc/pstate-frequency.d/`
 
