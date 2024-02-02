@@ -1034,12 +1034,13 @@ do_get_current() {
 
   if has_intel_pstate_dir; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
+  elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
+    # amd-pstate passive has this
+    do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
   elif has_amd_pstate_dir; then
     log_verbose "amd-pstate does not have runtime turbo support yet."
     log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
     do_get_current__cpu_turbo=""
-  elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
-    do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
   else
     do_get_current__cpu_turbo="0"
   fi
@@ -1283,12 +1284,15 @@ root_write_turbo() {
   root_write_turbo__target=""
   if has_intel_pstate_dir; then
     root_write_turbo__target="${SYSTEM_INTEL_PSTATE_TURBO}"
+  elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
+    root_write_turbo__target="${SYSTEM_CPUFREQ_BOOST}"
   elif has_amd_pstate_dir; then
     log_verbose "amd-pstate does not have turbo boost support yet in sysfs."
     log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
     root_write_turbo__target=""
   else
-    root_write_turbo__target="${SYSTEM_CPUFREQ_BOOST}"
+    log_verbose "Turbo boost is unsupported on your CPU platform."
+    root_write_turbo__target=""
   fi
 
   if [ -w "${root_write_turbo__target}" ]; then
@@ -2007,10 +2011,10 @@ readonly SYSTEM_INTEL_PSTATE_MAX="${SYSTEM_INTEL_PSTATE_DIR}/max_perf_pct"
 readonly SYSTEM_INTEL_PSTATE_MIN="${SYSTEM_INTEL_PSTATE_DIR}/min_perf_pct"
 readonly SYSTEM_INTEL_PSTATE_TURBO="${SYSTEM_INTEL_PSTATE_DIR}/no_turbo"
 
-# amd_pstate related vars
+# amd_pstate[passive,action] related vars
 readonly SYSTEM_AMD_PSTATE_DIR="${SYSTEM_CPU_DIR}/amd_pstate"
 
-# acpi-cpufreq|amd_pstate related vars
+# acpi-cpufreq|amd_pstate[passive] related vars
 readonly SYSTEM_CPUFREQ_BOOST="${SYSTEM_CPU_DIR}/cpufreq/boost"
 
 # configuration directory for power plan configs
