@@ -771,7 +771,7 @@ execute_power_plan_config() {
   execute_power_plan_config__cpu_gov=
   if has_intel_pstate_dir; then
     execute_power_plan_config__cpu_gov="${PLAN_CPU_PSTATE_GOVERNOR}"
-  elif has_intel_pstate_dir; then
+  elif has_amd_pstate_dir; then
     execute_power_plan_config__cpu_gov="${PLAN_CPU_PSTATE_GOVERNOR}"
   else
     execute_power_plan_config__cpu_gov="${PLAN_CPU_CPUFREQ_GOVERNOR}"
