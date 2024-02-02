@@ -22,12 +22,17 @@ _pstate-frequency() {
   local prev="${COMP_WORDS[COMP_CWORD - 1]}"
   local short_actions="-V -H -S -G -d -q"
   local long_actions="--quiet --version --help --set --get --quiet --delay"
-  local short_set_options="-m -n -t -p -g"
+  local short_set_options="-m -n -t -p -g -e"
   local short_get_options="-c -r"
-  local long_set_options="--max --min --turbo --plan --governor"
+  local long_set_options="--max --min --turbo --plan --governor --epp"
   local long_get_options="--current --real"
   local governors=""
   governors="$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors)"
+
+  local epp=""
+  if [ -f "/sys/devices/system/cpu/cpu0/cpufreq/energy_performance_available_preferences" ]; then
+    epp="$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_available_preferences)"
+  fi
 
   local plans=""
   local prefix='??-'
@@ -60,6 +65,8 @@ _pstate-frequency() {
       COMPREPLY=($(compgen -W "${plans}" -- "${cur}"))
     elif [[ ${prev} = "--governor" ]] || [[ ${prev} = "-g" ]]; then
       COMPREPLY=($(compgen -W "${governors}" -- "${cur}"))
+    elif [[ ${prev} = "--epp" ]] || [[ ${prev} = "-e" ]]; then
+      COMPREPLY=($(compgen -W "${epp}" -- "${cur}"))
     else
       COMPREPLY=($(compgen -W "${short_actions}" -- "${cur}"))
     fi
@@ -75,6 +82,7 @@ _pstate-frequency() {
   unset long_get_options
   unset plans
   unset governors
+  unset epp
 }
 
 complete -F _pstate-frequency pstate-frequency

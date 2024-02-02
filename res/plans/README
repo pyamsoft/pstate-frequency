@@ -47,6 +47,7 @@
 #  PLAN_CPU_TURBO [ "on" | "off" ]
 #  PLAN_CPU_PSTATE_GOVERNOR [ governor name ]
 #  PLAN_CPU_CPUFREQ_GOVERNOR [ governor name ]
+#  PLAN_CPU_EPP [ epp name ]
 #
 # If both are defined, the variables under PLAN_CPU take preference
 
@@ -58,3 +59,4 @@ PLAN_CPU_MIN=0
 PLAN_CPU_TURBO=off
 PLAN_CPU_PSTATE_GOVERNOR=powersave
 PLAN_CPU_CPUFREQ_GOVERNOR=ondemand
+PLAN_CPU_EPP=balance_performance,performance

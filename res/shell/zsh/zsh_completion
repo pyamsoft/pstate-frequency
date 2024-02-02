@@ -47,6 +47,9 @@ _options()
  elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--governor" ]; then
    _alternative \
      ":cpu governor name:"
+ elif [ "$words[$index]" = "-e" ] || [ "$words[$index]" = "--epp" ]; then
+   _alternative \
+     ":epp name:"
  elif [ "$words[$index]" = "-m" ] || [ "$words[$index]" = "--max" ]; then
    _alternative \
      ":max freq between 0 and 100:"
@@ -85,6 +88,7 @@ _privilaged_options()
     "-n:Set the CPU min"
     "-t:Set the CPU turbo"
     "-g:Set the CPU governor"
+    "-e:Set the EPP"
   )
   _describe -t privilaged-options "privilaged options" options "$@"
 }

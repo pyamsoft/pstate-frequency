@@ -49,6 +49,14 @@ function __fish_pstate-frequency_governors
     command cat "$SYSTEM_CPU_GOVERNORS" | tr ' ' '\n'
 end
 
+function __fish_pstate-frequency_epp
+    set -l SYSTEM_CPU_DIR "/sys/devices/system/cpu"
+    set -l SYSTEM_CPU_EPP "$SYSTEM_CPU_DIR/cpu0/cpufreq/energy_performance_available_preferences"
+
+    # This file does not always exist, how do I check that in fish?
+    command cat "$SYSTEM_CPU_EPP" | tr ' ' '\n'
+end
+
 function __fish_pstate-frequency_turbo_values
     printf "%s\t%s\n" "on" "Turn turbo boost on"
     printf "%s\t%s\n" "off" "Turn turbo boost off"
@@ -60,6 +68,8 @@ complete -f -c pstate-frequency -n "$set_layer" -s p -l plan -d "Set a predefine
 complete -f -c pstate-frequency -n "$set_layer; and __fish_contains_opt -s p plan" -kxa "(__fish_pstate-frequency_plans)"
 complete -f -c pstate-frequency -n "$set_layer" -s g -l governor -d "Set the cpufreq governor"
 complete -f -c pstate-frequency -n "$set_layer; and __fish_contains_opt -s g governor" -kxa "(__fish_pstate-frequency_governors)"
+complete -f -c pstate-frequency -n "$set_layer" -s e -l epp -d "Set the EPP"
+complete -f -c pstate-frequency -n "$set_layer; and __fish_contains_opt -s e epp" -kxa "(__fish_pstate-frequency_epp)"
 complete -f -c pstate-frequency -n "$set_layer" -s m -l max -r -d "Modify current CPU max frequency"
 complete -f -c pstate-frequency -n "$set_layer" -s n -l min -r -d "Modify current CPU min frequency"
 complete -f -c pstate-frequency -n "$set_layer" -s t -l turbo -d "Modify current CPU turbo boost"
