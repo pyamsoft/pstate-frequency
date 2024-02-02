@@ -689,6 +689,8 @@ execute_power_plan_config() {
   execute_power_plan_config__cpu_gov=
   if has_intel_pstate_dir; then
     execute_power_plan_config__cpu_gov="${PLAN_CPU_PSTATE_GOVERNOR}"
+  elif has_intel_pstate_dir; then
+    execute_power_plan_config__cpu_gov="${PLAN_CPU_PSTATE_GOVERNOR}"
   else
     execute_power_plan_config__cpu_gov="${PLAN_CPU_CPUFREQ_GOVERNOR}"
   fi
@@ -925,6 +927,10 @@ do_get_current() {
 
   if has_intel_pstate_dir; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
+  elif has_amd_pstate_dir; then
+    log_verbose "amd-pstate does not have runtime turbo support yet."
+    log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
+    do_get_current__cpu_turbo=""
   elif [ -r "${SYSTEM_CPUFREQ_BOOST}" ]; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_CPUFREQ_BOOST}")"
   else
@@ -935,17 +941,26 @@ do_get_current() {
   do_get_current__cpu_min_value=$((do_get_current__cpu_min_freq_khz * 100 / SYSTEM_CPU_MAX_FREQ))
 
   do_get_current__cpu_turbo_onoff=
-  if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
-    if has_intel_pstate_dir; then
-      do_get_current__cpu_turbo_onoff="OFF"
-    else
-      do_get_current__cpu_turbo_onoff="ON"
-    fi
+  if [ -z "${do_get_current__cpu_turbo}" ]; then
+    do_get_current__cpu_turbo="unknown"
+    do_get_current__cpu_turbo_onoff="BIOS_DEFAULT"
   else
-    if has_intel_pstate_dir; then
-      do_get_current__cpu_turbo_onoff="ON"
+    if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
+      if has_intel_pstate_dir; then
+        do_get_current__cpu_turbo_onoff="OFF"
+      elif has_amd_pstate_dir; then
+        do_get_current__cpu_turbo_onoff="ON"
+      else
+        do_get_current__cpu_turbo_onoff="ON"
+      fi
     else
-      do_get_current__cpu_turbo_onoff="OFF"
+      if has_intel_pstate_dir; then
+        do_get_current__cpu_turbo_onoff="ON"
+      elif has_amd_pstate_dir; then
+        do_get_current__cpu_turbo_onoff="OFf"
+      else
+        do_get_current__cpu_turbo_onoff="OFF"
+      fi
     fi
   fi
 
@@ -1158,6 +1173,10 @@ root_write_turbo() {
   root_write_turbo__target=""
   if has_intel_pstate_dir; then
     root_write_turbo__target="${SYSTEM_INTEL_PSTATE_TURBO}"
+  elif has_amd_pstate_dir; then
+    log_verbose "amd-pstate does not have turbo boost support yet in sysfs."
+    log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
+    root_write_turbo__target=""
   else
     root_write_turbo__target="${SYSTEM_CPUFREQ_BOOST}"
   fi
@@ -1167,7 +1186,7 @@ root_write_turbo() {
     printf -- "%s" "${root_write_turbo__turbo}" >"${root_write_turbo__target}" || return 1
     log_all "Turbo value written to %s" "${root_write_turbo__target}"
   else
-    elog "Unable to write to %s, continue..." "${root_write_turbo__target}"
+    elog 'Unable to write to turbo-boost sysfs "%s", continue...' "${root_write_turbo__target}"
   fi
 
   unset root_write_turbo__turbo
@@ -1353,6 +1372,22 @@ do_set() {
 # Returns true or false based on if intel_pstate directory exists
 has_intel_pstate_dir() {
   if [ -e "${SYSTEM_INTEL_PSTATE_DIR}" ] && [ -d "${SYSTEM_INTEL_PSTATE_DIR}" ]; then
+    # Return 0 means true
+    return 0
+  else
+    # Return non-0 means false
+    return 1
+  fi
+}
+
+##
+# Check that we have amd_pstate at the intel_pstate location
+#
+# https://www.kernel.org/doc/html/v6.0/admin-guide/pm/amd-pstate.html
+#
+# Returns true or false based on if amd_pstate directory exists
+has_amd_pstate_dir() {
+  if [ -e "${SYSTEM_AMD_PSTATE_DIR}" ] && [ -d "${SYSTEM_AMD_PSTATE_DIR}" ]; then
     # Return 0 means true
     return 0
   else
@@ -1784,6 +1819,9 @@ readonly SYSTEM_INTEL_PSTATE_DIR="${SYSTEM_CPU_DIR}/intel_pstate"
 readonly SYSTEM_INTEL_PSTATE_MAX="${SYSTEM_INTEL_PSTATE_DIR}/max_perf_pct"
 readonly SYSTEM_INTEL_PSTATE_MIN="${SYSTEM_INTEL_PSTATE_DIR}/min_perf_pct"
 readonly SYSTEM_INTEL_PSTATE_TURBO="${SYSTEM_INTEL_PSTATE_DIR}/no_turbo"
+
+# amd_pstate related vars
+readonly SYSTEM_AMD_PSTATE_DIR="${SYSTEM_CPU_DIR}/amd_pstate"
 
 # acpi-cpufreq|amd_pstate related vars
 readonly SYSTEM_CPUFREQ_BOOST="${SYSTEM_CPU_DIR}/cpufreq/boost"
