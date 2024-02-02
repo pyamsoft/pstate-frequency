@@ -32,6 +32,21 @@ _pstate-frequency() {
   local epp=""
   if [ -f "/sys/devices/system/cpu/cpu0/cpufreq/energy_performance_available_preferences" ]; then
     epp="$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_available_preferences)"
+
+    # But default is not a writeable value
+    _tmp=""
+    for e in ${epp}; do
+      if [ "$e" = "default" ]; then
+        continue;
+      fi
+      if [ -z "${_tmp}" ]; then
+        _tmp="$e"
+      else
+        _tmp="${_tmp} ${e}"
+      fi
+    done
+    epp="${_tmp}"
+    unset _tmp
   fi
 
   local plans=""
