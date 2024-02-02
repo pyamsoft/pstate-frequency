@@ -196,6 +196,7 @@ option:
     [set]
     -p <name>       | --plan <name>        | --plan=<name>          Set a predefined power plan <name>
     -g <name>       | --governor <name>    | --governor=<name>      Set the cpufreq governor <name>
+    -e <name>       | --epp <name>         | --epp=<name>           Set the Energy Performance Preference
     -m [+]<number>  | --max [+]<number>    | --max=[+]<number>      Modify current CPU max frequency <number|offset>
     -n [+]<number>  | --min [+]<number>    | --min=[+]<number>      Modify current CPU min frequency <number|offset>
     -t <on|off> | --turbo <on|off> | --turbo=<on|off>               Modify current CPU turbo boost <"on"|"off">
@@ -480,6 +481,85 @@ set_turbo() {
 }
 
 ##
+# Set the argument for cpu_epp
+# Can be set multiple times, final time overrides
+#
+# $1 execution mode
+# $2 user input for epp
+set_epp() {
+  set_epp__mode="$1"
+  set_epp__input="$2"
+
+  log_all "set_epp requires SET operation exec_mode"
+  if [ "${set_epp__mode}" -eq "${EXEC_MODE_SET}" ]; then
+    if ! has_epp_support; then
+      elog_quiet "Cannot set Energy Performance Preference without platform support. Your CPU is too old?"
+      return 1
+    fi
+
+    set_epp__all_available_epp="$(cat "${SYSTEM_CPU_EPP_AVAILABLE}")"
+
+    log_all "Check that '%s' is not digits" "${set_epp__all_available_epp}"
+    if ! is_digits "${set_epp__input}"; then
+      log_all "'%s' is not digits" "${set_epp__input}"
+      set_epp__value=""
+      for try_epp in $(printf -- "%s" "${set_epp__input}" | tr ',' ' '); do
+        log_verbose "Check if %s is a valid EPP" "${try_epp}"
+        if [ "${try_epp}" = "default" ]; then
+          log_all 'User requested EPP "default", but writing this value is not allowed.'
+          continue;
+        fi
+        for available_epp in ${set_epp__all_available_epp}; do
+          if [ "${available_epp}" = "default" ]; then
+            log_all 'System provides EPP "default", but writing this value is not allowed.'
+            continue;
+          fi
+ 
+          if [ "${try_epp}" = "${available_epp}" ]; then
+            set_epp__value="${try_epp}"
+            break
+          fi
+        done
+        unset try_epp
+        if [ -n "${set_epp__value}" ]; then
+          log_verbose "EPP has been found: %s" "${set_epp__value}"
+          break
+        fi
+      done
+
+      if [ -z "${set_epp__value}" ]; then
+        elog_quiet "Invalid EPP specified, do not change"
+      else
+        __exec_set_epp_type="${SET_EPP_TRUE}"
+        __exec_set_epp_arg="${set_epp__value}"
+        log_all "__exec_set_epp_arg: '%s'" "${__exec_set_epp_arg}"
+      fi
+
+      unset set_epp__value
+    else
+      elog_quiet "epp argument '%s' is a number" "${set_epp__input}"
+
+      unset set_epp__input
+      unset set_epp__mode
+      unset set_epp__all_available_epp
+      return 1
+    fi
+
+    unset set_epp__all_available_epp
+  else
+    elog_quiet "Cannot set epp outside of SET operation exec_mode"
+
+    unset set_epp__input
+    unset set_epp__mode
+    return 1
+  fi
+
+  unset set_epp__mode
+  unset set_epp__input
+  return 0
+}
+
+##
 # Set the argument for cpu_governor
 # Can be set multiple times, final time overrides
 #
@@ -653,6 +733,7 @@ locate_power_plan_config() {
 #  PLAN_CPU_TURBO [ "on" | "off" ]
 #  PLAN_CPU_PSTATE_GOVERNOR [ governor name ]
 #  PLAN_CPU_CPUFREQ_GOVERNOR [ governor name ]
+#  PLAN_CPU_EPP [ epp name ]
 #
 # If both are defined, the variables under PLAN_CPU take preference
 #
@@ -671,7 +752,7 @@ execute_power_plan_config() {
 
   execute_power_plan_config__type=""
   if [ -n "${PLAN_CPU_MAX}" ] || [ -n "${PLAN_CPU_MIN}" ] || [ -n "${PLAN_CPU_TURBO}" ] ||
-    [ -n "${PLAN_CPU_PSTATE_GOVERNOR}" ] || [ -n "${PLAN_CPU_CPUFREQ_GOVERNOR}" ]; then
+    [ -n "${PLAN_CPU_PSTATE_GOVERNOR}" ] || [ -n "${PLAN_CPU_CPUFREQ_GOVERNOR}" ] || [ -n "${PLAN_CPU_EPP}" ]; then
     execute_power_plan_config__type="MANUAL"
   elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BAT}" ]; then
     execute_power_plan_config__type="AUTO"
@@ -685,6 +766,7 @@ execute_power_plan_config() {
   execute_power_plan_config__cpu_max="${PLAN_CPU_MAX}"
   execute_power_plan_config__cpu_min="${PLAN_CPU_MIN}"
   execute_power_plan_config__cpu_turbo="${PLAN_CPU_TURBO}"
+  execute_power_plan_config__epp="${PLAN_CPU_EPP}"
 
   execute_power_plan_config__cpu_gov=
   if has_intel_pstate_dir; then
@@ -704,6 +786,7 @@ execute_power_plan_config() {
   unset PLAN_CPU_TURBO
   unset PLAN_CPU_PSTATE_GOVERNOR
   unset PLAN_CPU_CPUFREQ_GOVERNOR
+  unset PLAN_CPU_EPP
 
   if [ "${execute_power_plan_config__type}" = "MANUAL" ]; then
     set_power_plan_manual "${execute_power_plan_config__mode}" \
@@ -711,7 +794,8 @@ execute_power_plan_config() {
       "${execute_power_plan_config__cpu_max}" \
       "${execute_power_plan_config__cpu_min}" \
       "${execute_power_plan_config__cpu_turbo}" \
-      "${execute_power_plan_config__cpu_gov}" || return 1
+      "${execute_power_plan_config__cpu_gov}" \
+      "${execute_power_plan_config__epp}" || return 1
   else
     set_power_plan_automatic "${execute_power_plan_config__mode}" \
       "${execute_power_plan_config__name}" \
@@ -725,6 +809,7 @@ execute_power_plan_config() {
   unset execute_power_plan_config__cpu_min
   unset execute_power_plan_config__cpu_turbo
   unset execute_power_plan_config__cpu_gov
+  unset execute_power_plan_config__epp
 
   unset execute_power_plan_config__type
   unset execute_power_plan_config__name
@@ -851,6 +936,7 @@ is_battery_powered() {
 # $4 cpu min
 # $5 cpu turbo
 # $6 cpu gov
+# $7 epp
 set_power_plan_manual() {
   set_power_plan_manual__mode="$1"
   set_power_plan_manual__name="$2"
@@ -858,6 +944,7 @@ set_power_plan_manual() {
   set_power_plan_manual__min="$4"
   set_power_plan_manual__turbo="$5"
   set_power_plan_manual__gov="$6"
+  set_power_plan_manual__epp="$7"
 
   log_verbose "Attempt manual plan setting: %s" "${set_power_plan_manual__name}"
 
@@ -889,6 +976,7 @@ this behavior may change in later versions.
 EOF
     )"
   }
+
   set_turbo "${set_power_plan_manual__mode}" "${set_power_plan_manual__turbo}" || {
     elog_quiet "$(
       cat <<EOF
@@ -899,12 +987,25 @@ EOF
     )"
   }
 
+  if has_epp_support; then
+    set_epp "${set_power_plan_manual__mode}" "${set_power_plan_manual__epp}" || {
+      elog_quiet "$(
+        cat <<EOF
+You did not specify a valid EPP in your power plan.
+While this will not cause failure in this version of pstate-frequency,
+this behavior may change in later versions.
+EOF
+      )"
+    }
+  fi
+
   unset set_power_plan_manual__mode
   unset set_power_plan_manual__name
   unset set_power_plan_manual__max
   unset set_power_plan_manual__min
   unset set_power_plan_manual__turbo
   unset set_power_plan_manual__gov
+  unset set_power_plan_manual__epp
   return 0
 }
 
@@ -924,6 +1025,12 @@ do_get_current() {
   do_get_current__cpu_governor="$(cat "${SYSTEM_SCALING_GOVERNOR}")"
   do_get_current__cpu_driver="$(cat "${SYSTEM_SCALING_DRIVER}")"
   do_get_current__cpu_turbo=
+
+  if has_epp_support; then
+    do_get_current__epp="$(cat "${SYSTEM_CPU_EPP_RUNTIME}")"
+  else
+    do_get_current__epp="unsupported"
+  fi
 
   if has_intel_pstate_dir; then
     do_get_current__cpu_turbo="$(cat "${SYSTEM_INTEL_PSTATE_TURBO}")"
@@ -970,16 +1077,17 @@ do_get_current() {
     CPU_DRIVER   -> %s
     CPU_GOVERNOR -> %s
     TURBO        -> %s [%s]
+    EPP          -> %s
     CPU_MIN      -> %s%% [%sMHz]
     CPU_MAX      -> %s%% [%sMHz]
 EOF
-  )" "${do_get_current__cpu_driver}" "${do_get_current__cpu_governor}" \
-    "${do_get_current__cpu_turbo}" \
-    "${do_get_current__cpu_turbo_onoff}" \
-    "${do_get_current__cpu_min_value}" \
-    "${do_get_current__cpu_min_freq_mhz}" \
-    "${do_get_current__cpu_max_value}" \
-    "${do_get_current__cpu_max_freq_mhz}"
+  )" \
+    "${do_get_current__cpu_driver}" \
+    "${do_get_current__cpu_governor}" \
+    "${do_get_current__cpu_turbo}" "${do_get_current__cpu_turbo_onoff}" \
+    "${do_get_current__epp}" \
+    "${do_get_current__cpu_min_value}" "${do_get_current__cpu_min_freq_mhz}" \
+    "${do_get_current__cpu_max_value}" "${do_get_current__cpu_max_freq_mhz}"
 
   unset do_get_current__cpu_turbo_onoff
   unset do_get_current__cpu_max_freq_khz
@@ -991,6 +1099,7 @@ EOF
   unset do_get_current__cpu_turbo
   unset do_get_current__cpu_governor
   unset do_get_current__cpu_driver
+  unset do_get_current__epp
   return 0
 }
 
@@ -1073,7 +1182,8 @@ do_get() {
 # Returns true or false based on if something is requested to be --set
 is_set_command_possible() {
   if [ "${__exec_set_max_type}" -eq 1 ] || [ "${__exec_set_min_type}" -eq 1 ] ||
-    [ "${__exec_set_turbo_type}" -eq 1 ] || [ "${__exec_set_governor_type}" -eq 1 ]; then
+    [ "${__exec_set_turbo_type}" -eq 1 ] || [ "${__exec_set_governor_type}" -eq 1 ] ||
+    [ "${__exec_set_epp_type}" -eq 1 ]; then
     return 0
   else
     return 1
@@ -1217,6 +1327,28 @@ root_write_governor() {
 }
 
 ##
+# Write the given EPP value to the scaling driver
+#
+# $1 epp value
+root_write_epp() {
+  root_write_epp__epp="$1"
+
+  log_verbose "Write EPP '%s' to all CPUs" "${root_write_epp__epp}"
+  for root_write_epp__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
+    root_write_epp__target="${SYSTEM_CPU_DIR}/cpu${root_write_epp__i}/cpufreq/energy_performance_preference"
+    log_verbose "Write EPP: '%s' to file: %s" "${root_write_epp__epp}" "${root_write_epp__target}"
+    printf -- "%s" "${root_write_epp__epp}" >"${root_write_epp__target}" || return 1
+    log_all "EPP '%s' written to %s" "${root_write_epp__epp}" "${root_write_epp__target}"
+
+    unset root_write_epp__target
+    unset root_write_epp__i
+  done
+
+  unset root_write_epp__epp
+  return 0
+}
+
+##
 # Do the actual setting of CPU values once all prerequisites are filled
 root_do_set() {
   log_verbose "YOU ARE ROOT"
@@ -1232,20 +1364,14 @@ root_do_set() {
   # is higher than the requested max. In this case, min will be set first, as
   # the logic above should guarantee that it is lower than the max
 
-  root_do_set__setting_cpu_governor=
-  log_all "Check if we are setting governor"
-  if [ "${__exec_set_governor_type}" -eq 1 ]; then
-    log_all "Set governor to arg"
-    root_do_set__setting_cpu_governor="${__exec_set_governor_arg}"
-  fi
-
   # If this is set from changing governor or turbo, we must re-read cpuinfo_ files
   root_do_set__reread_cpu=0
 
   # Apply the governor first
-  if [ -n "${root_do_set__setting_cpu_governor}" ]; then
-    log_verbose "ROOT: setting_cpu_governor: ${root_do_set__setting_cpu_governor}"
-    root_write_governor "${root_do_set__setting_cpu_governor}"
+  log_all "Check if we are setting governor"
+  if [ "${__exec_set_governor_type}" -eq 1 ]; then
+    log_verbose "ROOT: setting_cpu_governor: ${__exec_set_governor_arg}"
+    root_write_governor "${__exec_set_governor_arg}"
 
     # Flag for re-reading
     root_do_set__reread_cpu=1
@@ -1254,21 +1380,25 @@ root_do_set() {
   # Then apply turbo
   log_all "Check if we are setting turbo"
   if [ "${__exec_set_turbo_type}" -eq 1 ]; then
-    log_all "Set turbo to arg"
-    root_do_set__setting_cpu_turbo="${__exec_set_turbo_arg}"
+    log_verbose "ROOT: setting_cpu_turbo: ${__exec_set_turbo_arg}"
+    root_write_turbo "${__exec_set_turbo_arg}"
+
+    # Flag for re-reading
+    root_do_set__reread_cpu=1
   fi
 
-  # Set the turbo first, as it may change the values of the cpuinfo_max or cpuinfo_min frequencies
-  if [ -n "${root_do_set__setting_cpu_turbo}" ]; then
-    log_verbose "ROOT: setting_cpu_turbo: ${root_do_set__setting_cpu_turbo}"
-    root_write_turbo "${root_do_set__setting_cpu_turbo}"
+  # Then apply EPP
+  log_all "Check if we are setting epp"
+  if [ "${__exec_set_epp_type}" -eq 1 ]; then
+    log_verbose "ROOT: setting_epp: ${__exec_set_epp_arg}"
+    root_write_epp "${__exec_set_epp_arg}"
 
     # Flag for re-reading
     root_do_set__reread_cpu=1
   fi
 
   if [ "${root_do_set__reread_cpu}" -eq 1 ]; then
-    log_verbose "Re-read system cpuinfo_ since turbo/governor may have changed frequency range."
+    log_verbose "Re-read system cpuinfo_ since turbo/governor/epp may have changed frequency range."
     # Re-read the system cpuinfo files in case turbo changes these
     SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
   fi
@@ -1332,8 +1462,6 @@ root_do_set() {
 
   unset root_do_set__setting_cpu_max
   unset root_do_set__setting_cpu_min
-  unset root_do_set__setting_cpu_turbo
-  unset root_do_set__setting_cpu_governor
   return 0
 }
 
@@ -1362,6 +1490,18 @@ do_set() {
 
   unset do_set__delay
   return 0
+}
+
+##
+# Check that we have energy_performance_available_preferences and energy_performance_preference available
+has_epp_support() {
+  if [ -f "${SYSTEM_CPU_EPP_AVAILABLE}" ] && [ -f "${SYSTEM_CPU_EPP_RUNTIME}" ]; then
+    # Return 0 means true
+    return 0
+  else
+    # Return non-0 means false
+    return 1
+  fi
 }
 
 ##
@@ -1450,8 +1590,12 @@ main() {
     main__opt_governor=0
     main__opt_governor_arg=""
 
+    # EPP
+    main__opt_epp=0
+    main__opt_epp_arg=""
+
     while [ "${OPTIND}" -le "$#" ]; do
-      while getopts ":HVGSp:m:n:t:g:crdq-:" option; do
+      while getopts ":HVGSp:m:n:t:g:e:crdq-:" option; do
         case "${option}" in
         -)
           log_verbose "parse long option: -%s%s" "${option}" "${OPTARG}"
@@ -1544,6 +1688,19 @@ main() {
               shift
             else
               elog_quiet "Long option --governor expects argument"
+              return 1
+            fi
+            ;;
+          epp)
+            main__opt_epp=1
+
+            # --epp expects an argument
+            if [ $# -ge ${OPTIND} ]; then
+              eval main__opt_epp_arg="\$${OPTIND}"
+              log_all "Attempt to set --epp:${main__opt_epp_arg}"
+              shift
+            else
+              elog_quiet "Long option --epp expects argument"
               return 1
             fi
             ;;
@@ -1658,6 +1815,18 @@ main() {
             return 1
           fi
           ;;
+        e)
+          main__opt_epp=1
+
+          # -e expects an argument
+          if [ -n "${OPTARG}" ]; then
+            main__opt_epp_arg="${OPTARG}"
+            log_all "Attempt to set -e:${main__opt_epp_arg}"
+          else
+            elog_quiet "Short option -e expects argument"
+            return 1
+          fi
+          ;;
         c)
           log_all "Set exec_get_type to current"
           exec_get_type="${GET_TYPE_CURRENT}"
@@ -1709,6 +1878,12 @@ main() {
     set_governor "${exec_mode}" "${main__opt_governor_arg}" || return 1
   fi
 
+  # Then override epp
+  if [ "${main__opt_epp}" -ne 0 ]; then
+    log_verbose "--epp requested with argument: ${main__opt_epp_arg}"
+    set_epp "${exec_mode}" "${main__opt_epp_arg}" || return 1
+  fi
+
   # Followed by turbo
   if [ "${main__opt_turbo}" -ne 0 ]; then
     log_verbose "--turbo requested with argument: ${main__opt_turbo_arg}"
@@ -1732,12 +1907,14 @@ main() {
   unset main__opt_max
   unset main__opt_min
   unset main__opt_plan
+  unset main__opt_epp
 
   unset main__opt_turbo_arg
   unset main__opt_governor_arg
   unset main__opt_max_arg
   unset main__opt_min_arg
   unset main__opt_plan_arg
+  unset main__opt_epp_arg
 
   case "${exec_mode}" in
   "${EXEC_MODE_GET}")
@@ -1753,6 +1930,7 @@ set_max: ${__exec_set_max_type} [${__exec_set_max_arg}]
 set_min: ${__exec_set_min_type} [${__exec_set_min_arg}]
 set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]
 set_governor: ${__exec_set_governor_type} [${__exec_set_governor_arg}]
+set_epp: ${__exec_set_epp_type} [${__exec_set_epp_arg}]
 EOF
     )"
     do_set "${execution_delay}" || return 1
@@ -1801,6 +1979,11 @@ readonly SET_GOVERNOR_TRUE=1
 __exec_set_governor_type="${SET_GOVERNOR_FALSE}"
 __exec_set_governor_arg=""
 
+readonly SET_EPP_FALSE=0
+readonly SET_EPP_TRUE=1
+__exec_set_epp_type="${SET_EPP_FALSE}"
+__exec_set_epp_arg=""
+
 # Check system sanity
 # Some container based systems will not have CPU related info and therefore
 # will not work with pstate-frequency
@@ -1813,6 +1996,10 @@ readonly SYSTEM_SCALING_MIN_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_fre
 readonly SYSTEM_SCALING_GOVERNOR="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_governor"
 readonly SYSTEM_SCALING_DRIVER="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_driver"
 readonly SYSTEM_CPU_GOVERNORS="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_available_governors"
+
+# Some platforms have EPP support
+readonly SYSTEM_CPU_EPP_AVAILABLE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/energy_performance_available_preferences"
+readonly SYSTEM_CPU_EPP_RUNTIME="${SYSTEM_CPU_DIR}/cpu0/cpufreq/energy_performance_preference"
 
 # intel_pstate related vars
 readonly SYSTEM_INTEL_PSTATE_DIR="${SYSTEM_CPU_DIR}/intel_pstate"
