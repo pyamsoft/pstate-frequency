@@ -9,6 +9,7 @@ minimum and maximum scaling frequencies and the state of turbo boost.
 
 - The intel_pstate (included in kernel 3.9 and upwards) OR
   the amd_pstate driver in "passive" mode (included in kernel 5.17) OR
+  the amd_pstate driver in "active-epp" mode (included in kernel 6.5) OR
   the acpi-cpufreq driver (you have this).  
   Other CPU scaling drivers are not supported and so the behavior of
   the pstate-frequency script when running with an unsupported CPU driver is undefined.
@@ -39,6 +40,7 @@ change:
 - Install a set of default power plans (defaults to Yes)
 - Install bash completion (defaults to Yes)
 - Install zsh completion (defaults to No)
+- Install fish completion (defaults to No)
 - Install systemd related unit files (defaults to Yes)
 - Install udev rules for automatic frequency setting (defaults to Yes)
 - Install this README as documentation (defaults to Yes)
@@ -119,6 +121,8 @@ takes various flags as required arguments:
     all cores.
 - **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.  
     Must be specified as a plan name inside of `/etc/pstate-frequency.d/`
+- **-e --epp** Adjust the current CPU Energy Performance Preference
+    Must be the name of a valid EPP profile - other than "default"
 
 _By default, calling the -S option with no extra arguments will return an
 error_
@@ -126,7 +130,7 @@ error_
 ##### Power Plans
 
 Power Plans are convenience shortcuts which essentially alias to calling
-pstate-frequency with various options for --max, --min, --turbo, and
+pstate-frequency with various options for --max, --min, --turbo, --epp, and
 --governor. They are not necessary for operation, but are recommended.
 
 There are five default power plans:
@@ -235,7 +239,7 @@ With the intel_pstate driver:
 - /sys/devices/system/cpu/intel_pstate/min_perf_pct
 - /sys/devices/system/cpu/intel_pstate/no_turbo
 
-With acpi-cpufreq OR amd_pstate:
+With acpi-cpufreq OR amd_pstate (passive):
 
 - /sys/devices/system/cpu/cpufreq/boost
 
