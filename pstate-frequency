@@ -1301,11 +1301,13 @@ root_write_turbo() {
       root_write_turbo__target=""
     fi
   else
-    log_verbose "Turbo boost is unsupported on your CPU platform."
+    log_verbose "Could not find turbo information from ANY expected locations."
     root_write_turbo__target=""
   fi
 
-  if [ -w "${root_write_turbo__target}" ]; then
+  if [ -z "${root_write_turbo__target}" ]; then
+    elog "Turbo boost is unsupported on your CPU platform."
+  elif [ -w "${root_write_turbo__target}" ]; then
     log_verbose "Write turbo_value '%s' to file: %s" "${root_write_turbo__turbo}" "${root_write_turbo__target}"
     printf -- "%s" "${root_write_turbo__turbo}" >"${root_write_turbo__target}" || return 1
     log_all "Turbo value written to %s" "${root_write_turbo__target}"
