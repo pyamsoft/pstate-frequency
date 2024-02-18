@@ -18,59 +18,55 @@
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-_pstate-frequency()
-{
+_pstate-frequency() {
   typeset -A opt_args
   _arguments \
     "1: :_actions" \
     "*: :_options"
 }
 
-_actions()
-{
+_actions() {
   _alternative \
     "unprivilaged-actions:unprivilaged actions:_unprivilaged_actions" \
     "privilaged-actions:privilaged actions:_privilaged_actions"
 }
 
-_options()
-{
- # Array size ${#words}
- local index
- let "index=${#words} - 1"
- if [ "$words[$index]" = "-S" ] || [ "$words[$index]" = "--set" ]; then
-   _alternative \
-     "privilaged-options:privilaged options:_privilaged_options"
- elif [ "$words[$index]" = "-G" ] || [ "$words[$index]" = "--get" ]; then
-   _alternative \
-     "unprivilaged-options:unprivilaged options:_unprivilaged_options"
- elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--governor" ]; then
-   _alternative \
-     ":cpu governor name:"
- elif [ "$words[$index]" = "-e" ] || [ "$words[$index]" = "--epp" ]; then
-   _alternative \
-     ":epp name:"
- elif [ "$words[$index]" = "-m" ] || [ "$words[$index]" = "--max" ]; then
-   _alternative \
-     ":max freq between 0 and 100:"
- elif [ "$words[$index]" = "-n" ] || [ "$words[$index]" = "--min" ]; then
-   _alternative \
-     ":min freq between 0 and 100:"
- elif [ "$words[$index]" = "-t" ] || [ "$words[$index]" = "--turbo" ]; then
-   _alternative \
-     ":turbo boost either on or off:"
- elif [ "$words[$index]" = "-p" ] || [ "$words[$index]" = "--plan" ]; then
-   _alternative \
-     ":power plan name :"
- else
-   _actions
- fi
+_options() {
+  # Array size ${#words}
+  local index
+  let "index=${#words} - 1"
+  if [ "$words[$index]" = "-S" ] || [ "$words[$index]" = "--set" ]; then
+    _alternative \
+      "privilaged-options:privilaged options:_privilaged_options"
+  elif [ "$words[$index]" = "-G" ] || [ "$words[$index]" = "--get" ]; then
+    _alternative \
+      "unprivilaged-options:unprivilaged options:_unprivilaged_options"
+  elif [ "$words[$index]" = "-g" ] || [ "$words[$index]" = "--governor" ]; then
+    _alternative \
+      ":cpu governor name:"
+  elif [ "$words[$index]" = "-e" ] || [ "$words[$index]" = "--epp" ]; then
+    _alternative \
+      ":epp name:"
+  elif [ "$words[$index]" = "-m" ] || [ "$words[$index]" = "--max" ]; then
+    _alternative \
+      ":max freq between 0 and 100:"
+  elif [ "$words[$index]" = "-n" ] || [ "$words[$index]" = "--min" ]; then
+    _alternative \
+      ":min freq between 0 and 100:"
+  elif [ "$words[$index]" = "-t" ] || [ "$words[$index]" = "--turbo" ]; then
+    _alternative \
+      ":turbo boost either on or off:"
+  elif [ "$words[$index]" = "-p" ] || [ "$words[$index]" = "--plan" ]; then
+    _alternative \
+      ":power plan name :"
+  else
+    _actions
+  fi
 }
 
-_unprivilaged_options()
-{
+_unprivilaged_options() {
   # Add long option support
-  local options;
+  local options
   options=(
     "-c:Get the current CPU values"
     "-r:Get real-time CPU frequencies"
@@ -78,10 +74,9 @@ _unprivilaged_options()
   _describe -t unprivilaged-options "unprivilaged options" options "$@"
 }
 
-_privilaged_options()
-{
+_privilaged_options() {
   # Add long option support
-  local options;
+  local options
   options=(
     "-p:Set a pre-defined plan"
     "-m:Set the CPU max"
@@ -93,11 +88,9 @@ _privilaged_options()
   _describe -t privilaged-options "privilaged options" options "$@"
 }
 
-
-_unprivilaged_actions()
-{
+_unprivilaged_actions() {
   # Add long option support
-  local actions;
+  local actions
   actions=(
     "-H:Print the help output"
     "-V:Print the current version"
@@ -109,10 +102,9 @@ _unprivilaged_actions()
   _describe -t unprivilaged-actions "unprivilaged actions" actions "$@"
 }
 
-_privilaged_actions()
-{
+_privilaged_actions() {
   # Add long option support
-  local actions;
+  local actions
   actions=(
     "-S:Modify the current CPU values"
   )
@@ -120,4 +112,3 @@ _privilaged_actions()
 }
 
 _pstate-frequency "$@"
-

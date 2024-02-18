@@ -37,7 +37,7 @@ _pstate-frequency() {
     _tmp=""
     for e in ${epp}; do
       if [ "$e" = "default" ]; then
-        continue;
+        continue
       fi
       if [ -z "${_tmp}" ]; then
         _tmp="$e"
