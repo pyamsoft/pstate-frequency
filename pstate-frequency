@@ -507,14 +507,14 @@ set_epp() {
         log_verbose "Check if %s is a valid EPP" "${try_epp}"
         if [ "${try_epp}" = "default" ]; then
           log_all 'User requested EPP "default", but writing this value is not allowed.'
-          continue;
+          continue
         fi
         for available_epp in ${set_epp__all_available_epp}; do
           if [ "${available_epp}" = "default" ]; then
             log_all 'System provides EPP "default", but writing this value is not allowed.'
-            continue;
+            continue
           fi
- 
+
           if [ "${try_epp}" = "${available_epp}" ]; then
             set_epp__value="${try_epp}"
             break
