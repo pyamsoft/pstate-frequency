@@ -103,26 +103,26 @@ The _-S --set_ option can only be called by a user with root permissions, and
 takes various flags as required arguments:
 
 - **--delay** Delays the execution of the set commands by 5 seconds.  
-    This is naive but useful for system startup where various bits of the machine
-    may not be ready until a certain amount of time has passed.  
+   This is naive but useful for system startup where various bits of the machine
+  may not be ready until a certain amount of time has passed.
 
-    _It is mainly used in the systemd unit_
+  _It is mainly used in the systemd unit_
 
 - **-m --max** Adjust the maximum scaling frequency of the CPU  
-    Can be specified as a plain number or in the syntax `+<number>`
-    which will resolve to the minimum CPU frequency + `number`
+   Can be specified as a plain number or in the syntax `+<number>`
+  which will resolve to the minimum CPU frequency + `number`
 - **-n --min** Adjust the minimum scaling frequency of the CPU  
-    Can be specified as a plain number or in the syntax `+<number>`
-    which will resolve to the minimum CPU frequency + `number`
+   Can be specified as a plain number or in the syntax `+<number>`
+  which will resolve to the minimum CPU frequency + `number`
 - **-g --governor** Adjust the current CPU scaling governor.
-    Must be the name of a valid CPU governor
+  Must be the name of a valid CPU governor
 - **-t --turbo** Adjust the current state of Turbo Boost.  
-    Can be specified as `on` or `off`. Adjusts turbo boost for
-    all cores.
+   Can be specified as `on` or `off`. Adjusts turbo boost for
+  all cores.
 - **-p --plan** Adjust the maximum scaling and Turbo Boost to a preset plan.  
-    Must be specified as a plan name inside of `/etc/pstate-frequency.d/`
+   Must be specified as a plan name inside of `/etc/pstate-frequency.d/`
 - **-e --epp** Adjust the current CPU Energy Performance Preference
-    Must be the name of a valid EPP profile - other than "default"
+  Must be the name of a valid EPP profile - other than "default"
 
 _By default, calling the -S option with no extra arguments will return an
 error_
