@@ -18,7 +18,7 @@
 
 [Unit]
 Description=Program to manage CPU frequencies
-After=basic.target
+After=tlp.service power-profiles-daemon.service acpid.service laptop-mode.service powertop.service
 
 [Service]
 Type=simple
