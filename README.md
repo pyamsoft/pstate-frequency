@@ -1,8 +1,8 @@
 # pstate-frequency
 
-Easily control Intel p-state driver on Linux (3.9 and upwards)
+Easily control modern CPU p-state driver on Linux (3.9 and upwards)
 
-pstate-frequency is able to adjust the Intel p-state driver values for the
+pstate-frequency is able to adjust the modern CPU p-state driver values for the
 minimum and maximum scaling frequencies and the state of turbo boost.
 
 ### Requirements
