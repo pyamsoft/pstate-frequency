@@ -1,4 +1,10 @@
 # Put the spec in ~/rpmbuild/SPECS and clone the repo as ~/rpmbuild/SOURCES
+#
+# Credit to original file goes to Github Users:
+# https://github.com/bensallen
+# https://github.com/ozky
+#
+# Copied-with-modification from: https://github.com/pyamsoft/pstate-frequency/issues/25
 
 Name:      pstate-frequency
 Version:   3.15.1
