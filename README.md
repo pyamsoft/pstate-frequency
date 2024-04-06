@@ -1,8 +1,8 @@
 # pstate-frequency
 
-Easily control modern CPU p-state driver on Linux (3.9 and upwards)
+Easily control CPU p-state driver on Linux (3.9 and upwards)
 
-pstate-frequency is able to adjust the modern CPU p-state driver values for the
+pstate-frequency is able to adjust the CPU p-state driver values for the
 minimum and maximum scaling frequencies and the state of turbo boost.
 
 ### Requirements
@@ -15,7 +15,7 @@ minimum and maximum scaling frequencies and the state of turbo boost.
   the pstate-frequency script when running with an unsupported CPU driver is undefined.
 
 - coreutils  
-  The standard GNU tools for things like cat, wc, grep, and cut. These are
+  The standard GNU tools for things like cat, tr, grep, and awk. These are
   generally expected on all modern Linux based systems. If you are in a
   situation where your machine does not have these basic tools, support cannot
   be offered at this time.
