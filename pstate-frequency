@@ -1579,36 +1579,33 @@ main() {
   exec_mode="${EXEC_MODE_NONE}"
   execution_delay=0 # Whether or not to delay the script
 
-  # Sanity check
-  check_binary id || return 1
-  check_binary sleep || return 1
+  # Power plans
+  main__opt_plan=0
+  main__opt_plan_arg=""
+
+  # Max CPU
+  main__opt_max=0
+  main__opt_max_arg=""
+
+  # Min CPU
+  main__opt_min=0
+  main__opt_min_arg=""
+
+  # Turbo CPU
+  main__opt_turbo=0
+  main__opt_turbo_arg=""
+
+  # Governor CPU
+  main__opt_governor=0
+  main__opt_governor_arg=""
+
+  # EPP
+  main__opt_epp=0
+  main__opt_epp_arg=""
 
   # While risky to call eval, this is one way to
   # emulate the bash indirect_expansion ability
   if [ $# -gt 0 ]; then
-    # Power plans
-    main__opt_plan=0
-    main__opt_plan_arg=""
-
-    # Max CPU
-    main__opt_max=0
-    main__opt_max_arg=""
-
-    # Min CPU
-    main__opt_min=0
-    main__opt_min_arg=""
-
-    # Turbo CPU
-    main__opt_turbo=0
-    main__opt_turbo_arg=""
-
-    # Governor CPU
-    main__opt_governor=0
-    main__opt_governor_arg=""
-
-    # EPP
-    main__opt_epp=0
-    main__opt_epp_arg=""
 
     while [ "${OPTIND}" -le "$#" ]; do
       while getopts ":HVGSp:m:n:t:g:e:crdq-:" option; do
@@ -2064,6 +2061,8 @@ check_binary cat || exit 1
 check_binary grep || exit 1
 check_binary tr || exit 1
 check_binary awk || exit 1
+check_binary id || exit 1
+check_binary sleep || exit 1
 
 SYSTEM_CPU_NUMBER=
 SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
