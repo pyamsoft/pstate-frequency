@@ -2062,6 +2062,8 @@ fi
 # Need grep for CPU number
 check_binary cat || exit 1
 check_binary grep || exit 1
+check_binary tr || exit 1
+check_binary awk || exit 1
 
 SYSTEM_CPU_NUMBER=
 SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
