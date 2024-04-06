@@ -1,0 +1,42 @@
+# Put the spec in ~/rpmbuild/SPECS and clone the repo as ~/rpmbuild/SOURCES
+
+Name:      pstate-frequency
+Version:   3.15.1
+Release:   1
+License:   GPLv2
+Summary:   Easily control moden CPU p-state driver on Linux
+Url:       https://pyamsoft.github.io/pstate-frequency
+Group:     System
+Source0:   https://github.com/pyamsoft/%{name}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+Requires:  coreutils
+Requires:  grep
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
+
+%description
+Pstate-frequency is able to adjust the modern CPU p-state driver values for the minimum and maximum scaling frequencies and the state of turbo boost.
+
+%prep
+%setup -q
+
+%install
+patch -p1 -i "./assets/pkgbuild/patches/00-fix-prefix.patch"
+make PREFIX=%{_prefix} DESTDIR=%{buildroot} install
+
+%clean
+rm -rf %{buildroot}
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/%{name}
+/etc/%{name}.d/*.plan
+/usr/lib/systemd/system/%{name}@.service
+/usr/lib/systemd/system/%{name}-sleep.service
+/usr/lib/udev/rules.d/99-%{name}.rules
+/usr/share/bash-completion/completions/%{name}
+%doc %{_docdir}/%{name}/README.md
+%doc %{_docdir}/%{name}/LICENSE
+
+%changelog
+* Sat Apr 06 2024 3.15.1-1
+- Initial RPM release (3.15.1-1)
+
