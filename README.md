@@ -61,6 +61,15 @@ are currently unofficially supported through the **checkinstall** program
 and this is the recommended way to install the package until an actual
 package can be constructed.
 
+For those who are brave and running an RPM based system, a spec file exists at
+`assets/rpm` which should build the latest release version. You will need all
+of the usual `rpmdev` related tools and a working `rpmdev tree` already setup.
+Since I do not actually run an RPM based machine (I use Arch btw), I won't be
+able to ensure this file is kept working, so its a "best effort" basis. I have
+at least verified that the rpmspec builds in a Fedora 39 container, for what
+that is worth! See the original RPM spec inspiration
+[here](https://github.com/pyamsoft/pstate-frequency/issues/25)
+
 Any other package management based distributions can look to using
 **checkinstall** but are otherwise entirely unsupported by the developer at
 this time.
