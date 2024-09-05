@@ -25,4 +25,4 @@ Type=simple
 ExecStart=/bin/sh -c "pstate-frequency --delay -S -p %I"
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=graphical.target
