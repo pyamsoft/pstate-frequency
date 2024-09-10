@@ -7,7 +7,7 @@
 # Copied-with-modification from: https://github.com/pyamsoft/pstate-frequency/issues/25
 
 Name:      pstate-frequency
-Version:   3.15.1
+Version:   3.15.2
 Release:   1
 License:   GPLv2
 Summary:   Easily control moden CPU p-state driver on Linux
@@ -16,6 +16,7 @@ Group:     System
 Source0:   https://github.com/pyamsoft/%{name}/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 Requires:  coreutils
 Requires:  grep
+Requires:  awk
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 
 %description
@@ -43,6 +44,9 @@ rm -rf %{buildroot}
 %doc %{_docdir}/%{name}/LICENSE
 
 %changelog
+* Wed Sep 04 2024 3.15.2-1
+- Fix systemd service file ordering due to new power-profiles-daemon release.
+
 * Sat Apr 06 2024 3.15.1-1
 - Initial RPM release (3.15.1-1)
 

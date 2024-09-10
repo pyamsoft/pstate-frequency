@@ -59,7 +59,8 @@ GitHub and compile it for ArchLinux.
 Debian package management and RedHat package management based distributions
 are currently unofficially supported through the **checkinstall** program
 and this is the recommended way to install the package until an actual
-package can be constructed.
+package can be constructed. Please see the `docheckinstall` script in
+`assets/checkinstall`
 
 For those who are brave and running an RPM based system, a spec file exists at
 `assets/rpm` which should build the latest release version. You will need all

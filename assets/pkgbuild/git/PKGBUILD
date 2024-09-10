@@ -52,7 +52,7 @@ pkgver() {
     return 1
   }
 
-  printf "%s.r%s.%s" "$(awk -F '=' '{if (/^readonly __VERSION=/) {print $2}}' "${_gitname}")" \
+  printf "%s.r%s.%s" "$(awk -F '=' '{ if (/^readonly __VERSION=/) { print $2 } }' "${_gitname}")" \
     "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
