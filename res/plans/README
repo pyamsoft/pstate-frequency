@@ -58,4 +58,4 @@ PLAN_CPU_MIN=0
 PLAN_CPU_TURBO=off
 PLAN_CPU_PSTATE_GOVERNOR=powersave
 PLAN_CPU_CPUFREQ_GOVERNOR=ondemand
-PLAN_CPU_EPP=balance_performance,performance
+PLAN_CPU_EPP=balance_power,balance_performance,performance
