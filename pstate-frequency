@@ -199,7 +199,7 @@ option:
     -e <name>       | --epp <name>         | --epp=<name>           Set the Energy Performance Preference
     -m [+]<number>  | --max [+]<number>    | --max=[+]<number>      Modify current CPU max frequency <number|offset>
     -n [+]<number>  | --min [+]<number>    | --min=[+]<number>      Modify current CPU min frequency <number|offset>
-    -t <on|off> | --turbo <on|off> | --turbo=<on|off>               Modify current CPU turbo boost <"on"|"off">
+    -t <on|off>     | --turbo <on|off>     | --turbo=<on|off>       Modify current CPU turbo boost <"on"|"off">
 
 system:
     [set]
