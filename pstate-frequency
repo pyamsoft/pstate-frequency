@@ -190,21 +190,22 @@ action:
 
 option:
     [get]
-    -c | --current                  Display the current user set CPU values
-    -r | --real                     Display the real time CPU frequencies
+    -c | --current   Display the current user set CPU values
+    -r | --real      Display the real time CPU frequencies
 
     [set]
     -p <name>       | --plan <name>        | --plan=<name>          Set a predefined power plan <name>
     -g <name>       | --governor <name>    | --governor=<name>      Set the cpufreq governor <name>
-    -e <name>       | --epp <name>         | --epp=<name>           Set the Energy Performance Preference
-    -m [+]<number>  | --max [+]<number>    | --max=[+]<number>      Modify current CPU max frequency <number|offset>
-    -n [+]<number>  | --min [+]<number>    | --min=[+]<number>      Modify current CPU min frequency <number|offset>
+    -e <name>       | --epp <name>         | --epp=<name>           Set the Energy Performance Preference <name>
+    -m [+]<number>  | --max [+]<number>    | --max=[+]<number>      Modify current CPU max frequency <number|+offset>
+    -n [+]<number>  | --min [+]<number>    | --min=[+]<number>      Modify current CPU min frequency <number|+offset>
     -t <on|off>     | --turbo <on|off>     | --turbo=<on|off>       Modify current CPU turbo boost <"on"|"off">
 
 system:
     [set]
-    --delay                                                         Delay execution of "set" commands by 5 seconds
-            <Used to work around a boot issue where values are set too early and can be overwritten by another system component.>
+    --delay          Delay execution of "set" commands by 5 seconds
+                     (Used to work around a boot issue where values are set too early
+                     and can be overwritten by another system component.)
 
 
 examples:
