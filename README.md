@@ -145,17 +145,23 @@ pstate-frequency with various options for --max, --min, --turbo, --epp, and
 
 There are five default power plans:
 
-1. **powersave** Sets the minimum and maximum scaling frequencies to the
-   lowest available and disables Turbo Boost.
-2. **balanced** Sets the minimum scaling frequency to the
-   lowest available, the maximum scaling frequency to the highest available
-   non-turbo frequency and disables Turbo Boost.
-3. **performance** Sets the minimum scaling frequency to the
-   lowest available, the maximum scaling frequency to the highest available
-   frequency and enables Turbo Boost.
-4. **max** Sets the minimum and maximum scaling frequencies
-   to the highest available frequency taking into account Turbo Boost
-   frequencies, and enables Turbo Boost.
+1. **powersave** Sets the minimum scaling frequency to the lowest available
+   frequency, the maximum scaling frequency to 30% above the minimum scaling
+   frequency within the possible range, configures the scaling governor and
+   energy performance preference to "powersave" equivalent settings, and
+   disables Turbo Boost.
+2. **balanced** Sets the minimum scaling frequency to the lowest available
+   frequency, the maximum scaling frequency to the highest available frequency,
+   configures the scaling governor and energy performance preference to
+   "balanced" equivalent settings, and enables Turbo Boost.
+3. **performance** Sets the minimum scaling frequency to the lowest available
+   frequency, the maximum scaling frequency to the highest available frequency,
+   configures the scaling governor and energy performance preference to
+   "performance" equivalent settings, and enables Turbo Boost.
+4. **max** Sets the minimum and maximum scaling frequencies to the highest
+   available frequency taking into account Turbo Boost frequencies, configures
+   the scaling governor and energy performance preference to "max" equivalent
+   settings, and enables Turbo Boost.
 5. **auto** If the computer's main powersource is online, then the
    _balanced_ plan is set. If the main powersource is offline, then the
    _powersave_ plan is set.
