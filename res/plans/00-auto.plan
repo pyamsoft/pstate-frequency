@@ -16,7 +16,7 @@
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# On battery, executes powersave plan
 # On AC executes balanced plan
+# On battery, executes powersave plan too
 PLAN_AUTO_AC=balanced
-PLAN_AUTO_BAT=powersave
+PLAN_AUTO_BAT=balanced
