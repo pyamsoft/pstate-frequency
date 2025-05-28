@@ -1057,16 +1057,12 @@ do_get_current() {
     if [ "${do_get_current__cpu_turbo}" -eq 1 ]; then
       if has_intel_pstate_dir; then
         do_get_current__cpu_turbo_onoff="OFF"
-      elif has_amd_pstate_dir; then
-        do_get_current__cpu_turbo_onoff="ON"
       else
         do_get_current__cpu_turbo_onoff="ON"
       fi
     else
       if has_intel_pstate_dir; then
         do_get_current__cpu_turbo_onoff="ON"
-      elif has_amd_pstate_dir; then
-        do_get_current__cpu_turbo_onoff="OFf"
       else
         do_get_current__cpu_turbo_onoff="OFF"
       fi
@@ -2023,6 +2019,10 @@ readonly SYSTEM_AMD_PSTATE_DIR="${SYSTEM_CPU_DIR}/amd_pstate"
 # Turbo boost locations in sysfs
 readonly SYSTEM_CPUFREQ_TURBO="${SYSTEM_CPU_DIR}/cpufreq/boost"
 readonly SYSTEM_INTEL_PSTATE_TURBO="${SYSTEM_INTEL_PSTATE_DIR}/no_turbo"
+
+## It seems that this path USED TO be used for amd-pstate boost, but
+## at some point, at least on Kernel 6.12 it is no longer used, and
+## even an amd-pstate driver uses the CPUFREQ boost path.
 readonly SYSTEM_AMD_PSTATE_TURBO="${SYSTEM_AMD_PSTATE_DIR}/cpb_boost"
 
 # configuration directory for power plan configs
