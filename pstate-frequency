@@ -1373,52 +1373,52 @@ root_do_set() {
   # the logic above should guarantee that it is lower than the max
 
   # If this is set from changing governor or turbo, we must re-read cpuinfo_ files
-  root_do_set__reread_cpu=0
+  root_do_set__reread_cpu="${SET_REREAD_CPU_FALSE}"
 
   # Apply the governor first
   log_all "Check if we are setting governor"
-  if [ "${__exec_set_governor_type}" -eq 1 ]; then
+  if [ "${__exec_set_governor_type}" -eq "${SET_GOVERNOR_TRUE}" ]; then
     log_verbose "ROOT: setting_cpu_governor: ${__exec_set_governor_arg}"
     root_write_governor "${__exec_set_governor_arg}"
 
     # Flag for re-reading
-    root_do_set__reread_cpu=1
+    root_do_set__reread_cpu="${SET_REREAD_CPU_TRUE}"
   fi
 
   # Then apply turbo
   log_all "Check if we are setting turbo"
-  if [ "${__exec_set_turbo_type}" -eq 1 ]; then
+  if [ "${__exec_set_turbo_type}" -eq "${SET_TURBO_TRUE}" ]; then
     log_verbose "ROOT: setting_cpu_turbo: ${__exec_set_turbo_arg}"
     root_write_turbo "${__exec_set_turbo_arg}"
 
     # Flag for re-reading
-    root_do_set__reread_cpu=1
+    root_do_set__reread_cpu="${SET_REREAD_CPU_TRUE}"
   fi
 
   # Then apply EPP
   log_all "Check if we are setting epp"
-  if [ "${__exec_set_epp_type}" -eq 1 ]; then
+  if [ "${__exec_set_epp_type}" -eq "${SET_EPP_TRUE}" ]; then
     log_verbose "ROOT: setting_epp: ${__exec_set_epp_arg}"
     root_write_epp "${__exec_set_epp_arg}"
 
     # Flag for re-reading
-    root_do_set__reread_cpu=1
+    root_do_set__reread_cpu="${SET_REREAD_CPU_TRUE}"
   fi
 
-  if [ "${root_do_set__reread_cpu}" -eq 1 ]; then
+  if [ "${root_do_set__reread_cpu}" -eq "${SET_REREAD_CPU_TRUE}" ]; then
     log_verbose "Re-read system cpuinfo_ since turbo/governor/epp may have changed frequency range."
     # Re-read the system cpuinfo files in case turbo changes these
     SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
   fi
 
   log_all "Check if we are setting max"
-  if [ "${__exec_set_max_type}" -eq 1 ]; then
+  if [ "${__exec_set_max_type}" -eq "${SET_MAX_TRUE}" ]; then
     log_all "Set max to arg"
     root_do_set__setting_cpu_max="${__exec_set_max_arg}"
   fi
 
   log_all "Check if we are setting min"
-  if [ "${__exec_set_min_type}" -eq 1 ]; then
+  if [ "${__exec_set_min_type}" -eq "${SET_MIN_TRUE}" ]; then
     log_all "Set min to arg"
     root_do_set__setting_cpu_min="${__exec_set_min_arg}"
   fi
@@ -1482,7 +1482,7 @@ do_set() {
   do_set__delay="$1"
 
   if [ "$(id -u)" -eq 0 ]; then
-    if [ "${do_set__delay}" -eq 1 ]; then
+    if [ "${do_set__delay}" -eq "${EXEC_DELAY_TRUE}" ]; then
       log_verbose "Delay for 5 seconds requested by user"
       sleep 5
     fi
@@ -1569,7 +1569,7 @@ main() {
 
   exec_get_type="${GET_TYPE_CURRENT}"
   exec_mode="${EXEC_MODE_NONE}"
-  execution_delay=0 # Whether or not to delay the script
+  execution_delay="${EXEC_DELAY_FALSE}" # Whether or not to delay the script
 
   # Power plans
   main__opt_plan=0
@@ -1724,7 +1724,7 @@ main() {
             log_less_verbose
             ;;
           delay)
-            execution_delay=1
+            execution_delay="${EXEC_DELAY_TRUE}"
             ;;
           *)
             # We must provide our own error message in this case
@@ -1990,6 +1990,12 @@ readonly SET_EPP_FALSE=0
 readonly SET_EPP_TRUE=1
 __exec_set_epp_type="${SET_EPP_FALSE}"
 __exec_set_epp_arg=""
+
+readonly SET_REREAD_CPU_FALSE=0
+readonly SET_REREAD_CPU_TRUE=1
+
+readonly EXEC_DELAY_FALSE=0
+readonly EXEC_DELAY_TRUE=1
 
 # Check system sanity
 # Some container based systems will not have CPU related info and therefore
