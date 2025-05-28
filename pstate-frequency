@@ -493,11 +493,6 @@ set_epp() {
 
   log_all "set_epp requires SET operation exec_mode"
   if [ "${set_epp__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    if ! has_epp_support; then
-      elog_quiet "Cannot set Energy Performance Preference without platform support. Your CPU is too old?"
-      return 1
-    fi
-
     set_epp__all_available_epp="$(cat "${SYSTEM_CPU_EPP_AVAILABLE}")"
 
     log_all "Check that '%s' is not digits" "${set_epp__all_available_epp}"
@@ -1892,10 +1887,12 @@ main() {
     set_governor "${exec_mode}" "${main__opt_governor_arg}" || return 1
   fi
 
-  # Then override epp
-  if [ "${main__opt_epp}" -ne 0 ]; then
-    log_verbose "--epp requested with argument: ${main__opt_epp_arg}"
-    set_epp "${exec_mode}" "${main__opt_epp_arg}" || return 1
+  if has_epp_support; then
+    # Then override epp
+    if [ "${main__opt_epp}" -ne 0 ]; then
+      log_verbose "--epp requested with argument: ${main__opt_epp_arg}"
+      set_epp "${exec_mode}" "${main__opt_epp_arg}" || return 1
+    fi
   fi
 
   # Followed by turbo
