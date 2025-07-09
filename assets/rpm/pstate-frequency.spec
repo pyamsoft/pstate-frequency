@@ -7,7 +7,7 @@
 # Copied-with-modification from: https://github.com/pyamsoft/pstate-frequency/issues/25
 
 Name:      pstate-frequency
-Version:   3.15.2
+Version:   3.16.1
 Release:   1
 License:   GPLv2
 Summary:   Easily control moden CPU p-state driver on Linux
@@ -44,6 +44,13 @@ rm -rf %{buildroot}
 %doc %{_docdir}/%{name}/LICENSE
 
 %changelog
+* Tue Jul 08 2025 3.16.1-1
+- systemd and udev scripts run directly instead of via /bin/sh
+
+* Wed May 28 2025 3.16.0-1
+- New EPP set behavior
+- Default EPP in plans is balance_power
+
 * Wed Sep 04 2024 3.15.2-1
 - Fix systemd service file ordering due to new power-profiles-daemon release.
 
