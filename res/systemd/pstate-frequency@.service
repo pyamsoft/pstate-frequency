@@ -22,7 +22,7 @@ After=tlp.service power-profiles-daemon.service acpid.service laptop-mode.servic
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c "pstate-frequency --delay -S -p %I"
+ExecStart=%PREFIX%/bin/pstate-frequency --delay -S -p %I
 
 [Install]
 WantedBy=graphical.target

@@ -17,4 +17,4 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Sets power states based on the current connected state of the AC Adapter
-ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="Mains", RUN+="/bin/sh -c 'pstate-frequency -qq -S -p auto'"
+ACTION=="change", SUBSYSTEM=="power_supply", ATTR{type}=="Mains", RUN+="%PREFIX%/bin/pstate-frequency --delay -qq -S -p auto"

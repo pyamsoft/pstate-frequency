@@ -140,6 +140,7 @@ install-udev:
 	@echo "  INSTALL  $(UDEV_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(UDEV_INSTALL_TARGET))"
 	@install -Dm 644 "$(UDEV_INSTALL_SRC)" "$(UDEV_INSTALL_TARGET)"
+	@sed -i "s|%PREFIX%|$(PREFIX)|" "$(UDEV_INSTALL_TARGET)"
 
 install-systemd:
 	@$(MAKE) install-systemd-pstate-at
@@ -149,11 +150,13 @@ install-systemd-pstate-at:
 	@echo "  INSTALL  $(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_AT_INSTALL_TARGET))"
 	@install -Dm 644 "$(SYSTEMD_SERVICE_AT_INSTALL_SRC)" "$(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
+	@sed -i "s|%PREFIX%|$(PREFIX)|" "$(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
 
 install-systemd-pstate-sleep:
 	@echo "  INSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET))"
 	@install -Dm 644 "$(SYSTEMD_SERVICE_SLEEP_INSTALL_SRC)" "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
+	@sed -i "s|%PREFIX%|$(PREFIX)|" "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 
 install-power-plans:
 	@echo "  INSTALL  DIR: $(POWER_PLAN_INSTALL_TARGETDIR)"

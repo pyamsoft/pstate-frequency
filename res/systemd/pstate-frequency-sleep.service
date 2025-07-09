@@ -22,7 +22,7 @@ After=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate
 
 [Service]
 Type=simple
-ExecStart=/bin/sh -c "pstate-frequency -S -p auto"
+ExecStart=%PREFIX%/bin/pstate-frequency -S -p auto
 
 [Install]
 WantedBy=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
