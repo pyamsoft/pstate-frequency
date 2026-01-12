@@ -174,7 +174,8 @@ _check_binary() {
 ##
 # Print usage
 _print_usage() {
-  _print_version
+  _print_version || return 1
+
   _log "$(
     cat <<EOF
 
@@ -255,6 +256,7 @@ is_digits() {
 # Print version
 _print_version() {
   _log "pstate-frequency <%s>" "${__VERSION}"
+  return 0
 }
 
 ##
@@ -264,6 +266,8 @@ _log_more_verbose() {
     __log_level=$((__log_level + 1))
     _log_all "__log_level more verbose"
   fi
+
+  return 0
 }
 
 ##
@@ -273,6 +277,8 @@ _log_less_verbose() {
     _log_all "__log_level less verbose"
     __log_level=$((__log_level - 1))
   fi
+
+  return 0
 }
 
 ##
@@ -299,7 +305,7 @@ set_variable_bounds() {
   fi
 
   # Echo out result
-  printf -- "%s" "${set_variable_bounds__result}"
+  printf -- '%s' "${set_variable_bounds__result}"
 
   unset set_variable_bounds__result
   unset set_variable_bounds__number
