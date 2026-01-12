@@ -1006,16 +1006,74 @@ EOF
 }
 
 ##
+# Determine the current scaling_max_freq by reading from all CPUs for the highest value
+_get_system_scaling_max_freq() {
+  _max_khz=""
+  for _cpu in "${SYSTEM_CPU_DIR}"/cpu*/cpufreq; do
+    _cpu_max_khz="$(cat "${_cpu}/scaling_max_freq")"
+    if [ -n "${_cpu_max_khz}" ]; then
+      if [ -z "${_max_khz}" ]; then
+        _max_khz="${_cpu_max_khz}"
+      elif [ "${_cpu_max_khz}" -gt "${_max_khz}" ]; then
+        _max_khz="${_cpu_max_khz}"
+      fi
+    fi
+    unset _cpu
+  done
+  unset _cpu
+
+  if [ -n "${_max_khz}" ]; then
+    printf -- '%s' "${_max_khz}"
+  fi
+
+  unset _max_khz
+  return 0
+}
+
+##
+# Determine the current scaling_min_freq by reading from all CPUs for the lowest value
+_get_system_scaling_min_freq() {
+  _min_khz=""
+  for _cpu in "${SYSTEM_CPU_DIR}"/cpu*/cpufreq; do
+    _cpu_min_khz="$(cat "${_cpu}/scaling_min_freq")"
+    if [ -n "${_cpu_min_khz}" ]; then
+      if [ -z "${_min_khz}" ]; then
+        _min_khz="${_cpu_min_khz}"
+      elif [ "${_cpu_min_khz}" -lt "${_min_khz}" ]; then
+        _min_khz="${_cpu_min_khz}"
+      fi
+    fi
+    unset _cpu
+  done
+  unset _cpu
+
+  if [ -n "${_min_khz}" ]; then
+    printf -- '%s' "${_min_khz}"
+  fi
+
+  unset _min_khz
+  return 0
+}
+
+##
 # Get the current state of the CPU from the pstate and scaling driver
 #
 do_get_current() {
   # Re-read the system cpuinfo files in case turbo changes these
   SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
 
-  do_get_current__cpu_max_freq_khz="$(cat "${SYSTEM_SCALING_MAX_FREQ}")"
+  do_get_current__cpu_max_freq_khz="$(_get_system_scaling_max_freq)"
+  if [ -z "${do_get_current__cpu_max_freq_khz}" ] || [ "${do_get_current__cpu_max_freq_khz}" -le 0 ]; then
+    elog_quiet "Unable to determine current scaling_max_freq"
+    return 1
+  fi
   do_get_current__cpu_max_freq_mhz="$((do_get_current__cpu_max_freq_khz / 1000))"
 
-  do_get_current__cpu_min_freq_khz="$(cat "${SYSTEM_SCALING_MIN_FREQ}")"
+  do_get_current__cpu_min_freq_khz="$(_get_system_scaling_min_freq)"
+  if [ -z "${do_get_current__cpu_min_freq_khz}" ] || [ "${do_get_current__cpu_min_freq_khz}" -le 0 ]; then
+    elog_quiet "Unable to determine current scaling_min_freq"
+    return 1
+  fi
   do_get_current__cpu_min_freq_mhz="$((do_get_current__cpu_min_freq_khz / 1000))"
 
   do_get_current__cpu_governor="$(cat "${SYSTEM_SCALING_GOVERNOR}")"
@@ -1366,6 +1424,16 @@ root_do_set() {
     return 1
   fi
 
+  # Read the current values HERE because if this fails the system is not sane
+  root_do_set__cpu_min_freq="$(_get_system_scaling_min_freq)"
+  if [ -z "${root_do_set__cpu_min_freq}" ] || [ "${root_do_set__cpu_min_freq}" -le 0 ]; then
+    elog_quiet "Unable to determine current scaling_min_freq"
+    return 1
+  fi
+  root_do_set__cpu_min_value=$((root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
+  readonly root_do_set__cpu_min_freq
+  readonly root_do_set__cpu_min_value
+
   # settings are applied as follows:
   # the governor is applied first incase it also affects other CPU settings
   # max is set next except in the case where the current system minimum value
@@ -1439,12 +1507,6 @@ root_do_set() {
       log_all "set max to just above min"
       root_do_set__setting_cpu_max="$((root_do_set__setting_cpu_min + 1))"
     fi
-
-    # Current variables
-    root_do_set__cpu_min_freq="$(cat "${SYSTEM_SCALING_MIN_FREQ}")"
-    root_do_set__cpu_min_value=$((root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
-    readonly root_do_set__cpu_min_freq
-    readonly root_do_set__cpu_min_value
 
     # Set max first if it is greater than the current CPU min
     if [ "${root_do_set__setting_cpu_max}" -gt "${root_do_set__cpu_min_value}" ]; then
@@ -2004,8 +2066,6 @@ readonly SYSTEM_CPU_DIR="/sys/devices/system/cpu"
 
 # System related vars
 readonly SYSTEM_POWER_SUPPLY_DIR="/sys/class/power_supply"
-readonly SYSTEM_SCALING_MAX_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_max_freq"
-readonly SYSTEM_SCALING_MIN_FREQ="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_min_freq"
 readonly SYSTEM_SCALING_GOVERNOR="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_governor"
 readonly SYSTEM_SCALING_DRIVER="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_driver"
 readonly SYSTEM_CPU_GOVERNORS="${SYSTEM_CPU_DIR}/cpu0/cpufreq/scaling_available_governors"
