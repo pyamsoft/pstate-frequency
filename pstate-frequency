@@ -86,7 +86,7 @@ _log_all() {
 # Quiet log
 # Can be seen at
 # __log_level = quiet, normal, verbose, all
-log_quiet() {
+_log_quiet() {
   if [ "$#" -eq 0 ]; then
     return 1
   fi
@@ -104,7 +104,7 @@ log_quiet() {
 
 ##
 # Error logging
-elog() {
+_elog() {
   if [ "$#" -eq 0 ]; then
     return 1
   fi
@@ -117,7 +117,7 @@ elog() {
 
 ##
 # Verbose error logging
-elog_verbose() {
+_elog_verbose() {
   if [ "$#" -eq 0 ]; then
     return 1
   fi
@@ -130,14 +130,14 @@ elog_verbose() {
 
 ##
 # Quiet error logging
-elog_quiet() {
+_elog_quiet() {
   if [ "$#" -eq 0 ]; then
     return 1
   fi
 
   elog__fmt="$1"
   shift
-  log_quiet "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
+  _log_quiet "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -145,7 +145,7 @@ elog_quiet() {
 # Check the environment path for the given binary, exit if it is not found
 #
 # $1 binary to check on the path
-check_binary() {
+_check_binary() {
   check_binary__bin="$1"
   if [ -z "${check_binary__bin}" ]; then
     # Can't assume we have printf here
@@ -167,8 +167,8 @@ check_binary() {
 
 ##
 # Print usage
-print_usage() {
-  print_version
+_print_usage() {
+  _print_version
   _log "$(
     cat <<EOF
 
@@ -247,13 +247,13 @@ is_digits() {
 
 ##
 # Print version
-print_version() {
+_print_version() {
   _log "pstate-frequency <%s>" "${__VERSION}"
 }
 
 ##
 # Increase log verbosity
-log_more_verbose() {
+_log_more_verbose() {
   if [ "${__log_level}" -lt "${LOG_LEVEL_ALL}" ]; then
     __log_level=$((__log_level + 1))
     _log_all "__log_level more verbose"
@@ -262,7 +262,7 @@ log_more_verbose() {
 
 ##
 # Decrease log verbosity
-log_less_verbose() {
+_log_less_verbose() {
   if [ "${__log_level}" -gt "${LOG_LEVEL_OFF}" ]; then
     _log_all "__log_level less verbose"
     __log_level=$((__log_level - 1))
@@ -341,7 +341,7 @@ set_max() {
         unset set_max__number
         ;;
       *)
-        elog_quiet "max argument '%s' is not a number" "${set_max__value}"
+        _elog_quiet "max argument '%s' is not a number" "${set_max__value}"
 
         unset set_max__value
         unset set_max__mode
@@ -353,7 +353,7 @@ set_max() {
 
     unset set_max__value
   else
-    elog_quiet "Cannot set max outside of SET operation exec_mode"
+    _elog_quiet "Cannot set max outside of SET operation exec_mode"
 
     unset set_max__input
     unset set_max__mode
@@ -404,7 +404,7 @@ set_min() {
         unset set_min__number
         ;;
       *)
-        elog_quiet "min argument '%s' is not a number" "${set_min__value}"
+        _elog_quiet "min argument '%s' is not a number" "${set_min__value}"
 
         unset set_min__value
         unset set_min__mode
@@ -415,7 +415,7 @@ set_min() {
     fi
     unset set_min__value
   else
-    elog_quiet "Cannot set min outside of SET operation exec_mode"
+    _elog_quiet "Cannot set min outside of SET operation exec_mode"
 
     unset set_min__mode
     unset set_min__input
@@ -458,14 +458,14 @@ set_turbo() {
         __exec_set_turbo_arg="0"
       fi
     else
-      elog_quiet "turbo argument '%s' is invalid" "${set_turbo__input}"
+      _elog_quiet "turbo argument '%s' is invalid" "${set_turbo__input}"
 
       unset set_turbo__input
       unset set_turbo__mode
       return 1
     fi
   else
-    elog_quiet "Cannot set turbo outside of SET operation exec_mode"
+    _elog_quiet "Cannot set turbo outside of SET operation exec_mode"
 
     unset set_turbo__mode
     unset set_turbo__input
@@ -524,7 +524,7 @@ set_epp() {
       done
 
       if [ -z "${set_epp__value}" ]; then
-        elog_quiet "Invalid EPP specified, do not change"
+        _elog_quiet "Invalid EPP specified, do not change"
       else
         __exec_set_epp_type="${SET_EPP_TRUE}"
         __exec_set_epp_arg="${set_epp__value}"
@@ -533,7 +533,7 @@ set_epp() {
 
       unset set_epp__value
     else
-      elog_quiet "epp argument '%s' is a number" "${set_epp__input}"
+      _elog_quiet "epp argument '%s' is a number" "${set_epp__input}"
 
       unset set_epp__input
       unset set_epp__mode
@@ -543,7 +543,7 @@ set_epp() {
 
     unset set_epp__all_available_epp
   else
-    elog_quiet "Cannot set epp outside of SET operation exec_mode"
+    _elog_quiet "Cannot set epp outside of SET operation exec_mode"
 
     unset set_epp__input
     unset set_epp__mode
@@ -589,7 +589,7 @@ set_governor() {
       done
 
       if [ -z "${set_governor__value}" ]; then
-        elog_quiet "Invalid governor specified, do not change"
+        _elog_quiet "Invalid governor specified, do not change"
       else
         __exec_set_governor_type="${SET_GOVERNOR_TRUE}"
         __exec_set_governor_arg="${set_governor__value}"
@@ -598,7 +598,7 @@ set_governor() {
 
       unset set_governor__value
     else
-      elog_quiet "governor argument '%s' is a number" "${set_governor__input}"
+      _elog_quiet "governor argument '%s' is a number" "${set_governor__input}"
 
       unset set_governor__input
       unset set_governor__mode
@@ -608,7 +608,7 @@ set_governor() {
 
     unset set_governor__all_available_governors
   else
-    elog_quiet "Cannot set governor outside of SET operation exec_mode"
+    _elog_quiet "Cannot set governor outside of SET operation exec_mode"
 
     unset set_governor__input
     unset set_governor__mode
@@ -657,7 +657,7 @@ set_power_plan() {
 
     # Fail if we don't find a config
     if [ -z "${set_power_plan__config}" ]; then
-      elog_quiet "No power plan configuration found for argument: %s" "${set_power_plan__input}"
+      _elog_quiet "No power plan configuration found for argument: %s" "${set_power_plan__input}"
       unset set_power_plan__i
       unset set_power_plan__mode
       unset set_power_plan__input
@@ -667,7 +667,7 @@ set_power_plan() {
     # Otherwise source the config and set a plan
     execute_power_plan_config "${set_power_plan__mode}" "${set_power_plan__config}" "${set_power_plan__input}" || return 1
   else
-    elog_quiet "Cannot set power plan outside of SET operation exec_mode"
+    _elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
     unset set_power_plan__i
     unset set_power_plan__mode
@@ -753,7 +753,7 @@ execute_power_plan_config() {
   elif [ -n "${PLAN_AUTO_AC}" ] || [ -n "${PLAN_AUTO_BAT}" ]; then
     execute_power_plan_config__type="AUTO"
   else
-    elog_quiet "Invalid power plan file: %s" "${execute_power_plan_config__location}"
+    _elog_quiet "Invalid power plan file: %s" "${execute_power_plan_config__location}"
     return 1
   fi
 
@@ -831,7 +831,7 @@ set_power_plan_automatic() {
 
   if [ "${set_power_plan_automatic__ac}" = "${set_power_plan_automatic__name}" ] ||
     [ "${set_power_plan_automatic__bat}" = "${set_power_plan_automatic__name}" ]; then
-    elog_quiet "Automatic power plan cannot self reference"
+    _elog_quiet "Automatic power plan cannot self reference"
     unset set_power_plan_automatic__name
     unset set_power_plan_automatic__bat
     unset set_power_plan_automatic__ac
@@ -851,7 +851,7 @@ set_power_plan_automatic() {
 
   # Fail if we don't find a config
   if [ -z "${set_power_plan_automatic__config}" ]; then
-    elog_quiet "No power plan configuration found for auto config: %s" "${set_power_plan_automatic__arg}"
+    _elog_quiet "No power plan configuration found for auto config: %s" "${set_power_plan_automatic__arg}"
     unset set_power_plan_automatic__name
     unset set_power_plan_automatic__bat
     unset set_power_plan_automatic__ac
@@ -883,11 +883,11 @@ is_battery_powered() {
     # Get the power_supply type
     is_battery_powered__file="${is_battery_powered__power_supply}/type"
     if [ ! -f "${is_battery_powered__file}" ]; then
-      elog_verbose "No type file exists: %s" "${is_battery_powered__file}"
+      _elog_verbose "No type file exists: %s" "${is_battery_powered__file}"
       # No file exists, skip
       continue
     fi
-    elog_verbose "Check power supply type: %s" "${is_battery_powered__file}"
+    _elog_verbose "Check power supply type: %s" "${is_battery_powered__file}"
     is_battery_powered__type="$(cat "${is_battery_powered__file}")"
 
     # Check if the type is Mains
@@ -901,7 +901,7 @@ is_battery_powered() {
         _log_verbose "Is Mains online? %s" "${is_battery_powered__online}"
 
         if ! is_digits "${is_battery_powered__online}"; then
-          elog_verbose "Online state was NaN, default to 1: %s" "${is_battery_powered__power_supply}"
+          _elog_verbose "Online state was NaN, default to 1: %s" "${is_battery_powered__power_supply}"
           is_battery_powered__online=1
         fi
 
@@ -946,7 +946,7 @@ set_power_plan_manual() {
 
   # Check validity of variables here, parse special arguments
   set_max "${set_power_plan_manual__mode}" "${set_power_plan_manual__max}" || {
-    elog_quiet "$(
+    _elog_quiet "$(
       cat <<EOF
 You did not specify a valid max in your power plan.
 While this will not cause failure in this version of pstate-frequency,
@@ -955,7 +955,7 @@ EOF
     )"
   }
   set_min "${set_power_plan_manual__mode}" "${set_power_plan_manual__min}" || {
-    elog_quiet "$(
+    _elog_quiet "$(
       cat <<EOF
 You did not specify a valid min in your power plan.
 While this will not cause failure in this version of pstate-frequency,
@@ -964,7 +964,7 @@ EOF
     )"
   }
   set_governor "${set_power_plan_manual__mode}" "${set_power_plan_manual__gov}" || {
-    elog_quiet "$(
+    _elog_quiet "$(
       cat <<EOF
 You did not specify a valid governor in your power plan.
 While this will not cause failure in this version of pstate-frequency,
@@ -974,7 +974,7 @@ EOF
   }
 
   set_turbo "${set_power_plan_manual__mode}" "${set_power_plan_manual__turbo}" || {
-    elog_quiet "$(
+    _elog_quiet "$(
       cat <<EOF
 You did not specify a valid turbo in your power plan.
 While this will not cause failure in this version of pstate-frequency,
@@ -985,7 +985,7 @@ EOF
 
   if has_epp_support; then
     set_epp "${set_power_plan_manual__mode}" "${set_power_plan_manual__epp}" || {
-      elog_quiet "$(
+      _elog_quiet "$(
         cat <<EOF
 You did not specify a valid EPP in your power plan.
 While this will not cause failure in this version of pstate-frequency,
@@ -1044,14 +1044,14 @@ _resolve_cpuinfo_values() {
   unset _max_freq_file
 
   if [ -z "${_max_khz}" ] || [ "${_max_khz}" -lt 0 ]; then
-    elog_quiet 'Unable to determine CPU Info Max'
+    _elog_quiet 'Unable to determine CPU Info Max'
     unset _max_khz
     unset _min_khz
     return 1
   fi
 
   if [ -z "${_min_khz}" ] || [ "${_min_khz}" -lt 0 ]; then
-    elog_quiet 'Unable to determine CPU Info Min'
+    _elog_quiet 'Unable to determine CPU Info Min'
     unset _max_khz
     unset _min_khz
     return 1
@@ -1157,20 +1157,20 @@ _get_system_scaling_min_freq() {
 do_get_current() {
   # Re-read the system cpuinfo files in case turbo changes these
   _resolve_cpuinfo_values || {
-    elog_quiet "Failed to resolve system CPU Info values"
+    _elog_quiet "Failed to resolve system CPU Info values"
     return 1
   }
 
   do_get_current__cpu_max_freq_khz="$(_get_system_scaling_max_freq)"
   if [ -z "${do_get_current__cpu_max_freq_khz}" ] || [ "${do_get_current__cpu_max_freq_khz}" -le 0 ]; then
-    elog_quiet "Unable to determine current scaling_max_freq"
+    _elog_quiet "Unable to determine current scaling_max_freq"
     return 1
   fi
   do_get_current__cpu_max_freq_mhz="$((do_get_current__cpu_max_freq_khz / 1000))"
 
   do_get_current__cpu_min_freq_khz="$(_get_system_scaling_min_freq)"
   if [ -z "${do_get_current__cpu_min_freq_khz}" ] || [ "${do_get_current__cpu_min_freq_khz}" -le 0 ]; then
-    elog_quiet "Unable to determine current scaling_min_freq"
+    _elog_quiet "Unable to determine current scaling_min_freq"
     return 1
   fi
   do_get_current__cpu_min_freq_mhz="$((do_get_current__cpu_min_freq_khz / 1000))"
@@ -1226,7 +1226,7 @@ do_get_current() {
     fi
   fi
 
-  print_version
+  _print_version
   _log "$(
     cat <<EOF
     CPU_DRIVER   -> %s
@@ -1299,7 +1299,7 @@ do_get_real_work() {
 ##
 # Public entry point for getting realtime frequencies
 do_get_real() {
-  print_version
+  _print_version
   do_get_real_work || return 1
   return 0
 }
@@ -1319,7 +1319,7 @@ do_get() {
     do_get_real || return 1
     ;;
   *)
-    elog_quiet "Invalid GET type"
+    _elog_quiet "Invalid GET type"
 
     unset do_get__type
     return 1
@@ -1455,13 +1455,13 @@ root_write_turbo() {
   fi
 
   if [ -z "${root_write_turbo__target}" ]; then
-    elog "Turbo boost is unsupported on your CPU platform."
+    _elog "Turbo boost is unsupported on your CPU platform."
   elif [ -w "${root_write_turbo__target}" ]; then
     _log_verbose "Write turbo_value '%s' to file: %s" "${root_write_turbo__turbo}" "${root_write_turbo__target}"
     printf -- "%s" "${root_write_turbo__turbo}" >"${root_write_turbo__target}" || return 1
     _log_all "Turbo value written to %s" "${root_write_turbo__target}"
   else
-    elog 'Unable to write to turbo-boost sysfs "%s", continue...' "${root_write_turbo__target}"
+    _elog 'Unable to write to turbo-boost sysfs "%s", continue...' "${root_write_turbo__target}"
   fi
 
   unset root_write_turbo__turbo
@@ -1519,14 +1519,14 @@ root_do_set() {
   _log_verbose "YOU ARE ROOT"
   _log_all "Check that we are setting something"
   if ! is_set_command_possible; then
-    elog_quiet "Not setting any CPU options"
+    _elog_quiet "Not setting any CPU options"
     return 1
   fi
 
   # Read the current values HERE because if this fails the system is not sane
   root_do_set__cpu_min_freq="$(_get_system_scaling_min_freq)"
   if [ -z "${root_do_set__cpu_min_freq}" ] || [ "${root_do_set__cpu_min_freq}" -le 0 ]; then
-    elog_quiet "Unable to determine current scaling_min_freq"
+    _elog_quiet "Unable to determine current scaling_min_freq"
     return 1
   fi
   root_do_set__cpu_min_value=$((root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
@@ -1576,7 +1576,7 @@ root_do_set() {
     _log_verbose "Re-read system cpuinfo_ since turbo/governor/epp may have changed frequency range."
     # Re-read the system cpuinfo files in case turbo changes these
     _resolve_cpuinfo_values || {
-      elog_quiet "Failed to resolve system CPU Info values"
+      _elog_quiet "Failed to resolve system CPU Info values"
       return 1
     }
   fi
@@ -1654,7 +1654,7 @@ do_set() {
     root_do_set || return 1
     do_get_current || return 1
   else
-    elog_quiet "You must be root."
+    _elog_quiet "You must be root."
 
     unset do_set__delay
     return 1
@@ -1723,7 +1723,7 @@ has_amd_pstate_dir() {
 main() {
   # Ensure our system values are set
   _resolve_cpuinfo_values || {
-    elog_quiet "Failed to resolve system CPU Info values"
+    _elog_quiet "Failed to resolve system CPU Info values"
     return 1
   }
 
@@ -1775,16 +1775,16 @@ main() {
           _log_verbose "parse long option: -%s%s" "${option}" "${OPTARG}"
           case "${OPTARG}" in
           help)
-            print_usage
+            _print_usage
             return 0
             ;;
           version)
-            print_version
+            _print_version
             return 0
             ;;
           get)
             if [ "${exec_mode}" = "${EXEC_MODE_SET}" ]; then
-              elog_quiet "Cannot use --get mode when already in --set mode"
+              _elog_quiet "Cannot use --get mode when already in --set mode"
               return 1
             else
               _log_all "Set operation exec_mode to GET"
@@ -1793,7 +1793,7 @@ main() {
             ;;
           set)
             if [ "${exec_mode}" = "${EXEC_MODE_GET}" ]; then
-              elog_quiet "Cannot use --set mode when already in --get mode"
+              _elog_quiet "Cannot use --set mode when already in --get mode"
               return 1
             else
               _log_all "Set operation exec_mode to SET"
@@ -1809,7 +1809,7 @@ main() {
               _log_all "Attempt to set --plan:%s" "${main__opt_plan_arg}"
               shift
             else
-              elog_quiet "Long option --plan expects argument"
+              _elog_quiet "Long option --plan expects argument"
               return 1
             fi
             ;;
@@ -1822,7 +1822,7 @@ main() {
               _log_all "Attempt to set --max:%s" "${main__opt_max_arg}"
               shift
             else
-              elog_quiet "Long option --max expects argument"
+              _elog_quiet "Long option --max expects argument"
               return 1
             fi
             ;;
@@ -1835,7 +1835,7 @@ main() {
               _log_all "Attempt to set --min:%s" "${main__opt_min_arg}"
               shift
             else
-              elog_quiet "Long option --min expects argument"
+              _elog_quiet "Long option --min expects argument"
               return 1
             fi
             ;;
@@ -1848,7 +1848,7 @@ main() {
               _log_all "Attempt to set --turbo:%s" "${main__opt_turbo_arg}"
               shift
             else
-              elog_quiet "Long option --turbo expects argument"
+              _elog_quiet "Long option --turbo expects argument"
               return 1
             fi
             ;;
@@ -1861,7 +1861,7 @@ main() {
               _log_all "Attempt to set --governor:%s" "${main__opt_governor_arg}"
               shift
             else
-              elog_quiet "Long option --governor expects argument"
+              _elog_quiet "Long option --governor expects argument"
               return 1
             fi
             ;;
@@ -1874,7 +1874,7 @@ main() {
               _log_all "Attempt to set --epp:%s" "${main__opt_epp_arg}"
               shift
             else
-              elog_quiet "Long option --epp expects argument"
+              _elog_quiet "Long option --epp expects argument"
               return 1
             fi
             ;;
@@ -1887,33 +1887,33 @@ main() {
             exec_get_type="${GET_TYPE_REAL}"
             ;;
           debug)
-            log_more_verbose
+            _log_more_verbose
             ;;
           quiet)
-            log_less_verbose
+            _log_less_verbose
             ;;
           delay)
             execution_delay="${EXEC_DELAY_TRUE}"
             ;;
           *)
             # We must provide our own error message in this case
-            elog_quiet "Illegal long option --%s" "${OPTARG} (may need argument)\n"
-            print_usage
+            _elog_quiet "Illegal long option --%s" "${OPTARG} (may need argument)\n"
+            _print_usage
             return 1
             ;;
           esac
           ;;
         H)
-          print_usage
+          _print_usage
           return 0
           ;;
         V)
-          print_version
+          _print_version
           return 0
           ;;
         G)
           if [ "${exec_mode}" = "${EXEC_MODE_SET}" ]; then
-            elog_quiet "Cannot use --get mode when already in --set mode"
+            _elog_quiet "Cannot use --get mode when already in --set mode"
             return 1
           else
             _log_all "Set operation exec_mode to GET"
@@ -1922,7 +1922,7 @@ main() {
           ;;
         S)
           if [ "${exec_mode}" = "${EXEC_MODE_GET}" ]; then
-            elog_quiet "Cannot use --set mode when already in --get mode"
+            _elog_quiet "Cannot use --set mode when already in --get mode"
             return 1
           else
             _log_all "Set operation exec_mode to SET"
@@ -1937,7 +1937,7 @@ main() {
             main__opt_plan_arg="${OPTARG}"
             _log_all "Attempt to set -p:%s" "${main__opt_plan_arg}"
           else
-            elog_quiet "Short option -p expects argument"
+            _elog_quiet "Short option -p expects argument"
             return 1
           fi
           ;;
@@ -1949,7 +1949,7 @@ main() {
             main__opt_max_arg="${OPTARG}"
             _log_all "Attempt to set -m:%s" "${main__opt_max_arg}"
           else
-            elog_quiet "Short option -m expects argument"
+            _elog_quiet "Short option -m expects argument"
             return 1
           fi
           ;;
@@ -1961,7 +1961,7 @@ main() {
             main__opt_min_arg="${OPTARG}"
             _log_all "Attempt to set -n:%s" "${main__opt_min_arg}"
           else
-            elog_quiet "Short option -n expects argument"
+            _elog_quiet "Short option -n expects argument"
             return 1
           fi
           ;;
@@ -1973,7 +1973,7 @@ main() {
             main__opt_turbo_arg="${OPTARG}"
             _log_all "Attempt to set -t:%s" "${main__opt_turbo_arg}"
           else
-            elog_quiet "Short option -t expects argument"
+            _elog_quiet "Short option -t expects argument"
             return 1
           fi
           ;;
@@ -1985,7 +1985,7 @@ main() {
             main__opt_governor_arg="${OPTARG}"
             _log_all "Attempt to set -g:%s" "${main__opt_governor_arg}"
           else
-            elog_quiet "Short option -g expects argument"
+            _elog_quiet "Short option -g expects argument"
             return 1
           fi
           ;;
@@ -1997,7 +1997,7 @@ main() {
             main__opt_epp_arg="${OPTARG}"
             _log_all "Attempt to set -e:%s" "${main__opt_epp_arg}"
           else
-            elog_quiet "Short option -e expects argument"
+            _elog_quiet "Short option -e expects argument"
             return 1
           fi
           ;;
@@ -2010,14 +2010,14 @@ main() {
           exec_get_type="${GET_TYPE_REAL}"
           ;;
         d)
-          log_more_verbose
+          _log_more_verbose
           ;;
         q)
-          log_less_verbose
+          _log_less_verbose
           ;;
         *)
-          elog_quiet "Illegal short option -${OPTARG} (may need argument)\n"
-          print_usage
+          _elog_quiet "Illegal short option -${OPTARG} (may need argument)\n"
+          _print_usage
           return 1
           ;;
         esac
@@ -2116,7 +2116,7 @@ EOF
     do_set "${execution_delay}" || return 1
     ;;
   *)
-    print_usage
+    _print_usage
     ;;
   esac
 
@@ -2222,7 +2222,7 @@ readonly CPUINFO_MIN_FREQ_FILE="${SYSTEM_CPU_DIR}/cpu0/cpufreq/cpuinfo_min_freq"
 # Check that we can actually run, these CPU freq files must be present
 if [ ! -f "${CPUINFO_MAX_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MAX_FREQ_FILE}" ] ||
   [ ! -f "${CPUINFO_MIN_FREQ_FILE}" ] || [ ! -r "${CPUINFO_MIN_FREQ_FILE}" ]; then
-  elog_quiet "pstate-frequency is not supported on your system."
+  _elog_quiet "pstate-frequency is not supported on your system."
 
   # Exit code 2 means system unsupported
   exit 2
@@ -2232,12 +2232,12 @@ fi
 #
 # Need cat for heredoc
 # Need grep for CPU number
-check_binary cat || exit 1
-check_binary grep || exit 1
-check_binary tr || exit 1
-check_binary awk || exit 1
-check_binary id || exit 1
-check_binary sleep || exit 1
+_check_binary cat || exit 1
+_check_binary grep || exit 1
+_check_binary tr || exit 1
+_check_binary awk || exit 1
+_check_binary id || exit 1
+_check_binary sleep || exit 1
 
 SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
 readonly SYSTEM_CPU_NUMBER
