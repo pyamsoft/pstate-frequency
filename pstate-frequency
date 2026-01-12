@@ -1005,6 +1005,100 @@ EOF
   return 0
 }
 
+_resolve_cpuinfo_values() {
+  # amd-pstate holds its MAX CPU frequency in a different file, the cpuinfo_max_freq file
+  # changes based on if turbo is off or on, which is a little weird for interactive changes
+  if [ -r "${SYSTEM_CPU_DIR}/cpu0/cpufreq/amd_pstate_max_freq" ]; then
+    _max_freq_file="amd_pstate_max_freq"
+  else
+    _max_freq_file="cpuinfo_max_freq"
+  fi
+
+  _max_khz=""
+  _min_khz=""
+  for _cpu in "${SYSTEM_CPU_DIR}"/cpu*/cpufreq; do
+    _cpu_max_khz="$(cat "${_cpu}/${_max_freq_file}")"
+    _cpu_min_khz="$(cat "${_cpu}/cpuinfo_min_freq")"
+
+    if [ -n "${_cpu_max_khz}" ]; then
+      if [ -z "${_max_khz}" ]; then
+        _max_khz="${_cpu_max_khz}"
+      elif [ "${_cpu_max_khz}" -gt "${_max_khz}" ]; then
+        _max_khz="${_cpu_max_khz}"
+      fi
+    fi
+
+    if [ -n "${_cpu_min_khz}" ]; then
+      if [ -z "${_min_khz}" ]; then
+        _min_khz="${_cpu_min_khz}"
+      elif [ "${_cpu_min_khz}" -lt "${_min_khz}" ]; then
+        _min_khz="${_cpu_min_khz}"
+      fi
+    fi
+
+    unset _cpu
+    unset _cpu_max_khz
+    unset _cpu_min_khz
+  done
+  unset _cpu
+  unset _max_freq_file
+
+  if [ -z "${_max_khz}" ] || [ "${_max_khz}" -lt 0 ]; then
+    elog_quiet 'Unable to determine CPU Info Max'
+    unset _max_khz
+    unset _min_khz
+    return 1
+  fi
+
+  if [ -z "${_min_khz}" ] || [ "${_min_khz}" -lt 0 ]; then
+    elog_quiet 'Unable to determine CPU Info Min'
+    unset _max_khz
+    unset _min_khz
+    return 1
+  fi
+
+  # According to auto CPU freq, on some systems, the "scaling" values are HIGHER than the system values.
+  # If we encounter this, do as they do and take the higher values for max, and the lower values for min
+  # https://github.com/AdnanHodzic/auto-cpufreq/pull/899
+
+  _scaling_max_freq="$(_get_system_scaling_max_freq)"
+  if [ -n "${_scaling_max_freq}" ] && [ "${_scaling_max_freq}" -gt 0 ]; then
+    if [ "${_scaling_max_freq}" -gt "${_max_khz}" ]; then
+      log_verbose 'scaling_max_freq is higher than discovered cpuinfo_max_freq. Take larger: %s > %s' "${_scaling_max_freq}" "${_max_khz}"
+      _max_khz="${_scaling_max_freq}"
+    fi
+  fi
+  unset _scaling_max_freq
+
+  _scaling_min_freq="$(_get_system_scaling_max_freq)"
+  if [ -n "${_scaling_min_freq}" ] && [ "${_scaling_min_freq}" -gt 0 ]; then
+    if [ "${_scaling_min_freq}" -lt "${_min_khz}" ]; then
+      log_verbose 'scaling_min_freq is lower than discovered cpuinfo_min_freq. Take smaller: %s > %s' "${_scaling_min_freq}" "${_min_khz}"
+      _min_khz="${_scaling_min_freq}"
+    fi
+  fi
+  unset _scaling_max_freq
+
+  SYSTEM_CPU_MAX_FREQ="${_max_khz}"
+  SYSTEM_CPU_MIN_FREQ="${_min_khz}"
+  SYSTEM_CPU_MAX_VALUE=100
+  SYSTEM_CPU_MIN_VALUE=$((SYSTEM_CPU_MIN_FREQ * 100 / SYSTEM_CPU_MAX_FREQ))
+
+  log_verbose "$(
+    cat <<EOF
+Resolved system CPU values
+SYSTEM_CPU_MAX_FREQ: %s KHz
+SYSTEM_CPU_MIN_FREQ: %s KHz
+SYSTEM_CPU_MAX_VALUE: %s %%
+SYSTEM_CPU_MIN_VALUE: %s %%
+EOF
+  )" "${SYSTEM_CPU_MAX_FREQ}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_VALUE}" "${SYSTEM_CPU_MAX_VALUE}"
+
+  unset _max_khz
+  unset _min_khz
+  return 0
+}
+
 ##
 # Determine the current scaling_max_freq by reading from all CPUs for the highest value
 _get_system_scaling_max_freq() {
@@ -1019,6 +1113,7 @@ _get_system_scaling_max_freq() {
       fi
     fi
     unset _cpu
+    unset _cpu_max_khz
   done
   unset _cpu
 
@@ -1044,6 +1139,7 @@ _get_system_scaling_min_freq() {
       fi
     fi
     unset _cpu
+    unset _cpu_min_khz
   done
   unset _cpu
 
@@ -1060,7 +1156,10 @@ _get_system_scaling_min_freq() {
 #
 do_get_current() {
   # Re-read the system cpuinfo files in case turbo changes these
-  SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
+  _resolve_cpuinfo_values || {
+    elog_quiet "Failed to resolve system CPU Info values"
+    return 1
+  }
 
   do_get_current__cpu_max_freq_khz="$(_get_system_scaling_max_freq)"
   if [ -z "${do_get_current__cpu_max_freq_khz}" ] || [ "${do_get_current__cpu_max_freq_khz}" -le 0 ]; then
@@ -1476,7 +1575,10 @@ root_do_set() {
   if [ "${root_do_set__reread_cpu}" -eq "${SET_REREAD_CPU_TRUE}" ]; then
     log_verbose "Re-read system cpuinfo_ since turbo/governor/epp may have changed frequency range."
     # Re-read the system cpuinfo files in case turbo changes these
-    SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
+    _resolve_cpuinfo_values || {
+      elog_quiet "Failed to resolve system CPU Info values"
+      return 1
+    }
   fi
 
   log_all "Check if we are setting max"
@@ -1619,6 +1721,11 @@ has_amd_pstate_dir() {
 #
 # $@ all command line args
 main() {
+  # Ensure our system values are set
+  _resolve_cpuinfo_values || {
+    elog_quiet "Failed to resolve system CPU Info values"
+    return 1
+  }
 
   # Execution modes
   readonly EXEC_MODE_NONE=0
@@ -2128,20 +2235,14 @@ check_binary awk || exit 1
 check_binary id || exit 1
 check_binary sleep || exit 1
 
-SYSTEM_CPU_NUMBER=
 SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
 readonly SYSTEM_CPU_NUMBER
 
+# Set by _resolve_cpuinfo_values
 SYSTEM_CPU_MAX_FREQ=
-SYSTEM_CPU_MAX_FREQ="$(cat "${CPUINFO_MAX_FREQ_FILE}")"
-
 SYSTEM_CPU_MIN_FREQ=
-SYSTEM_CPU_MIN_FREQ="$(cat "${CPUINFO_MIN_FREQ_FILE}")"
-readonly SYSTEM_CPU_MIN_FREQ
-
-# Read the system to figure out the min frequency
-readonly SYSTEM_CPU_MAX_VALUE=100
-readonly SYSTEM_CPU_MIN_VALUE=$((SYSTEM_CPU_MIN_FREQ * 100 / SYSTEM_CPU_MAX_FREQ))
+SYSTEM_CPU_MAX_VALUE=
+SYSTEM_CPU_MIN_VALUE=
 
 # Exit 0 is success, exit 1 is some failure.
 main "$@" || exit 1
