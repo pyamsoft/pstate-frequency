@@ -46,7 +46,7 @@ _log() {
 # Verbose log
 # Can be seen at
 # __log_level = verbose, all
-log_verbose() {
+_log_verbose() {
   if [ "$#" -eq 0 ]; then
     return 1
   fi
@@ -66,7 +66,7 @@ log_verbose() {
 # All log
 # Can be seen at
 # __log_level = all
-log_all() {
+_log_all() {
   if [ "$#" -eq 0 ]; then
     return 1
   fi
@@ -124,7 +124,7 @@ elog_verbose() {
 
   elog__fmt="$1"
   shift
-  log_verbose "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
+  _log_verbose "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -256,7 +256,7 @@ print_version() {
 log_more_verbose() {
   if [ "${__log_level}" -lt "${LOG_LEVEL_ALL}" ]; then
     __log_level=$((__log_level + 1))
-    log_all "__log_level more verbose"
+    _log_all "__log_level more verbose"
   fi
 }
 
@@ -264,7 +264,7 @@ log_more_verbose() {
 # Decrease log verbosity
 log_less_verbose() {
   if [ "${__log_level}" -gt "${LOG_LEVEL_OFF}" ]; then
-    log_all "__log_level less verbose"
+    _log_all "__log_level less verbose"
     __log_level=$((__log_level - 1))
   fi
 }
@@ -312,21 +312,21 @@ set_max() {
   set_max__mode="$1"
   set_max__input="$2"
 
-  log_all "set_max requires SET operation exec_mode"
+  _log_all "set_max requires SET operation exec_mode"
   if [ "${set_max__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    log_verbose "Set max_value to '%s'" "${set_max__input}"
+    _log_verbose "Set max_value to '%s'" "${set_max__input}"
     set_max__value="${set_max__input}"
 
-    log_all "Check that '%s' is all digits" "${set_max__value}"
+    _log_all "Check that '%s' is all digits" "${set_max__value}"
     if is_digits "${set_max__value}"; then
       __exec_set_max_type="${SET_MAX_TRUE}"
       __exec_set_max_arg="${set_max__value}"
-      log_all "__exec_set_max_arg: '%s'" "${__exec_set_max_arg}"
+      _log_all "__exec_set_max_arg: '%s'" "${__exec_set_max_arg}"
     else
       # Check if the max starts with a '+'
       case "${set_max__input}" in
       +*)
-        log_verbose "max argument is passed as + and number"
+        _log_verbose "max argument is passed as + and number"
         # Remove the plus sign from the input
         set_max__number="${set_max__input#?}"
 
@@ -375,21 +375,21 @@ set_min() {
   set_min__mode="$1"
   set_min__input="$2"
 
-  log_all "set_min requires SET operation exec_mode"
+  _log_all "set_min requires SET operation exec_mode"
   if [ "${set_min__mode}" -eq "${EXEC_MODE_SET}" ]; then
-    log_verbose "Set min_value to '%s'" "${set_min__input}"
+    _log_verbose "Set min_value to '%s'" "${set_min__input}"
     set_min__value="${set_min__input}"
 
-    log_all "Check that '%s' is all digits" "${set_min__value}"
+    _log_all "Check that '%s' is all digits" "${set_min__value}"
     if is_digits "${set_min__value}"; then
       __exec_set_min_type="${SET_MIN_TRUE}"
       __exec_set_min_arg="${set_min__value}"
-      log_all "__exec_set_min_arg: '%s'" "${__exec_set_min_arg}"
+      _log_all "__exec_set_min_arg: '%s'" "${__exec_set_min_arg}"
     else
       # Check if the min starts with a '+'
       case "${set_min__input}" in
       +*)
-        log_verbose "min argument is passed as + and number"
+        _log_verbose "min argument is passed as + and number"
         # Remove the plus sign from the input
         set_min__number="${set_min__input#?}"
 
@@ -437,24 +437,24 @@ set_turbo() {
   set_turbo__mode="$1"
   set_turbo__input="$2"
 
-  log_all "set_turbo requires SET operation exec_mode"
+  _log_all "set_turbo requires SET operation exec_mode"
   if [ "${set_turbo__mode}" -eq "${EXEC_MODE_SET}" ]; then
 
-    log_all "Check for special case arguments: on, off"
+    _log_all "Check for special case arguments: on, off"
     if [ "${set_turbo__input}" = "on" ]; then
       if has_intel_pstate_dir; then
-        log_verbose "intel_pstate Argument was 'on' set to 0"
+        _log_verbose "intel_pstate Argument was 'on' set to 0"
         __exec_set_turbo_arg="0"
       else
-        log_verbose "acpi-cpufreq|amd_pstate Argument was 'on' set to 1"
+        _log_verbose "acpi-cpufreq|amd_pstate Argument was 'on' set to 1"
         __exec_set_turbo_arg="1"
       fi
     elif [ "${set_turbo__input}" = "off" ]; then
       if has_intel_pstate_dir; then
-        log_verbose "intel_pstate Argument was 'off' set to 1"
+        _log_verbose "intel_pstate Argument was 'off' set to 1"
         __exec_set_turbo_arg="1"
       else
-        log_verbose "acpi-cpufreq|amd_pstate Argument was 'off' set to 0"
+        _log_verbose "acpi-cpufreq|amd_pstate Argument was 'off' set to 0"
         __exec_set_turbo_arg="0"
       fi
     else
@@ -474,7 +474,7 @@ set_turbo() {
 
   # We are doing turbo work
   __exec_set_turbo_type="${SET_TURBO_TRUE}"
-  log_all "__exec_set_turbo_arg: '%s'" "${__exec_set_turbo_arg}"
+  _log_all "__exec_set_turbo_arg: '%s'" "${__exec_set_turbo_arg}"
 
   unset set_turbo__mode
   unset set_turbo__input
@@ -491,23 +491,23 @@ set_epp() {
   set_epp__mode="$1"
   set_epp__input="$2"
 
-  log_all "set_epp requires SET operation exec_mode"
+  _log_all "set_epp requires SET operation exec_mode"
   if [ "${set_epp__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_epp__all_available_epp="$(cat "${SYSTEM_CPU_EPP_AVAILABLE}")"
 
-    log_all "Check that '%s' is not digits" "${set_epp__all_available_epp}"
+    _log_all "Check that '%s' is not digits" "${set_epp__all_available_epp}"
     if ! is_digits "${set_epp__input}"; then
-      log_all "'%s' is not digits" "${set_epp__input}"
+      _log_all "'%s' is not digits" "${set_epp__input}"
       set_epp__value=""
       for try_epp in $(printf -- "%s" "${set_epp__input}" | tr ',' ' '); do
-        log_verbose "Check if %s is a valid EPP" "${try_epp}"
+        _log_verbose "Check if %s is a valid EPP" "${try_epp}"
         if [ "${try_epp}" = "default" ]; then
-          log_all 'User requested EPP "default", but writing this value is not allowed.'
+          _log_all 'User requested EPP "default", but writing this value is not allowed.'
           continue
         fi
         for available_epp in ${set_epp__all_available_epp}; do
           if [ "${available_epp}" = "default" ]; then
-            log_all 'System provides EPP "default", but writing this value is not allowed.'
+            _log_all 'System provides EPP "default", but writing this value is not allowed.'
             continue
           fi
 
@@ -518,7 +518,7 @@ set_epp() {
         done
         unset try_epp
         if [ -n "${set_epp__value}" ]; then
-          log_verbose "EPP has been found: %s" "${set_epp__value}"
+          _log_verbose "EPP has been found: %s" "${set_epp__value}"
           break
         fi
       done
@@ -528,7 +528,7 @@ set_epp() {
       else
         __exec_set_epp_type="${SET_EPP_TRUE}"
         __exec_set_epp_arg="${set_epp__value}"
-        log_all "__exec_set_epp_arg: '%s'" "${__exec_set_epp_arg}"
+        _log_all "__exec_set_epp_arg: '%s'" "${__exec_set_epp_arg}"
       fi
 
       unset set_epp__value
@@ -565,16 +565,16 @@ set_governor() {
   set_governor__mode="$1"
   set_governor__input="$2"
 
-  log_all "set_governor requires SET operation exec_mode"
+  _log_all "set_governor requires SET operation exec_mode"
   if [ "${set_governor__mode}" -eq "${EXEC_MODE_SET}" ]; then
     set_governor__all_available_governors="$(cat "${SYSTEM_CPU_GOVERNORS}")"
 
-    log_all "Check that '%s' is not digits" "${set_governor__input}"
+    _log_all "Check that '%s' is not digits" "${set_governor__input}"
     if ! is_digits "${set_governor__input}"; then
-      log_all "'%s' is not digits" "${set_governor__input}"
+      _log_all "'%s' is not digits" "${set_governor__input}"
       set_governor__value=""
       for try_gov in $(printf -- "%s" "${set_governor__input}" | tr ',' ' '); do
-        log_verbose "Check if %s is a valid governor" "${try_gov}"
+        _log_verbose "Check if %s is a valid governor" "${try_gov}"
         for available_gov in ${set_governor__all_available_governors}; do
           if [ "${try_gov}" = "${available_gov}" ]; then
             set_governor__value="${try_gov}"
@@ -583,7 +583,7 @@ set_governor() {
         done
         unset try_gov
         if [ -n "${set_governor__value}" ]; then
-          log_verbose "Governor has been found: %s" "${set_governor__value}"
+          _log_verbose "Governor has been found: %s" "${set_governor__value}"
           break
         fi
       done
@@ -593,7 +593,7 @@ set_governor() {
       else
         __exec_set_governor_type="${SET_GOVERNOR_TRUE}"
         __exec_set_governor_arg="${set_governor__value}"
-        log_all "__exec_set_governor_arg: '%s'" "${__exec_set_governor_arg}"
+        _log_all "__exec_set_governor_arg: '%s'" "${__exec_set_governor_arg}"
       fi
 
       unset set_governor__value
@@ -639,7 +639,7 @@ set_power_plan() {
   set_power_plan__mode="$1"
   set_power_plan__input="$2"
 
-  log_all "set_power_plan requires SET operation exec_mode"
+  _log_all "set_power_plan requires SET operation exec_mode"
   if [ "${set_power_plan__mode}" -eq "${EXEC_MODE_SET}" ]; then
     # Loop the config dir $(POWER_PLAN_CONFIG_DIR}
     #
@@ -649,7 +649,7 @@ set_power_plan() {
     # 01-powersave.plan
 
     # set_power_plan__input is the name of a plan
-    log_all "Search the config directory '%s' for power plan configrations" "${POWER_PLAN_CONFIG_DIR}"
+    _log_all "Search the config directory '%s' for power plan configrations" "${POWER_PLAN_CONFIG_DIR}"
     # Locate config with given input
     set_power_plan__config=
     set_power_plan__config="$(locate_power_plan_config "${set_power_plan__input}")"
@@ -741,7 +741,7 @@ execute_power_plan_config() {
   execute_power_plan_config__location="$2"
   execute_power_plan_config__name="$3"
 
-  log_verbose "Sourcing config from location: %s" "${execute_power_plan_config__location}"
+  _log_verbose "Sourcing config from location: %s" "${execute_power_plan_config__location}"
 
   # shellcheck disable=SC1090
   . "${execute_power_plan_config__location}" || return 1
@@ -839,7 +839,7 @@ set_power_plan_automatic() {
     return 1
   fi
 
-  log_verbose "Set power plan to: %s" "${set_power_plan_automatic__name}"
+  _log_verbose "Set power plan to: %s" "${set_power_plan_automatic__name}"
   set_power_plan_automatic__arg=
   if is_battery_powered; then
     set_power_plan_automatic__config="$(locate_power_plan_config "${set_power_plan_automatic__bat}")"
@@ -898,7 +898,7 @@ is_battery_powered() {
 
         # If online exists, cat out the status
         is_battery_powered__online="$(cat "${is_battery_powered__power_supply}/online")"
-        log_verbose "Is Mains online? %s" "${is_battery_powered__online}"
+        _log_verbose "Is Mains online? %s" "${is_battery_powered__online}"
 
         if ! is_digits "${is_battery_powered__online}"; then
           elog_verbose "Online state was NaN, default to 1: %s" "${is_battery_powered__power_supply}"
@@ -917,7 +917,7 @@ is_battery_powered() {
     unset is_battery_powered__power_supply
   done
 
-  log_verbose "No Mains power supply found, default to 1"
+  _log_verbose "No Mains power supply found, default to 1"
   return 1
 }
 
@@ -942,7 +942,7 @@ set_power_plan_manual() {
   set_power_plan_manual__gov="$6"
   set_power_plan_manual__epp="$7"
 
-  log_verbose "Attempt manual plan setting: %s" "${set_power_plan_manual__name}"
+  _log_verbose "Attempt manual plan setting: %s" "${set_power_plan_manual__name}"
 
   # Check validity of variables here, parse special arguments
   set_max "${set_power_plan_manual__mode}" "${set_power_plan_manual__max}" || {
@@ -1064,7 +1064,7 @@ _resolve_cpuinfo_values() {
   _scaling_max_freq="$(_get_system_scaling_max_freq)"
   if [ -n "${_scaling_max_freq}" ] && [ "${_scaling_max_freq}" -gt 0 ]; then
     if [ "${_scaling_max_freq}" -gt "${_max_khz}" ]; then
-      log_verbose 'scaling_max_freq is higher than discovered cpuinfo_max_freq. Take larger: %s > %s' "${_scaling_max_freq}" "${_max_khz}"
+      _log_verbose 'scaling_max_freq is higher than discovered cpuinfo_max_freq. Take larger: %s > %s' "${_scaling_max_freq}" "${_max_khz}"
       _max_khz="${_scaling_max_freq}"
     fi
   fi
@@ -1073,7 +1073,7 @@ _resolve_cpuinfo_values() {
   _scaling_min_freq="$(_get_system_scaling_max_freq)"
   if [ -n "${_scaling_min_freq}" ] && [ "${_scaling_min_freq}" -gt 0 ]; then
     if [ "${_scaling_min_freq}" -lt "${_min_khz}" ]; then
-      log_verbose 'scaling_min_freq is lower than discovered cpuinfo_min_freq. Take smaller: %s > %s' "${_scaling_min_freq}" "${_min_khz}"
+      _log_verbose 'scaling_min_freq is lower than discovered cpuinfo_min_freq. Take smaller: %s > %s' "${_scaling_min_freq}" "${_min_khz}"
       _min_khz="${_scaling_min_freq}"
     fi
   fi
@@ -1084,7 +1084,7 @@ _resolve_cpuinfo_values() {
   SYSTEM_CPU_MAX_VALUE=100
   SYSTEM_CPU_MIN_VALUE=$((SYSTEM_CPU_MIN_FREQ * 100 / SYSTEM_CPU_MAX_FREQ))
 
-  log_verbose "$(
+  _log_verbose "$(
     cat <<EOF
 Resolved system CPU values
 SYSTEM_CPU_MAX_FREQ: %s KHz
@@ -1195,8 +1195,8 @@ do_get_current() {
     if [ -r "${SYSTEM_AMD_PSTATE_TURBO}" ]; then
       do_get_current__cpu_turbo="$(cat "${SYSTEM_AMD_PSTATE_TURBO}")"
     else
-      log_verbose "amd-pstate does not have runtime turbo support yet."
-      log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
+      _log_verbose "amd-pstate does not have runtime turbo support in your current Kernel."
+      _log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
       do_get_current__cpu_turbo=""
     fi
   else
@@ -1355,27 +1355,27 @@ root_write_max() {
 
   # Bound our value before converting it to frequencies
   root_write_max__fixed_min="$((SYSTEM_CPU_MIN_VALUE + 1))"
-  log_verbose "Bound value '%s' between %s and %s" "${root_write_max__max}" "${root_write_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}"
+  _log_verbose "Bound value '%s' between %s and %s" "${root_write_max__max}" "${root_write_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}"
   root_write_max__max="$(set_variable_bounds "${root_write_max__max}" "${root_write_max__fixed_min}" "${SYSTEM_CPU_MAX_VALUE}")"
   unset root_write_max__fixed_min
 
   if has_intel_pstate_dir; then
-    log_verbose "Write max_value '%s' to intel_pstate file: %s" "${root_write_max__max}" "${SYSTEM_INTEL_PSTATE_MAX}"
+    _log_verbose "Write max_value '%s' to intel_pstate file: %s" "${root_write_max__max}" "${SYSTEM_INTEL_PSTATE_MAX}"
     printf -- "%s" "${root_write_max__max}" >"${SYSTEM_INTEL_PSTATE_MAX}" || return 1
-    log_all "Max value written to %s" "${SYSTEM_INTEL_PSTATE_MAX}"
+    _log_all "Max value written to %s" "${SYSTEM_INTEL_PSTATE_MAX}"
   fi
 
   root_write_max__freq=$((root_write_max__max * SYSTEM_CPU_MAX_FREQ / 100))
 
   # Bound frequency between system min and max
-  log_all "Bound %s between %s and %s" "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}"
+  _log_all "Bound %s between %s and %s" "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}"
   root_write_max__freq="$(set_variable_bounds "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}")"
 
   for root_write_max__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_max__target="${SYSTEM_CPU_DIR}/cpu${root_write_max__i}/cpufreq/scaling_max_freq"
-    log_verbose "Write freq: %sKHz to file: %s" "${root_write_max__freq}" "${root_write_max__target}"
+    _log_verbose "Write freq: %sKHz to file: %s" "${root_write_max__freq}" "${root_write_max__target}"
     printf -- "%s" "${root_write_max__freq}" >"${root_write_max__target}" || return 1
-    log_all "Max value written to %s" "${root_write_max__target}"
+    _log_all "Max value written to %s" "${root_write_max__target}"
 
     unset root_write_max__target
     unset root_write_max__i
@@ -1396,27 +1396,27 @@ root_write_min() {
 
   # Bound our value before converting it to frequencies
   root_write_min__fixed_max="$((SYSTEM_CPU_MAX_VALUE - 1))"
-  log_verbose "Bound value '%s' between %s and %s" "${root_write_min__min}" "${SYSTEM_CPU_MIN_VALUE}" "${root_write_min__fixed_max}"
+  _log_verbose "Bound value '%s' between %s and %s" "${root_write_min__min}" "${SYSTEM_CPU_MIN_VALUE}" "${root_write_min__fixed_max}"
   root_write_min__min="$(set_variable_bounds "${root_write_min__min}" "${SYSTEM_CPU_MIN_VALUE}" "${root_write_min__fixed_max}")"
   unset root_write_min__fixed_max
 
   if has_intel_pstate_dir; then
-    log_verbose "Write min_value '%s' to intel_pstate file: %s" "${root_write_min__min}" "${SYSTEM_INTEL_PSTATE_MIN}"
+    _log_verbose "Write min_value '%s' to intel_pstate file: %s" "${root_write_min__min}" "${SYSTEM_INTEL_PSTATE_MIN}"
     printf -- "%s" "${root_write_min__min}" >"${SYSTEM_INTEL_PSTATE_MIN}" || return 1
-    log_all "Min value written to %s" "${SYSTEM_INTEL_PSTATE_MIN}"
+    _log_all "Min value written to %s" "${SYSTEM_INTEL_PSTATE_MIN}"
   fi
 
   root_write_min__freq=$((root_write_min__min * SYSTEM_CPU_MAX_FREQ / 100))
 
   # Bound frequency between system min and max
-  log_all "Bound %s between %s and %s" "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}"
+  _log_all "Bound %s between %s and %s" "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}"
   root_write_min__freq="$(set_variable_bounds "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}")"
 
   for root_write_min__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq"
-    log_verbose "Write freq: %sKHz to file: %s" "${root_write_min__freq}" "${root_write_min__target}"
+    _log_verbose "Write freq: %sKHz to file: %s" "${root_write_min__freq}" "${root_write_min__target}"
     printf -- "%s" "${root_write_min__freq}" >"${root_write_min__target}" || return 1
-    log_all "Min value written to %s" "${root_write_min__target}"
+    _log_all "Min value written to %s" "${root_write_min__target}"
 
     unset root_write_min__target
     unset root_write_min__i
@@ -1445,21 +1445,21 @@ root_write_turbo() {
     if [ -r "${SYSTEM_AMD_PSTATE_TURBO}" ]; then
       root_write_turbo__target="$(cat "${SYSTEM_AMD_PSTATE_TURBO}")"
     else
-      log_verbose "amd-pstate does not have turbo boost support yet in sysfs."
-      log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
+      _log_verbose "amd-pstate does not have turbo boost support in your current Kernel."
+      _log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
       root_write_turbo__target=""
     fi
   else
-    log_verbose "Could not find turbo information from ANY expected locations."
+    _log_verbose "Could not find turbo information from ANY expected locations."
     root_write_turbo__target=""
   fi
 
   if [ -z "${root_write_turbo__target}" ]; then
     elog "Turbo boost is unsupported on your CPU platform."
   elif [ -w "${root_write_turbo__target}" ]; then
-    log_verbose "Write turbo_value '%s' to file: %s" "${root_write_turbo__turbo}" "${root_write_turbo__target}"
+    _log_verbose "Write turbo_value '%s' to file: %s" "${root_write_turbo__turbo}" "${root_write_turbo__target}"
     printf -- "%s" "${root_write_turbo__turbo}" >"${root_write_turbo__target}" || return 1
-    log_all "Turbo value written to %s" "${root_write_turbo__target}"
+    _log_all "Turbo value written to %s" "${root_write_turbo__target}"
   else
     elog 'Unable to write to turbo-boost sysfs "%s", continue...' "${root_write_turbo__target}"
   fi
@@ -1476,12 +1476,12 @@ root_write_turbo() {
 root_write_governor() {
   root_write_governor__gov="$1"
 
-  log_verbose "Write cpu_governor '%s' to all CPUs" "${root_write_governor__gov}"
+  _log_verbose "Write cpu_governor '%s' to all CPUs" "${root_write_governor__gov}"
   for root_write_governor__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_governor__target="${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor"
-    log_verbose "Write governor: '%s' to file: %s" "${root_write_governor__gov}" "${root_write_governor__target}"
+    _log_verbose "Write governor: '%s' to file: %s" "${root_write_governor__gov}" "${root_write_governor__target}"
     printf -- "%s" "${root_write_governor__gov}" >"${root_write_governor__target}" || return 1
-    log_all "Governor '%s' written to %s" "${root_write_governor__gov}" "${root_write_governor__target}"
+    _log_all "Governor '%s' written to %s" "${root_write_governor__gov}" "${root_write_governor__target}"
 
     unset root_write_governor__target
     unset root_write_governor__i
@@ -1498,12 +1498,12 @@ root_write_governor() {
 root_write_epp() {
   root_write_epp__epp="$1"
 
-  log_verbose "Write EPP '%s' to all CPUs" "${root_write_epp__epp}"
+  _log_verbose "Write EPP '%s' to all CPUs" "${root_write_epp__epp}"
   for root_write_epp__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_epp__target="${SYSTEM_CPU_DIR}/cpu${root_write_epp__i}/cpufreq/energy_performance_preference"
-    log_verbose "Write EPP: '%s' to file: %s" "${root_write_epp__epp}" "${root_write_epp__target}"
+    _log_verbose "Write EPP: '%s' to file: %s" "${root_write_epp__epp}" "${root_write_epp__target}"
     printf -- "%s" "${root_write_epp__epp}" >"${root_write_epp__target}" || return 1
-    log_all "EPP '%s' written to %s" "${root_write_epp__epp}" "${root_write_epp__target}"
+    _log_all "EPP '%s' written to %s" "${root_write_epp__epp}" "${root_write_epp__target}"
 
     unset root_write_epp__target
     unset root_write_epp__i
@@ -1516,8 +1516,8 @@ root_write_epp() {
 ##
 # Do the actual setting of CPU values once all prerequisites are filled
 root_do_set() {
-  log_verbose "YOU ARE ROOT"
-  log_all "Check that we are setting something"
+  _log_verbose "YOU ARE ROOT"
+  _log_all "Check that we are setting something"
   if ! is_set_command_possible; then
     elog_quiet "Not setting any CPU options"
     return 1
@@ -1543,9 +1543,9 @@ root_do_set() {
   root_do_set__reread_cpu="${SET_REREAD_CPU_FALSE}"
 
   # Apply the governor first
-  log_all "Check if we are setting governor"
+  _log_all "Check if we are setting governor"
   if [ "${__exec_set_governor_type}" -eq "${SET_GOVERNOR_TRUE}" ]; then
-    log_verbose "ROOT: setting_cpu_governor: ${__exec_set_governor_arg}"
+    _log_verbose "ROOT: setting_cpu_governor: %s" "${__exec_set_governor_arg}"
     root_write_governor "${__exec_set_governor_arg}"
 
     # Flag for re-reading
@@ -1553,9 +1553,9 @@ root_do_set() {
   fi
 
   # Then apply turbo
-  log_all "Check if we are setting turbo"
+  _log_all "Check if we are setting turbo"
   if [ "${__exec_set_turbo_type}" -eq "${SET_TURBO_TRUE}" ]; then
-    log_verbose "ROOT: setting_cpu_turbo: ${__exec_set_turbo_arg}"
+    _log_verbose "ROOT: setting_cpu_turbo: %s" "${__exec_set_turbo_arg}"
     root_write_turbo "${__exec_set_turbo_arg}"
 
     # Flag for re-reading
@@ -1563,9 +1563,9 @@ root_do_set() {
   fi
 
   # Then apply EPP
-  log_all "Check if we are setting epp"
+  _log_all "Check if we are setting epp"
   if [ "${__exec_set_epp_type}" -eq "${SET_EPP_TRUE}" ]; then
-    log_verbose "ROOT: setting_epp: ${__exec_set_epp_arg}"
+    _log_verbose "ROOT: setting_epp: %s" "${__exec_set_epp_arg}"
     root_write_epp "${__exec_set_epp_arg}"
 
     # Flag for re-reading
@@ -1573,7 +1573,7 @@ root_do_set() {
   fi
 
   if [ "${root_do_set__reread_cpu}" -eq "${SET_REREAD_CPU_TRUE}" ]; then
-    log_verbose "Re-read system cpuinfo_ since turbo/governor/epp may have changed frequency range."
+    _log_verbose "Re-read system cpuinfo_ since turbo/governor/epp may have changed frequency range."
     # Re-read the system cpuinfo files in case turbo changes these
     _resolve_cpuinfo_values || {
       elog_quiet "Failed to resolve system CPU Info values"
@@ -1581,54 +1581,54 @@ root_do_set() {
     }
   fi
 
-  log_all "Check if we are setting max"
+  _log_all "Check if we are setting max"
   if [ "${__exec_set_max_type}" -eq "${SET_MAX_TRUE}" ]; then
-    log_all "Set max to arg"
+    _log_all "Set max to arg"
     root_do_set__setting_cpu_max="${__exec_set_max_arg}"
   fi
 
-  log_all "Check if we are setting min"
+  _log_all "Check if we are setting min"
   if [ "${__exec_set_min_type}" -eq "${SET_MIN_TRUE}" ]; then
-    log_all "Set min to arg"
+    _log_all "Set min to arg"
     root_do_set__setting_cpu_min="${__exec_set_min_arg}"
   fi
 
   if [ -n "${root_do_set__setting_cpu_max}" ]; then
-    log_all "Check that min is not >= max"
+    _log_all "Check that min is not >= max"
     if [ -n "${root_do_set__setting_cpu_min}" ]; then
       if [ "${root_do_set__setting_cpu_min}" -ge "${root_do_set__setting_cpu_max}" ]; then
-        log_all "set min to just below max"
+        _log_all "set min to just below max"
         root_do_set__setting_cpu_min="$((root_do_set__setting_cpu_max - 1))"
       fi
     fi
   fi
 
   if [ -n "${root_do_set__setting_cpu_max}" ] && [ -n "${root_do_set__setting_cpu_min}" ]; then
-    log_all "Check that max is not <= min"
+    _log_all "Check that max is not <= min"
     if [ "${root_do_set__setting_cpu_max}" -le "${root_do_set__setting_cpu_min}" ]; then
-      log_all "set max to just above min"
+      _log_all "set max to just above min"
       root_do_set__setting_cpu_max="$((root_do_set__setting_cpu_min + 1))"
     fi
 
     # Set max first if it is greater than the current CPU min
     if [ "${root_do_set__setting_cpu_max}" -gt "${root_do_set__cpu_min_value}" ]; then
-      log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
+      _log_verbose "ROOT: setting_cpu_max: %s" "${root_do_set__setting_cpu_max}"
       root_write_max "${root_do_set__setting_cpu_max}"
 
-      log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
+      _log_verbose "ROOT: setting_cpu_min: %s" "${root_do_set__setting_cpu_min}"
       root_write_min "${root_do_set__setting_cpu_min}"
     else
-      log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
+      _log_verbose "ROOT: setting_cpu_min: %s" "${root_do_set__setting_cpu_min}"
       root_write_min "${root_do_set__setting_cpu_min}"
 
-      log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
+      _log_verbose "ROOT: setting_cpu_max: %s" "${root_do_set__setting_cpu_max}"
       root_write_max "${root_do_set__setting_cpu_max}"
     fi
   elif [ -n "${root_do_set__setting_cpu_max}" ]; then
-    log_verbose "ROOT: setting_cpu_max: ${root_do_set__setting_cpu_max}"
+    _log_verbose "ROOT: setting_cpu_max: %s" "${root_do_set__setting_cpu_max}"
     root_write_max "${root_do_set__setting_cpu_max}"
   elif [ -n "${root_do_set__setting_cpu_min}" ]; then
-    log_verbose "ROOT: setting_cpu_min: ${root_do_set__setting_cpu_min}"
+    _log_verbose "ROOT: setting_cpu_min: %s" "${root_do_set__setting_cpu_min}"
     root_write_min "${root_do_set__setting_cpu_min}"
   fi
 
@@ -1647,7 +1647,7 @@ do_set() {
 
   if [ "$(id -u)" -eq 0 ]; then
     if [ "${do_set__delay}" -eq "${EXEC_DELAY_TRUE}" ]; then
-      log_verbose "Delay for 5 seconds requested by user"
+      _log_verbose "Delay for 5 seconds requested by user"
       sleep 5
     fi
 
@@ -1772,7 +1772,7 @@ main() {
       while getopts ":HVGSp:m:n:t:g:e:crdq-:" option; do
         case "${option}" in
         -)
-          log_verbose "parse long option: -%s%s" "${option}" "${OPTARG}"
+          _log_verbose "parse long option: -%s%s" "${option}" "${OPTARG}"
           case "${OPTARG}" in
           help)
             print_usage
@@ -1787,7 +1787,7 @@ main() {
               elog_quiet "Cannot use --get mode when already in --set mode"
               return 1
             else
-              log_all "Set operation exec_mode to GET"
+              _log_all "Set operation exec_mode to GET"
               exec_mode="${EXEC_MODE_GET}"
             fi
             ;;
@@ -1796,7 +1796,7 @@ main() {
               elog_quiet "Cannot use --set mode when already in --get mode"
               return 1
             else
-              log_all "Set operation exec_mode to SET"
+              _log_all "Set operation exec_mode to SET"
               exec_mode="${EXEC_MODE_SET}"
             fi
             ;;
@@ -1806,7 +1806,7 @@ main() {
             # --plan expects an argument
             if [ $# -ge ${OPTIND} ]; then
               eval main__opt_plan_arg="\$${OPTIND}"
-              log_all "Attempt to set --plan:${main__opt_plan_arg}"
+              _log_all "Attempt to set --plan:%s" "${main__opt_plan_arg}"
               shift
             else
               elog_quiet "Long option --plan expects argument"
@@ -1819,7 +1819,7 @@ main() {
             # --max expects an argument
             if [ $# -ge ${OPTIND} ]; then
               eval main__opt_max_arg="\$${OPTIND}"
-              log_all "Attempt to set --max:${main__opt_max_arg}"
+              _log_all "Attempt to set --max:%s" "${main__opt_max_arg}"
               shift
             else
               elog_quiet "Long option --max expects argument"
@@ -1832,7 +1832,7 @@ main() {
             # --min expects an argument
             if [ $# -ge ${OPTIND} ]; then
               eval main__opt_min_arg="\$${OPTIND}"
-              log_all "Attempt to set --min:${main__opt_min_arg}"
+              _log_all "Attempt to set --min:%s" "${main__opt_min_arg}"
               shift
             else
               elog_quiet "Long option --min expects argument"
@@ -1845,7 +1845,7 @@ main() {
             # --turbo expects an argument
             if [ $# -ge ${OPTIND} ]; then
               eval main__opt_turbo_arg="\$${OPTIND}"
-              log_all "Attempt to set --turbo:${main__opt_turbo_arg}"
+              _log_all "Attempt to set --turbo:%s" "${main__opt_turbo_arg}"
               shift
             else
               elog_quiet "Long option --turbo expects argument"
@@ -1858,7 +1858,7 @@ main() {
             # --governor expects an argument
             if [ $# -ge ${OPTIND} ]; then
               eval main__opt_governor_arg="\$${OPTIND}"
-              log_all "Attempt to set --governor:${main__opt_governor_arg}"
+              _log_all "Attempt to set --governor:%s" "${main__opt_governor_arg}"
               shift
             else
               elog_quiet "Long option --governor expects argument"
@@ -1871,7 +1871,7 @@ main() {
             # --epp expects an argument
             if [ $# -ge ${OPTIND} ]; then
               eval main__opt_epp_arg="\$${OPTIND}"
-              log_all "Attempt to set --epp:${main__opt_epp_arg}"
+              _log_all "Attempt to set --epp:%s" "${main__opt_epp_arg}"
               shift
             else
               elog_quiet "Long option --epp expects argument"
@@ -1879,11 +1879,11 @@ main() {
             fi
             ;;
           current)
-            log_all "Set exec_get_type to current"
+            _log_all "Set exec_get_type to current"
             exec_get_type="${GET_TYPE_CURRENT}"
             ;;
           real)
-            log_all "Set exec_get_type to real"
+            _log_all "Set exec_get_type to real"
             exec_get_type="${GET_TYPE_REAL}"
             ;;
           debug)
@@ -1916,7 +1916,7 @@ main() {
             elog_quiet "Cannot use --get mode when already in --set mode"
             return 1
           else
-            log_all "Set operation exec_mode to GET"
+            _log_all "Set operation exec_mode to GET"
             exec_mode="${EXEC_MODE_GET}"
           fi
           ;;
@@ -1925,7 +1925,7 @@ main() {
             elog_quiet "Cannot use --set mode when already in --get mode"
             return 1
           else
-            log_all "Set operation exec_mode to SET"
+            _log_all "Set operation exec_mode to SET"
             exec_mode="${EXEC_MODE_SET}"
           fi
           ;;
@@ -1935,7 +1935,7 @@ main() {
           # -p expects an argument
           if [ -n "${OPTARG}" ]; then
             main__opt_plan_arg="${OPTARG}"
-            log_all "Attempt to set -p:${main__opt_plan_arg}"
+            _log_all "Attempt to set -p:%s" "${main__opt_plan_arg}"
           else
             elog_quiet "Short option -p expects argument"
             return 1
@@ -1947,7 +1947,7 @@ main() {
           # -m expects an argument
           if [ -n "${OPTARG}" ]; then
             main__opt_max_arg="${OPTARG}"
-            log_all "Attempt to set -m:${main__opt_max_arg}"
+            _log_all "Attempt to set -m:%s" "${main__opt_max_arg}"
           else
             elog_quiet "Short option -m expects argument"
             return 1
@@ -1959,7 +1959,7 @@ main() {
           # -n expects an argument
           if [ -n "${OPTARG}" ]; then
             main__opt_min_arg="${OPTARG}"
-            log_all "Attempt to set -n:${main__opt_min_arg}"
+            _log_all "Attempt to set -n:%s" "${main__opt_min_arg}"
           else
             elog_quiet "Short option -n expects argument"
             return 1
@@ -1971,7 +1971,7 @@ main() {
           # -t expects an argument
           if [ -n "${OPTARG}" ]; then
             main__opt_turbo_arg="${OPTARG}"
-            log_all "Attempt to set -t:${main__opt_turbo_arg}"
+            _log_all "Attempt to set -t:%s" "${main__opt_turbo_arg}"
           else
             elog_quiet "Short option -t expects argument"
             return 1
@@ -1983,7 +1983,7 @@ main() {
           # -g expects an argument
           if [ -n "${OPTARG}" ]; then
             main__opt_governor_arg="${OPTARG}"
-            log_all "Attempt to set -g:${main__opt_governor_arg}"
+            _log_all "Attempt to set -g:%s" "${main__opt_governor_arg}"
           else
             elog_quiet "Short option -g expects argument"
             return 1
@@ -1995,18 +1995,18 @@ main() {
           # -e expects an argument
           if [ -n "${OPTARG}" ]; then
             main__opt_epp_arg="${OPTARG}"
-            log_all "Attempt to set -e:${main__opt_epp_arg}"
+            _log_all "Attempt to set -e:%s" "${main__opt_epp_arg}"
           else
             elog_quiet "Short option -e expects argument"
             return 1
           fi
           ;;
         c)
-          log_all "Set exec_get_type to current"
+          _log_all "Set exec_get_type to current"
           exec_get_type="${GET_TYPE_CURRENT}"
           ;;
         r)
-          log_all "Set exec_get_type to real"
+          _log_all "Set exec_get_type to real"
           exec_get_type="${GET_TYPE_REAL}"
           ;;
         d)
@@ -2042,38 +2042,38 @@ main() {
 
   # Process the plan first as it sets other values
   if [ "${main__opt_plan}" -ne 0 ]; then
-    log_verbose "--plan requested with argument: ${main__opt_plan_arg}"
+    _log_verbose "--plan requested with argument: ${main__opt_plan_arg}"
     set_power_plan "${exec_mode}" "${main__opt_plan_arg}" || return 1
   fi
 
   # Then override governor
   if [ "${main__opt_governor}" -ne 0 ]; then
-    log_verbose "--governor requested with argument: ${main__opt_governor_arg}"
+    _log_verbose "--governor requested with argument: ${main__opt_governor_arg}"
     set_governor "${exec_mode}" "${main__opt_governor_arg}" || return 1
   fi
 
   if has_epp_support; then
     # Then override epp
     if [ "${main__opt_epp}" -ne 0 ]; then
-      log_verbose "--epp requested with argument: ${main__opt_epp_arg}"
+      _log_verbose "--epp requested with argument: ${main__opt_epp_arg}"
       set_epp "${exec_mode}" "${main__opt_epp_arg}" || return 1
     fi
   fi
 
   # Followed by turbo
   if [ "${main__opt_turbo}" -ne 0 ]; then
-    log_verbose "--turbo requested with argument: ${main__opt_turbo_arg}"
+    _log_verbose "--turbo requested with argument: ${main__opt_turbo_arg}"
     set_turbo "${exec_mode}" "${main__opt_turbo_arg}" || return 1
   fi
 
   # And then max and min
   if [ "${main__opt_max}" -ne 0 ]; then
-    log_verbose "--max requested with argument: ${main__opt_max_arg}"
+    _log_verbose "--max requested with argument: ${main__opt_max_arg}"
     set_max "${exec_mode}" "${main__opt_max_arg}" || return 1
   fi
 
   if [ "${main__opt_min}" -ne 0 ]; then
-    log_verbose "--min requested with argument: ${main__opt_min_arg}"
+    _log_verbose "--min requested with argument: ${main__opt_min_arg}"
     set_min "${exec_mode}" "${main__opt_min_arg}" || return 1
   fi
 
@@ -2094,12 +2094,12 @@ main() {
 
   case "${exec_mode}" in
   "${EXEC_MODE_GET}")
-    log_verbose "exec_mode: GET"
-    log_verbose "exec_get_type: %s" "${exec_get_type}"
+    _log_verbose "exec_mode: GET"
+    _log_verbose "exec_get_type: %s" "${exec_get_type}"
     do_get "${exec_get_type}" || return 1
     ;;
   "${EXEC_MODE_SET}")
-    log_verbose "$(
+    _log_verbose "$(
       cat <<EOF
 exec_mode: SET
 set_max: %s [%s]
@@ -2120,7 +2120,7 @@ EOF
     ;;
   esac
 
-  log_all "Exit: Success"
+  _log_all "Exit: Success"
   return 0
 }
 
