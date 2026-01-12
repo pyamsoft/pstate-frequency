@@ -26,7 +26,7 @@ readonly __VERSION="3.17.0"
 # Normal log
 # Can be seen at
 # __log_level = normal, verbose, all
-log() {
+_log() {
   if [ "$#" -eq 0 ]; then
     return 1
   fi
@@ -111,7 +111,7 @@ elog() {
 
   elog__fmt="$1"
   shift
-  log "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
+  _log "\033[0;31mERROR: ${elog__fmt}\033[0m" "$@" 1>&2
   unset elog__fmt
 }
 
@@ -169,7 +169,7 @@ check_binary() {
 # Print usage
 print_usage() {
   print_version
-  log "$(
+  _log "$(
     cat <<EOF
 
 usage:
@@ -248,7 +248,7 @@ is_digits() {
 ##
 # Print version
 print_version() {
-  log "pstate-frequency <%s>" "${__VERSION}"
+  _log "pstate-frequency <%s>" "${__VERSION}"
 }
 
 ##
@@ -1227,7 +1227,7 @@ do_get_current() {
   fi
 
   print_version
-  log "$(
+  _log "$(
     cat <<EOF
     CPU_DRIVER   -> %s
     CPU_GOVERNOR -> %s
@@ -1282,7 +1282,7 @@ do_get_real_work() {
     else
       do_get_real_work__freq_spaces=" "
     fi
-    log "    CPU[%s]%s->%s %sMHz" \
+    _log "    CPU[%s]%s->%s %sMHz" \
       "${do_get_real_work__cpu}" \
       "${do_get_real_work__spaces}" \
       "${do_get_real_work__freq_spaces}" \
@@ -2102,13 +2102,17 @@ main() {
     log_verbose "$(
       cat <<EOF
 exec_mode: SET
-set_max: ${__exec_set_max_type} [${__exec_set_max_arg}]
-set_min: ${__exec_set_min_type} [${__exec_set_min_arg}]
-set_turbo: ${__exec_set_turbo_type} [${__exec_set_turbo_arg}]
-set_governor: ${__exec_set_governor_type} [${__exec_set_governor_arg}]
-set_epp: ${__exec_set_epp_type} [${__exec_set_epp_arg}]
+set_max: %s [%s]
+set_min: %s [%s]
+set_turbo: %s [%s]
+set_governor: %s [%s]
+set_epp: %s [%s]
 EOF
-    )"
+    )" "${__exec_set_max_type}" "${__exec_set_max_arg}" \
+      "${__exec_set_min_type}" "${__exec_set_min_arg}" \
+      "${__exec_set_turbo_type}" "${__exec_set_turbo_arg}" \
+      "${__exec_set_governor_type}" "${__exec_set_governor_arg}" \
+      "${__exec_set_epp_type}" "${__exec_set_epp_arg}"
     do_set "${execution_delay}" || return 1
     ;;
   *)
