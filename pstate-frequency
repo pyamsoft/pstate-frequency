@@ -1733,12 +1733,6 @@ has_amd_pstate_dir() {
 #
 # $@ all command line args
 main() {
-  # Ensure our system values are set
-  _resolve_cpuinfo_values || {
-    _elog_quiet "Failed to resolve system CPU Info values"
-    return 1
-  }
-
   # Execution modes
   readonly EXEC_MODE_NONE=0
   readonly EXEC_MODE_GET=1
@@ -2051,6 +2045,12 @@ main() {
       unset option_shift_count
     done
   fi
+
+  # Ensure our system values are set
+  _resolve_cpuinfo_values || {
+    _elog_quiet "Failed to resolve system CPU Info values"
+    return 1
+  }
 
   # Process the plan first as it sets other values
   if [ "${main__opt_plan}" -ne 0 ]; then
