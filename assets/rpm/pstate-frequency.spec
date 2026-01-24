@@ -7,7 +7,7 @@
 # Copied-with-modification from: https://github.com/pyamsoft/pstate-frequency/issues/25
 
 Name:      pstate-frequency
-Version:   3.16.1
+Version:   3.17.0
 Release:   1
 License:   GPLv2
 Summary:   Easily control moden CPU p-state driver on Linux
@@ -44,6 +44,9 @@ rm -rf %{buildroot}
 %doc %{_docdir}/%{name}/LICENSE
 
 %changelog
+* Sat Jan 24 2026 3.17.0-1
+- Read frequencies from all CPU cores to determine system max and min
+
 * Tue Jul 08 2025 3.16.1-1
 - systemd and udev scripts run directly instead of via /bin/sh
 
