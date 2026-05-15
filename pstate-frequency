@@ -1455,7 +1455,7 @@ root_write_turbo() {
   elif has_amd_pstate_dir; then
     # Check amd-pstate dir last since we can still use the acpi-cpufreq location on amd-pstate passive mode
     if [ -r "${SYSTEM_AMD_PSTATE_TURBO}" ]; then
-      root_write_turbo__target="$(cat "${SYSTEM_AMD_PSTATE_TURBO}")"
+      root_write_turbo__target="${SYSTEM_AMD_PSTATE_TURBO}"
     else
       _log_verbose "amd-pstate does not have turbo boost support in your current Kernel."
       _log_verbose "See here for kernel support: https://www.phoronix.com/news/AMD-Core-Perf-Boost-Linux"
