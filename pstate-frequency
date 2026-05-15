@@ -1082,14 +1082,14 @@ _resolve_cpuinfo_values() {
   fi
   unset _scaling_max_freq
 
-  _scaling_min_freq="$(_get_system_scaling_max_freq)"
+  _scaling_min_freq="$(_get_system_scaling_min_freq)"
   if [ -n "${_scaling_min_freq}" ] && [ "${_scaling_min_freq}" -gt 0 ]; then
     if [ "${_scaling_min_freq}" -lt "${_min_khz}" ]; then
       _log_verbose 'scaling_min_freq is lower than discovered cpuinfo_min_freq. Take smaller: %s > %s' "${_scaling_min_freq}" "${_min_khz}"
       _min_khz="${_scaling_min_freq}"
     fi
   fi
-  unset _scaling_max_freq
+  unset _scaling_min_freq
 
   SYSTEM_CPU_MAX_FREQ="${_max_khz}"
   SYSTEM_CPU_MIN_FREQ="${_min_khz}"
@@ -1301,10 +1301,11 @@ do_get_real_work() {
       "${do_get_real_work__freq_mhz}"
   done
 
-  unset do_get_real__current_freq_khz
-  unset do_get_real__current_freq_mhz
-  unset do_get_real__spaces
-  unset do_get_real__cpu
+  unset do_get_real_work__freq_khz
+  unset do_get_real_work__freq_mhz
+  unset do_get_real_work__freq_spaces
+  unset do_get_real_work__spaces
+  unset do_get_real_work__cpu
   return 0
 }
 
