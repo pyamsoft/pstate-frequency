@@ -670,7 +670,6 @@ set_power_plan() {
     # Fail if we don't find a config
     if [ -z "${set_power_plan__config}" ]; then
       _elog_quiet "No power plan configuration found for argument: %s" "${set_power_plan__input}"
-      unset set_power_plan__i
       unset set_power_plan__mode
       unset set_power_plan__input
       return 1
@@ -681,13 +680,11 @@ set_power_plan() {
   else
     _elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
-    unset set_power_plan__i
     unset set_power_plan__mode
     unset set_power_plan__input
     return 1
   fi
 
-  unset set_power_plan__i
   unset set_power_plan__mode
   unset set_power_plan__input
   return 0
