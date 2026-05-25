@@ -20,7 +20,7 @@
 
 # pstate-frequency
 # by: pyamsoft <developer(dot)pyamsoft(at)gmail(dot)com>
-readonly __VERSION="3.17.1"
+readonly __VERSION="3.18.0"
 
 ##
 # Normal log
@@ -1164,6 +1164,82 @@ _get_system_scaling_min_freq() {
 }
 
 ##
+# Get the hardware max frequency (KHz) for a specific CPU core index
+# On newer Intel CPUs, different CPU cores may have difference frequency scaling
+# so we can't just yolo apply one frequency over all of them
+#
+# $1 cpu index (integer)
+_get_cpu_max_freq_for_core() {
+  _get_cpu_max_freq_for_core__idx="$1"
+  _get_cpu_max_freq_for_core__dir="${SYSTEM_CPU_DIR}/cpu${_get_cpu_max_freq_for_core__idx}/cpufreq"
+
+  if [ -r "${_get_cpu_max_freq_for_core__dir}/amd_pstate_max_freq" ]; then
+    _get_cpu_max_freq_for_core__file="${_get_cpu_max_freq_for_core__dir}/amd_pstate_max_freq"
+  else
+    _get_cpu_max_freq_for_core__file="${_get_cpu_max_freq_for_core__dir}/cpuinfo_max_freq"
+  fi
+
+  if [ ! -r "${_get_cpu_max_freq_for_core__file}" ]; then
+    unset _get_cpu_max_freq_for_core__idx
+    unset _get_cpu_max_freq_for_core__dir
+    unset _get_cpu_max_freq_for_core__file
+    return 1
+  fi
+
+  _get_cpu_max_freq_for_core__khz="$(cat "${_get_cpu_max_freq_for_core__file}")"
+
+  _get_cpu_max_freq_for_core__scaling="$(cat "${_get_cpu_max_freq_for_core__dir}/scaling_max_freq")"
+  if [ -n "${_get_cpu_max_freq_for_core__scaling}" ] && [ "${_get_cpu_max_freq_for_core__scaling}" -gt 0 ]; then
+    if [ "${_get_cpu_max_freq_for_core__scaling}" -gt "${_get_cpu_max_freq_for_core__khz}" ]; then
+      _get_cpu_max_freq_for_core__khz="${_get_cpu_max_freq_for_core__scaling}"
+    fi
+  fi
+
+  printf -- '%s' "${_get_cpu_max_freq_for_core__khz}"
+
+  unset _get_cpu_max_freq_for_core__idx
+  unset _get_cpu_max_freq_for_core__dir
+  unset _get_cpu_max_freq_for_core__file
+  unset _get_cpu_max_freq_for_core__khz
+  unset _get_cpu_max_freq_for_core__scaling
+  return 0
+}
+
+##
+# Get the hardware min frequency (KHz) for a specific CPU core index
+# On newer Intel CPUs, different CPU cores may have difference frequency scaling
+# so we can't just yolo apply one frequency over all of them
+#
+# $1 cpu index (integer)
+_get_cpu_min_freq_for_core() {
+  _get_cpu_min_freq_for_core__idx="$1"
+  _get_cpu_min_freq_for_core__dir="${SYSTEM_CPU_DIR}/cpu${_get_cpu_min_freq_for_core__idx}/cpufreq"
+
+  if [ ! -r "${_get_cpu_min_freq_for_core__dir}/cpuinfo_min_freq" ]; then
+    unset _get_cpu_min_freq_for_core__idx
+    unset _get_cpu_min_freq_for_core__dir
+    return 1
+  fi
+
+  _get_cpu_min_freq_for_core__khz="$(cat "${_get_cpu_min_freq_for_core__dir}/cpuinfo_min_freq")"
+
+  _get_cpu_min_freq_for_core__scaling="$(cat "${_get_cpu_min_freq_for_core__dir}/scaling_min_freq")"
+  if [ -n "${_get_cpu_min_freq_for_core__scaling}" ] && [ "${_get_cpu_min_freq_for_core__scaling}" -gt 0 ]; then
+    if [ "${_get_cpu_min_freq_for_core__scaling}" -lt "${_get_cpu_min_freq_for_core__khz}" ]; then
+      _get_cpu_min_freq_for_core__khz="${_get_cpu_min_freq_for_core__scaling}"
+    fi
+  fi
+
+  printf -- '%s' "${_get_cpu_min_freq_for_core__khz}"
+
+  unset _get_cpu_min_freq_for_core__idx
+  unset _get_cpu_min_freq_for_core__dir
+  unset _get_cpu_min_freq_for_core__khz
+  unset _get_cpu_min_freq_for_core__scaling
+  return 0
+}
+
+##
 # Get the current state of the CPU from the pstate and scaling driver
 #
 do_get_current() {
@@ -1215,8 +1291,17 @@ do_get_current() {
     do_get_current__cpu_turbo="0"
   fi
 
-  do_get_current__cpu_max_value=$((do_get_current__cpu_max_freq_khz * 100 / SYSTEM_CPU_MAX_FREQ))
-  do_get_current__cpu_min_value=$((do_get_current__cpu_min_freq_khz * 100 / SYSTEM_CPU_MAX_FREQ))
+  # For the current, just pull from CPU0, which should always exist
+  do_get_current__cpu0_max="$(_get_cpu_max_freq_for_core 0)"
+  if [ -z "${do_get_current__cpu0_max}" ] || [ "${do_get_current__cpu0_max}" -le 0 ]; then
+    _elog_quiet "Unable to determine cpu0 max freq for display"
+    unset do_get_current__cpu0_max
+    return 1
+  fi
+
+  do_get_current__cpu_max_value=$((do_get_current__cpu_max_freq_khz * 100 / do_get_current__cpu0_max))
+  do_get_current__cpu_min_value=$((do_get_current__cpu_min_freq_khz * 100 / do_get_current__cpu0_max))
+  unset do_get_current__cpu0_max
 
   do_get_current__cpu_turbo_onoff=
   if [ -z "${do_get_current__cpu_turbo}" ]; then
@@ -1257,6 +1342,7 @@ EOF
     "${do_get_current__cpu_max_value}" "${do_get_current__cpu_max_freq_mhz}"
 
   unset do_get_current__cpu_turbo_onoff
+  unset do_get_current__cpu0_max
   unset do_get_current__cpu_max_freq_khz
   unset do_get_current__cpu_min_freq_khz
   unset do_get_current__cpu_max_freq_mhz
@@ -1378,23 +1464,40 @@ root_write_max() {
     _log_all "Max value written to %s" "${SYSTEM_INTEL_PSTATE_MAX}"
   fi
 
-  root_write_max__freq=$((root_write_max__max * SYSTEM_CPU_MAX_FREQ / 100))
-
-  # Bound frequency between system min and max
-  _log_all "Bound %s between %s and %s" "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}"
-  root_write_max__freq="$(set_variable_bounds "${root_write_max__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}")"
-
   for root_write_max__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
+    # Grab the frequency of the current core (which may be different per CPU core)
+    root_write_max__core_max="$(_get_cpu_max_freq_for_core "${root_write_max__i}")"
+    if [ -z "${root_write_max__core_max}" ] || [ "${root_write_max__core_max}" -le 0 ]; then
+      _elog "Unable to read max freq for cpu%s, skipping" "${root_write_max__i}"
+      unset root_write_max__core_max
+      unset root_write_max__i
+      continue
+    fi
+
+    # Same for the min (see the idea of Intel P and E cores)
+    root_write_max__core_min="$(_get_cpu_min_freq_for_core "${root_write_max__i}")"
+    if [ -z "${root_write_max__core_min}" ] || [ "${root_write_max__core_min}" -le 0 ]; then
+      root_write_max__core_min=0
+    fi
+
+    # Resolve a KHz value as a percentage based on asked value
+    root_write_max__freq=$((root_write_max__max * root_write_max__core_max / 100))
+
+    _log_all "Bound %s between %s and %s" "${root_write_max__freq}" "${root_write_max__core_min}" "${root_write_max__core_max}"
+    root_write_max__freq="$(set_variable_bounds "${root_write_max__freq}" "${root_write_max__core_min}" "${root_write_max__core_max}")"
+
     root_write_max__target="${SYSTEM_CPU_DIR}/cpu${root_write_max__i}/cpufreq/scaling_max_freq"
     _log_verbose "Write freq: %sKHz to file: %s" "${root_write_max__freq}" "${root_write_max__target}"
     printf -- "%s" "${root_write_max__freq}" >"${root_write_max__target}" || return 1
     _log_all "Max value written to %s" "${root_write_max__target}"
 
     unset root_write_max__target
+    unset root_write_max__freq
+    unset root_write_max__core_max
+    unset root_write_max__core_min
     unset root_write_max__i
   done
 
-  unset root_write_max__freq
   unset root_write_max__max
   return 0
 }
@@ -1419,23 +1522,38 @@ root_write_min() {
     _log_all "Min value written to %s" "${SYSTEM_INTEL_PSTATE_MIN}"
   fi
 
-  root_write_min__freq=$((root_write_min__min * SYSTEM_CPU_MAX_FREQ / 100))
-
-  # Bound frequency between system min and max
-  _log_all "Bound %s between %s and %s" "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}"
-  root_write_min__freq="$(set_variable_bounds "${root_write_min__freq}" "${SYSTEM_CPU_MIN_FREQ}" "${SYSTEM_CPU_MAX_FREQ}")"
-
   for root_write_min__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
+    # Same per CPU frequency different handling as for max_freq
+    root_write_min__core_max="$(_get_cpu_max_freq_for_core "${root_write_min__i}")"
+    if [ -z "${root_write_min__core_max}" ] || [ "${root_write_min__core_max}" -le 0 ]; then
+      _elog "Unable to read max freq for cpu%s, skipping" "${root_write_min__i}"
+      unset root_write_min__core_max
+      unset root_write_min__i
+      continue
+    fi
+
+    root_write_min__core_min="$(_get_cpu_min_freq_for_core "${root_write_min__i}")"
+    if [ -z "${root_write_min__core_min}" ] || [ "${root_write_min__core_min}" -le 0 ]; then
+      root_write_min__core_min=0
+    fi
+
+    root_write_min__freq=$((root_write_min__min * root_write_min__core_max / 100))
+
+    _log_all "Bound %s between %s and %s" "${root_write_min__freq}" "${root_write_min__core_min}" "${root_write_min__core_max}"
+    root_write_min__freq="$(set_variable_bounds "${root_write_min__freq}" "${root_write_min__core_min}" "${root_write_min__core_max}")"
+
     root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq"
     _log_verbose "Write freq: %sKHz to file: %s" "${root_write_min__freq}" "${root_write_min__target}"
     printf -- "%s" "${root_write_min__freq}" >"${root_write_min__target}" || return 1
     _log_all "Min value written to %s" "${root_write_min__target}"
 
     unset root_write_min__target
+    unset root_write_min__freq
+    unset root_write_min__core_max
+    unset root_write_min__core_min
     unset root_write_min__i
   done
 
-  unset root_write_min__freq
   unset root_write_min__min
   return 0
 }
