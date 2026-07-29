@@ -1956,6 +1956,66 @@ main() {
               exec_mode="${EXEC_MODE_SET}"
             fi
             ;;
+          plan=*)
+            main__opt_plan=1
+
+            main__opt_plan_arg="${OPTARG#*=}"
+            if [ -z "${main__opt_plan_arg}" ]; then
+              _elog_quiet "Long option --plan expects argument"
+              return 1
+            fi
+            _log_all "Attempt to set --plan:%s" "${main__opt_plan_arg}"
+            ;;
+          max=*)
+            main__opt_max=1
+
+            main__opt_max_arg="${OPTARG#*=}"
+            if [ -z "${main__opt_max_arg}" ]; then
+              _elog_quiet "Long option --max expects argument"
+              return 1
+            fi
+            _log_all "Attempt to set --max:%s" "${main__opt_max_arg}"
+            ;;
+          min=*)
+            main__opt_min=1
+
+            main__opt_min_arg="${OPTARG#*=}"
+            if [ -z "${main__opt_min_arg}" ]; then
+              _elog_quiet "Long option --min expects argument"
+              return 1
+            fi
+            _log_all "Attempt to set --min:%s" "${main__opt_min_arg}"
+            ;;
+          turbo=*)
+            main__opt_turbo=1
+
+            main__opt_turbo_arg="${OPTARG#*=}"
+            if [ -z "${main__opt_turbo_arg}" ]; then
+              _elog_quiet "Long option --turbo expects argument"
+              return 1
+            fi
+            _log_all "Attempt to set --turbo:%s" "${main__opt_turbo_arg}"
+            ;;
+          governor=*)
+            main__opt_governor=1
+
+            main__opt_governor_arg="${OPTARG#*=}"
+            if [ -z "${main__opt_governor_arg}" ]; then
+              _elog_quiet "Long option --governor expects argument"
+              return 1
+            fi
+            _log_all "Attempt to set --governor:%s" "${main__opt_governor_arg}"
+            ;;
+          epp=*)
+            main__opt_epp=1
+
+            main__opt_epp_arg="${OPTARG#*=}"
+            if [ -z "${main__opt_epp_arg}" ]; then
+              _elog_quiet "Long option --epp expects argument"
+              return 1
+            fi
+            _log_all "Attempt to set --epp:%s" "${main__opt_epp_arg}"
+            ;;
           plan)
             main__opt_plan=1
 
