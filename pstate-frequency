@@ -1033,10 +1033,12 @@ _resolve_cpuinfo_values() {
   _max_khz=""
   _min_khz=""
   for _cpu in "${SYSTEM_CPU_DIR}"/cpu*/cpufreq; do
-    _cpu_max_khz="$(cat "${_cpu}/${_max_freq_file}")"
-    _cpu_min_khz="$(cat "${_cpu}/cpuinfo_min_freq")"
+    [ -d "${_cpu}" ] || continue
 
-    if [ -n "${_cpu_max_khz}" ]; then
+    _cpu_max_khz="$(cat "${_cpu}/${_max_freq_file}" 2>/dev/null)"
+    _cpu_min_khz="$(cat "${_cpu}/cpuinfo_min_freq" 2>/dev/null)"
+
+    if is_digits "${_cpu_max_khz}"; then
       if [ -z "${_max_khz}" ]; then
         _max_khz="${_cpu_max_khz}"
       elif [ "${_cpu_max_khz}" -gt "${_max_khz}" ]; then
@@ -1044,7 +1046,7 @@ _resolve_cpuinfo_values() {
       fi
     fi
 
-    if [ -n "${_cpu_min_khz}" ]; then
+    if is_digits "${_cpu_min_khz}"; then
       if [ -z "${_min_khz}" ]; then
         _min_khz="${_cpu_min_khz}"
       elif [ "${_cpu_min_khz}" -lt "${_min_khz}" ]; then
@@ -1052,21 +1054,21 @@ _resolve_cpuinfo_values() {
       fi
     fi
 
-    unset _cpu
     unset _cpu_max_khz
     unset _cpu_min_khz
   done
   unset _cpu
   unset _max_freq_file
 
-  if [ -z "${_max_khz}" ] || [ "${_max_khz}" -lt 0 ]; then
+  # Must be > 0, SYSTEM_CPU_MAX_FREQ is used as a divisor below
+  if ! is_digits "${_max_khz}" || [ "${_max_khz}" -le 0 ]; then
     _elog_quiet 'Unable to determine CPU Info Max'
     unset _max_khz
     unset _min_khz
     return 1
   fi
 
-  if [ -z "${_min_khz}" ] || [ "${_min_khz}" -lt 0 ]; then
+  if ! is_digits "${_min_khz}" || [ "${_min_khz}" -le 0 ]; then
     _elog_quiet 'Unable to determine CPU Info Min'
     unset _max_khz
     unset _min_khz
