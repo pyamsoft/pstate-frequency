@@ -234,6 +234,9 @@ EOF
 # Check if the passed in variable is digits
 # Does not support negative numbers
 #
+# Anything longer than 18 digits would cause an integer overflow and fuck things up
+# Please don't do that :)
+#
 # $1 input to check
 #
 # Returns true or false based on if something is requested to be --set
@@ -242,6 +245,10 @@ is_digits() {
 
   case "${is_digits__input}" in
   *[!0-9]* | '')
+    unset is_digits__input
+    return 1
+    ;;
+  ???????????????????*)
     unset is_digits__input
     return 1
     ;;
