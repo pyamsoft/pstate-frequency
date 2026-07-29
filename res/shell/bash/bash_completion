@@ -21,7 +21,7 @@ _pstate-frequency() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local prev="${COMP_WORDS[COMP_CWORD - 1]}"
   local short_actions="-V -H -S -G -d -q"
-  local long_actions="--quiet --version --help --set --get --quiet --delay"
+  local long_actions="--version --help --set --get --debug --quiet --delay"
   local short_set_options="-m -n -t -p -g -e"
   local short_get_options="-c -r"
   local long_set_options="--max --min --turbo --plan --governor --epp"
