@@ -1122,15 +1122,16 @@ EOF
 _get_system_scaling_max_freq() {
   _max_khz=""
   for _cpu in "${SYSTEM_CPU_DIR}"/cpu*/cpufreq; do
-    _cpu_max_khz="$(cat "${_cpu}/scaling_max_freq")"
-    if [ -n "${_cpu_max_khz}" ]; then
+    [ -d "${_cpu}" ] || continue
+
+    _cpu_max_khz="$(cat "${_cpu}/scaling_max_freq" 2>/dev/null)"
+    if is_digits "${_cpu_max_khz}"; then
       if [ -z "${_max_khz}" ]; then
         _max_khz="${_cpu_max_khz}"
       elif [ "${_cpu_max_khz}" -gt "${_max_khz}" ]; then
         _max_khz="${_cpu_max_khz}"
       fi
     fi
-    unset _cpu
     unset _cpu_max_khz
   done
   unset _cpu
@@ -1148,15 +1149,16 @@ _get_system_scaling_max_freq() {
 _get_system_scaling_min_freq() {
   _min_khz=""
   for _cpu in "${SYSTEM_CPU_DIR}"/cpu*/cpufreq; do
-    _cpu_min_khz="$(cat "${_cpu}/scaling_min_freq")"
-    if [ -n "${_cpu_min_khz}" ]; then
+    [ -d "${_cpu}" ] || continue
+
+    _cpu_min_khz="$(cat "${_cpu}/scaling_min_freq" 2>/dev/null)"
+    if is_digits "${_cpu_min_khz}"; then
       if [ -z "${_min_khz}" ]; then
         _min_khz="${_cpu_min_khz}"
       elif [ "${_cpu_min_khz}" -lt "${_min_khz}" ]; then
         _min_khz="${_cpu_min_khz}"
       fi
     fi
-    unset _cpu
     unset _cpu_min_khz
   done
   unset _cpu
@@ -1192,10 +1194,17 @@ _get_cpu_max_freq_for_core() {
     return 1
   fi
 
-  _get_cpu_max_freq_for_core__khz="$(cat "${_get_cpu_max_freq_for_core__file}")"
+  _get_cpu_max_freq_for_core__khz="$(cat "${_get_cpu_max_freq_for_core__file}" 2>/dev/null)"
+  if ! is_digits "${_get_cpu_max_freq_for_core__khz}"; then
+    unset _get_cpu_max_freq_for_core__idx
+    unset _get_cpu_max_freq_for_core__dir
+    unset _get_cpu_max_freq_for_core__file
+    unset _get_cpu_max_freq_for_core__khz
+    return 1
+  fi
 
-  _get_cpu_max_freq_for_core__scaling="$(cat "${_get_cpu_max_freq_for_core__dir}/scaling_max_freq")"
-  if [ -n "${_get_cpu_max_freq_for_core__scaling}" ] && [ "${_get_cpu_max_freq_for_core__scaling}" -gt 0 ]; then
+  _get_cpu_max_freq_for_core__scaling="$(cat "${_get_cpu_max_freq_for_core__dir}/scaling_max_freq" 2>/dev/null)"
+  if is_digits "${_get_cpu_max_freq_for_core__scaling}" && [ "${_get_cpu_max_freq_for_core__scaling}" -gt 0 ]; then
     if [ "${_get_cpu_max_freq_for_core__scaling}" -gt "${_get_cpu_max_freq_for_core__khz}" ]; then
       _get_cpu_max_freq_for_core__khz="${_get_cpu_max_freq_for_core__scaling}"
     fi
@@ -1227,10 +1236,16 @@ _get_cpu_min_freq_for_core() {
     return 1
   fi
 
-  _get_cpu_min_freq_for_core__khz="$(cat "${_get_cpu_min_freq_for_core__dir}/cpuinfo_min_freq")"
+  _get_cpu_min_freq_for_core__khz="$(cat "${_get_cpu_min_freq_for_core__dir}/cpuinfo_min_freq" 2>/dev/null)"
+  if ! is_digits "${_get_cpu_min_freq_for_core__khz}"; then
+    unset _get_cpu_min_freq_for_core__idx
+    unset _get_cpu_min_freq_for_core__dir
+    unset _get_cpu_min_freq_for_core__khz
+    return 1
+  fi
 
-  _get_cpu_min_freq_for_core__scaling="$(cat "${_get_cpu_min_freq_for_core__dir}/scaling_min_freq")"
-  if [ -n "${_get_cpu_min_freq_for_core__scaling}" ] && [ "${_get_cpu_min_freq_for_core__scaling}" -gt 0 ]; then
+  _get_cpu_min_freq_for_core__scaling="$(cat "${_get_cpu_min_freq_for_core__dir}/scaling_min_freq" 2>/dev/null)"
+  if is_digits "${_get_cpu_min_freq_for_core__scaling}" && [ "${_get_cpu_min_freq_for_core__scaling}" -gt 0 ]; then
     if [ "${_get_cpu_min_freq_for_core__scaling}" -lt "${_get_cpu_min_freq_for_core__khz}" ]; then
       _get_cpu_min_freq_for_core__khz="${_get_cpu_min_freq_for_core__scaling}"
     fi
@@ -2375,6 +2390,7 @@ _check_binary tr || exit 1
 _check_binary awk || exit 1
 _check_binary id || exit 1
 _check_binary sleep || exit 1
+_check_binary seq || exit 1
 
 SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
 readonly SYSTEM_CPU_NUMBER
