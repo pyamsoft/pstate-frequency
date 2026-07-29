@@ -1325,7 +1325,7 @@ do_get_current() {
   unset do_get_current__cpu0_max
 
   do_get_current__cpu_turbo_onoff=
-  if [ -z "${do_get_current__cpu_turbo}" ]; then
+  if ! is_digits "${do_get_current__cpu_turbo}"; then
     do_get_current__cpu_turbo="unknown"
     do_get_current__cpu_turbo_onoff="BIOS_DEFAULT"
   else
@@ -1387,10 +1387,10 @@ do_get_real_work() {
 
     # There MUST be a better way to do this. If you have a >999 CPU core count, well then shucks.
     do_get_real_work__spaces="    "
-    if [ "${do_get_real_work__cpu}" -gt 9 ]; then
-      do_get_real_work__spaces="   "
-    elif [ "${do_get_real_work__cpu}" -gt 99 ]; then
+    if [ "${do_get_real_work__cpu}" -gt 99 ]; then
       do_get_real_work__spaces="  "
+    elif [ "${do_get_real_work__cpu}" -gt 9 ]; then
+      do_get_real_work__spaces="   "
     fi
 
     # If your CPU is super fast, well congratulations!
@@ -1488,16 +1488,15 @@ root_write_max() {
   for root_write_max__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     # Grab the frequency of the current core (which may be different per CPU core)
     root_write_max__core_max="$(_get_cpu_max_freq_for_core "${root_write_max__i}")"
-    if [ -z "${root_write_max__core_max}" ] || [ "${root_write_max__core_max}" -le 0 ]; then
-      _elog "Unable to read max freq for cpu%s, skipping" "${root_write_max__i}"
+    if ! is_digits "${root_write_max__core_max}" || [ "${root_write_max__core_max}" -le 0 ]; then
+      _log_verbose "Unable to read max freq for cpu%s, skipping" "${root_write_max__i}"
       unset root_write_max__core_max
-      unset root_write_max__i
       continue
     fi
 
     # Same for the min (see the idea of Intel P and E cores)
     root_write_max__core_min="$(_get_cpu_min_freq_for_core "${root_write_max__i}")"
-    if [ -z "${root_write_max__core_min}" ] || [ "${root_write_max__core_min}" -le 0 ]; then
+    if ! is_digits "${root_write_max__core_min}" || [ "${root_write_max__core_min}" -le 0 ]; then
       root_write_max__core_min=0
     fi
 
@@ -1509,14 +1508,16 @@ root_write_max() {
 
     root_write_max__target="${SYSTEM_CPU_DIR}/cpu${root_write_max__i}/cpufreq/scaling_max_freq"
     _log_verbose "Write freq: %sKHz to file: %s" "${root_write_max__freq}" "${root_write_max__target}"
-    printf -- "%s" "${root_write_max__freq}" >"${root_write_max__target}" || return 1
-    _log_all "Max value written to %s" "${root_write_max__target}"
+    if printf -- "%s" "${root_write_max__freq}" >"${root_write_max__target}"; then
+      _log_all "Max value written to %s" "${root_write_max__target}"
+    else
+      _elog "Failed to write max freq to %s" "${root_write_max__target}"
+    fi
 
     unset root_write_max__target
     unset root_write_max__freq
     unset root_write_max__core_max
     unset root_write_max__core_min
-    unset root_write_max__i
   done
 
   unset root_write_max__max
@@ -1546,15 +1547,14 @@ root_write_min() {
   for root_write_min__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     # Same per CPU frequency different handling as for max_freq
     root_write_min__core_max="$(_get_cpu_max_freq_for_core "${root_write_min__i}")"
-    if [ -z "${root_write_min__core_max}" ] || [ "${root_write_min__core_max}" -le 0 ]; then
-      _elog "Unable to read max freq for cpu%s, skipping" "${root_write_min__i}"
+    if ! is_digits "${root_write_min__core_max}" || [ "${root_write_min__core_max}" -le 0 ]; then
+      _log_verbose "Unable to read max freq for cpu%s, skipping" "${root_write_min__i}"
       unset root_write_min__core_max
-      unset root_write_min__i
       continue
     fi
 
     root_write_min__core_min="$(_get_cpu_min_freq_for_core "${root_write_min__i}")"
-    if [ -z "${root_write_min__core_min}" ] || [ "${root_write_min__core_min}" -le 0 ]; then
+    if ! is_digits "${root_write_min__core_min}" || [ "${root_write_min__core_min}" -le 0 ]; then
       root_write_min__core_min=0
     fi
 
@@ -1565,14 +1565,16 @@ root_write_min() {
 
     root_write_min__target="${SYSTEM_CPU_DIR}/cpu${root_write_min__i}/cpufreq/scaling_min_freq"
     _log_verbose "Write freq: %sKHz to file: %s" "${root_write_min__freq}" "${root_write_min__target}"
-    printf -- "%s" "${root_write_min__freq}" >"${root_write_min__target}" || return 1
-    _log_all "Min value written to %s" "${root_write_min__target}"
+    if printf -- "%s" "${root_write_min__freq}" >"${root_write_min__target}"; then
+      _log_all "Min value written to %s" "${root_write_min__target}"
+    else
+      _elog "Failed to write min freq to %s" "${root_write_min__target}"
+    fi
 
     unset root_write_min__target
     unset root_write_min__freq
     unset root_write_min__core_max
     unset root_write_min__core_min
-    unset root_write_min__i
   done
 
   unset root_write_min__min
@@ -1632,11 +1634,13 @@ root_write_governor() {
   for root_write_governor__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_governor__target="${SYSTEM_CPU_DIR}/cpu${root_write_governor__i}/cpufreq/scaling_governor"
     _log_verbose "Write governor: '%s' to file: %s" "${root_write_governor__gov}" "${root_write_governor__target}"
-    printf -- "%s" "${root_write_governor__gov}" >"${root_write_governor__target}" || return 1
-    _log_all "Governor '%s' written to %s" "${root_write_governor__gov}" "${root_write_governor__target}"
+    if printf -- "%s" "${root_write_governor__gov}" >"${root_write_governor__target}"; then
+      _log_all "Governor '%s' written to %s" "${root_write_governor__gov}" "${root_write_governor__target}"
+    else
+      _elog "Failed to write governor to %s" "${root_write_governor__target}"
+    fi
 
     unset root_write_governor__target
-    unset root_write_governor__i
   done
 
   unset root_write_governor__gov
@@ -1654,11 +1658,13 @@ root_write_epp() {
   for root_write_epp__i in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
     root_write_epp__target="${SYSTEM_CPU_DIR}/cpu${root_write_epp__i}/cpufreq/energy_performance_preference"
     _log_verbose "Write EPP: '%s' to file: %s" "${root_write_epp__epp}" "${root_write_epp__target}"
-    printf -- "%s" "${root_write_epp__epp}" >"${root_write_epp__target}" || return 1
-    _log_all "EPP '%s' written to %s" "${root_write_epp__epp}" "${root_write_epp__target}"
+    if printf -- "%s" "${root_write_epp__epp}" >"${root_write_epp__target}"; then
+      _log_all "EPP '%s' written to %s" "${root_write_epp__epp}" "${root_write_epp__target}"
+    else
+      _elog "Failed to write EPP to %s" "${root_write_epp__target}"
+    fi
 
     unset root_write_epp__target
-    unset root_write_epp__i
   done
 
   unset root_write_epp__epp
@@ -1682,8 +1688,8 @@ root_do_set() {
     return 1
   fi
   root_do_set__cpu_min_value=$((root_do_set__cpu_min_freq * 100 / SYSTEM_CPU_MAX_FREQ))
-  readonly root_do_set__cpu_min_freq
-  readonly root_do_set__cpu_min_value
+  root_do_set__setting_cpu_max=""
+  root_do_set__setting_cpu_min=""
 
   # settings are applied as follows:
   # the governor is applied first incase it also affects other CPU settings
@@ -1786,6 +1792,10 @@ root_do_set() {
 
   unset root_do_set__setting_cpu_max
   unset root_do_set__setting_cpu_min
+  unset root_do_set__cpu_min_freq
+  unset root_do_set__cpu_min_value
+  unset root_do_set__reread_cpu
+
   return 0
 }
 
