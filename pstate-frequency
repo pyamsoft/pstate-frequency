@@ -2147,7 +2147,7 @@ main() {
           _log_less_verbose
           ;;
         *)
-          _elog_quiet "Illegal short option -${OPTARG} (may need argument)\n"
+          _elog_quiet "Illegal short option -%s (may need argument)\n" "${OPTARG}"
           _print_usage
           return 1
           ;;
@@ -2179,38 +2179,38 @@ main() {
 
   # Process the plan first as it sets other values
   if [ "${main__opt_plan}" -ne 0 ]; then
-    _log_verbose "--plan requested with argument: ${main__opt_plan_arg}"
+    _log_verbose "--plan requested with argument: %s" "${main__opt_plan_arg}"
     set_power_plan "${exec_mode}" "${main__opt_plan_arg}" || return 1
   fi
 
   # Then override governor
   if [ "${main__opt_governor}" -ne 0 ]; then
-    _log_verbose "--governor requested with argument: ${main__opt_governor_arg}"
+    _log_verbose "--governor requested with argument: %s" "${main__opt_governor_arg}"
     set_governor "${exec_mode}" "${main__opt_governor_arg}" || return 1
   fi
 
   if has_epp_support; then
     # Then override epp
     if [ "${main__opt_epp}" -ne 0 ]; then
-      _log_verbose "--epp requested with argument: ${main__opt_epp_arg}"
+      _log_verbose "--epp requested with argument: %s" "${main__opt_epp_arg}"
       set_epp "${exec_mode}" "${main__opt_epp_arg}" || return 1
     fi
   fi
 
   # Followed by turbo
   if [ "${main__opt_turbo}" -ne 0 ]; then
-    _log_verbose "--turbo requested with argument: ${main__opt_turbo_arg}"
+    _log_verbose "--turbo requested with argument: %s" "${main__opt_turbo_arg}"
     set_turbo "${exec_mode}" "${main__opt_turbo_arg}" || return 1
   fi
 
   # And then max and min
   if [ "${main__opt_max}" -ne 0 ]; then
-    _log_verbose "--max requested with argument: ${main__opt_max_arg}"
+    _log_verbose "--max requested with argument: %s" "${main__opt_max_arg}"
     set_max "${exec_mode}" "${main__opt_max_arg}" || return 1
   fi
 
   if [ "${main__opt_min}" -ne 0 ]; then
-    _log_verbose "--min requested with argument: ${main__opt_min_arg}"
+    _log_verbose "--min requested with argument: %s" "${main__opt_min_arg}"
     set_min "${exec_mode}" "${main__opt_min_arg}" || return 1
   fi
 
