@@ -759,6 +759,16 @@ execute_power_plan_config() {
 
   _log_verbose "Sourcing config from location: %s" "${execute_power_plan_config__location}"
 
+  unset PLAN_AUTOMATIC
+  unset PLAN_AUTO_AC
+  unset PLAN_AUTO_BAT
+  unset PLAN_CPU_MAX
+  unset PLAN_CPU_MIN
+  unset PLAN_CPU_TURBO
+  unset PLAN_CPU_PSTATE_GOVERNOR
+  unset PLAN_CPU_CPUFREQ_GOVERNOR
+  unset PLAN_CPU_EPP
+
   # shellcheck disable=SC1090
   . "${execute_power_plan_config__location}" || return 1
 
