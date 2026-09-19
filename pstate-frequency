@@ -707,8 +707,7 @@ locate_power_plan_config() {
 
     # Strip all the fancy stuff from the file name to just get the plan name
     locate_power_plan_config__just_name="$(basename "${locate_power_plan_config__testconfig}" '.plan')"
-    locate_power_plan_config__name="$(printf -- '%s' "${locate_power_plan_config__just_name}" |
-      tr '-' ' ' | awk '{ print $2 }')"
+    locate_power_plan_config__name="${locate_power_plan_config__just_name#*-}"
 
     if [ "${locate_power_plan_config__input}" = "${locate_power_plan_config__name}" ]; then
       printf -- "%s" "${locate_power_plan_config__testconfig}"
