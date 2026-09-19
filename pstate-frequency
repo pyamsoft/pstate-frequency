@@ -672,18 +672,24 @@ set_power_plan() {
     # Locate config with given input
     set_power_plan__config=
     set_power_plan__config="$(locate_power_plan_config "${set_power_plan__input}")"
-    readonly set_power_plan__config
 
     # Fail if we don't find a config
     if [ -z "${set_power_plan__config}" ]; then
       _elog_quiet "No power plan configuration found for argument: %s" "${set_power_plan__input}"
+      unset set_power_plan__config
       unset set_power_plan__mode
       unset set_power_plan__input
       return 1
     fi
 
     # Otherwise source the config and set a plan
-    execute_power_plan_config "${set_power_plan__mode}" "${set_power_plan__config}" "${set_power_plan__input}" || return 1
+    execute_power_plan_config "${set_power_plan__mode}" "${set_power_plan__config}" "${set_power_plan__input}" || {
+      unset set_power_plan__config
+      unset set_power_plan__mode
+      unset set_power_plan__input
+      return 1
+    }
+    unset set_power_plan__config
   else
     _elog_quiet "Cannot set power plan outside of SET operation exec_mode"
 
