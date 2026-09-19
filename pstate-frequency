@@ -1407,7 +1407,12 @@ EOF
 do_get_real_work() {
   # CPUs in sysfs start at 0 and end at N-1
   for do_get_real_work__cpu in $(seq 0 $((SYSTEM_CPU_NUMBER - 1))); do
-    do_get_real_work__freq_khz="$(cat "${SYSTEM_CPU_DIR}/cpu${do_get_real_work__cpu}/cpufreq/scaling_cur_freq")"
+    do_get_real_work__freq_khz="$(cat "${SYSTEM_CPU_DIR}/cpu${do_get_real_work__cpu}/cpufreq/scaling_cur_freq" 2>/dev/null)"
+    if ! is_digits "${do_get_real_work__freq_khz}"; then
+      _log_verbose "Unable to read scaling_cur_freq for cpu%s, skipping" "${do_get_real_work__cpu}"
+      unset do_get_real_work__freq_khz
+      continue
+    fi
     do_get_real_work__freq_mhz="$((do_get_real_work__freq_khz / 1000))"
 
     # There MUST be a better way to do this. If you have a >999 CPU core count, well then shucks.
