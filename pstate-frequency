@@ -2304,11 +2304,13 @@ main() {
     set_governor "${exec_mode}" "${main__opt_governor_arg}" || return 1
   fi
 
-  if has_epp_support; then
-    # Then override epp
-    if [ "${main__opt_epp}" -ne 0 ]; then
+  # Then override epp
+  if [ "${main__opt_epp}" -ne 0 ]; then
+    if has_epp_support; then
       _log_verbose "--epp requested with argument: %s" "${main__opt_epp_arg}"
       set_epp "${exec_mode}" "${main__opt_epp_arg}" || return 1
+    else
+      _elog_quiet "EPP is not supported on this system, ignoring --epp"
     fi
   fi
 
