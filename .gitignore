@@ -1,9 +1,6 @@
-doc-pak/
-description-pak
-backup-*-pre-pstate-frequency.tgz
-*.deb
-app/build
-pstate-frequency-*.tar.gz
-cov-int*/
-coverity/
-.idea
+# Ignore idea folder
+.idea/*
+!.idea/copyright
+
+# NodeJS (I know, I know (it's for bats))
+node_modules
