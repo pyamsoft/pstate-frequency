@@ -27,7 +27,7 @@ main() {
     return 1
   fi
 
-  shellcheck "${ROOT}"/git-ssh "$@"
+  shellcheck "${ROOT}"/pstate-frequency "$@"
   return "$?"
 }
 
