@@ -27,7 +27,11 @@ main() {
     return 1
   fi
 
-  "${ROOT}/node_modules/.bin/bats" "${ROOT}"/tests/pstate-frequency.bats "$@"
+  printf -- 'Running non-root tests...\n'
+  "${ROOT}/node_modules/.bin/bats" "${ROOT}"/tests/non-root.bats "$@"
+
+  printf -- 'Running root tests...\n'
+  "${ROOT}/node_modules/.bin/bats" "${ROOT}"/tests/root.bats "$@"
   return "$?"
 }
 
