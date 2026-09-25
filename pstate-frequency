@@ -1210,7 +1210,7 @@ _get_cpu_max_freq_for_core() {
   fi
 
   _get_cpu_max_freq_for_core__raw="$(cat "${_get_cpu_max_freq_for_core__file}" "${_get_cpu_max_freq_for_core__dir}/scaling_max_freq" 2>/dev/null)"
-  set -- ${_get_cpu_max_freq_for_core__raw}
+  set -- "${_get_cpu_max_freq_for_core__raw}"
   _get_cpu_max_freq_for_core__khz="$1"
   _get_cpu_max_freq_for_core__scaling="$2"
   unset _get_cpu_max_freq_for_core__raw
@@ -1257,7 +1257,7 @@ _get_cpu_min_freq_for_core() {
   fi
 
   _get_cpu_min_freq_for_core__raw="$(cat "${_get_cpu_min_freq_for_core__dir}/cpuinfo_min_freq" "${_get_cpu_min_freq_for_core__dir}/scaling_min_freq" 2>/dev/null)"
-  set -- ${_get_cpu_min_freq_for_core__raw}
+  set -- "${_get_cpu_min_freq_for_core__raw}"
   _get_cpu_min_freq_for_core__khz="$1"
   _get_cpu_min_freq_for_core__scaling="$2"
   unset _get_cpu_min_freq_for_core__raw
