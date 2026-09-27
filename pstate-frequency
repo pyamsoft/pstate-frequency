@@ -2512,5 +2512,5 @@ SYSTEM_CPU_MAX_VALUE=
 SYSTEM_CPU_MIN_VALUE=
 
 # Exit 0 is success, exit 1 is some failure.
-main "$@" || exit 1
-exit 0
+main "$@"
+exit "$?"
