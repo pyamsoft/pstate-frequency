@@ -2520,7 +2520,7 @@ _check_binary id || exit 1
 _check_binary sleep || exit 1
 _check_binary seq || exit 1
 
-SYSTEM_CPU_NUMBER="$(grep -c "processor" /proc/cpuinfo)"
+SYSTEM_CPU_NUMBER="$(getconf _NPROCESSORS_ONLN)"
 readonly SYSTEM_CPU_NUMBER
 
 # Set by _resolve_cpuinfo_values
