@@ -518,6 +518,15 @@ set_epp() {
     if ! is_digits "${set_epp__input}"; then
       _log_all "'%s' is not digits" "${set_epp__input}"
       set_epp__value=""
+
+      # Reject glob characters
+      case "${set_epp__input}" in
+      *[!a-zA-Z0-9_-]*)
+        _log_all "'%s' contains invalid character" "${set_epp__input}"
+        set_epp__input=""
+        ;;
+      esac
+
       for try_epp in $(printf -- "%s" "${set_epp__input}" | tr ',' ' '); do
         _log_verbose "Check if %s is a valid EPP" "${try_epp}"
         if [ "${try_epp}" = "default" ]; then
@@ -592,6 +601,15 @@ set_governor() {
     if ! is_digits "${set_governor__input}"; then
       _log_all "'%s' is not digits" "${set_governor__input}"
       set_governor__value=""
+
+      # Reject glob characters
+      case "${set_governor__input}" in
+      *[!a-zA-Z0-9_-]*)
+        _log_all "'%s' contains invalid character" "${set_governor__input}"
+        set_governor__input=""
+        ;;
+      esac
+
       for try_gov in $(printf -- "%s" "${set_governor__input}" | tr ',' ' '); do
         _log_verbose "Check if %s is a valid governor" "${try_gov}"
         for available_gov in ${set_governor__all_available_governors}; do
