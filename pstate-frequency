@@ -521,7 +521,7 @@ set_epp() {
 
       # Reject glob characters
       case "${set_epp__input}" in
-      *[!a-zA-Z0-9_-,]*)
+      *[!a-zA-Z0-9_,-]*)
         _log_all "'%s' contains invalid character" "${set_epp__input}"
         set_epp__input=""
         ;;
@@ -604,7 +604,7 @@ set_governor() {
 
       # Reject glob characters
       case "${set_governor__input}" in
-      *[!a-zA-Z0-9_-,]*)
+      *[!a-zA-Z0-9_,-]*)
         _log_all "'%s' contains invalid character" "${set_governor__input}"
         set_governor__input=""
         ;;
