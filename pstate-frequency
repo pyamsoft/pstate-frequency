@@ -1363,17 +1363,8 @@ do_get_current() {
     do_get_current__cpu_turbo="0"
   fi
 
-  # For the current, just pull from CPU0, which should always exist
-  do_get_current__cpu0_max="$(_get_cpu_max_freq_for_core 0)"
-  if [ -z "${do_get_current__cpu0_max}" ] || [ "${do_get_current__cpu0_max}" -le 0 ]; then
-    _elog_quiet "Unable to determine cpu0 max freq for display"
-    unset do_get_current__cpu0_max
-    return 1
-  fi
-
-  do_get_current__cpu_max_value=$((do_get_current__cpu_max_freq_khz * 100 / do_get_current__cpu0_max))
-  do_get_current__cpu_min_value=$((do_get_current__cpu_min_freq_khz * 100 / do_get_current__cpu0_max))
-  unset do_get_current__cpu0_max
+  do_get_current__cpu_max_value=$((do_get_current__cpu_max_freq_khz * 100 / SYSTEM_CPU_MAX_FREQ))
+  do_get_current__cpu_min_value=$((do_get_current__cpu_min_freq_khz * 100 / SYSTEM_CPU_MAX_FREQ))
 
   do_get_current__cpu_turbo_onoff=
   if ! is_digits "${do_get_current__cpu_turbo}"; then
