@@ -76,6 +76,17 @@ setup() {
   [[ "${output}" == *"TURBO        -> 1 [ON]"* ]]
 }
 
+@test "-G -c never reports above 100% when cpu0 is not the fastest core" {
+  pf_add_cpu 0 4700000 400000 intel_pstate
+  pf_add_cpu 1 4800000 400000 intel_pstate
+  pf_add_intel_pstate 100 0 0
+
+  pf_run nonroot -G -c
+  [ "${status}" -eq 0 ]
+  [[ "${output}" == *"CPU_MIN      -> 8% [400MHz]"* ]]
+  [[ "${output}" == *"CPU_MAX      -> 100% [4800MHz]"* ]]
+}
+
 @test "-G -r prints one CPU line per fixture core" {
   pf_add_cpu 1 "${_CPU_MAX}" "${_CPU_MIN}"
   pf_add_cpu 2 "${_CPU_MAX}" "${_CPU_MIN}"
