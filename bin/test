@@ -21,17 +21,32 @@ ROOT="$(realpath "$(dirname "${BINDIR}")")"
 readonly ROOT
 unset BINDIR
 
+_bats() {
+  _target="$1"
+  shift
+
+  bats -p "${_target}" "$@"
+  return "$?"
+}
+
 main() {
-  if [ ! -r "${ROOT}/node_modules/.bin/bats" ]; then
-    printf -- 'Must install "bats" for testing. Run "bin/setup".\n'
+  if ! command -v bats >/dev/null 2>&1; then
+    printf -- 'Must install "bats" for testing..\n'
     return 1
   fi
 
   printf -- 'Running non-root tests...\n'
-  "${ROOT}/node_modules/.bin/bats" "${ROOT}"/tests/non-root.bats "$@"
+  _bats "${ROOT}"/tests/non-root.bats "$@" || {
+    printf -- 'Failed non-root tests\n'
+    return 1
+  }
 
   printf -- 'Running root tests...\n'
-  "${ROOT}/node_modules/.bin/bats" "${ROOT}"/tests/root.bats "$@"
+  _bats "${ROOT}"/tests/root.bats "$@" || {
+    printf -- 'Failed root tests\n'
+    return 1
+  }
+
   return "$?"
 }
 

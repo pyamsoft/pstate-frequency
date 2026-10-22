@@ -1,2 +1,3 @@
 [tools]
-node = "24"
+bats = "1.14"
+shellcheck = "0.11"
