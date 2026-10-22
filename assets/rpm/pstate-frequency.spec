@@ -7,7 +7,7 @@
 # Copied-with-modification from: https://github.com/pyamsoft/pstate-frequency/issues/25
 
 Name:      pstate-frequency
-Version:   3.17.1
+Version:   3.18.0
 Release:   1
 License:   GPLv2
 Summary:   Easily control moden CPU p-state driver on Linux
@@ -44,6 +44,9 @@ rm -rf %{buildroot}
 %doc %{_docdir}/%{name}/LICENSE
 
 %changelog
+* Wed Oct 21 2026 3.18.0-1
+- Support weird new Intel CPU configurations with different frequencies per core.
+
 * Fri May 15 2026 3.17.1-1
 - Couple bugfixes for cases that rarely happened (I hope)
 
