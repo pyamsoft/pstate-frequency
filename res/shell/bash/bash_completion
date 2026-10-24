@@ -63,27 +63,27 @@ _pstate-frequency() {
 
   if [[ ${cur} = --* ]]; then
     if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
-      COMPREPLY=($(compgen -W "${long_set_options}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${long_set_options}" -- "${cur}")
     elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
-      COMPREPLY=($(compgen -W "${long_get_options}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${long_get_options}" -- "${cur}")
     elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
-      COMPREPLY=($(compgen -W "${plans}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${plans}" -- "${cur}")
     else
-      COMPREPLY=($(compgen -W "${long_actions}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${long_actions}" -- "${cur}")
     fi
   elif [[ ${cur} = * ]]; then
     if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
-      COMPREPLY=($(compgen -W "${short_set_options}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${short_set_options}" -- "${cur}")
     elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
-      COMPREPLY=($(compgen -W "${short_get_options}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${short_get_options}" -- "${cur}")
     elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
-      COMPREPLY=($(compgen -W "${plans}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${plans}" -- "${cur}")
     elif [[ ${prev} = "--governor" ]] || [[ ${prev} = "-g" ]]; then
-      COMPREPLY=($(compgen -W "${governors}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${governors}" -- "${cur}")
     elif [[ ${prev} = "--epp" ]] || [[ ${prev} = "-e" ]]; then
-      COMPREPLY=($(compgen -W "${epp}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${epp}" -- "${cur}")
     else
-      COMPREPLY=($(compgen -W "${short_actions}" -- "${cur}"))
+      mapfile -t COMPREPLY < <(compgen -W "${short_actions}" -- "${cur}")
     fi
   fi
 
