@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 # The GPLv2 License
 #
 #   Copyright (C) 2025 pyamsoft
