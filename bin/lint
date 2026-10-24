@@ -33,8 +33,6 @@ main() {
     "${ROOT}"/assets/pkgbuild/git/PKGBUILD \
     "${ROOT}"/assets/pkgbuild/stable/PKGBUILD \
     "${ROOT}"/res/shell/bash/* \
-    "${ROOT}"/res/shell/zsh/* \
-    "${ROOT}"/res/shell/fish/* \
     "${ROOT}"/bin/* \
     "${ROOT}"/tests/* \
     "$@"
