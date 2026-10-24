@@ -140,7 +140,7 @@ pf_run() {
   # Syntax here is sh -c "blahblah" (arg$0), ($arg1) ...
   # in this case, arg$0 is ignored since we don't use $0 in our embedded script
   #
-  # shellcheck disable=SC2016,SC2086
+  # shellcheck disable=SC2016
   run unshare --user --map-root-user --mount -- sh -c '
     fixture="$1"
     pstate_bin="$2"
