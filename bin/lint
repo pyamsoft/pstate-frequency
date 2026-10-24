@@ -27,7 +27,17 @@ main() {
     return 1
   fi
 
-  shellcheck "${ROOT}"/pstate-frequency "$@"
+  shellcheck \
+    "${ROOT}"/pstate-frequency \
+    "${ROOT}"/assets/checkinstall/docheckinstall \
+    "${ROOT}"/assets/pkgbuild/git/PKGBUILD \
+    "${ROOT}"/assets/pkgbuild/stable/PKGBUILD \
+    "${ROOT}"/res/shell/bash/* \
+    "${ROOT}"/res/shell/zsh/* \
+    "${ROOT}"/res/shell/fish/* \
+    "${ROOT}"/bin/* \
+    "${ROOT}"/tests/* \
+    "$@"
   return "$?"
 }
 
