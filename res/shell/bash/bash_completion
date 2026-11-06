@@ -73,9 +73,9 @@ _pstate-frequency() {
     fi
   elif [[ ${cur} = * ]]; then
     if [[ ${prev} = "--set" ]] || [[ ${prev} = "-S" ]]; then
-      mapfile -t COMPREPLY < <(compgen -W "${short_set_options}" -- "${cur}")
+      mapfile -t COMPREPLY < <(compgen -W "${short_set_options} ${long_set_options}" -- "${cur}")
     elif [[ ${prev} = "--get" ]] || [[ ${prev} = "-G" ]]; then
-      mapfile -t COMPREPLY < <(compgen -W "${short_get_options}" -- "${cur}")
+      mapfile -t COMPREPLY < <(compgen -W "${short_get_options} ${long_get_options}" -- "${cur}")
     elif [[ ${prev} = "--plan" ]] || [[ ${prev} = "-p" ]]; then
       mapfile -t COMPREPLY < <(compgen -W "${plans}" -- "${cur}")
     elif [[ ${prev} = "--governor" ]] || [[ ${prev} = "-g" ]]; then
