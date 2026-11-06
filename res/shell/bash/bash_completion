@@ -83,7 +83,7 @@ _pstate-frequency() {
     elif [[ ${prev} = "--epp" ]] || [[ ${prev} = "-e" ]]; then
       mapfile -t COMPREPLY < <(compgen -W "${epp}" -- "${cur}")
     else
-      mapfile -t COMPREPLY < <(compgen -W "${short_actions}" -- "${cur}")
+      mapfile -t COMPREPLY < <(compgen -W "${short_actions} ${long_actions}" -- "${cur}")
     fi
   fi
 
