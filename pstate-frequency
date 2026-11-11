@@ -2259,7 +2259,7 @@ main() {
           _log_less_verbose
           ;;
         *)
-          _elog_quiet "Illegal short option -%s (may need argument)\n" "${OPTARG}"
+          _elog_quiet "Illegal short option -%s (may need argument)" "${OPTARG}"
           _print_usage
           return 1
           ;;
