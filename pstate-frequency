@@ -208,13 +208,6 @@ option:
     -n [+]<number>  | --min [+]<number>    | --min=[+]<number>      Modify current CPU min frequency <number|+offset>
     -t <on|off>     | --turbo <on|off>     | --turbo=<on|off>       Modify current CPU turbo boost <"on"|"off">
 
-system:
-    [set]
-    --delay          Delay execution of "set" commands by 5 seconds
-                     (Used to work around a boot issue where values are set too early
-                     and can be overwritten by another system component.)
-
-
 examples:
 
     # pstate-frequency -S -m 80 -t off
@@ -1849,27 +1842,15 @@ root_do_set() {
 ##
 # Check that the set call is possible, and the user is root.
 # Once this is validated, do the set calls and then run do_get_current
-#
-# $1 flag to set an execution delay
 do_set() {
-  do_set__delay="$1"
-
   if [ "$(id -u)" -eq 0 ]; then
-    if [ "${do_set__delay}" -eq "${EXEC_DELAY_TRUE}" ]; then
-      _log_verbose "Delay for 5 seconds requested by user"
-      sleep 5
-    fi
-
     root_do_set || return 1
     do_get_current || return 1
   else
     _elog_quiet "You must be root."
-
-    unset do_set__delay
     return 1
   fi
 
-  unset do_set__delay
   return 0
 }
 
@@ -1941,7 +1922,6 @@ main() {
 
   exec_get_type="${GET_TYPE_CURRENT}"
   exec_mode="${EXEC_MODE_NONE}"
-  execution_delay="${EXEC_DELAY_FALSE}" # Whether or not to delay the script
 
   # Power plans
   main__opt_plan=0
@@ -2156,11 +2136,11 @@ main() {
             _log_less_verbose
             ;;
           delay)
-            execution_delay="${EXEC_DELAY_TRUE}"
+            _log_quiet 'The --%s option has been deprecated and removed.' "${OPTARG}"
             ;;
           *)
             # We must provide our own error message in this case
-            _elog_quiet "Illegal long option --%s" "${OPTARG} (may need argument)\n"
+            _elog_quiet "Illegal long option --%s (may need argument)" "${OPTARG}"
             _print_usage
             return 1
             ;;
@@ -2384,7 +2364,7 @@ EOF
       "${__exec_set_turbo_type}" "${__exec_set_turbo_arg}" \
       "${__exec_set_governor_type}" "${__exec_set_governor_arg}" \
       "${__exec_set_epp_type}" "${__exec_set_epp_arg}"
-    do_set "${execution_delay}" || return 1
+    do_set || return 1
     ;;
   *)
     _print_usage
@@ -2437,9 +2417,6 @@ __exec_set_epp_arg=""
 
 readonly SET_REREAD_CPU_FALSE=0
 readonly SET_REREAD_CPU_TRUE=1
-
-readonly EXEC_DELAY_FALSE=0
-readonly EXEC_DELAY_TRUE=1
 
 # Check system sanity
 # Some container based systems will not have CPU related info and therefore
