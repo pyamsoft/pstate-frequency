@@ -21,7 +21,6 @@ After=suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
 ExecStartPre=/usr/bin/sleep 5
 ExecStart=%PREFIX%/bin/pstate-frequency -S -p auto
 

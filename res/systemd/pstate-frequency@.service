@@ -21,7 +21,6 @@ After=tlp.service tlp-pd.service power-profiles-daemon.service acpid.service lap
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
 ExecStartPre=/usr/bin/sleep 5
 ExecStart=%PREFIX%/bin/pstate-frequency -S -p %I
 
