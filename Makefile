@@ -32,7 +32,6 @@ ZSH_INSTALL_SRC="$(RES_DIR)/shell/zsh/zsh_completion"
 FISH_INSTALL_SRC="$(RES_DIR)/shell/fish/completions.fish"
 UDEV_INSTALL_SRC="$(RES_DIR)/udev/99-pstate-frequency.rules"
 SYSTEMD_SERVICE_AT_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency@.service"
-SYSTEMD_SERVICE_SLEEP_INSTALL_SRC="$(RES_DIR)/systemd/pstate-frequency-sleep.service"
 POWER_PLAN_INSTALL_SRCDIR="$(RES_DIR)/plans/"
 
 SCRIPT_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/bin/$(NAME)"
@@ -43,7 +42,6 @@ ZSH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/zsh/site-functions/_$(NAME
 FISH_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/share/fish/completions/$(NAME).fish"
 UDEV_INSTALL_TARGET="$(DESTDIR)/$(PREFIX)/lib/udev/rules.d/99-$(NAME).rules"
 SYSTEMD_SERVICE_AT_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)@.service"
-SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET="$(DESTDIR)/$(SYSTEM_PREFIX)/lib/systemd/system/$(NAME)-sleep.service"
 
 # If you decide to change this location, also update the script POWER_PLAN_CONFIG_DIR
 # or pstate-frequency will not look in the correct directory
@@ -52,11 +50,11 @@ POWER_PLAN_INSTALL_TARGETDIR="$(DESTDIR)/etc/pstate-frequency.d/"
 .PHONY: all install uninstall edit \
 	install-doc install-license install-script install-res \
 	install-bash install-zsh install-fish install-udev \
-	install-systemd install-systemd-pstate-at install-systemd-pstate-sleep \
+	install-systemd install-systemd-pstate-at \
 	install-power-plans \
 	uninstall-script uninstall-doc uninstall-license uninstall-res \
 	uninstall-bash uninstall-zsh uninstall-udev uninstall-systemd \
-	uninstall-systemd-pstate-at uninstall-systemd-pstate-sleep \
+	uninstall-systemd-pstate-at \
 	uninstall-power-plans
 
 all:
@@ -143,19 +141,12 @@ install-udev:
 
 install-systemd:
 	@$(MAKE) install-systemd-pstate-at
-	@$(MAKE) install-systemd-pstate-sleep
 	
 install-systemd-pstate-at:
 	@echo "  INSTALL  $(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
 	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_AT_INSTALL_TARGET))"
 	@install -Dm 644 "$(SYSTEMD_SERVICE_AT_INSTALL_SRC)" "$(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
 	@sed -i "s|%PREFIX%|$(PREFIX)|" "$(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
-
-install-systemd-pstate-sleep:
-	@echo "  INSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
-	@mkdir -p "$(shell dirname $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET))"
-	@install -Dm 644 "$(SYSTEMD_SERVICE_SLEEP_INSTALL_SRC)" "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
-	@sed -i "s|%PREFIX%|$(PREFIX)|" "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 
 install-power-plans:
 	@echo "  INSTALL  DIR: $(POWER_PLAN_INSTALL_TARGETDIR)"
@@ -222,15 +213,10 @@ uninstall-udev:
 
 uninstall-systemd:
 	@$(MAKE) uninstall-systemd-pstate-at
-	@$(MAKE) uninstall-systemd-pstate-sleep
 
 uninstall-systemd-pstate-at:
 	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
 	@rm -f "$(SYSTEMD_SERVICE_AT_INSTALL_TARGET)"
-
-uninstall-systemd-pstate-sleep:
-	@echo "  UNINSTALL  $(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
-	@rm -f "$(SYSTEMD_SERVICE_SLEEP_INSTALL_TARGET)"
 
 uninstall-power-plans:
 	@echo "  UNINSTALL  DIR: $(POWER_PLAN_INSTALL_TARGETDIR)"
