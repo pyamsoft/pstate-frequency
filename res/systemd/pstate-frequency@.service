@@ -17,7 +17,7 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 [Unit]
 Description=Program to manage CPU frequencies
-After=tlp.service tlp-pd.service power-profiles-daemon.service acpid.service laptop-mode.service powertop.service tuned.service tuned-ppd.service
+After=tlp.service tlp-pd.service power-profiles-daemon.service acpid.service laptop-mode.service powertop.service tuned.service tuned-ppd.service suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
 
 [Service]
 Type=oneshot
@@ -25,4 +25,4 @@ ExecStartPre=/usr/bin/sleep 5
 ExecStart=%PREFIX%/bin/pstate-frequency -S -p %I
 
 [Install]
-WantedBy=graphical.target
+WantedBy=graphical.target suspend.target hibernate.target hybrid-sleep.target suspend-then-hibernate.target
